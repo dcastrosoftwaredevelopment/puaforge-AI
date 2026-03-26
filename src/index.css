@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-primary: #09090b;
+  --color-bg-secondary: #111113;
+  --color-bg-tertiary: #19191d;
+  --color-bg-elevated: #222226;
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-border-default: rgba(255, 255, 255, 0.1);
+  --color-accent: rgba(255, 255, 255, 0.85);
+  --color-accent-hover: #ffffff;
+  --color-accent-muted: rgba(255, 255, 255, 0.08);
+  --color-text-primary: rgba(255, 255, 255, 0.9);
+  --color-text-secondary: rgba(255, 255, 255, 0.55);
+  --color-text-muted: rgba(255, 255, 255, 0.3);
+  --color-success: rgba(255, 255, 255, 0.5);
+  --color-chat-user: rgba(255, 255, 255, 0.07);
+  --color-chat-ai: rgba(255, 255, 255, 0.03);
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  overflow: hidden;
+}
+
+#root {
+  width: 100%;
+  height: 100svh;
+}
+
+/* Sandpack overrides */
+.sp-wrapper,
+.sp-layout {
+  height: 100% !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: var(--color-bg-secondary) !important;
+}
+
+.sp-layout > * {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.sp-file-explorer {
+  background: var(--color-bg-secondary) !important;
+  border-right: 1px solid var(--color-border-subtle) !important;
+  min-width: 180px !important;
+  max-width: 220px !important;
+  flex: 0 0 auto !important;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
