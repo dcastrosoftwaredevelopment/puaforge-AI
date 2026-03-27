@@ -106,30 +106,70 @@ function buildUserPrompt(prompt: string, currentFiles: Record<string, string>): 
 
 function buildPlaceholderResponse(prompt: string) {
   return {
-    rawResponse: `Aqui está o código gerado:
+    rawResponse: `Aqui está o código gerado com 2 arquivos:
+
+\`\`\`jsx file="/Header.js"
+export default function Header() {
+  return (
+    <header style={{
+      padding: '1rem 2rem',
+      background: '#151620',
+      borderBottom: '1px solid rgba(255,255,255,0.06)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    }}>
+      <h1 style={{ fontSize: '1.25rem', color: '#f1f5f9', fontWeight: 600, margin: 0 }}>
+        Vibe App
+      </h1>
+      <nav style={{ display: 'flex', gap: '1.5rem' }}>
+        <a href="#" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.9rem' }}>Home</a>
+        <a href="#" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.9rem' }}>About</a>
+        <a href="#" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.9rem' }}>Contact</a>
+      </nav>
+    </header>
+  )
+}
+\`\`\`
 
 \`\`\`jsx file="/App.js"
+import Header from './Header'
+
 export default function App() {
   return (
     <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
       minHeight: '100vh',
       background: '#0e0f16',
       color: '#e2e8f0',
       fontFamily: 'system-ui, sans-serif',
-      padding: '2rem'
     }}>
-      <div style={{ textAlign: 'center', maxWidth: '600px' }}>
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: '#f1f5f9', fontWeight: 600 }}>Gerado pela IA</h1>
-        <p style={{ color: '#94a3b8', fontSize: '1.1rem', lineHeight: 1.6 }}>
-          Prompt: "${prompt}"
-        </p>
-        <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '2rem' }}>
-          Configure ANTHROPIC_API_KEY no .env para IA real.
-        </p>
-      </div>
+      <Header />
+      <main style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '4rem 2rem',
+      }}>
+        <div style={{ textAlign: 'center', maxWidth: '600px' }}>
+          <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: '#f1f5f9', fontWeight: 600 }}>
+            Gerado pela IA
+          </h2>
+          <p style={{ color: '#94a3b8', fontSize: '1.1rem', lineHeight: 1.6 }}>
+            Prompt: "${prompt}"
+          </p>
+          <div style={{
+            marginTop: '2rem',
+            padding: '1rem 2rem',
+            background: '#151620',
+            borderRadius: '0.75rem',
+            border: '1px solid rgba(255,255,255,0.06)',
+          }}>
+            <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0 }}>
+              Configure ANTHROPIC_API_KEY no .env para IA real.
+            </p>
+          </div>
+        </div>
+      </main>
     </div>
   )
 }

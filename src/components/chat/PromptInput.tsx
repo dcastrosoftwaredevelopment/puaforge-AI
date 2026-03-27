@@ -1,6 +1,6 @@
 import { useState, type KeyboardEvent } from 'react'
 import TextareaAutosize from 'react-textarea-autosize'
-import { useAtom, useSetAtom, useAtomValue } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import { Send } from 'lucide-react'
 import { messagesAtom, filesAtom, isGeneratingAtom, selectedModelAtom } from '@/atoms'
 import { generateCode } from '@/services/aiService'
@@ -8,7 +8,7 @@ import { generateCode } from '@/services/aiService'
 export default function PromptInput() {
   const [prompt, setPrompt] = useState('')
   const [messages, setMessages] = useAtom(messagesAtom)
-  const setFiles = useSetAtom(filesAtom)
+  const [files, setFiles] = useAtom(filesAtom)
   const [isGenerating, setIsGenerating] = useAtom(isGeneratingAtom)
   const selectedModel = useAtomValue(selectedModelAtom)
 
@@ -30,7 +30,7 @@ export default function PromptInput() {
       const result = await generateCode({
         prompt: text,
         model: selectedModel,
-        currentFiles: {},
+        currentFiles: files,
         history: messages.map((m) => ({ role: m.role, content: m.content })),
       })
 

@@ -1,6 +1,8 @@
-import { useAtomValue } from 'jotai'
-import { GripHorizontal } from 'lucide-react'
-import { isChatOpenAtom } from '@/atoms'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { GripHorizontal, Trash2 } from 'lucide-react'
+import { isChatOpenAtom, messagesAtom, filesAtom } from '@/atoms'
+import { DEFAULT_FILES } from '@/utils/defaultFiles'
+import { db } from '@/services/db'
 import { useFloatingPanel, type ResizeDirection } from '@/hooks/useFloatingPanel'
 import ChatHistory from './ChatHistory'
 import PromptInput from './PromptInput'
@@ -23,6 +25,8 @@ const resizeHandles: { direction: ResizeDirection; className: string }[] = [
 
 export default function FloatingChat() {
   const isChatOpen = useAtomValue(isChatOpenAtom)
+  const setMessages = useSetAtom(messagesAtom)
+  const setFiles = useSetAtom(filesAtom)
   const { position, size, onDragStart, onResizeStart } = useFloatingPanel({
     initialPosition: {
       x: window.innerWidth - INITIAL_WIDTH - 30,
@@ -63,7 +67,24 @@ export default function FloatingChat() {
               <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
               <span className="text-xs font-medium text-text-secondary">Vibe AI</span>
             </div>
-            <GripHorizontal size={14} className="text-text-muted" />
+            <div className="flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={async () => {
+                  await Promise.all([
+                    db.messages.clear(),
+                    db.projectFiles.clear(),
+                  ])
+                  setMessages([])
+                  setFiles(DEFAULT_FILES)
+                }}
+                className="p-1 rounded text-text-muted hover:text-text-primary transition"
+                title="Limpar conversa"
+              >
+                <Trash2 size={12} />
+              </button>
+              <GripHorizontal size={14} className="text-text-muted" />
+            </div>
           </div>
 
           {/* Messages */}

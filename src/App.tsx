@@ -1,9 +1,9 @@
-import { useAtomValue, useAtom } from 'jotai'
-import { SandpackProvider, SandpackLayout, SandpackFileExplorer } from '@codesandbox/sandpack-react'
-import { Code, Eye, Columns } from 'lucide-react'
+import { useAtom, useAtomValue } from 'jotai'
+import { SandpackProvider, SandpackLayout, SandpackFileExplorer, SandpackCodeEditor, SandpackPreview } from '@codesandbox/sandpack-react'
+import { Code, Eye, Columns, Loader2 } from 'lucide-react'
 import { filesAtom, viewModeAtom } from '@/atoms'
-import EditorPanel from '@/components/editor/EditorPanel'
-import PreviewPanel from '@/components/preview/PreviewPanel'
+import { usePersistence } from '@/hooks/usePersistence'
+import { useSandpackSync } from '@/hooks/useSandpackSync'
 import FloatingChat from '@/components/chat/FloatingChat'
 
 type ViewMode = 'editor' | 'preview' | 'split'
@@ -37,12 +37,53 @@ function ViewToggle() {
   )
 }
 
-export default function App() {
-  const files = useAtomValue(filesAtom)
+function SandpackContent() {
+  useSandpackSync()
   const viewMode = useAtomValue(viewModeAtom)
 
   const showEditor = viewMode === 'editor' || viewMode === 'split'
   const showPreview = viewMode === 'preview' || viewMode === 'split'
+
+  return (
+    <SandpackLayout style={{ display: 'flex', height: '100%', width: '100%', flexWrap: 'nowrap' }}>
+      <div style={{
+        display: showEditor ? 'flex' : 'none',
+        flex: 1,
+        minWidth: 0,
+        height: '100%',
+      }}>
+        <SandpackFileExplorer style={{ height: '100%' }} />
+        <SandpackCodeEditor
+          showTabs
+          showLineNumbers
+          showInlineErrors
+          readOnly
+          style={{ height: '100%', flex: 1 }}
+        />
+      </div>
+      <div style={{
+        position: showPreview ? 'relative' : 'absolute',
+        flex: showPreview ? 1 : undefined,
+        width: showPreview ? undefined : 0,
+        height: showPreview ? '100%' : 0,
+        overflow: showPreview ? 'visible' : 'hidden',
+        minWidth: 0,
+        opacity: showPreview ? 1 : 0,
+        pointerEvents: showPreview ? 'auto' : 'none',
+      }}>
+        <SandpackPreview
+          showNavigator
+          showRefreshButton
+          style={{ height: '100%' }}
+        />
+      </div>
+    </SandpackLayout>
+  )
+}
+
+export default function App() {
+  const { isHydrated } = usePersistence()
+  const files = useAtomValue(filesAtom)
 
   return (
     <div className="h-screen w-screen bg-bg-primary flex flex-col">
@@ -56,24 +97,23 @@ export default function App() {
 
       {/* Main content */}
       <main className="flex-1 overflow-hidden">
-        <SandpackProvider
-          files={files}
-          theme="dark"
-          template="react"
-          options={{
-            externalResources: ['https://cdn.tailwindcss.com'],
-          }}
-        >
-          <SandpackLayout style={{ height: '100%', border: 'none', borderRadius: 0, background: 'transparent' }}>
-            {showEditor && (
-              <>
-                <SandpackFileExplorer style={{ height: '100%' }} />
-                <EditorPanel />
-              </>
-            )}
-            {showPreview && <PreviewPanel />}
-          </SandpackLayout>
-        </SandpackProvider>
+        {isHydrated ? (
+          <SandpackProvider
+            files={files}
+            theme="dark"
+            template="react"
+            options={{
+              externalResources: ['https://cdn.tailwindcss.com'],
+            }}
+          >
+            <SandpackContent />
+          </SandpackProvider>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full gap-3">
+            <Loader2 size={24} className="animate-spin text-text-muted" />
+            <span className="text-text-muted text-sm">Carregando projeto...</span>
+          </div>
+        )}
       </main>
 
       {/* Floating chat overlay */}
