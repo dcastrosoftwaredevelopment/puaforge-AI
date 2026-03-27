@@ -1,14 +1,13 @@
 import { useEffect, useRef } from 'react'
-import { useAtomValue } from 'jotai'
 import { useSandpack } from '@codesandbox/sandpack-react'
-import { filesAtom } from '@/atoms'
+import { useFiles } from './useFiles'
 
 /**
  * Syncs filesAtom changes into Sandpack's internal state.
  * Must be rendered inside <SandpackProvider>.
  */
 export function useSandpackSync() {
-  const files = useAtomValue(filesAtom)
+  const { files } = useFiles()
   const { sandpack } = useSandpack()
   const sandpackRef = useRef(sandpack)
   sandpackRef.current = sandpack

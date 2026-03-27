@@ -1,6 +1,7 @@
 import { useAtomValue, useSetAtom } from 'jotai'
 import { GripHorizontal, Trash2 } from 'lucide-react'
-import { isChatOpenAtom, messagesAtom, filesAtom } from '@/atoms'
+import { isChatOpenAtom, messagesAtom } from '@/atoms'
+import { useFiles } from '@/hooks/useFiles'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
 import { db } from '@/services/db'
 import { useFloatingPanel, type ResizeDirection } from '@/hooks/useFloatingPanel'
@@ -26,7 +27,7 @@ const resizeHandles: { direction: ResizeDirection; className: string }[] = [
 export default function FloatingChat() {
   const isChatOpen = useAtomValue(isChatOpenAtom)
   const setMessages = useSetAtom(messagesAtom)
-  const setFiles = useSetAtom(filesAtom)
+  const { setFiles } = useFiles()
   const { position, size, onDragStart, onResizeStart } = useFloatingPanel({
     initialPosition: {
       x: window.innerWidth - INITIAL_WIDTH - 30,

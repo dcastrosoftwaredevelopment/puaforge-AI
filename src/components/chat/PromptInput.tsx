@@ -2,13 +2,14 @@ import { useState, type KeyboardEvent } from 'react'
 import TextareaAutosize from 'react-textarea-autosize'
 import { useAtom, useAtomValue } from 'jotai'
 import { Send } from 'lucide-react'
-import { messagesAtom, filesAtom, isGeneratingAtom, selectedModelAtom } from '@/atoms'
+import { messagesAtom, isGeneratingAtom, selectedModelAtom } from '@/atoms'
+import { useFiles } from '@/hooks/useFiles'
 import { generateCode } from '@/services/aiService'
 
 export default function PromptInput() {
   const [prompt, setPrompt] = useState('')
   const [messages, setMessages] = useAtom(messagesAtom)
-  const [files, setFiles] = useAtom(filesAtom)
+  const { files, setFiles } = useFiles()
   const [isGenerating, setIsGenerating] = useAtom(isGeneratingAtom)
   const selectedModel = useAtomValue(selectedModelAtom)
 

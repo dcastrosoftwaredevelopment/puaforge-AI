@@ -58,3 +58,7 @@ export const CLAUDE_MODELS: ClaudeModel[] = [
 ]
 
 export const selectedModelAtom = atom('claude-3-haiku-20240307')
+
+// Device preview
+export type DevicePreview = 'desktop' | 'tablet' | 'mobile'
+export const devicePreviewAtom = atom<DevicePreview>('desktop')

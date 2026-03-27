@@ -1,5 +1,4 @@
-export const DEFAULT_FILES: Record<string, string> = {
-  '/index.html': `<!DOCTYPE html>
+export const TAILWIND_HTML = `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -10,7 +9,10 @@ export const DEFAULT_FILES: Record<string, string> = {
   <body>
     <div id="root"></div>
   </body>
-</html>`,
+</html>`
+
+export const DEFAULT_FILES: Record<string, string> = {
+  '/index.html': TAILWIND_HTML,
   '/App.tsx': `export default function App() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#0e0f16] text-[#e2e8f0] font-sans">
