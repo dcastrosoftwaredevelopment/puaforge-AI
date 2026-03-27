@@ -1,8 +1,9 @@
 import { useAtomValue } from 'jotai'
 import { SandpackProvider } from '@codesandbox/sandpack-react'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Download } from 'lucide-react'
 import { filesAtom } from '@/atoms'
 import { usePersistence } from '@/hooks/usePersistence'
+import { downloadProject } from '@/services/downloadProject'
 import ViewToggle from '@/components/layout/ViewToggle'
 import SandpackContent from '@/components/layout/SandpackContent'
 import FloatingChat from '@/components/chat/FloatingChat'
@@ -17,7 +18,17 @@ export default function App() {
         <span className="text-sm font-semibold text-text-primary tracking-tight">
           vibe<span className="text-accent">.</span>platform
         </span>
-        <ViewToggle />
+        <div className="flex items-center gap-3">
+          <ViewToggle />
+          <button
+            onClick={() => downloadProject(files)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-text-secondary border border-border-subtle hover:text-text-primary hover:border-border-default bg-bg-tertiary transition"
+            title="Download projeto"
+          >
+            <Download size={14} />
+            Export
+          </button>
+        </div>
       </header>
 
       <main className="flex-1 overflow-hidden">
