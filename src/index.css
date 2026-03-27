@@ -22,7 +22,6 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
-  overflow: hidden;
 }
 
 #root {

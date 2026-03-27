@@ -1,11 +1,29 @@
 import { atom } from 'jotai'
 
+// Project
+export interface Project {
+  id: string
+  name: string
+  createdAt: number
+  updatedAt: number
+}
+
+export const projectsAtom = atom<Project[]>([])
+export const activeProjectIdAtom = atom<string | null>(null)
+
+// App view: home or editor
+export type AppView = 'home' | 'editor'
+export const appViewAtom = atom<AppView>('home')
+
+// Messages (scoped to active project)
 export interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
   timestamp: number
 }
+
+export const messagesAtom = atom<Message[]>([])
 
 // Project files fed to Sandpack
 export const filesAtom = atom<Record<string, string>>({
@@ -24,9 +42,6 @@ export const filesAtom = atom<Record<string, string>>({
   )
 }`,
 })
-
-// Chat messages
-export const messagesAtom = atom<Message[]>([])
 
 // UI state
 export const isChatOpenAtom = atom(true)

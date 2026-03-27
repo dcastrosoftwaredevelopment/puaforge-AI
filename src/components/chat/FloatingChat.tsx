@@ -3,7 +3,6 @@ import { GripHorizontal, Trash2 } from 'lucide-react'
 import { isChatOpenAtom, messagesAtom } from '@/atoms'
 import { useFiles } from '@/hooks/useFiles'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
-import { db } from '@/services/db'
 import { useFloatingPanel, type ResizeDirection } from '@/hooks/useFloatingPanel'
 import ChatHistory from './ChatHistory'
 import PromptInput from './PromptInput'
@@ -71,11 +70,7 @@ export default function FloatingChat() {
             <div className="flex items-center gap-2">
               <button
                 onPointerDown={(e) => e.stopPropagation()}
-                onClick={async () => {
-                  await Promise.all([
-                    db.messages.clear(),
-                    db.projectFiles.clear(),
-                  ])
+                onClick={() => {
                   setMessages([])
                   setFiles(DEFAULT_FILES)
                 }}
