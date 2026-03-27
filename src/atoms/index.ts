@@ -48,6 +48,10 @@ export const isChatOpenAtom = atom(true)
 export const isGeneratingAtom = atom(false)
 export const activeFileAtom = atom('/App.tsx')
 
+// Chat mode
+export type ChatMode = 'floating' | 'docked'
+export const chatModeAtom = atom<ChatMode>('docked')
+
 // View mode
 export type ViewMode = 'editor' | 'preview' | 'split'
 export const viewModeAtom = atom<ViewMode>('preview')
