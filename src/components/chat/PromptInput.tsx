@@ -5,12 +5,12 @@ import { Send } from 'lucide-react'
 import { messagesAtom, isGeneratingAtom, selectedModelAtom } from '@/atoms'
 import { useFiles } from '@/hooks/useFiles'
 import { generateCode } from '@/services/aiService'
-import { mergeFiles } from '@/services/fileParser'
+import { mergeFiles, extractDependencies } from '@/services/fileParser'
 
 export default function PromptInput() {
   const [prompt, setPrompt] = useState('')
   const [messages, setMessages] = useAtom(messagesAtom)
-  const { files, setFiles } = useFiles()
+  const { files, setFiles, setDeps } = useFiles()
   const [isGenerating, setIsGenerating] = useAtom(isGeneratingAtom)
   const selectedModel = useAtomValue(selectedModelAtom)
 
@@ -47,7 +47,14 @@ export default function PromptInput() {
       ])
 
       if (Object.keys(result.files).length > 0) {
-        setFiles((prev) => mergeFiles(prev, result.files))
+        const merged = mergeFiles(files, result.files)
+        setFiles(merged)
+
+        const newDeps = extractDependencies(merged)
+        if (Object.keys(newDeps).length > 0) {
+          console.log('[PromptInput] Detected dependencies:', newDeps)
+          setDeps((prev) => ({ ...prev, ...newDeps }))
+        }
       }
     } catch {
       setMessages((prev) => [

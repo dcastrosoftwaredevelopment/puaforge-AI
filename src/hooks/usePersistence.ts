@@ -9,13 +9,16 @@ import {
   type Message,
   type ViewMode,
 } from '@/atoms'
+import { depsAtom } from '@/hooks/useFiles'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
+import { extractDependencies } from '@/services/fileParser'
 
 export function usePersistence() {
   const setMessages = useSetAtom(messagesAtom)
   const setFiles = useSetAtom(filesAtom)
   const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom)
   const setViewMode = useSetAtom(viewModeAtom)
+  const setDeps = useSetAtom(depsAtom)
   const hydrated = useRef(false)
   const [isHydrated, setIsHydrated] = useState(false)
 
@@ -29,7 +32,7 @@ export function usePersistence() {
           setMessages(savedMessages as Message[])
         }
 
-        // Load project files
+        // Load project files and detect dependencies
         const savedFiles = await db.projectFiles.toArray()
         if (savedFiles.length > 0) {
           const fileMap: Record<string, string> = {}
@@ -37,6 +40,12 @@ export function usePersistence() {
             fileMap[f.path] = f.code
           }
           setFiles(fileMap)
+
+          const detectedDeps = extractDependencies(fileMap)
+          if (Object.keys(detectedDeps).length > 0) {
+            console.log('[persistence] Detected dependencies from files:', detectedDeps)
+            setDeps(detectedDeps)
+          }
         }
 
         // Load settings
@@ -92,6 +101,8 @@ export function usePersistence() {
     db.settings.put({ key: 'viewMode', value: viewMode })
   }, [viewMode])
 
+
+
   return {
     isHydrated,
     clearAll: async () => {
@@ -104,6 +115,7 @@ export function usePersistence() {
       setFiles(DEFAULT_FILES)
       setSelectedModel('claude-haiku-4-5-20251001')
       setViewMode('preview')
+      setDeps({})
     },
   }
 }

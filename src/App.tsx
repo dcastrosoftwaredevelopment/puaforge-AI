@@ -11,7 +11,8 @@ import FloatingChat from '@/components/chat/FloatingChat'
 
 export default function App() {
   const { isHydrated } = usePersistence()
-  const { files } = useFiles()
+  const { files, deps } = useFiles()
+  const depsKey = Object.keys(deps).sort().join(',')
 
   return (
     <div className="h-screen w-screen bg-bg-primary flex flex-col">
@@ -29,9 +30,13 @@ export default function App() {
       <main className="flex-1 overflow-hidden">
         {isHydrated ? (
           <SandpackProvider
+            key={depsKey}
             files={{ '/index.html': TAILWIND_HTML, ...files }}
             theme="dark"
             template="react-ts"
+            customSetup={{
+              dependencies: deps,
+            }}
             options={{
               activeFile: '/App.tsx',
               externalResources: ['https://cdn.tailwindcss.com'],

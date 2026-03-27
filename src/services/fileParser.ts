@@ -90,6 +90,36 @@ function addMissingStubs(files: Record<string, string>): Record<string, string> 
 }
 
 /**
+ * Scans all project files and extracts external npm dependencies.
+ * Returns a Record<packageName, "latest"> for use in Sandpack's customSetup.dependencies.
+ */
+export function extractDependencies(files: Record<string, string>): Record<string, string> {
+  const deps: Record<string, string> = {}
+  // Matches: import ... from 'package' or import 'package'
+  const importRegex = /import\s+(?:[\w{},*\s]+\s+from\s+)?['"]([^'"./][^'"]*)['"]/g
+
+  // Built-in modules that Sandpack already provides
+  const builtIn = new Set(['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime'])
+
+  for (const code of Object.values(files)) {
+    let match: RegExpExecArray | null
+    while ((match = importRegex.exec(code)) !== null) {
+      const specifier = match[1]
+      // Get the package name (handle scoped packages like @org/pkg)
+      const pkgName = specifier.startsWith('@')
+        ? specifier.split('/').slice(0, 2).join('/')
+        : specifier.split('/')[0]
+
+      if (!builtIn.has(pkgName) && !builtIn.has(specifier)) {
+        deps[pkgName] = 'latest'
+      }
+    }
+  }
+
+  return deps
+}
+
+/**
  * Resolves a relative import path to an absolute file path.
  * e.g. ('/pages/LandingPage.tsx', '../components/Hero') → '/components/Hero.tsx'
  */
