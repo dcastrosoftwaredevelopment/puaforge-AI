@@ -3,25 +3,27 @@ import Anthropic from '@anthropic-ai/sdk'
 
 const router = Router()
 
-const SYSTEM_PROMPT = `You are an expert React developer. The user will describe a UI or feature they want.
+const SYSTEM_PROMPT = `You are an expert React + TypeScript developer. The user will describe a UI or feature they want.
 You must respond with complete file contents using this format:
 
-\`\`\`jsx file="/App.js"
+\`\`\`tsx file="/App.tsx"
 // your code here
 \`\`\`
 
 Rules:
+- Always use TypeScript (.tsx files), never .js or .jsx
 - Always return complete files, not partial diffs
-- Use inline styles or basic CSS — Tailwind CDN is available
+- Use Tailwind CSS classes for styling — Tailwind CDN is available via <script> tag
+- Prefer Tailwind utility classes over inline styles
 - Use only React (no external libraries unless explicitly asked)
 - If multiple files are needed, return each in its own fenced block
-- Always include /App.js as the main entry
+- Always include /App.tsx as the main entry
 - ALWAYS use a dark theme with these colors:
-  - Backgrounds: #08080d (darkest), #0e0f16 (base), #151620 (surface), #1a1b2e (elevated)
-  - Text: #f1f5f9 (headings), #e2e8f0 (body), #94a3b8 (secondary), #64748b (muted)
-  - Accent: #6366f1 (primary), #818cf8 (hover)
-  - Borders: rgba(255,255,255,0.06) (subtle), rgba(255,255,255,0.1) (default)
-  - Success: #10b981
+  - Backgrounds: bg-[#08080d] (darkest), bg-[#0e0f16] (base), bg-[#151620] (surface), bg-[#1a1b2e] (elevated)
+  - Text: text-[#f1f5f9] (headings), text-[#e2e8f0] (body), text-[#94a3b8] (secondary), text-[#64748b] (muted)
+  - Accent: text-[#6366f1] / bg-[#6366f1] (primary), hover variants with [#818cf8]
+  - Borders: border-[rgba(255,255,255,0.06)] (subtle), border-[rgba(255,255,255,0.1)] (default)
+  - Success: text-[#10b981]
   - NEVER use light backgrounds, gradients with purple/blue, or white backgrounds`
 
 interface GenerateBody {
@@ -108,63 +110,40 @@ function buildPlaceholderResponse(prompt: string) {
   return {
     rawResponse: `Aqui está o código gerado com 2 arquivos:
 
-\`\`\`jsx file="/Header.js"
+\`\`\`tsx file="/Header.tsx"
 export default function Header() {
   return (
-    <header style={{
-      padding: '1rem 2rem',
-      background: '#151620',
-      borderBottom: '1px solid rgba(255,255,255,0.06)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    }}>
-      <h1 style={{ fontSize: '1.25rem', color: '#f1f5f9', fontWeight: 600, margin: 0 }}>
+    <header className="px-8 py-4 bg-[#151620] border-b border-white/[0.06] flex items-center justify-between">
+      <h1 className="text-xl font-semibold text-[#f1f5f9]">
         Vibe App
       </h1>
-      <nav style={{ display: 'flex', gap: '1.5rem' }}>
-        <a href="#" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.9rem' }}>Home</a>
-        <a href="#" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.9rem' }}>About</a>
-        <a href="#" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.9rem' }}>Contact</a>
+      <nav className="flex gap-6">
+        <a href="#" className="text-[#94a3b8] text-sm hover:text-[#e2e8f0] transition">Home</a>
+        <a href="#" className="text-[#94a3b8] text-sm hover:text-[#e2e8f0] transition">About</a>
+        <a href="#" className="text-[#94a3b8] text-sm hover:text-[#e2e8f0] transition">Contact</a>
       </nav>
     </header>
   )
 }
 \`\`\`
 
-\`\`\`jsx file="/App.js"
+\`\`\`tsx file="/App.tsx"
 import Header from './Header'
 
 export default function App() {
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#0e0f16',
-      color: '#e2e8f0',
-      fontFamily: 'system-ui, sans-serif',
-    }}>
+    <div className="min-h-screen bg-[#0e0f16] text-[#e2e8f0] font-sans">
       <Header />
-      <main style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '4rem 2rem',
-      }}>
-        <div style={{ textAlign: 'center', maxWidth: '600px' }}>
-          <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: '#f1f5f9', fontWeight: 600 }}>
+      <main className="flex items-center justify-center px-8 py-16">
+        <div className="text-center max-w-xl">
+          <h2 className="text-4xl font-semibold text-[#f1f5f9] mb-4">
             Gerado pela IA
           </h2>
-          <p style={{ color: '#94a3b8', fontSize: '1.1rem', lineHeight: 1.6 }}>
+          <p className="text-lg text-[#94a3b8] leading-relaxed">
             Prompt: "${prompt}"
           </p>
-          <div style={{
-            marginTop: '2rem',
-            padding: '1rem 2rem',
-            background: '#151620',
-            borderRadius: '0.75rem',
-            border: '1px solid rgba(255,255,255,0.06)',
-          }}>
-            <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0 }}>
+          <div className="mt-8 px-8 py-4 bg-[#151620] rounded-xl border border-white/[0.06]">
+            <p className="text-sm text-[#64748b]">
               Configure ANTHROPIC_API_KEY no .env para IA real.
             </p>
           </div>

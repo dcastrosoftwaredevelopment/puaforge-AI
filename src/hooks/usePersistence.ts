@@ -7,6 +7,7 @@ import {
   selectedModelAtom,
   viewModeAtom,
   type Message,
+  type ViewMode,
 } from '@/atoms'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
 
@@ -46,7 +47,7 @@ export function usePersistence() {
 
         const viewModeSetting = await db.settings.get('viewMode')
         if (viewModeSetting) {
-          setViewMode(viewModeSetting.value as 'editor' | 'preview' | 'split')
+          setViewMode(viewModeSetting.value as ViewMode)
         }
       } catch (error) {
         console.error('[persistence] Hydration error:', error)

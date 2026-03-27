@@ -37,8 +37,9 @@ export const isChatOpenAtom = atom(true)
 export const isGeneratingAtom = atom(false)
 export const activeFileAtom = atom('/App.js')
 
-// View mode: 'editor' | 'preview' | 'split'
-export const viewModeAtom = atom<'editor' | 'preview' | 'split'>('preview')
+// View mode
+export type ViewMode = 'editor' | 'preview' | 'split'
+export const viewModeAtom = atom<ViewMode>('preview')
 
 // Claude model selection
 export interface ClaudeModel {

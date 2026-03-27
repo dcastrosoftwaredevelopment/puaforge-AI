@@ -1,7 +1,7 @@
 /**
  * Parses AI response to extract file blocks.
  * Expected format:
- * ```jsx file="/App.js"
+ * ```tsx file="/App.tsx"
  * // code here
  * ```
  */
