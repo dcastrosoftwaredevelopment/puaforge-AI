@@ -18,7 +18,9 @@ Rules:
 - Use only React (no external libraries unless explicitly asked)
 - If multiple files are needed, return each in its own fenced block
 - CRITICAL: Every file that is imported MUST be included in your response. If a file imports '../components/Foo', you MUST include a code block for that file. Never reference a file without providing its complete implementation.
-- Always include /App.tsx as the main entry
+- IMPORTANT: Only return files that NEED TO CHANGE. Files that are not modified should NOT be included in your response. The system will automatically merge your changes with existing files — unchanged files are preserved.
+- Only include /App.tsx if it needs to be modified (e.g. new imports or layout changes)
+- When the user asks to update a specific section or component, focus ONLY on that component and any files it directly affects. Do NOT rewrite unrelated components.
 - ALWAYS use a dark theme with these colors:
   - Backgrounds: bg-[#08080d] (darkest), bg-[#0e0f16] (base), bg-[#151620] (surface), bg-[#1a1b2e] (elevated)
   - Text: text-[#f1f5f9] (headings), text-[#e2e8f0] (body), text-[#94a3b8] (secondary), text-[#64748b] (muted)
@@ -57,22 +59,19 @@ router.post('/generate', async (req: Request<object, object, GenerateBody>, res:
 
     const client = new Anthropic({ apiKey })
 
-    const messages: Anthropic.MessageParam[] = [
-      ...history.map((h) => ({
-        role: (h.role === 'assistant' ? 'assistant' : 'user') as 'user' | 'assistant',
-        content: h.content,
-      })),
-      {
-        role: 'user',
-        content: buildUserPrompt(prompt, currentFiles),
-      },
-    ]
+    const conversationMessages = buildConversation(history, prompt, currentFiles)
 
     const response = await client.messages.create({
       model: modelId,
-      max_tokens: 4096,
-      system: SYSTEM_PROMPT,
-      messages,
+      max_tokens: 16384,
+      system: [
+        {
+          type: 'text',
+          text: SYSTEM_PROMPT,
+          cache_control: { type: 'ephemeral' },
+        },
+      ],
+      messages: conversationMessages,
     })
 
     const rawResponse = response.content
@@ -97,14 +96,91 @@ router.post('/generate', async (req: Request<object, object, GenerateBody>, res:
   }
 })
 
-function buildUserPrompt(prompt: string, currentFiles: Record<string, string>): string {
-  const fileContext = Object.entries(currentFiles)
-    .map(([path, code]) => `File: ${path}\n\`\`\`\n${code}\n\`\`\``)
-    .join('\n\n')
+/** Rough token estimate: ~4 chars per token */
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4)
+}
 
-  return fileContext
-    ? `Current files:\n${fileContext}\n\nUser request: ${prompt}`
-    : prompt
+/**
+ * Builds the full conversation array for the API call.
+ *
+ * Strategy:
+ * - Recent history (last KEEP_RECENT turns) is sent with FULL code blocks
+ *   so the AI remembers exactly what it generated.
+ * - Older history has code blocks stripped (replaced by file name summaries)
+ *   to save tokens while preserving conversational context.
+ * - Current project files are always sent in the final user message so the
+ *   AI sees the true current state of every file.
+ * - Prompt caching is applied to the oldest cached-eligible message to avoid
+ *   re-processing the same prefix on every call.
+ */
+const KEEP_RECENT = 4 // keep last N messages with full code
+const CODE_BLOCK_RE = /```[\w]*\s+file="[^"]+"\n[\s\S]*?```/g
+
+function buildConversation(
+  history: { role: string; content: string }[],
+  prompt: string,
+  currentFiles: Record<string, string>,
+): Anthropic.MessageParam[] {
+  const messages: Anthropic.MessageParam[] = []
+
+  // --- Build history messages ---
+  for (let i = 0; i < history.length; i++) {
+    const h = history[i]
+    const role = (h.role === 'assistant' ? 'assistant' : 'user') as 'user' | 'assistant'
+    const isRecent = i >= history.length - KEEP_RECENT
+
+    if (role === 'assistant' && !isRecent) {
+      // Compress old assistant messages: strip code, keep file list
+      const fileNames = [...h.content.matchAll(/file="([^"]+)"/g)].map((m) => m[1])
+      const text = h.content.replace(CODE_BLOCK_RE, '').trim()
+      const summary = fileNames.length > 0
+        ? `${text}\n[Generated/updated files: ${fileNames.join(', ')}]`
+        : text || '[code response]'
+      messages.push({ role, content: summary })
+    } else {
+      messages.push({ role, content: h.content })
+    }
+  }
+
+  // --- Apply cache_control to the boundary between old and recent history ---
+  // This lets the API cache the compressed prefix and only process recent turns
+  if (messages.length >= KEEP_RECENT && messages.length > 0) {
+    const cacheIdx = Math.max(0, messages.length - KEEP_RECENT)
+    const msg = messages[cacheIdx]
+    if (typeof msg.content === 'string') {
+      messages[cacheIdx] = {
+        role: msg.role,
+        content: [
+          { type: 'text', text: msg.content, cache_control: { type: 'ephemeral' } },
+        ],
+      }
+    }
+  }
+
+  // --- Build final user message with current files + new prompt ---
+  const entries = Object.entries(currentFiles).filter(([path]) => path !== '/index.html')
+  let userContent = ''
+
+  if (entries.length > 0) {
+    const fileContext = entries
+      .map(([path, code]) => `File: ${path}\n\`\`\`\n${code}\n\`\`\``)
+      .join('\n\n')
+    userContent += `Current project files (${entries.length} files):\n${fileContext}\n\n`
+  }
+
+  userContent += `IMPORTANT: Only return files that NEED TO CHANGE. All other files are preserved automatically.\n\n`
+  userContent += `User request: ${prompt}`
+
+  messages.push({ role: 'user', content: userContent })
+
+  const totalTokens = messages.reduce((sum, m) => {
+    const text = typeof m.content === 'string' ? m.content : JSON.stringify(m.content)
+    return sum + estimateTokens(text)
+  }, 0)
+  console.log(`[generate] Conversation: ${messages.length} messages, ~${totalTokens} tokens (estimated)`)
+
+  return messages
 }
 
 function buildPlaceholderResponse(prompt: string) {

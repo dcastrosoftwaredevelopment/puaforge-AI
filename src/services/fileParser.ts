@@ -1,4 +1,45 @@
 /**
+ * Detects if a code string is a placeholder stub (auto-generated or "em construção").
+ */
+function isStub(code: string): boolean {
+  return /em construção/i.test(code) ||
+    /placeholder/i.test(code) ||
+    code.split('\n').length <= 8
+}
+
+/**
+ * Smart merge: merges new AI-generated files into existing project files.
+ * Protects existing real implementations from being overwritten by stubs.
+ */
+export function mergeFiles(
+  existing: Record<string, string>,
+  incoming: Record<string, string>,
+): Record<string, string> {
+  const merged = { ...existing }
+
+  for (const [path, code] of Object.entries(incoming)) {
+    const prev = existing[path]
+
+    // No existing file — always accept
+    if (!prev) {
+      merged[path] = code
+      continue
+    }
+
+    // If the incoming file is a stub but the existing one isn't, keep existing
+    if (isStub(code) && !isStub(prev)) {
+      console.log(`[mergeFiles] Skipping stub for ${path} — keeping existing implementation`)
+      continue
+    }
+
+    // Otherwise accept the new version
+    merged[path] = code
+  }
+
+  return merged
+}
+
+/**
  * Parses AI response to extract file blocks.
  * Expected format:
  * ```tsx file="/App.tsx"

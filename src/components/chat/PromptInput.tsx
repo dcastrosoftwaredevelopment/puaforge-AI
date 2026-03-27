@@ -5,6 +5,7 @@ import { Send } from 'lucide-react'
 import { messagesAtom, isGeneratingAtom, selectedModelAtom } from '@/atoms'
 import { useFiles } from '@/hooks/useFiles'
 import { generateCode } from '@/services/aiService'
+import { mergeFiles } from '@/services/fileParser'
 
 export default function PromptInput() {
   const [prompt, setPrompt] = useState('')
@@ -46,7 +47,7 @@ export default function PromptInput() {
       ])
 
       if (Object.keys(result.files).length > 0) {
-        setFiles((prev) => ({ ...prev, ...result.files }))
+        setFiles((prev) => mergeFiles(prev, result.files))
       }
     } catch {
       setMessages((prev) => [
