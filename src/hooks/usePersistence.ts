@@ -102,7 +102,7 @@ export function usePersistence() {
       ])
       setMessages([])
       setFiles(DEFAULT_FILES)
-      setSelectedModel('claude-3-haiku-20240307')
+      setSelectedModel('claude-haiku-4-5-20251001')
       setViewMode('preview')
     },
   }

@@ -17,6 +17,7 @@ Rules:
 - Prefer Tailwind utility classes over inline styles
 - Use only React (no external libraries unless explicitly asked)
 - If multiple files are needed, return each in its own fenced block
+- CRITICAL: Every file that is imported MUST be included in your response. If a file imports '../components/Foo', you MUST include a code block for that file. Never reference a file without providing its complete implementation.
 - Always include /App.tsx as the main entry
 - ALWAYS use a dark theme with these colors:
   - Backgrounds: bg-[#08080d] (darkest), bg-[#0e0f16] (base), bg-[#151620] (surface), bg-[#1a1b2e] (elevated)
@@ -51,7 +52,7 @@ router.post('/generate', async (req: Request<object, object, GenerateBody>, res:
   }
 
   try {
-    const modelId = model || 'claude-3-haiku-20240307'
+    const modelId = model || 'claude-haiku-4-5-20251001'
     console.log('[generate] Calling Anthropic SDK | model:', modelId)
 
     const client = new Anthropic({ apiKey })
