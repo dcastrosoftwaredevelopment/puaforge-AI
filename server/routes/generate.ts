@@ -15,7 +15,8 @@ Rules:
 - Always return complete files, not partial diffs
 - Use Tailwind CSS classes for styling — Tailwind CDN is available via <script> tag
 - Prefer Tailwind utility classes over inline styles
-- Use only React (no external libraries unless explicitly asked)
+- Always use lucide-react for icons (e.g. import { Menu, X, ArrowRight } from 'lucide-react'). Never use other icon libraries.
+- Use only React and lucide-react (no other external libraries unless explicitly asked)
 - If multiple files are needed, return each in its own fenced block
 - CRITICAL: Every file that is imported MUST be included in your response. If a file imports '../components/Foo', you MUST include a code block for that file. Never reference a file without providing its complete implementation.
 - IMPORTANT: Only return files that NEED TO CHANGE. Files that are not modified should NOT be included in your response. The system will automatically merge your changes with existing files — unchanged files are preserved.
