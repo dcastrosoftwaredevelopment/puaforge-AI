@@ -1,9 +1,9 @@
 import { useCallback, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { SandpackProvider } from '@codesandbox/sandpack-react'
-import { Loader2 } from 'lucide-react'
+import { Loader2, MessageCircle } from 'lucide-react'
 import { useFiles } from '@/hooks/useFiles'
-import { useChatMode } from '@/hooks/useChat'
+import { useChat } from '@/hooks/useChat'
 import { useProjectLoader } from '@/hooks/useProjectLoader'
 import { TAILWIND_HTML } from '@/utils/defaultFiles'
 import EditorHeader from '@/components/layout/EditorHeader'
@@ -19,10 +19,11 @@ export default function EditorView() {
   const { projectId } = useParams<{ projectId: string }>()
   const projectReady = useProjectLoader(projectId)
   const { files, deps } = useFiles()
-  const chatMode = useChatMode()
+  const { mode: chatMode, isOpen: isChatOpen, setIsOpen: setIsChatOpen } = useChat()
   const [chatWidth, setChatWidth] = useState(CHAT_DEFAULT)
 
   const isDocked = chatMode === 'docked'
+  const showDockedChat = isDocked && isChatOpen
 
   const onChatResize = useCallback((delta: number) => {
     setChatWidth((prev) => Math.min(CHAT_MAX, Math.max(CHAT_MIN, prev - delta)))
@@ -66,7 +67,16 @@ export default function EditorView() {
           </SandpackProvider>
         </main>
 
-        {isDocked && (
+        {isDocked && !isChatOpen && (
+          <button
+            onClick={() => setIsChatOpen(true)}
+            className="shrink-0 w-10 border-l border-border-subtle bg-bg-secondary flex items-center justify-center hover:bg-bg-elevated transition cursor-pointer"
+            title="Abrir chat"
+          >
+            <MessageCircle size={16} className="text-text-muted" />
+          </button>
+        )}
+        {showDockedChat && (
           <>
             <ResizeHandle onResize={onChatResize} />
             <DockedChat width={chatWidth} />

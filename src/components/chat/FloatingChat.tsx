@@ -1,4 +1,4 @@
-import { GripHorizontal, Trash2, PanelRightClose, PanelRightOpen } from 'lucide-react'
+import { GripHorizontal, Trash2, PanelRightClose, PanelRightOpen, Minus } from 'lucide-react'
 import { useFiles } from '@/hooks/useFiles'
 import { useChat } from '@/hooks/useChat'
 import { useMessages } from '@/hooks/useMessages'
@@ -27,7 +27,7 @@ const resizeHandles: { direction: ResizeDirection; className: string }[] = [
 function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?: (e: React.PointerEvent) => void }) {
   const { setMessages } = useMessages()
   const { setFiles, setDeps } = useFiles()
-  const { mode: chatMode, setMode: setChatMode } = useChat()
+  const { mode: chatMode, setMode: setChatMode, setIsOpen } = useChat()
 
   return (
     <>
@@ -47,18 +47,34 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
               setFiles(DEFAULT_FILES)
               setDeps({})
             }}
-            className="p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
-            title="Limpar conversa"
+            className="group relative p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
           >
             <Trash2 size={12} />
+            <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-md bg-bg-elevated border border-border-subtle text-[10px] text-text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 transition shadow-lg z-50">
+              Limpar conversa
+            </span>
           </button>
+          {isDocked && (
+            <button
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => setIsOpen(false)}
+              className="group relative p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
+            >
+              <Minus size={13} />
+              <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-md bg-bg-elevated border border-border-subtle text-[10px] text-text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 transition shadow-lg z-50">
+                Minimizar chat
+              </span>
+            </button>
+          )}
           <button
             onPointerDown={(e) => e.stopPropagation()}
             onClick={() => setChatMode(chatMode === 'docked' ? 'floating' : 'docked')}
-            className="p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
-            title={chatMode === 'docked' ? 'Modo flutuante' : 'Fixar no painel'}
+            className="group relative p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
           >
             {chatMode === 'docked' ? <PanelRightOpen size={13} /> : <PanelRightClose size={13} />}
+            <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-md bg-bg-elevated border border-border-subtle text-[10px] text-text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 transition shadow-lg z-50">
+              {chatMode === 'docked' ? 'Modo flutuante' : 'Fixar no painel'}
+            </span>
           </button>
           {!isDocked && <GripHorizontal size={14} className="text-text-muted" />}
         </div>
