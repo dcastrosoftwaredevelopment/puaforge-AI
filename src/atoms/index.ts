@@ -95,6 +95,10 @@ export const editorActionsAtom = atom<{ save: () => void; discard: () => void }>
   discard: () => {},
 })
 
+// Panel sizes
+export const editorFractionAtom = atom(0.5)
+export const chatWidthAtom = atom(384)
+
 // Device preview
 export type DevicePreview = 'desktop' | 'tablet' | 'mobile'
 export const devicePreviewAtom = atom<DevicePreview>('desktop')

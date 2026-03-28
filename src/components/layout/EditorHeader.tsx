@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
-import { Home, ImageIcon, History } from 'lucide-react'
+import { Home, ImageIcon, History, RotateCcw } from 'lucide-react'
 import { useProjectActions } from '@/hooks/useProjectActions'
 import { useProjectImages } from '@/hooks/useProjectImages'
 import { useCheckpoints } from '@/hooks/useCheckpoints'
+import { usePanelSizes } from '@/hooks/usePanelSizes'
 import ViewToggle from '@/components/layout/ViewToggle'
 import DeviceToggle from '@/components/layout/DeviceToggle'
 import ExportButton from '@/components/layout/ExportButton'
@@ -15,6 +16,7 @@ export default function EditorHeader() {
   const { goHome } = useProjectActions()
   const { images } = useProjectImages()
   const { checkpoints } = useCheckpoints()
+  const { resetPanels } = usePanelSizes()
   const [showImages, setShowImages] = useState(false)
   const [showCheckpoints, setShowCheckpoints] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -84,6 +86,15 @@ export default function EditorHeader() {
         </div>
         <DeviceToggle />
         <ViewToggle />
+        <button
+          onClick={resetPanels}
+          className="group relative p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+        >
+          <RotateCcw size={14} />
+          <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-md bg-bg-elevated border border-border-subtle text-[10px] text-text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 transition shadow-lg z-50">
+            Resetar painéis
+          </span>
+        </button>
         <ExportButton />
         <PublishButton />
       </div>

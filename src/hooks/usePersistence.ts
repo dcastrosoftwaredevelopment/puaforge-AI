@@ -10,6 +10,8 @@ import {
   viewModeAtom,
   devicePreviewAtom,
   isChatOpenAtom,
+  editorFractionAtom,
+  chatWidthAtom,
   type Project,
   type ViewMode,
   type DevicePreview,
@@ -28,6 +30,8 @@ export function usePersistence() {
   const setViewMode = useSetAtom(viewModeAtom)
   const setDevicePreview = useSetAtom(devicePreviewAtom)
   const setIsChatOpen = useSetAtom(isChatOpenAtom)
+  const setEditorFraction = useSetAtom(editorFractionAtom)
+  const setChatWidth = useSetAtom(chatWidthAtom)
   const hydrated = useRef(false)
   const [isHydrated, setIsHydrated] = useState(false)
 
@@ -50,6 +54,12 @@ export function usePersistence() {
 
         const chatOpenSetting = await db.settings.get('isChatOpen')
         if (chatOpenSetting) setIsChatOpen(chatOpenSetting.value === 'true')
+
+        const editorFractionSetting = await db.settings.get('editorFraction')
+        if (editorFractionSetting) setEditorFraction(parseFloat(editorFractionSetting.value))
+
+        const chatWidthSetting = await db.settings.get('chatWidth')
+        if (chatWidthSetting) setChatWidth(parseInt(chatWidthSetting.value, 10))
       } catch (error) {
         console.error('[persistence] Hydration error:', error)
       } finally {
@@ -114,6 +124,18 @@ export function usePersistence() {
     if (!hydrated.current) return
     db.settings.put({ key: 'isChatOpen', value: String(isChatOpen) })
   }, [isChatOpen])
+
+  const editorFraction = useAtomValue(editorFractionAtom)
+  useEffect(() => {
+    if (!hydrated.current) return
+    db.settings.put({ key: 'editorFraction', value: String(editorFraction) })
+  }, [editorFraction])
+
+  const chatWidth = useAtomValue(chatWidthAtom)
+  useEffect(() => {
+    if (!hydrated.current) return
+    db.settings.put({ key: 'chatWidth', value: String(chatWidth) })
+  }, [chatWidth])
 
   return { isHydrated }
 }

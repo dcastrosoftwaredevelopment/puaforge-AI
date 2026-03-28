@@ -1,9 +1,10 @@
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { SandpackProvider } from '@codesandbox/sandpack-react'
 import { Loader2, MessageCircle } from 'lucide-react'
 import { useFiles } from '@/hooks/useFiles'
 import { useChat } from '@/hooks/useChat'
+import { usePanelSizes } from '@/hooks/usePanelSizes'
 import { useProjectLoader } from '@/hooks/useProjectLoader'
 import { TAILWIND_HTML } from '@/utils/defaultFiles'
 import EditorHeader from '@/components/layout/EditorHeader'
@@ -13,14 +14,13 @@ import FloatingChat, { DockedChat } from '@/components/chat/FloatingChat'
 
 const CHAT_MIN = 280
 const CHAT_MAX = 600
-const CHAT_DEFAULT = 384
 
 export default function EditorView() {
   const { projectId } = useParams<{ projectId: string }>()
   const projectReady = useProjectLoader(projectId)
   const { files, deps } = useFiles()
   const { mode: chatMode, isOpen: isChatOpen, setIsOpen: setIsChatOpen } = useChat()
-  const [chatWidth, setChatWidth] = useState(CHAT_DEFAULT)
+  const { chatWidth, setChatWidth } = usePanelSizes()
 
   const isDocked = chatMode === 'docked'
   const showDockedChat = isDocked && isChatOpen

@@ -1,4 +1,4 @@
-import { memo, useCallback, useRef, useState } from 'react'
+import { memo, useCallback, useRef } from 'react'
 import { SandpackLayout, SandpackFileExplorer, SandpackCodeEditor, SandpackPreview } from '@codesandbox/sandpack-react'
 import { Save, Undo2 } from 'lucide-react'
 import { type DevicePreview } from '@/atoms'
@@ -6,6 +6,7 @@ import { useViewMode } from '@/hooks/useViewMode'
 import { useDevicePreview } from '@/hooks/useDevicePreview'
 import { useSandpackSync } from '@/hooks/useSandpackSync'
 import { useEditorState } from '@/hooks/useEditorState'
+import { usePanelSizes } from '@/hooks/usePanelSizes'
 import ResizeHandle from '@/components/layout/ResizeHandle'
 
 const DEVICE_WIDTHS: Record<DevicePreview, string> = {
@@ -49,10 +50,10 @@ function EditBar({ onSave, onDiscard }: { onSave: () => void; onDiscard: () => v
 
 export default function SandpackContent() {
   const { isDirty, saveEdits, discardEdits } = useEditorState()
+  const { editorFraction, setEditorFraction } = usePanelSizes()
   const { showEditor, showPreview, isSplit } = useViewMode()
   const { device } = useDevicePreview()
   const containerRef = useRef<HTMLDivElement>(null)
-  const [editorFraction, setEditorFraction] = useState(0.5)
 
   const isResponsive = device !== 'desktop'
 
