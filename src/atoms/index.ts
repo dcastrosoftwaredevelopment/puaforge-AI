@@ -45,6 +45,17 @@ export const filesAtom = atom<Record<string, string>>({
 }`,
 })
 
+// Project images (reusable assets)
+export interface ProjectImage {
+  id: string
+  name: string
+  dataUrl: string
+  mediaType: string
+  size: number
+}
+
+export const projectImagesAtom = atom<ProjectImage[]>([])
+
 // UI state
 export const isChatOpenAtom = atom(true)
 export const isGeneratingAtom = atom(false)
@@ -62,17 +73,10 @@ export const viewModeAtom = atom<ViewMode>('preview')
 export interface ClaudeModel {
   id: string
   name: string
-  description: string
-  tier: 'free' | 'paid'
 }
 
-export const CLAUDE_MODELS: ClaudeModel[] = [
-  { id: 'claude-haiku-4-5-20251001', name: 'Haiku 4.5', description: 'Rápido e leve', tier: 'free' },
-  { id: 'claude-sonnet-4-6-20250514', name: 'Sonnet 4.6', description: 'Equilibrado', tier: 'paid' },
-  { id: 'claude-opus-4-6-20250514', name: 'Opus 4.6', description: 'Mais poderoso', tier: 'paid' },
-]
-
-export const selectedModelAtom = atom('claude-haiku-4-5-20251001')
+export const availableModelsAtom = atom<ClaudeModel[]>([])
+export const selectedModelAtom = atom('')
 
 // Device preview
 export type DevicePreview = 'desktop' | 'tablet' | 'mobile'

@@ -22,6 +22,7 @@ Rules:
 - IMPORTANT: Only return files that NEED TO CHANGE. Files that are not modified should NOT be included in your response. The system will automatically merge your changes with existing files — unchanged files are preserved.
 - Only include /App.tsx if it needs to be modified (e.g. new imports or layout changes)
 - When the user asks to update a specific section or component, focus ONLY on that component and any files it directly affects. Do NOT rewrite unrelated components.
+- When the user has project images available (listed in the prompt), use them via: import { imageName } from './assets/images'. Use the imported variable as src for <img> tags or in inline styles like backgroundImage: \`url(\${imageName})\`. NEVER modify /assets/images.ts — it is auto-generated.
 - ALWAYS use a dark theme with these colors:
   - Backgrounds: bg-[#08080d] (darkest), bg-[#0e0f16] (base), bg-[#151620] (surface), bg-[#1a1b2e] (elevated)
   - Text: text-[#f1f5f9] (headings), text-[#e2e8f0] (body), text-[#94a3b8] (secondary), text-[#64748b] (muted)
@@ -68,7 +69,7 @@ router.post('/generate', async (req: Request<object, object, GenerateBody>, res:
 
     const conversationMessages = buildConversation(history, prompt, currentFiles, images)
 
-    const response = await client.messages.create({
+    const stream = client.messages.stream({
       model: modelId,
       max_tokens: 16384,
       system: [
@@ -80,6 +81,8 @@ router.post('/generate', async (req: Request<object, object, GenerateBody>, res:
       ],
       messages: conversationMessages,
     })
+
+    const response = await stream.finalMessage()
 
     const rawResponse = response.content
       .filter((block): block is Anthropic.TextBlock => block.type === 'text')

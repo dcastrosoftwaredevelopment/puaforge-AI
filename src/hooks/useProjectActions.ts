@@ -7,6 +7,7 @@ import {
   activeProjectIdAtom,
   messagesAtom,
   filesAtom,
+  projectImagesAtom,
   type Project,
 } from '@/atoms'
 import { depsAtom } from '@/hooks/useFiles'
@@ -20,6 +21,7 @@ export function useProjectActions() {
   const setMessages = useSetAtom(messagesAtom)
   const setFiles = useSetAtom(filesAtom)
   const setDeps = useSetAtom(depsAtom)
+  const setProjectImages = useSetAtom(projectImagesAtom)
 
   const createProject = useCallback(async () => {
     await dbReady
@@ -37,10 +39,11 @@ export function useProjectActions() {
     setMessages([])
     setFiles(DEFAULT_FILES)
     setDeps({})
+    setProjectImages([])
 
     navigate(`/project/${project.id}`)
     return project
-  }, [navigate, setProjects, setActiveProjectId, setMessages, setFiles, setDeps])
+  }, [navigate, setProjects, setActiveProjectId, setMessages, setFiles, setDeps, setProjectImages])
 
   const openProject = useCallback((id: string) => {
     navigate(`/project/${id}`)
@@ -51,6 +54,7 @@ export function useProjectActions() {
       db.projects.delete(id),
       db.messages.where('projectId').equals(id).delete(),
       db.projectFiles.where('projectId').equals(id).delete(),
+      db.projectImages.where('projectId').equals(id).delete(),
     ])
     setProjects((prev) => prev.filter((p) => p.id !== id))
   }, [setProjects])

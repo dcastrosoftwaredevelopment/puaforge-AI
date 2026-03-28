@@ -6,6 +6,7 @@ import { messagesAtom, isGeneratingAtom, selectedModelAtom, type MessageImage } 
 import { useFiles } from '@/hooks/useFiles'
 import { generateCode } from '@/services/aiService'
 import { mergeFiles, extractDependencies } from '@/services/fileParser'
+import { useProjectImages } from '@/hooks/useProjectImages'
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 const MAX_BASE64_BYTES = 5 * 1024 * 1024 // 5MB — limite da API do Claude
@@ -90,6 +91,7 @@ export default function PromptInput() {
   const { files, setFiles, setDeps } = useFiles()
   const [isGenerating, setIsGenerating] = useAtom(isGeneratingAtom)
   const selectedModel = useAtomValue(selectedModelAtom)
+  const { getImagesContext } = useProjectImages()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,8 +130,13 @@ export default function PromptInput() {
     setIsGenerating(true)
 
     try {
+      const imagesCtx = getImagesContext()
+      const fullPrompt = imagesCtx
+        ? `${text || 'Analise esta imagem e crie o layout correspondente.'}\n\n${imagesCtx}`
+        : (text || 'Analise esta imagem e crie o layout correspondente.')
+
       const result = await generateCode({
-        prompt: text || 'Analise esta imagem e crie o layout correspondente.',
+        prompt: fullPrompt,
         model: selectedModel,
         currentFiles: files,
         history: messages.map((m) => ({ role: m.role, content: m.content, images: m.images })),

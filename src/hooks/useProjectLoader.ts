@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSetAtom } from 'jotai'
-import { activeProjectIdAtom, messagesAtom, filesAtom, type Message } from '@/atoms'
+import { activeProjectIdAtom, messagesAtom, filesAtom, projectImagesAtom, type Message, type ProjectImage } from '@/atoms'
 import { depsAtom } from '@/hooks/useFiles'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
 import { extractDependencies } from '@/services/fileParser'
@@ -18,6 +18,7 @@ export function useProjectLoader(projectId: string | undefined) {
   const setMessages = useSetAtom(messagesAtom)
   const setFiles = useSetAtom(filesAtom)
   const setDeps = useSetAtom(depsAtom)
+  const setProjectImages = useSetAtom(projectImagesAtom)
   const [isReady, setIsReady] = useState(false)
   const loadedRef = useRef<string | null>(null)
 
@@ -59,8 +60,31 @@ export function useProjectLoader(projectId: string | undefined) {
         fileMap = DEFAULT_FILES
       }
 
+      const savedImages = await db.projectImages
+        .where('projectId')
+        .equals(projectId!)
+        .toArray()
+      if (cancelled) return
+
       // Set data BEFORE activeProjectId to avoid persistence saving stale data
+      const projectImages = savedImages.map(({ projectId: _, ...img }) => img) as ProjectImage[]
+      setProjectImages(projectImages)
       setMessages(savedMessages.map(({ projectId: _, ...m }) => m) as Message[])
+      // Regenerate /assets/images.ts if project has images
+      if (projectImages.length > 0) {
+        const exports = projectImages
+          .map((img) => {
+            const base = img.name.replace(/\.[^.]+$/, '')
+            const exportName = base
+              .replace(/[^a-zA-Z0-9]+(.)/g, (_, c: string) => c.toUpperCase())
+              .replace(/[^a-zA-Z0-9]/g, '')
+              .replace(/^(\d)/, '_$1')
+            return `export const ${exportName} = '${img.dataUrl}'`
+          })
+          .join('\n')
+        fileMap['/assets/images.ts'] = `// Auto-generated — do not edit manually\n${exports}\n`
+      }
+
       setFiles(fileMap)
       setDeps(Object.keys(detectedDeps).length > 0 ? detectedDeps : {})
       setActiveProjectId(projectId!)
