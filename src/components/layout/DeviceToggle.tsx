@@ -1,6 +1,6 @@
-import { useAtom } from 'jotai'
 import { Monitor, Tablet, Smartphone } from 'lucide-react'
-import { devicePreviewAtom, type DevicePreview } from '@/atoms'
+import { type DevicePreview } from '@/atoms'
+import { useDevicePreview } from '@/hooks/useDevicePreview'
 
 const devices: { device: DevicePreview; icon: React.ReactNode; label: string }[] = [
   { device: 'desktop', icon: <Monitor size={14} />, label: 'Desktop' },
@@ -9,7 +9,7 @@ const devices: { device: DevicePreview; icon: React.ReactNode; label: string }[]
 ]
 
 export default function DeviceToggle() {
-  const [device, setDevice] = useAtom(devicePreviewAtom)
+  const { device, setDevice } = useDevicePreview()
 
   return (
     <div className="flex items-center gap-0.5 bg-bg-tertiary rounded-lg p-0.5 border border-border-subtle">

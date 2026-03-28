@@ -1,6 +1,6 @@
-import { useAtom } from 'jotai'
 import { Code, Eye, Columns } from 'lucide-react'
-import { viewModeAtom, type ViewMode } from '@/atoms'
+import { type ViewMode } from '@/atoms'
+import { useViewMode } from '@/hooks/useViewMode'
 
 const modes: { mode: ViewMode; icon: React.ReactNode; label: string }[] = [
   { mode: 'preview', icon: <Eye size={14} />, label: 'Preview' },
@@ -9,7 +9,7 @@ const modes: { mode: ViewMode; icon: React.ReactNode; label: string }[] = [
 ]
 
 export default function ViewToggle() {
-  const [viewMode, setViewMode] = useAtom(viewModeAtom)
+  const { viewMode, setViewMode } = useViewMode()
 
   return (
     <div className="flex items-center gap-0.5 bg-bg-tertiary rounded-lg p-0.5 border border-border-subtle">

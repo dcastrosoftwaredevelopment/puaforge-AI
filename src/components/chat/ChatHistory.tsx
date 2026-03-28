@@ -1,12 +1,10 @@
 import { useEffect, useRef } from 'react'
-import { useAtomValue } from 'jotai'
-import { messagesAtom, isGeneratingAtom } from '@/atoms'
-import ChatMessage from './ChatMessage'
 import { Loader2 } from 'lucide-react'
+import { useMessagesValue } from '@/hooks/useMessages'
+import ChatMessage from './ChatMessage'
 
 export default function ChatHistory() {
-  const messages = useAtomValue(messagesAtom)
-  const isGenerating = useAtomValue(isGeneratingAtom)
+  const { messages, isGenerating } = useMessagesValue()
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

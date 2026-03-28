@@ -1,9 +1,8 @@
-import { useAtom } from 'jotai'
 import { MessageCircle, X } from 'lucide-react'
-import { isChatOpenAtom } from '@/atoms'
+import { useChat } from '@/hooks/useChat'
 
 export default function ChatToggleButton() {
-  const [isChatOpen, setIsChatOpen] = useAtom(isChatOpenAtom)
+  const { isOpen: isChatOpen, setIsOpen: setIsChatOpen } = useChat()
 
   return (
     <button

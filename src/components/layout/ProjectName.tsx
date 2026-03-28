@@ -1,15 +1,11 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from 'react'
-import { useAtomValue } from 'jotai'
 import { Pencil } from 'lucide-react'
-import { projectsAtom, activeProjectIdAtom } from '@/atoms'
+import { useProjects } from '@/hooks/useProjects'
 import { useProjectActions } from '@/hooks/useProjectActions'
 
 export default function ProjectName() {
-  const projects = useAtomValue(projectsAtom)
-  const activeId = useAtomValue(activeProjectIdAtom)
+  const { activeProject: project } = useProjects()
   const { renameProject } = useProjectActions()
-
-  const project = projects.find((p) => p.id === activeId)
   const [isEditing, setIsEditing] = useState(false)
   const [name, setName] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)

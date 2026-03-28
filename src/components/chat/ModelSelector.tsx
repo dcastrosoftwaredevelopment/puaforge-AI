@@ -1,41 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
-import { useAtom, useAtomValue } from 'jotai'
 import { ChevronDown, Check, Cpu, Loader2 } from 'lucide-react'
-import { selectedModelAtom, availableModelsAtom } from '@/atoms'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
-
-export function useModels() {
-  const [models, setModels] = useAtom(availableModelsAtom)
-  const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom)
-  const [loading, setLoading] = useState(false)
-  const fetched = useRef(false)
-
-  useEffect(() => {
-    if (fetched.current) return
-    fetched.current = true
-
-    setLoading(true)
-    fetch(`${API_URL}/api/models`)
-      .then((res) => res.json())
-      .then((data) => {
-        const list = data.models || []
-        setModels(list)
-        if (list.length > 0 && !selectedModel) {
-          setSelectedModel(list[0].id)
-        }
-      })
-      .catch((err) => console.error('[models] Failed to fetch:', err))
-      .finally(() => setLoading(false))
-  }, [setModels, selectedModel, setSelectedModel])
-
-  return { models, loading }
-}
+import { useModels } from '@/hooks/useModels'
 
 export default function ModelSelector() {
-  const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom)
-  const models = useAtomValue(availableModelsAtom)
-  const { loading } = useModels()
+  const { models, selectedModel, setSelectedModel, loading } = useModels()
   const [isOpen, setIsOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 

@@ -1,20 +1,32 @@
+import { useCallback, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { SandpackProvider } from '@codesandbox/sandpack-react'
-import { useAtomValue } from 'jotai'
 import { Loader2 } from 'lucide-react'
-import { chatModeAtom } from '@/atoms'
 import { useFiles } from '@/hooks/useFiles'
+import { useChatMode } from '@/hooks/useChat'
 import { useProjectLoader } from '@/hooks/useProjectLoader'
 import { TAILWIND_HTML } from '@/utils/defaultFiles'
 import EditorHeader from '@/components/layout/EditorHeader'
 import SandpackContent from '@/components/layout/SandpackContent'
+import ResizeHandle from '@/components/layout/ResizeHandle'
 import FloatingChat, { DockedChat } from '@/components/chat/FloatingChat'
+
+const CHAT_MIN = 280
+const CHAT_MAX = 600
+const CHAT_DEFAULT = 384
 
 export default function EditorView() {
   const { projectId } = useParams<{ projectId: string }>()
   const projectReady = useProjectLoader(projectId)
   const { files, deps } = useFiles()
-  const chatMode = useAtomValue(chatModeAtom)
+  const chatMode = useChatMode()
+  const [chatWidth, setChatWidth] = useState(CHAT_DEFAULT)
+
+  const isDocked = chatMode === 'docked'
+
+  const onChatResize = useCallback((delta: number) => {
+    setChatWidth((prev) => Math.min(CHAT_MAX, Math.max(CHAT_MIN, prev - delta)))
+  }, [])
 
   // Forces SandpackProvider remount on any file or dependency change
   const filesHash = Object.entries(files)
@@ -55,7 +67,12 @@ export default function EditorView() {
           </SandpackProvider>
         </main>
 
-        {chatMode === 'docked' && <DockedChat />}
+        {isDocked && (
+          <>
+            <ResizeHandle onResize={onChatResize} />
+            <DockedChat width={chatWidth} />
+          </>
+        )}
       </div>
 
       <FloatingChat />

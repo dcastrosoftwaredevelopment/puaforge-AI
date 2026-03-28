@@ -1,10 +1,9 @@
-import { useAtomValue } from 'jotai'
 import { Plus, Trash2, FolderOpen, Layers } from 'lucide-react'
-import { projectsAtom } from '@/atoms'
+import { useProjects } from '@/hooks/useProjects'
 import { useProjectActions } from '@/hooks/useProjectActions'
 
 export default function ProjectList() {
-  const projects = useAtomValue(projectsAtom)
+  const { projects } = useProjects()
   const { createProject, openProject, deleteProject } = useProjectActions()
 
   return (

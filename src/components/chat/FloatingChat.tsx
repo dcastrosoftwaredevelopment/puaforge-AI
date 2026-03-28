@@ -1,7 +1,7 @@
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { GripHorizontal, Trash2, PanelRightClose, PanelRightOpen } from 'lucide-react'
-import { isChatOpenAtom, messagesAtom, chatModeAtom } from '@/atoms'
 import { useFiles } from '@/hooks/useFiles'
+import { useChat } from '@/hooks/useChat'
+import { useMessages } from '@/hooks/useMessages'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
 
 import { useFloatingPanel, type ResizeDirection } from '@/hooks/useFloatingPanel'
@@ -25,9 +25,9 @@ const resizeHandles: { direction: ResizeDirection; className: string }[] = [
 ]
 
 function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?: (e: React.PointerEvent) => void }) {
-  const setMessages = useSetAtom(messagesAtom)
+  const { setMessages } = useMessages()
   const { setFiles, setDeps } = useFiles()
-  const [chatMode, setChatMode] = useAtom(chatModeAtom)
+  const { mode: chatMode, setMode: setChatMode } = useChat()
 
   return (
     <>
@@ -82,7 +82,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
 }
 
 function FloatingMode() {
-  const isChatOpen = useAtomValue(isChatOpenAtom)
+  const { isOpen: isChatOpen } = useChat()
   const { position, size, onDragStart, onResizeStart } = useFloatingPanel({
     initialPosition: {
       x: window.innerWidth - INITIAL_WIDTH - 30,
@@ -120,16 +120,16 @@ function FloatingMode() {
   )
 }
 
-export function DockedChat() {
+export function DockedChat({ width }: { width: number }) {
   return (
-    <div className="w-96 shrink-0 border-l border-border-subtle bg-bg-secondary flex flex-col h-full">
+    <div className="shrink-0 border-l border-border-subtle bg-bg-secondary flex flex-col h-full" style={{ width }}>
       <ChatPanel isDocked={true} />
     </div>
   )
 }
 
 export default function FloatingChat() {
-  const chatMode = useAtomValue(chatModeAtom)
+  const { mode: chatMode } = useChat()
 
   if (chatMode === 'docked') return null
   return <FloatingMode />

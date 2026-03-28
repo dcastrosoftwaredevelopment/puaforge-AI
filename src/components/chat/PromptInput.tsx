@@ -1,9 +1,10 @@
 import { useRef, useState, type KeyboardEvent } from 'react'
 import TextareaAutosize from 'react-textarea-autosize'
-import { useAtom, useAtomValue } from 'jotai'
 import { Send, ImagePlus, X } from 'lucide-react'
-import { messagesAtom, isGeneratingAtom, selectedModelAtom, type MessageImage } from '@/atoms'
+import { type MessageImage } from '@/atoms'
 import { useFiles } from '@/hooks/useFiles'
+import { useMessages } from '@/hooks/useMessages'
+import { useModels } from '@/hooks/useModels'
 import { generateCode } from '@/services/aiService'
 import { mergeFiles, extractDependencies } from '@/services/fileParser'
 import { useProjectImages } from '@/hooks/useProjectImages'
@@ -87,10 +88,9 @@ export default function PromptInput() {
   const [prompt, setPrompt] = useState('')
   const [pendingImages, setPendingImages] = useState<MessageImage[]>([])
   const [imageError, setImageError] = useState<string | null>(null)
-  const [messages, setMessages] = useAtom(messagesAtom)
+  const { messages, setMessages, isGenerating, setIsGenerating } = useMessages()
   const { files, setFiles, setDeps } = useFiles()
-  const [isGenerating, setIsGenerating] = useAtom(isGeneratingAtom)
-  const selectedModel = useAtomValue(selectedModelAtom)
+  const { selectedModel } = useModels()
   const { getImagesContext } = useProjectImages()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
