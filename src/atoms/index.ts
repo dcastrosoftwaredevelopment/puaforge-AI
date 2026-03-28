@@ -56,6 +56,16 @@ export interface ProjectImage {
 
 export const projectImagesAtom = atom<ProjectImage[]>([])
 
+// Checkpoints
+export interface Checkpoint {
+  id: string
+  name: string
+  files: Record<string, string>
+  createdAt: number
+}
+
+export const checkpointsAtom = atom<Checkpoint[]>([])
+
 // UI state
 export const isChatOpenAtom = atom(true)
 export const isGeneratingAtom = atom(false)

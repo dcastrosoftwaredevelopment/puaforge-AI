@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSetAtom } from 'jotai'
-import { activeProjectIdAtom, messagesAtom, filesAtom, projectImagesAtom, type Message, type ProjectImage } from '@/atoms'
+import { activeProjectIdAtom, messagesAtom, filesAtom, projectImagesAtom, checkpointsAtom, type Message, type ProjectImage, type Checkpoint } from '@/atoms'
 import { depsAtom } from '@/hooks/useFiles'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
 import { extractDependencies } from '@/services/fileParser'
@@ -19,6 +19,7 @@ export function useProjectLoader(projectId: string | undefined) {
   const setFiles = useSetAtom(filesAtom)
   const setDeps = useSetAtom(depsAtom)
   const setProjectImages = useSetAtom(projectImagesAtom)
+  const setCheckpoints = useSetAtom(checkpointsAtom)
   const [isReady, setIsReady] = useState(false)
   const loadedRef = useRef<string | null>(null)
 
@@ -66,9 +67,17 @@ export function useProjectLoader(projectId: string | undefined) {
         .toArray()
       if (cancelled) return
 
+      const savedCheckpoints = await db.checkpoints
+        .where('projectId')
+        .equals(projectId!)
+        .reverse()
+        .sortBy('createdAt')
+      if (cancelled) return
+
       // Set data BEFORE activeProjectId to avoid persistence saving stale data
       const projectImages = savedImages.map(({ projectId: _, ...img }) => img) as ProjectImage[]
       setProjectImages(projectImages)
+      setCheckpoints(savedCheckpoints.map(({ projectId: _, ...c }) => c) as Checkpoint[])
       setMessages(savedMessages.map(({ projectId: _, ...m }) => m) as Message[])
       // Regenerate /assets/images.ts if project has images
       if (projectImages.length > 0) {
