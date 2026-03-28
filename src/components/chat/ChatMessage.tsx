@@ -20,7 +20,7 @@ export default function ChatMessage({ message }: Props) {
         {isUser ? <User size={14} /> : <Bot size={14} />}
       </div>
       <div
-        className={`max-w-[85%] rounded-xl px-3 py-2.5 text-sm leading-relaxed ${
+        className={`max-w-[85%] min-w-0 rounded-xl px-3 py-2.5 text-sm leading-relaxed break-words overflow-hidden ${
           isUser
             ? 'bg-chat-user text-text-primary'
             : 'bg-chat-ai text-text-secondary'
@@ -39,7 +39,7 @@ export default function ChatMessage({ message }: Props) {
           </div>
         )}
         {isUser ? (
-          <p>{message.content}</p>
+          <p className="whitespace-pre-wrap break-words">{message.content}</p>
         ) : (
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
