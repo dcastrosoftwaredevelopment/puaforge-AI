@@ -6,6 +6,7 @@ import { useCheckpoints } from '@/hooks/useCheckpoints'
 import ViewToggle from '@/components/layout/ViewToggle'
 import DeviceToggle from '@/components/layout/DeviceToggle'
 import ExportButton from '@/components/layout/ExportButton'
+import PublishButton from '@/components/layout/PublishButton'
 import ProjectName from '@/components/layout/ProjectName'
 import ImageAssets from '@/components/layout/ImageAssets'
 import Checkpoints from '@/components/layout/Checkpoints'
@@ -84,6 +85,7 @@ export default function EditorHeader() {
         <DeviceToggle />
         <ViewToggle />
         <ExportButton />
+        <PublishButton />
       </div>
     </header>
   )

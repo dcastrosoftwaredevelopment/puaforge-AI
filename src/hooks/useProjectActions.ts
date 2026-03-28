@@ -59,6 +59,7 @@ export function useProjectActions() {
       db.projectFiles.where('projectId').equals(id).delete(),
       db.projectImages.where('projectId').equals(id).delete(),
       db.checkpoints.where('projectId').equals(id).delete(),
+      db.publishedSites.delete(id),
     ])
     setProjects((prev) => prev.filter((p) => p.id !== id))
   }, [setProjects])

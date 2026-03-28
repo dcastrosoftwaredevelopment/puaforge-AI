@@ -5,6 +5,7 @@ import morgan from 'morgan'
 import dotenv from 'dotenv'
 import { generateRoute } from './routes/generate.js'
 import { modelsRoute } from './routes/models.js'
+import { publishRoute } from './routes/publish.js'
 
 const envPath = path.resolve(process.cwd(), '.env')
 console.log('[server] Loading .env from:', envPath)
@@ -24,6 +25,7 @@ app.use(express.json({ limit: '50mb' }))
 
 app.use('/api', generateRoute)
 app.use('/api', modelsRoute)
+app.use('/api', publishRoute)
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' })

@@ -41,6 +41,12 @@ export interface DbCheckpoint {
   createdAt: number
 }
 
+export interface DbPublishedSite {
+  projectId: string
+  html: string
+  publishedAt: number
+}
+
 export interface DbSetting {
   key: string
   value: string
@@ -48,7 +54,7 @@ export interface DbSetting {
 
 // Database definition
 const DB_NAME = 'vibe-platform'
-const DB_VERSION = 5
+const DB_VERSION = 6
 
 const db = new Dexie(DB_NAME) as Dexie & {
   projects: EntityTable<DbProject, 'id'>
@@ -56,6 +62,7 @@ const db = new Dexie(DB_NAME) as Dexie & {
   projectFiles: EntityTable<DbProjectFile, 'id'>
   projectImages: EntityTable<DbProjectImage, 'id'>
   checkpoints: EntityTable<DbCheckpoint, 'id'>
+  publishedSites: EntityTable<DbPublishedSite, 'projectId'>
   settings: EntityTable<DbSetting, 'key'>
 }
 
@@ -65,6 +72,7 @@ db.version(DB_VERSION).stores({
   projectFiles: '++id, [projectId+path], projectId',
   projectImages: 'id, projectId',
   checkpoints: 'id, projectId, createdAt',
+  publishedSites: 'projectId',
   settings: 'key',
 })
 
