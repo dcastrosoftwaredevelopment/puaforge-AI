@@ -9,6 +9,7 @@ import {
   selectedModelAtom,
   viewModeAtom,
   devicePreviewAtom,
+  isChatOpenAtom,
   type Project,
   type ViewMode,
   type DevicePreview,
@@ -26,6 +27,7 @@ export function usePersistence() {
   const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom)
   const setViewMode = useSetAtom(viewModeAtom)
   const setDevicePreview = useSetAtom(devicePreviewAtom)
+  const setIsChatOpen = useSetAtom(isChatOpenAtom)
   const hydrated = useRef(false)
   const [isHydrated, setIsHydrated] = useState(false)
 
@@ -45,6 +47,9 @@ export function usePersistence() {
 
         const deviceSetting = await db.settings.get('devicePreview')
         if (deviceSetting) setDevicePreview(deviceSetting.value as DevicePreview)
+
+        const chatOpenSetting = await db.settings.get('isChatOpen')
+        if (chatOpenSetting) setIsChatOpen(chatOpenSetting.value === 'true')
       } catch (error) {
         console.error('[persistence] Hydration error:', error)
       } finally {
@@ -103,6 +108,12 @@ export function usePersistence() {
     if (!hydrated.current) return
     db.settings.put({ key: 'devicePreview', value: devicePreview })
   }, [devicePreview])
+
+  const isChatOpen = useAtomValue(isChatOpenAtom)
+  useEffect(() => {
+    if (!hydrated.current) return
+    db.settings.put({ key: 'isChatOpen', value: String(isChatOpen) })
+  }, [isChatOpen])
 
   return { isHydrated }
 }

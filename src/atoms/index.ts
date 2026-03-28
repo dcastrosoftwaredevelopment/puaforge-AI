@@ -90,6 +90,10 @@ export const selectedModelAtom = atom('')
 
 // Editor dirty state (user has unsaved manual edits)
 export const editorDirtyAtom = atom(false)
+export const editorActionsAtom = atom<{ save: () => void; discard: () => void }>({
+  save: () => {},
+  discard: () => {},
+})
 
 // Device preview
 export type DevicePreview = 'desktop' | 'tablet' | 'mobile'

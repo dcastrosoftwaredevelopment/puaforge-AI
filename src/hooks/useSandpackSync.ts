@@ -1,21 +1,26 @@
 import { useCallback, useEffect, useRef } from 'react'
+import { useSetAtom } from 'jotai'
 import { useSandpack } from '@codesandbox/sandpack-react'
+import { editorActionsAtom } from '@/atoms'
 import { useFiles } from './useFiles'
 import { useEditorState } from './useEditorState'
 
 /**
  * Syncs filesAtom changes into Sandpack's internal state.
- * Provides save/discard for user manual edits.
+ * Registers save/discard actions via atom for external consumption.
  * Must be rendered inside <SandpackProvider>.
  */
 export function useSandpackSync() {
   const { files, setFiles } = useFiles()
   const { sandpack } = useSandpack()
-  const { setDirty } = useEditorState()
+  const { isDirty, setDirty } = useEditorState()
+  const setActions = useSetAtom(editorActionsAtom)
   const sandpackRef = useRef(sandpack)
   sandpackRef.current = sandpack
   const prevFilesRef = useRef(files)
   const isFirstRunRef = useRef(true)
+  const isDirtyRef = useRef(isDirty)
+  isDirtyRef.current = isDirty
 
   // Push atom changes → Sandpack (skip first run, Provider already has correct files)
   useEffect(() => {
@@ -42,9 +47,10 @@ export function useSandpackSync() {
     setDirty(false)
   }, [files, setDirty])
 
-  // Mark dirty when user types in editor — poll on interval (lightweight)
+  // Detect user edits — poll using refs to avoid re-renders when already dirty
   useEffect(() => {
     const interval = setInterval(() => {
+      if (isDirtyRef.current) return
       const spFiles = sandpackRef.current.files
       for (const [path, file] of Object.entries(spFiles)) {
         if (path === '/index.html' || path === '/package.json') continue
@@ -54,7 +60,7 @@ export function useSandpackSync() {
           return
         }
       }
-    }, 500)
+    }, 800)
     return () => clearInterval(interval)
   }, [setDirty])
 
@@ -82,5 +88,8 @@ export function useSandpackSync() {
     setDirty(false)
   }, [setDirty])
 
-  return { saveEdits, discardEdits }
+  // Register actions so other components can call save/discard without useSandpack()
+  useEffect(() => {
+    setActions({ save: saveEdits, discard: discardEdits })
+  }, [saveEdits, discardEdits, setActions])
 }

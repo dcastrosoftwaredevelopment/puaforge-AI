@@ -45,6 +45,10 @@ body {
   height: 100% !important;
 }
 
+.sp-preview-container {
+  background: var(--color-bg-primary) !important;
+}
+
 .sp-file-explorer {
   background: var(--color-bg-secondary) !important;
   border-right: 1px solid var(--color-border-subtle) !important;
