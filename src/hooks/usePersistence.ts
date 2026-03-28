@@ -8,8 +8,10 @@ import {
   filesAtom,
   selectedModelAtom,
   viewModeAtom,
+  devicePreviewAtom,
   type Project,
   type ViewMode,
+  type DevicePreview,
 } from '@/atoms'
 
 /** Resolves when the latest persistence write is done — lets readers wait for pending saves */
@@ -23,6 +25,7 @@ export function usePersistence() {
   const activeProjectId = useAtomValue(activeProjectIdAtom)
   const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom)
   const setViewMode = useSetAtom(viewModeAtom)
+  const setDevicePreview = useSetAtom(devicePreviewAtom)
   const hydrated = useRef(false)
   const [isHydrated, setIsHydrated] = useState(false)
 
@@ -39,6 +42,9 @@ export function usePersistence() {
 
         const viewModeSetting = await db.settings.get('viewMode')
         if (viewModeSetting) setViewMode(viewModeSetting.value as ViewMode)
+
+        const deviceSetting = await db.settings.get('devicePreview')
+        if (deviceSetting) setDevicePreview(deviceSetting.value as DevicePreview)
       } catch (error) {
         console.error('[persistence] Hydration error:', error)
       } finally {
@@ -91,6 +97,12 @@ export function usePersistence() {
     if (!hydrated.current) return
     db.settings.put({ key: 'viewMode', value: viewMode })
   }, [viewMode])
+
+  const devicePreview = useAtomValue(devicePreviewAtom)
+  useEffect(() => {
+    if (!hydrated.current) return
+    db.settings.put({ key: 'devicePreview', value: devicePreview })
+  }, [devicePreview])
 
   return { isHydrated }
 }
