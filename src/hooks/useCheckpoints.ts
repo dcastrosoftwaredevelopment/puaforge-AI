@@ -1,12 +1,13 @@
 import { useCallback } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
-import { activeProjectIdAtom, checkpointsAtom, type Checkpoint } from '@/atoms'
+import { activeProjectIdAtom, checkpointsAtom, messagesAtom, type Checkpoint } from '@/atoms'
 import { useFiles } from '@/hooks/useFiles'
 import { db } from '@/services/db'
 import { extractDependencies } from '@/services/fileParser'
 
 export function useCheckpoints() {
   const [checkpoints, setCheckpoints] = useAtom(checkpointsAtom)
+  const [, setMessages] = useAtom(messagesAtom)
   const activeProjectId = useAtomValue(activeProjectIdAtom)
   const { files, setFiles, setDeps } = useFiles()
 
@@ -25,10 +26,25 @@ export function useCheckpoints() {
   const restoreCheckpoint = useCallback(async (id: string) => {
     const checkpoint = checkpoints.find((c) => c.id === id)
     if (!checkpoint) return
+
     setFiles(checkpoint.files)
     const deps = extractDependencies(checkpoint.files)
     setDeps(Object.keys(deps).length > 0 ? deps : {})
-  }, [checkpoints, setFiles, setDeps])
+
+    const fileList = Object.keys(checkpoint.files)
+      .filter((p) => p !== '/index.html')
+      .join(', ')
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        role: 'user',
+        content: `[Código restaurado para o checkpoint "${checkpoint.name}"]\n\nArquivos atuais do projeto: ${fileList}\n\nIMPORTANTE: O código foi revertido para um estado anterior. Ignore as mensagens anteriores sobre arquivos que possam não existir mais. A partir de agora, considere APENAS os arquivos listados acima como o estado atual do projeto.`,
+        timestamp: Date.now(),
+      },
+    ])
+  }, [checkpoints, setFiles, setDeps, setMessages])
 
   const deleteCheckpoint = useCallback(async (id: string) => {
     await db.checkpoints.delete(id)
