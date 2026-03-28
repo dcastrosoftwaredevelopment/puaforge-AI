@@ -3,6 +3,7 @@ import { GripHorizontal, Trash2, PanelRightClose, PanelRightOpen } from 'lucide-
 import { isChatOpenAtom, messagesAtom, chatModeAtom } from '@/atoms'
 import { useFiles } from '@/hooks/useFiles'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
+
 import { useFloatingPanel, type ResizeDirection } from '@/hooks/useFloatingPanel'
 import ChatHistory from './ChatHistory'
 import PromptInput from './PromptInput'
@@ -25,7 +26,7 @@ const resizeHandles: { direction: ResizeDirection; className: string }[] = [
 
 function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?: (e: React.PointerEvent) => void }) {
   const setMessages = useSetAtom(messagesAtom)
-  const { setFiles } = useFiles()
+  const { setFiles, setDeps } = useFiles()
   const [chatMode, setChatMode] = useAtom(chatModeAtom)
 
   return (
@@ -44,6 +45,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
             onClick={() => {
               setMessages([])
               setFiles(DEFAULT_FILES)
+              setDeps({})
             }}
             className="p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
             title="Limpar conversa"

@@ -8,24 +8,21 @@ import {
   filesAtom,
   selectedModelAtom,
   viewModeAtom,
-  appViewAtom,
-  type Message,
   type Project,
   type ViewMode,
 } from '@/atoms'
-import { depsAtom } from '@/hooks/useFiles'
-import { DEFAULT_FILES } from '@/utils/defaultFiles'
-import { extractDependencies } from '@/services/fileParser'
+
+/** Resolves when the latest persistence write is done — lets readers wait for pending saves */
+let pendingPersist: Promise<void> = Promise.resolve()
+export function waitForPersist() {
+  return pendingPersist
+}
 
 export function usePersistence() {
   const setProjects = useSetAtom(projectsAtom)
-  const [activeProjectId, setActiveProjectId] = useAtom(activeProjectIdAtom)
-  const setMessages = useSetAtom(messagesAtom)
-  const setFiles = useSetAtom(filesAtom)
+  const activeProjectId = useAtomValue(activeProjectIdAtom)
   const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom)
   const setViewMode = useSetAtom(viewModeAtom)
-  const setAppView = useSetAtom(appViewAtom)
-  const setDeps = useSetAtom(depsAtom)
   const hydrated = useRef(false)
   const [isHydrated, setIsHydrated] = useState(false)
 
@@ -42,12 +39,6 @@ export function usePersistence() {
 
         const viewModeSetting = await db.settings.get('viewMode')
         if (viewModeSetting) setViewMode(viewModeSetting.value as ViewMode)
-
-        const activeSetting = await db.settings.get('activeProjectId')
-        if (activeSetting && allProjects.some((p) => p.id === activeSetting.value)) {
-          setActiveProjectId(activeSetting.value)
-          setAppView('editor')
-        }
       } catch (error) {
         console.error('[persistence] Hydration error:', error)
       } finally {
@@ -58,51 +49,19 @@ export function usePersistence() {
     hydrate()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Load project data when activeProjectId changes
-  useEffect(() => {
-    if (!hydrated.current || !activeProjectId) return
-
-    async function loadProject() {
-      const savedMessages = await db.messages
-        .where('projectId')
-        .equals(activeProjectId!)
-        .sortBy('timestamp')
-      setMessages(savedMessages.map(({ projectId: _, ...m }) => m) as Message[])
-
-      const savedFiles = await db.projectFiles
-        .where('projectId')
-        .equals(activeProjectId!)
-        .toArray()
-
-      if (savedFiles.length > 0) {
-        const fileMap: Record<string, string> = {}
-        for (const f of savedFiles) fileMap[f.path] = f.code
-        setFiles(fileMap)
-
-        const detectedDeps = extractDependencies(fileMap)
-        if (Object.keys(detectedDeps).length > 0) setDeps(detectedDeps)
-        else setDeps({})
-      } else {
-        setFiles(DEFAULT_FILES)
-        setDeps({})
-      }
-
-      db.settings.put({ key: 'activeProjectId', value: activeProjectId! })
-    }
-    loadProject()
-  }, [activeProjectId]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Persist messages
+  // Persist messages — atomic transaction
   const messagesValue = useAtomValue(messagesAtom)
   useEffect(() => {
     if (!hydrated.current || !activeProjectId) return
     const pid = activeProjectId
     const entries = messagesValue.map((m) => ({ ...m, projectId: pid }))
-    db.messages.where('projectId').equals(pid).delete()
-      .then(() => db.messages.bulkPut(entries))
+    pendingPersist = db.transaction('rw', db.messages, async () => {
+      await db.messages.where('projectId').equals(pid).delete()
+      await db.messages.bulkPut(entries)
+    }).catch((e) => console.error('[persistence] messages save error:', e))
   }, [messagesValue, activeProjectId])
 
-  // Persist files
+  // Persist files — atomic transaction
   const filesValue = useAtomValue(filesAtom)
   useEffect(() => {
     if (!hydrated.current || !activeProjectId) return
@@ -113,9 +72,12 @@ export function usePersistence() {
       code,
       updatedAt: Date.now(),
     }))
-    db.projectFiles.where('projectId').equals(pid).delete()
-      .then(() => db.projectFiles.bulkAdd(entries))
-    db.projects.update(pid, { updatedAt: Date.now() })
+    pendingPersist = db.transaction('rw', db.projectFiles, async () => {
+      await db.projectFiles.where('projectId').equals(pid).delete()
+      await db.projectFiles.bulkAdd(entries)
+    }).then(() => {
+      db.projects.update(pid, { updatedAt: Date.now() })
+    }).catch((e) => console.error('[persistence] files save error:', e))
   }, [filesValue, activeProjectId])
 
   // Persist settings

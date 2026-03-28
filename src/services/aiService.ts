@@ -2,11 +2,17 @@ import { parseFilesFromResponse } from './fileParser'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
+interface HistoryImage {
+  base64: string
+  mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp'
+}
+
 interface GenerateParams {
   prompt: string
   model: string
   currentFiles: Record<string, string>
-  history: { role: 'user' | 'assistant'; content: string }[]
+  history: { role: 'user' | 'assistant'; content: string; images?: HistoryImage[] }[]
+  images?: HistoryImage[]
 }
 
 interface GenerateResult {
@@ -24,6 +30,7 @@ export async function generateCode(params: GenerateParams): Promise<GenerateResu
       model: params.model,
       currentFiles: params.currentFiles,
       history: params.history,
+      images: params.images,
     }),
   })
 

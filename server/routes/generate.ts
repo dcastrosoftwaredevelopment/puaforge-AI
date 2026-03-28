@@ -29,15 +29,21 @@ Rules:
   - Success: text-[#10b981]
   - NEVER use light backgrounds, gradients with purple/blue, or white backgrounds`
 
+interface ImageData {
+  base64: string
+  mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp'
+}
+
 interface GenerateBody {
   prompt: string
   model?: string
   currentFiles: Record<string, string>
-  history: { role: string; content: string }[]
+  history: { role: string; content: string; images?: ImageData[] }[]
+  images?: ImageData[]
 }
 
 router.post('/generate', async (req: Request<object, object, GenerateBody>, res: Response) => {
-  const { prompt, model, currentFiles, history } = req.body
+  const { prompt, model, currentFiles, history, images } = req.body
 
   if (!prompt) {
     res.status(400).json({ error: 'Prompt is required' })
@@ -59,7 +65,7 @@ router.post('/generate', async (req: Request<object, object, GenerateBody>, res:
 
     const client = new Anthropic({ apiKey })
 
-    const conversationMessages = buildConversation(history, prompt, currentFiles)
+    const conversationMessages = buildConversation(history, prompt, currentFiles, images)
 
     const response = await client.messages.create({
       model: modelId,
@@ -118,9 +124,10 @@ const KEEP_RECENT = 4 // keep last N messages with full code
 const CODE_BLOCK_RE = /```[\w]*\s+file="[^"]+"\n[\s\S]*?```/g
 
 function buildConversation(
-  history: { role: string; content: string }[],
+  history: { role: string; content: string; images?: ImageData[] }[],
   prompt: string,
   currentFiles: Record<string, string>,
+  images?: ImageData[],
 ): Anthropic.MessageParam[] {
   const messages: Anthropic.MessageParam[] = []
 
@@ -138,6 +145,14 @@ function buildConversation(
         ? `${text}\n[Generated/updated files: ${fileNames.join(', ')}]`
         : text || '[code response]'
       messages.push({ role, content: summary })
+    } else if (role === 'user' && h.images && h.images.length > 0) {
+      // User messages with images use multimodal content blocks
+      const contentBlocks: Anthropic.ContentBlockParam[] = h.images.map((img) => ({
+        type: 'image' as const,
+        source: { type: 'base64' as const, media_type: img.mediaType, data: img.base64 },
+      }))
+      contentBlocks.push({ type: 'text' as const, text: h.content })
+      messages.push({ role, content: contentBlocks })
     } else {
       messages.push({ role, content: h.content })
     }
@@ -172,7 +187,16 @@ function buildConversation(
   userContent += `IMPORTANT: Only return files that NEED TO CHANGE. All other files are preserved automatically.\n\n`
   userContent += `User request: ${prompt}`
 
-  messages.push({ role: 'user', content: userContent })
+  if (images && images.length > 0) {
+    const contentBlocks: Anthropic.ContentBlockParam[] = images.map((img) => ({
+      type: 'image' as const,
+      source: { type: 'base64' as const, media_type: img.mediaType, data: img.base64 },
+    }))
+    contentBlocks.push({ type: 'text' as const, text: userContent })
+    messages.push({ role: 'user', content: contentBlocks })
+  } else {
+    messages.push({ role: 'user', content: userContent })
+  }
 
   const totalTokens = messages.reduce((sum, m) => {
     const text = typeof m.content === 'string' ? m.content : JSON.stringify(m.content)

@@ -26,6 +26,18 @@ export default function ChatMessage({ message }: Props) {
             : 'bg-chat-ai text-text-secondary'
         }`}
       >
+        {isUser && message.images && message.images.length > 0 && (
+          <div className="flex gap-1.5 flex-wrap mb-2">
+            {message.images.map((img, i) => (
+              <img
+                key={i}
+                src={`data:${img.mediaType};base64,${img.base64}`}
+                alt="Uploaded"
+                className="max-w-[200px] max-h-[150px] object-contain rounded-lg"
+              />
+            ))}
+          </div>
+        )}
         {isUser ? (
           <p>{message.content}</p>
         ) : (

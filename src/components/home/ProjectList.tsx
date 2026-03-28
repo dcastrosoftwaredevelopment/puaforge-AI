@@ -13,7 +13,7 @@ export default function ProjectList() {
       <aside className="w-56 shrink-0 border-r border-border-subtle bg-bg-secondary flex flex-col">
         <div className="px-4 py-4 border-b border-border-subtle">
           <span className="text-sm font-semibold text-text-primary tracking-tight">
-            vibe<span className="text-accent">.</span>platform
+            Vibe<span className="text-accent">.</span>Platform
           </span>
         </div>
 

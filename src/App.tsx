@@ -1,13 +1,11 @@
-import { useAtomValue } from 'jotai'
+import { Routes, Route } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
-import { appViewAtom } from '@/atoms'
 import { usePersistence } from '@/hooks/usePersistence'
 import ProjectList from '@/components/home/ProjectList'
 import EditorView from '@/components/layout/EditorView'
 
 export default function App() {
   const { isHydrated } = usePersistence()
-  const appView = useAtomValue(appViewAtom)
 
   if (!isHydrated) {
     return (
@@ -18,5 +16,10 @@ export default function App() {
     )
   }
 
-  return appView === 'home' ? <ProjectList /> : <EditorView />
+  return (
+    <Routes>
+      <Route path="/" element={<ProjectList />} />
+      <Route path="/project/:projectId" element={<EditorView />} />
+    </Routes>
+  )
 }

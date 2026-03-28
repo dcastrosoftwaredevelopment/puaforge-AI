@@ -11,16 +11,18 @@ export interface Project {
 export const projectsAtom = atom<Project[]>([])
 export const activeProjectIdAtom = atom<string | null>(null)
 
-// App view: home or editor
-export type AppView = 'home' | 'editor'
-export const appViewAtom = atom<AppView>('home')
-
 // Messages (scoped to active project)
+export interface MessageImage {
+  base64: string
+  mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp'
+}
+
 export interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
   timestamp: number
+  images?: MessageImage[]
 }
 
 export const messagesAtom = atom<Message[]>([])

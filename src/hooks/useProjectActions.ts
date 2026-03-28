@@ -1,12 +1,12 @@
 import { useCallback } from 'react'
 import { useSetAtom } from 'jotai'
+import { useNavigate } from 'react-router-dom'
 import { db, dbReady } from '@/services/db'
 import {
   projectsAtom,
   activeProjectIdAtom,
   messagesAtom,
   filesAtom,
-  appViewAtom,
   type Project,
 } from '@/atoms'
 import { depsAtom } from '@/hooks/useFiles'
@@ -14,12 +14,12 @@ import { DEFAULT_FILES } from '@/utils/defaultFiles'
 import { generateProjectName } from '@/utils/projectNames'
 
 export function useProjectActions() {
+  const navigate = useNavigate()
   const setProjects = useSetAtom(projectsAtom)
   const setActiveProjectId = useSetAtom(activeProjectIdAtom)
   const setMessages = useSetAtom(messagesAtom)
   const setFiles = useSetAtom(filesAtom)
   const setDeps = useSetAtom(depsAtom)
-  const setAppView = useSetAtom(appViewAtom)
 
   const createProject = useCallback(async () => {
     await dbReady
@@ -31,18 +31,20 @@ export function useProjectActions() {
     }
     await db.projects.add(project)
     setProjects((prev) => [project, ...prev])
+
+    // Clear state before navigating to new project
     setActiveProjectId(project.id)
     setMessages([])
     setFiles(DEFAULT_FILES)
     setDeps({})
-    setAppView('editor')
-    return project
-  }, [setProjects, setActiveProjectId, setMessages, setFiles, setDeps, setAppView])
 
-  const openProject = useCallback(async (id: string) => {
-    setActiveProjectId(id)
-    setAppView('editor')
-  }, [setActiveProjectId, setAppView])
+    navigate(`/project/${project.id}`)
+    return project
+  }, [navigate, setProjects, setActiveProjectId, setMessages, setFiles, setDeps])
+
+  const openProject = useCallback((id: string) => {
+    navigate(`/project/${id}`)
+  }, [navigate])
 
   const deleteProject = useCallback(async (id: string) => {
     await Promise.all([
@@ -60,9 +62,9 @@ export function useProjectActions() {
 
   const goHome = useCallback(() => {
     setActiveProjectId(null)
-    setAppView('home')
     db.settings.delete('activeProjectId')
-  }, [setActiveProjectId, setAppView])
+    navigate('/')
+  }, [navigate, setActiveProjectId])
 
   return { createProject, openProject, deleteProject, renameProject, goHome }
 }
