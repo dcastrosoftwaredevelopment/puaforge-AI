@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { GripHorizontal, Trash2, PanelRightClose, PanelRightOpen, Minus } from 'lucide-react'
 import { useFiles } from '@/hooks/useFiles'
 import { useChat } from '@/hooks/useChat'
@@ -9,6 +10,7 @@ import ChatHistory from './ChatHistory'
 import PromptInput from './PromptInput'
 import ChatToggleButton from './ChatToggleButton'
 import ModelSelector from './ModelSelector'
+import ConfirmModal from '@/components/ui/ConfirmModal'
 
 const INITIAL_WIDTH = 430
 const INITIAL_HEIGHT = 540
@@ -28,6 +30,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
   const { setMessages } = useMessages()
   const { setFiles, setDeps } = useFiles()
   const { mode: chatMode, setMode: setChatMode, setIsOpen } = useChat()
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
 
   return (
     <>
@@ -42,11 +45,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
         <div className="flex items-center gap-1.5">
           <button
             onPointerDown={(e) => e.stopPropagation()}
-            onClick={() => {
-              setMessages([])
-              setFiles(DEFAULT_FILES)
-              setDeps({})
-            }}
+            onClick={() => setShowClearConfirm(true)}
             className="group relative p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
           >
             <Trash2 size={12} />
@@ -93,6 +92,21 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
           <span className="text-[10px] text-text-muted">Shift+Enter para nova linha</span>
         </div>
       </div>
+
+      <ConfirmModal
+        open={showClearConfirm}
+        title="Limpar conversa"
+        message="Isso vai apagar todo o histórico de mensagens e resetar o código para o estado inicial. Esta ação não pode ser desfeita."
+        confirmLabel="Limpar"
+        cancelLabel="Cancelar"
+        onConfirm={() => {
+          setMessages([])
+          setFiles(DEFAULT_FILES)
+          setDeps({})
+          setShowClearConfirm(false)
+        }}
+        onCancel={() => setShowClearConfirm(false)}
+      />
     </>
   )
 }
