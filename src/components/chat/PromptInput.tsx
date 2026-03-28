@@ -6,6 +6,7 @@ import { useFiles } from '@/hooks/useFiles'
 import { useMessages } from '@/hooks/useMessages'
 import { useModels } from '@/hooks/useModels'
 import { useEditorState } from '@/hooks/useEditorState'
+import { useApiKey } from '@/hooks/useApiKey'
 import { generateCode } from '@/services/aiService'
 import { mergeFiles, extractDependencies } from '@/services/fileParser'
 import { useProjectImages } from '@/hooks/useProjectImages'
@@ -93,6 +94,7 @@ export default function PromptInput() {
   const { files, setFiles, setDeps } = useFiles()
   const { selectedModel } = useModels()
   const { isDirty } = useEditorState()
+  const { effectiveApiKey } = useApiKey()
   const { getImagesContext } = useProjectImages()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -143,6 +145,7 @@ export default function PromptInput() {
         currentFiles: files,
         history: messages.map((m) => ({ role: m.role, content: m.content, images: m.images })),
         images,
+        apiKey: effectiveApiKey || undefined,
       })
 
       setMessages((prev) => [

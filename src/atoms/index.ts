@@ -99,6 +99,10 @@ export const editorActionsAtom = atom<{ save: () => void; discard: () => void }>
 export const editorFractionAtom = atom(0.5)
 export const chatWidthAtom = atom(384)
 
+// API key (configured via settings page)
+export const apiKeyAtom = atom('')
+export const apiKeyEnabledAtom = atom(true)
+
 // Device preview
 export type DevicePreview = 'desktop' | 'tablet' | 'mobile'
 export const devicePreviewAtom = atom<DevicePreview>('desktop')

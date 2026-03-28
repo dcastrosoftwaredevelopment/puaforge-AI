@@ -1,5 +1,6 @@
 import { Router, type Request, type Response } from 'express'
 import Anthropic from '@anthropic-ai/sdk'
+import { getApiKey } from '../utils/getApiKey.js'
 
 const router = Router()
 
@@ -52,12 +53,11 @@ router.post('/generate', async (req: Request<object, object, GenerateBody>, res:
     return
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  console.log('[generate] Has API key:', !!apiKey)
+  const apiKey = getApiKey(req)
+  console.log('[generate] API key from frontend:', apiKey ? 'yes' : 'no')
 
   if (!apiKey) {
-    console.log('[generate] No API key, using placeholder')
-    res.json(buildPlaceholderResponse(prompt))
+    res.status(401).json({ error: 'API key não configurada. Acesse Configurações para adicionar sua chave do Claude.' })
     return
   }
 
@@ -209,56 +209,6 @@ function buildConversation(
   console.log(`[generate] Conversation: ${messages.length} messages, ~${totalTokens} tokens (estimated)`)
 
   return messages
-}
-
-function buildPlaceholderResponse(prompt: string) {
-  return {
-    rawResponse: `Aqui está o código gerado com 2 arquivos:
-
-\`\`\`tsx file="/Header.tsx"
-export default function Header() {
-  return (
-    <header className="px-8 py-4 bg-[#151620] border-b border-white/[0.06] flex items-center justify-between">
-      <h1 className="text-xl font-semibold text-[#f1f5f9]">
-        Vibe App
-      </h1>
-      <nav className="flex gap-6">
-        <a href="#" className="text-[#94a3b8] text-sm hover:text-[#e2e8f0] transition">Home</a>
-        <a href="#" className="text-[#94a3b8] text-sm hover:text-[#e2e8f0] transition">About</a>
-        <a href="#" className="text-[#94a3b8] text-sm hover:text-[#e2e8f0] transition">Contact</a>
-      </nav>
-    </header>
-  )
-}
-\`\`\`
-
-\`\`\`tsx file="/App.tsx"
-import Header from './Header'
-
-export default function App() {
-  return (
-    <div className="min-h-screen bg-[#0e0f16] text-[#e2e8f0] font-sans">
-      <Header />
-      <main className="flex items-center justify-center px-8 py-16">
-        <div className="text-center max-w-xl">
-          <h2 className="text-4xl font-semibold text-[#f1f5f9] mb-4">
-            Gerado pela IA
-          </h2>
-          <p className="text-lg text-[#94a3b8] leading-relaxed">
-            Prompt: "${prompt}"
-          </p>
-          <div className="mt-8 px-8 py-4 bg-[#151620] rounded-xl border border-white/[0.06]">
-            <p className="text-sm text-[#64748b]">
-              Configure ANTHROPIC_API_KEY no .env para IA real.
-            </p>
-          </div>
-        </div>
-      </main>
-    </div>
-  )
-}
-\`\`\``,
-  }
 }
 
 export { router as generateRoute }

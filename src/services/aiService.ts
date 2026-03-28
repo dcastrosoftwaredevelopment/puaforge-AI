@@ -13,6 +13,7 @@ interface GenerateParams {
   currentFiles: Record<string, string>
   history: { role: 'user' | 'assistant'; content: string; images?: HistoryImage[] }[]
   images?: HistoryImage[]
+  apiKey?: string
 }
 
 interface GenerateResult {
@@ -24,7 +25,10 @@ export async function generateCode(params: GenerateParams): Promise<GenerateResu
   console.log('[aiService] Sending request to:', `${API_URL}/api/generate`)
   const response = await fetch(`${API_URL}/api/generate`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(params.apiKey ? { 'X-API-Key': params.apiKey } : {}),
+    },
     body: JSON.stringify({
       prompt: params.prompt,
       model: params.model,

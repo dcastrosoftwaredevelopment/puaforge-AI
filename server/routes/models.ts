@@ -1,10 +1,11 @@
 import { Router, type Request, type Response } from 'express'
 import Anthropic from '@anthropic-ai/sdk'
+import { getApiKey } from '../utils/getApiKey.js'
 
 const router = Router()
 
-router.get('/models', async (_req: Request, res: Response) => {
-  const apiKey = process.env.ANTHROPIC_API_KEY
+router.get('/models', async (req: Request, res: Response) => {
+  const apiKey = getApiKey(req)
   if (!apiKey) {
     res.json({ models: [] })
     return

@@ -3,6 +3,7 @@ import { Loader2 } from 'lucide-react'
 import { usePersistence } from '@/hooks/usePersistence'
 import ProjectList from '@/components/home/ProjectList'
 import EditorView from '@/components/layout/EditorView'
+import Settings from '@/components/settings/Settings'
 
 export default function App() {
   const { isHydrated } = usePersistence()
@@ -20,6 +21,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<ProjectList />} />
       <Route path="/project/:projectId" element={<EditorView />} />
+      <Route path="/settings" element={<Settings />} />
     </Routes>
   )
 }
