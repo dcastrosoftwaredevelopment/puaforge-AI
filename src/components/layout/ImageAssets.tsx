@@ -20,10 +20,31 @@ function baseName(fileName: string): string {
   return fileName.replace(/\.[^.]+$/, '')
 }
 
-function ImageRow({ img, onRename, onCopy, onRemove }: {
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+
+  return copied ? (
+    <span className="text-[10px] text-success">Copiado!</span>
+  ) : (
+    <button
+      onClick={handleCopy}
+      className="p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
+      title="Copiar texto para o chat"
+    >
+      <Copy size={12} />
+    </button>
+  )
+}
+
+function ImageRow({ img, onRename, onRemove }: {
   img: { id: string; name: string; dataUrl: string; size: number }
   onRename: (id: string, name: string) => void
-  onCopy: (name: string) => void
   onRemove: (id: string) => void
 }) {
   const [editing, setEditing] = useState(false)
@@ -45,6 +66,8 @@ function ImageRow({ img, onRename, onCopy, onRemove }: {
   }
 
   const cancelRename = () => setEditing(false)
+
+  const exportName = toExportName(img.name)
 
   return (
     <div className="flex items-center gap-2 p-2 rounded-lg bg-bg-tertiary border border-border-subtle group">
@@ -87,19 +110,13 @@ function ImageRow({ img, onRename, onCopy, onRemove }: {
       </div>
       {!editing && (
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+          <CopyButton text={`usa a imagem ${exportName}`} />
           <button
             onClick={startEditing}
             className="p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
             title="Renomear"
           >
             <Pencil size={12} />
-          </button>
-          <button
-            onClick={() => onCopy(img.name)}
-            className="p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
-            title="Copiar import"
-          >
-            <Copy size={12} />
           </button>
           <button
             onClick={() => onRemove(img.id)}
@@ -127,11 +144,6 @@ export default function ImageAssets() {
     }
   }
 
-  const copyImport = (name: string) => {
-    const exportName = toExportName(name)
-    navigator.clipboard.writeText(`import { ${exportName} } from './assets/images'`)
-  }
-
   return (
     <div className="p-3 space-y-3">
       <div className="flex items-center justify-between">
@@ -154,9 +166,15 @@ export default function ImageAssets() {
       </div>
 
       {images.length === 0 ? (
-        <p className="text-xs text-text-muted text-center py-4">
-          Faça upload de imagens para usar no seu site
-        </p>
+        <div className="text-center py-4 space-y-2">
+          <p className="text-xs text-text-muted">
+            Faça upload de imagens para usar no seu site
+          </p>
+          <p className="text-[10px] text-text-muted/70 leading-relaxed">
+            No chat, peça para a IA usar pelo nome.<br />
+            Ex: "usa a imagem logo como background"
+          </p>
+        </div>
       ) : (
         <div className="space-y-2">
           {images.map((img) => (
@@ -164,10 +182,12 @@ export default function ImageAssets() {
               key={img.id}
               img={img}
               onRename={renameImage}
-              onCopy={copyImport}
               onRemove={removeImage}
             />
           ))}
+          <p className="text-[10px] text-text-muted/70 leading-relaxed pt-1">
+            Clique no nome da variável para copiar o texto pronto para o chat.
+          </p>
         </div>
       )}
     </div>
