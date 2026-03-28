@@ -88,6 +88,9 @@ export interface ClaudeModel {
 export const availableModelsAtom = atom<ClaudeModel[]>([])
 export const selectedModelAtom = atom('')
 
+// Editor dirty state (user has unsaved manual edits)
+export const editorDirtyAtom = atom(false)
+
 // Device preview
 export type DevicePreview = 'desktop' | 'tablet' | 'mobile'
 export const devicePreviewAtom = atom<DevicePreview>('desktop')

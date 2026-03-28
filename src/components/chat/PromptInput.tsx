@@ -5,6 +5,7 @@ import { type MessageImage } from '@/atoms'
 import { useFiles } from '@/hooks/useFiles'
 import { useMessages } from '@/hooks/useMessages'
 import { useModels } from '@/hooks/useModels'
+import { useEditorState } from '@/hooks/useEditorState'
 import { generateCode } from '@/services/aiService'
 import { mergeFiles, extractDependencies } from '@/services/fileParser'
 import { useProjectImages } from '@/hooks/useProjectImages'
@@ -91,6 +92,7 @@ export default function PromptInput() {
   const { messages, setMessages, isGenerating, setIsGenerating } = useMessages()
   const { files, setFiles, setDeps } = useFiles()
   const { selectedModel } = useModels()
+  const { isDirty } = useEditorState()
   const { getImagesContext } = useProjectImages()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -114,7 +116,7 @@ export default function PromptInput() {
 
   const handleSend = async () => {
     const text = prompt.trim()
-    if ((!text && pendingImages.length === 0) || isGenerating) return
+    if ((!text && pendingImages.length === 0) || isGenerating || isDirty) return
 
     const images = pendingImages.length > 0 ? [...pendingImages] : undefined
     const userMsg = {
@@ -185,8 +187,15 @@ export default function PromptInput() {
     }
   }
 
+  const isDisabled = isGenerating || isDirty
+
   return (
     <div className="space-y-2">
+      {isDirty && (
+        <div className="text-xs text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded-lg px-3 py-2">
+          Você está editando o código. Salve ou descarte as alterações no editor para voltar a usar a IA.
+        </div>
+      )}
       {imageError && (
         <div className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
           {imageError}
@@ -220,7 +229,7 @@ export default function PromptInput() {
           maxRows={8}
           className="w-full bg-bg-tertiary border border-border-subtle rounded-xl p-3 pr-20 text-sm text-text-primary placeholder-text-muted resize-none focus:outline-none focus:border-border-default transition"
           placeholder="Descreva o que deseja construir..."
-          disabled={isGenerating}
+          disabled={isDisabled}
         />
         <div className="absolute right-2.5 bottom-2.5 flex items-center gap-1">
           <input
@@ -233,7 +242,7 @@ export default function PromptInput() {
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            disabled={isGenerating}
+            disabled={isDisabled}
             className="p-1.5 rounded-lg bg-bg-elevated text-text-secondary border border-border-subtle hover:text-text-primary hover:bg-border-default disabled:opacity-20 transition cursor-pointer"
             title="Enviar imagem"
           >
@@ -241,7 +250,7 @@ export default function PromptInput() {
           </button>
           <button
             onClick={handleSend}
-            disabled={isGenerating || (!prompt.trim() && pendingImages.length === 0)}
+            disabled={isDisabled || (!prompt.trim() && pendingImages.length === 0)}
             className="p-1.5 rounded-lg bg-bg-elevated text-text-secondary border border-border-subtle hover:text-text-primary hover:bg-border-default disabled:opacity-20 transition cursor-pointer"
           >
             <Send size={14} />

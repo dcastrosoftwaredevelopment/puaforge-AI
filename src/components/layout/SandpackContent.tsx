@@ -1,9 +1,11 @@
 import { useCallback, useRef, useState } from 'react'
 import { SandpackLayout, SandpackFileExplorer, SandpackCodeEditor, SandpackPreview } from '@codesandbox/sandpack-react'
+import { Save, Undo2 } from 'lucide-react'
 import { type DevicePreview } from '@/atoms'
 import { useViewMode } from '@/hooks/useViewMode'
 import { useDevicePreview } from '@/hooks/useDevicePreview'
 import { useSandpackSync } from '@/hooks/useSandpackSync'
+import { useEditorState } from '@/hooks/useEditorState'
 import ResizeHandle from '@/components/layout/ResizeHandle'
 
 const DEVICE_WIDTHS: Record<DevicePreview, string> = {
@@ -16,7 +18,8 @@ const SPLIT_MIN = 0.2 // 20% minimum for each panel
 const SPLIT_MAX = 0.8
 
 export default function SandpackContent() {
-  useSandpackSync()
+  const { saveEdits, discardEdits } = useSandpackSync()
+  const { isDirty } = useEditorState()
   const { showEditor, showPreview, isSplit } = useViewMode()
   const { device } = useDevicePreview()
   const containerRef = useRef<HTMLDivElement>(null)
@@ -35,16 +38,38 @@ export default function SandpackContent() {
   return (
     <SandpackLayout ref={containerRef} className="flex h-full w-full">
       <div
-        className={showEditor ? 'flex min-w-0 h-full' : 'hidden'}
+        className={showEditor ? 'flex flex-col min-w-0 h-full' : 'hidden'}
         style={isSplit ? { width: `${editorFraction * 100}%` } : { flex: 1 }}
       >
-        <SandpackFileExplorer />
-        <SandpackCodeEditor
-          showTabs
-          showLineNumbers
-          showInlineErrors
-          readOnly
-        />
+        {isDirty && (
+          <div className="flex items-center justify-between px-3 py-1.5 bg-amber-500/10 border-b border-amber-500/20 shrink-0">
+            <span className="text-[11px] font-medium text-amber-400">Editando manualmente</span>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={discardEdits}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+              >
+                <Undo2 size={13} />
+                Descartar
+              </button>
+              <button
+                onClick={saveEdits}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium bg-accent/15 text-accent hover:bg-accent/25 transition cursor-pointer"
+              >
+                <Save size={13} />
+                Salvar
+              </button>
+            </div>
+          </div>
+        )}
+        <div className="flex flex-1 min-h-0">
+          <SandpackFileExplorer />
+          <SandpackCodeEditor
+            showTabs
+            showLineNumbers
+            showInlineErrors
+          />
+        </div>
       </div>
       {isSplit && <ResizeHandle onResize={onSplitResize} />}
       <div

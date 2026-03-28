@@ -28,7 +28,6 @@ export default function EditorView() {
     setChatWidth((prev) => Math.min(CHAT_MAX, Math.max(CHAT_MIN, prev - delta)))
   }, [])
 
-  // Forces SandpackProvider remount on any file or dependency change
   const filesHash = Object.entries(files)
     .map(([p, c]) => `${p}:${c.length}`)
     .sort()
