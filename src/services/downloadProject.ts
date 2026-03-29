@@ -1,7 +1,7 @@
 import JSZip from 'jszip'
 
 const PACKAGE_JSON = {
-  name: 'vibe-project',
+  name: 'puaforge-project',
   private: true,
   version: '1.0.0',
   type: 'module',
@@ -84,7 +84,7 @@ const INDEX_HTML = `<!DOCTYPE html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vibe Project</title>
+    <title>PuaForge Project</title>
   </head>
   <body>
     <div id="root"></div>
@@ -137,7 +137,7 @@ export async function downloadProject(files: Record<string, string>) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = 'vibe-project.zip'
+  a.download = 'puaforge-project.zip'
   a.click()
   URL.revokeObjectURL(url)
 }

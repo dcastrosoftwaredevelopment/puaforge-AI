@@ -39,8 +39,12 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
         onPointerDown={onDragStart}
         className={`px-4 py-3 border-b border-border-subtle flex items-center justify-between select-none ${!isDocked ? 'cursor-grab active:cursor-grabbing' : ''}`}>
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-          <span className="text-xs font-medium text-text-secondary">Vibe AI</span>
+          <div className="w-2 h-2 rounded-full bg-vibe-blue animate-pulse shadow-[0_0_6px_rgba(0,229,255,0.6)]" />
+          <span className="flex items-center gap-0.5 text-xs font-medium">
+            <span className="font-sans font-extrabold text-pua-text">Pua</span>
+            <span className="font-mono font-light text-vibe-blue">Forge</span>
+            <span className="text-[8px] bg-forge-terracotta text-white px-1 py-0.5 rounded-sm ml-0.5 leading-none">AI</span>
+          </span>
         </div>
         <div className="flex items-center gap-1.5">
           <button

@@ -9,8 +9,10 @@ export default function Sidebar() {
   return (
     <aside className="w-56 shrink-0 border-r border-border-subtle bg-bg-secondary flex flex-col">
       <div className="px-4 py-4 border-b border-border-subtle">
-        <span className="text-sm font-semibold text-text-primary tracking-tight">
-          Vibe<span className="text-accent">.</span>Platform
+        <span className="flex items-center gap-0.5">
+          <span className="font-sans font-extrabold text-pua-text">Pua</span>
+          <span className="font-mono font-light text-vibe-blue">Forge</span>
+          <span className="text-[9px] bg-forge-terracotta text-white px-1.5 py-0.5 rounded-sm ml-1 self-center leading-none">AI</span>
         </span>
       </div>
 
