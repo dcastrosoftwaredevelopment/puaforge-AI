@@ -42,7 +42,7 @@ export default function EditorHeader() {
       <div className="flex items-center gap-3">
         <button
           onClick={goHome}
-          className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+          className="p-1.5 rounded-lg text-forge-terracotta/60 hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
           title="Voltar para projetos"
         >
           <Home size={15} />
@@ -54,7 +54,7 @@ export default function EditorHeader() {
         <div className="relative" ref={panelRef}>
           <button
             onClick={() => setShowImages(!showImages)}
-            className="flex items-center gap-1.5 p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+            className="flex items-center gap-1.5 p-1.5 rounded-lg text-forge-terracotta/60 hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
             title="Imagens do projeto"
           >
             <ImageIcon size={15} />
@@ -71,7 +71,7 @@ export default function EditorHeader() {
         <div className="relative" ref={checkpointRef}>
           <button
             onClick={() => setShowCheckpoints(!showCheckpoints)}
-            className="flex items-center gap-1.5 p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+            className="flex items-center gap-1.5 p-1.5 rounded-lg text-forge-terracotta/60 hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
             title="Checkpoints"
           >
             <History size={15} />
@@ -89,7 +89,7 @@ export default function EditorHeader() {
         <ViewToggle />
         <button
           onClick={resetPanels}
-          className="group relative p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+          className="group relative p-1.5 rounded-lg text-forge-terracotta/60 hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
         >
           <RotateCcw size={14} />
           <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-md bg-bg-elevated border border-border-subtle text-[10px] text-text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 transition shadow-lg z-50">

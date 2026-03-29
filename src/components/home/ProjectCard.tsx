@@ -46,7 +46,7 @@ export default function ProjectCard({ project, hasPreview, onOpen, onDelete, onP
             e.stopPropagation()
             onDelete()
           }}
-          className="p-1.5 rounded-lg text-text-muted hover:text-red-400 hover:bg-bg-primary transition"
+          className="p-1.5 rounded-lg text-text-muted hover:text-forge-terracotta hover:bg-bg-primary transition"
           title="Excluir projeto"
         >
           <Trash2 size={14} />

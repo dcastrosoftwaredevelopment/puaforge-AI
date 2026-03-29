@@ -25,7 +25,7 @@ export default function Sidebar() {
               : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary'
           }`}
         >
-          <Layers size={15} className="text-text-secondary" />
+          <Layers size={15} className="text-forge-terracotta/70" />
           Projetos
         </button>
         <button
@@ -36,7 +36,7 @@ export default function Sidebar() {
               : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary'
           }`}
         >
-          <Settings size={15} className="text-text-secondary" />
+          <Settings size={15} className="text-forge-terracotta/70" />
           Configurações
         </button>
       </nav>

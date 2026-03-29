@@ -195,12 +195,12 @@ export default function PromptInput() {
   return (
     <div className="space-y-2">
       {isDirty && (
-        <div className="text-xs text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded-lg px-3 py-2">
+        <div className="text-xs text-forge-terracotta bg-forge-terracotta/10 border border-forge-terracotta/20 rounded-lg px-3 py-2">
           Você está editando o código. Salve ou descarte as alterações no editor para voltar a usar a IA.
         </div>
       )}
       {imageError && (
-        <div className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+        <div className="text-xs text-forge-terracotta bg-forge-terracotta/10 border border-forge-terracotta/20 rounded-lg px-3 py-2">
           {imageError}
         </div>
       )}
@@ -246,7 +246,7 @@ export default function PromptInput() {
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isDisabled}
-            className="p-1.5 rounded-lg bg-bg-elevated text-text-secondary border border-border-subtle hover:text-text-primary hover:bg-border-default disabled:opacity-20 transition cursor-pointer"
+            className="p-1.5 rounded-lg bg-bg-elevated text-text-muted border border-border-subtle hover:text-forge-terracotta hover:border-forge-terracotta/30 disabled:opacity-20 transition cursor-pointer"
             title="Enviar imagem"
           >
             <ImagePlus size={14} />
@@ -254,7 +254,7 @@ export default function PromptInput() {
           <button
             onClick={handleSend}
             disabled={isDisabled || (!prompt.trim() && pendingImages.length === 0)}
-            className="p-1.5 rounded-lg bg-bg-elevated text-text-secondary border border-border-subtle hover:text-text-primary hover:bg-border-default disabled:opacity-20 transition cursor-pointer"
+            className="p-1.5 rounded-lg bg-forge-terracotta/10 text-forge-terracotta border border-forge-terracotta/30 hover:bg-forge-terracotta/20 disabled:opacity-20 transition cursor-pointer"
           >
             <Send size={14} />
           </button>

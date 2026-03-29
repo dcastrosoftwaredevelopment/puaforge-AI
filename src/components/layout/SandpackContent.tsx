@@ -26,8 +26,8 @@ const SandpackSyncBridge = memo(function SandpackSyncBridge() {
 
 function EditBar({ onSave, onDiscard }: { onSave: () => void; onDiscard: () => void }) {
   return (
-    <div className="flex items-center justify-between px-3 py-1.5 bg-amber-500/10 border-b border-amber-500/20 shrink-0">
-      <span className="text-[11px] font-medium text-amber-400">Editando manualmente</span>
+    <div className="flex items-center justify-between px-3 py-1.5 bg-forge-terracotta/10 border-b border-forge-terracotta/20 shrink-0">
+      <span className="text-[11px] font-medium text-forge-terracotta">Editando manualmente</span>
       <div className="flex items-center gap-1.5">
         <button
           onClick={onDiscard}

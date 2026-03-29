@@ -80,7 +80,7 @@ export default function Settings() {
           <section className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <Key size={16} className="text-accent" />
+                <Key size={16} className="text-forge-terracotta" />
                 <h2 className="text-base font-semibold text-text-primary">Claude API Key</h2>
               </div>
               {apiKey && (
@@ -104,7 +104,7 @@ export default function Settings() {
             </p>
 
             {apiKey && !apiKeyEnabled && (
-              <div className="text-xs text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded-lg px-3 py-2">
+              <div className="text-xs text-forge-terracotta bg-forge-terracotta/10 border border-forge-terracotta/20 rounded-lg px-3 py-2">
                 Chave desabilitada. A geração de código e listagem de modelos não funcionarão até habilitar novamente.
               </div>
             )}
@@ -132,13 +132,13 @@ export default function Settings() {
 
               {/* Validation status */}
               {validation === 'valid' && (
-                <div className="flex items-center gap-2 text-xs text-emerald-400">
+                <div className="flex items-center gap-2 text-xs text-vibe-blue">
                   <CheckCircle2 size={13} />
                   Chave válida
                 </div>
               )}
               {validation === 'invalid' && (
-                <div className="flex items-center gap-2 text-xs text-red-400">
+                <div className="flex items-center gap-2 text-xs text-forge-terracotta">
                   <XCircle size={13} />
                   {validationError}
                 </div>
@@ -163,7 +163,7 @@ export default function Settings() {
                 {apiKey && (
                   <button
                     onClick={handleClear}
-                    className="px-3 py-1.5 rounded-lg bg-bg-elevated border border-border-subtle text-sm text-red-400 hover:bg-red-400/10 hover:border-red-400/30 transition cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg bg-bg-elevated border border-border-subtle text-sm text-forge-terracotta hover:bg-forge-terracotta/10 hover:border-forge-terracotta/30 transition cursor-pointer"
                   >
                     Remover chave
                   </button>

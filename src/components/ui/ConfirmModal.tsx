@@ -42,8 +42,8 @@ export default function ConfirmModal({
       <div className="absolute inset-0 bg-black/60" onClick={onCancel} />
       <div className="relative bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/50 w-80 p-5 space-y-4">
         <div className="flex items-start gap-3">
-          <div className="shrink-0 w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
-            <AlertTriangle size={16} className="text-red-400" />
+          <div className="shrink-0 w-8 h-8 rounded-lg bg-forge-terracotta/10 flex items-center justify-center">
+            <AlertTriangle size={16} className="text-forge-terracotta" />
           </div>
           <div>
             <h3 className="text-sm font-medium text-text-primary">{title}</h3>
@@ -60,7 +60,7 @@ export default function ConfirmModal({
           </button>
           <button
             onClick={onConfirm}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition cursor-pointer"
+            className="px-3 py-1.5 rounded-lg text-xs font-medium text-forge-terracotta bg-forge-terracotta/10 border border-forge-terracotta/20 hover:bg-forge-terracotta/20 transition cursor-pointer"
           >
             {confirmLabel}
           </button>

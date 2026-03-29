@@ -90,7 +90,7 @@ function ImageRow({ img, onRename, onRemove }: {
               className="flex-1 min-w-0 text-xs bg-bg-elevated border border-border-default rounded px-1.5 py-0.5 text-text-primary outline-none focus:border-accent"
               autoFocus
             />
-            <button onClick={confirmRename} className="p-0.5 text-success hover:text-green-400 transition cursor-pointer">
+            <button onClick={confirmRename} className="p-0.5 text-success hover:text-vibe-blue transition cursor-pointer">
               <Check size={11} />
             </button>
             <button onClick={cancelRename} className="p-0.5 text-text-muted hover:text-text-primary transition cursor-pointer">
@@ -120,7 +120,7 @@ function ImageRow({ img, onRename, onRemove }: {
           </button>
           <button
             onClick={() => onRemove(img.id)}
-            className="p-1 rounded text-text-muted hover:text-red-400 transition cursor-pointer"
+            className="p-1 rounded text-text-muted hover:text-forge-terracotta transition cursor-pointer"
             title="Remover imagem"
           >
             <Trash2 size={12} />
