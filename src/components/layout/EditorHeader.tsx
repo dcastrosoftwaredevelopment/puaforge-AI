@@ -7,6 +7,7 @@ import { usePanelSizes } from '@/hooks/usePanelSizes'
 import ViewToggle from '@/components/layout/ViewToggle'
 import DeviceToggle from '@/components/layout/DeviceToggle'
 import ExportButton from '@/components/layout/ExportButton'
+import BuildDownloadButton from '@/components/layout/BuildDownloadButton'
 import PublishButton from '@/components/layout/PublishButton'
 import ProjectName from '@/components/layout/ProjectName'
 import ImageAssets from '@/components/layout/ImageAssets'
@@ -96,6 +97,7 @@ export default function EditorHeader() {
           </span>
         </button>
         <ExportButton />
+        <BuildDownloadButton />
         <PublishButton />
       </div>
     </header>
