@@ -44,7 +44,7 @@ export default function ProjectList() {
             </div>
             <button
               onClick={createProject}
-              className="flex items-center gap-2 px-4 py-2 bg-bg-elevated border border-border-default hover:bg-border-default text-text-primary text-sm font-medium rounded-lg transition cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 bg-forge-terracotta/10 border border-forge-terracotta/30 hover:bg-forge-terracotta/20 text-forge-terracotta text-sm font-medium rounded-lg transition cursor-pointer"
             >
               <Plus size={16} />
               Novo Projeto

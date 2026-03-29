@@ -13,7 +13,7 @@ export default function ProjectCard({ project, hasPreview, onOpen, onDelete, onP
   return (
     <div
       onClick={onOpen}
-      className="group relative bg-bg-secondary border border-border-subtle rounded-xl p-5 cursor-pointer hover:border-border-default hover:bg-bg-elevated transition"
+      className="group relative bg-bg-secondary border border-border-subtle rounded-xl p-5 cursor-pointer hover:border-forge-terracotta/30 hover:bg-bg-elevated transition"
     >
       <h3 className="text-sm font-medium text-text-primary mb-2 pr-8">
         {project.name}
@@ -35,7 +35,7 @@ export default function ProjectCard({ project, hasPreview, onOpen, onDelete, onP
               e.stopPropagation()
               onPreview()
             }}
-            className="p-1.5 rounded-lg text-text-muted hover:text-accent hover:bg-bg-primary transition"
+            className="p-1.5 rounded-lg text-text-muted hover:text-forge-terracotta hover:bg-bg-primary transition"
             title="Abrir preview"
           >
             <Globe size={14} />
