@@ -9,10 +9,7 @@ export default function Sidebar() {
   return (
     <aside className="w-56 shrink-0 border-r border-border-subtle bg-bg-secondary flex flex-col">
       <div className="px-4 py-4 border-b border-border-subtle">
-        <span className="flex items-center gap-1.5">
-          <span className="font-sans font-bold text-vibe-blue">PuaForge</span>
-          <span className="text-[9px] font-bold text-forge-terracotta leading-none">AI</span>
-        </span>
+        <img src="/Logo PuaForge.png" alt="PuaForge AI" style={{ width: '200px', height: 'auto' }} />
       </div>
 
       <nav className="flex-1 px-2 py-3 space-y-1">
