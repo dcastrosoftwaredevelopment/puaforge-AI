@@ -85,8 +85,6 @@ export default function EditorHeader() {
             </div>
           )}
         </div>
-        <DeviceToggle />
-        <ViewToggle />
         <button
           onClick={resetPanels}
           className="group relative p-1.5 rounded-lg text-forge-terracotta/60 hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
@@ -96,6 +94,8 @@ export default function EditorHeader() {
             Resetar painéis
           </span>
         </button>
+        <DeviceToggle />
+        <ViewToggle />
         <ExportButton />
         <BuildDownloadButton />
         <PublishButton />
