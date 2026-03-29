@@ -2,32 +2,26 @@
 
 @theme {
   /* PuaForge AI — Brand Palette */
-  --color-pua-dark: #0D0D0D;
-  --color-pua-card: #1F1F1F;
-  --color-forge-terracotta: #D65A31;
-  --color-vibe-blue: #00E5FF;
-  --color-pua-text: #E0E0E0;
+  --color-forge-terracotta: #D65A31; /* primary accent — developer / human action */
+  --color-vibe-blue: #00E5FF;        /* AI output, success, preview */
+  --color-pua-text: #E0E0E0;         /* logo typography */
 
-  /* Layout backgrounds (mapped to PuaForge palette) */
+  /* Layout backgrounds */
   --color-bg-primary: #0D0D0D;
   --color-bg-secondary: #141414;
   --color-bg-tertiary: #1A1A1A;
   --color-bg-elevated: #1F1F1F;
   --color-border-subtle: rgba(255, 255, 255, 0.06);
   --color-border-default: rgba(255, 255, 255, 0.1);
-  --color-accent: #D65A31;
-  --color-accent-hover: #E06535;
-  --color-accent-muted: rgba(214, 90, 49, 0.1);
+
+  /* Semantic aliases */
+  --color-accent: #D65A31;           /* = forge-terracotta */
+  --color-success: #00E5FF;          /* = vibe-blue */
   --color-text-primary: #E0E0E0;
   --color-text-secondary: rgba(224, 224, 224, 0.55);
   --color-text-muted: rgba(224, 224, 224, 0.3);
-  --color-success: #00E5FF;
   --color-chat-user: rgba(255, 255, 255, 0.07);
   --color-chat-ai: rgba(255, 255, 255, 0.03);
-
-  /* Brand shadows */
-  --shadow-vibe-glow: 0 0 15px rgba(0, 229, 255, 0.4);
-  --shadow-forge-glow: 0 0 10px rgba(214, 90, 49, 0.3);
 
   /* Brand fonts */
   --font-sans: 'Inter', 'Poppins', system-ui, sans-serif;

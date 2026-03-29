@@ -91,7 +91,7 @@ export default function Settings() {
                   }`}
                 >
                   <span
-                    className={`absolute top-0.5 w-4 h-4 rounded-full bg-pua-dark transition-transform ${
+                    className={`absolute top-0.5 w-4 h-4 rounded-full bg-bg-primary transition-transform ${
                       apiKeyEnabled ? 'left-[18px]' : 'left-0.5'
                     }`}
                   />
