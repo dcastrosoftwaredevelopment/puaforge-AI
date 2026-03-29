@@ -15,9 +15,9 @@
   --color-bg-elevated: #1F1F1F;
   --color-border-subtle: rgba(255, 255, 255, 0.06);
   --color-border-default: rgba(255, 255, 255, 0.1);
-  --color-accent: rgba(255, 255, 255, 0.85);
-  --color-accent-hover: #ffffff;
-  --color-accent-muted: rgba(255, 255, 255, 0.08);
+  --color-accent: #D65A31;
+  --color-accent-hover: #E06535;
+  --color-accent-muted: rgba(214, 90, 49, 0.1);
   --color-text-primary: #E0E0E0;
   --color-text-secondary: rgba(224, 224, 224, 0.55);
   --color-text-muted: rgba(224, 224, 224, 0.3);
