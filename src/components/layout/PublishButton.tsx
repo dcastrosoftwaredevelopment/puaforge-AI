@@ -36,7 +36,7 @@ export default function PublishButton() {
       <button
         onClick={publishedAt ? () => setShowPanel(!showPanel) : handlePublish}
         disabled={isPublishing}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 disabled:opacity-50 transition cursor-pointer"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20 hover:bg-vibe-blue/20 disabled:opacity-50 transition cursor-pointer"
         title="Gerar preview local do site"
       >
         {isPublishing ? (
@@ -65,7 +65,7 @@ export default function PublishButton() {
                   </div>
                   <button
                     onClick={openPublished}
-                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition cursor-pointer"
+                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20 hover:bg-vibe-blue/20 transition cursor-pointer"
                   >
                     <ExternalLink size={12} />
                     Abrir preview
