@@ -68,13 +68,15 @@ export default function EditorView() {
         </main>
 
         {isDocked && !isChatOpen && (
-          <button
-            onClick={() => setIsChatOpen(true)}
-            className="shrink-0 w-10 border-l border-border-subtle bg-bg-secondary flex items-center justify-center hover:bg-forge-terracotta/10 transition cursor-pointer"
-            title="Abrir chat"
-          >
-            <MessageCircle size={16} className="text-forge-terracotta/60 group-hover:text-forge-terracotta" />
-          </button>
+          <div className="shrink-0 w-8 relative border-l border-border-subtle bg-bg-secondary">
+            <button
+              onClick={() => setIsChatOpen(true)}
+              className="absolute bottom-4 left-0 right-0 mx-auto w-7 h-7 flex items-center justify-center rounded-lg bg-forge-terracotta/10 hover:bg-forge-terracotta/20 text-forge-terracotta border border-forge-terracotta/20 transition cursor-pointer"
+              title="Abrir chat"
+            >
+              <MessageCircle size={13} />
+            </button>
+          </div>
         )}
         {showDockedChat && (
           <>
