@@ -26,6 +26,15 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' })
 })
 
+// Serve frontend build in production
+if (process.env.NODE_ENV === 'production') {
+  const distPath = path.resolve(process.cwd(), 'dist')
+  app.use(express.static(distPath))
+  app.get('*path', (_req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'))
+  })
+}
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`)
   console.log('API key: configured via frontend Settings (X-API-Key header)')

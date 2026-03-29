@@ -24,11 +24,11 @@ export default function ResizeHandle({ onResize }: ResizeHandleProps) {
 
     const onUp = () => {
       setDragging(false)
-      target.removeEventListener('pointermove', onMove)
+      target.removeEventListener('pointermove', onMove as EventListener)
       target.removeEventListener('pointerup', onUp)
     }
 
-    target.addEventListener('pointermove', onMove)
+    target.addEventListener('pointermove', onMove as EventListener)
     target.addEventListener('pointerup', onUp)
   }, [onResize])
 
