@@ -50,7 +50,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
           <button
             onPointerDown={(e) => e.stopPropagation()}
             onClick={() => setShowClearConfirm(true)}
-            className="group relative p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
+            className="group relative p-1 rounded text-forge-terracotta/60 hover:text-forge-terracotta transition cursor-pointer"
           >
             <Trash2 size={12} />
             <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-md bg-bg-elevated border border-border-subtle text-[10px] text-text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 transition shadow-lg z-50">
@@ -61,7 +61,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
             <button
               onPointerDown={(e) => e.stopPropagation()}
               onClick={() => setIsOpen(false)}
-              className="group relative p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
+              className="group relative p-1 rounded text-forge-terracotta/60 hover:text-forge-terracotta transition cursor-pointer"
             >
               <Minus size={13} />
               <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-md bg-bg-elevated border border-border-subtle text-[10px] text-text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 transition shadow-lg z-50">
@@ -72,7 +72,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
           <button
             onPointerDown={(e) => e.stopPropagation()}
             onClick={() => setChatMode(chatMode === 'docked' ? 'floating' : 'docked')}
-            className="group relative p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
+            className="group relative p-1 rounded text-forge-terracotta/60 hover:text-forge-terracotta transition cursor-pointer"
           >
             {chatMode === 'docked' ? <PanelRightOpen size={13} /> : <PanelRightClose size={13} />}
             <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-md bg-bg-elevated border border-border-subtle text-[10px] text-text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 transition shadow-lg z-50">

@@ -14,7 +14,7 @@ export default function ChatMessage({ message }: Props) {
     <div className={`flex gap-2.5 ${isUser ? 'flex-row-reverse' : ''}`}>
       <div
         className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${
-          isUser ? 'bg-accent-muted text-text-primary' : 'bg-chat-ai text-text-secondary'
+          isUser ? 'bg-forge-terracotta/15 text-forge-terracotta' : 'bg-vibe-blue/10 text-vibe-blue'
         }`}
       >
         {isUser ? <User size={14} /> : <Bot size={14} />}

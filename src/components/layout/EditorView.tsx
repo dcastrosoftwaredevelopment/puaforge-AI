@@ -70,10 +70,10 @@ export default function EditorView() {
         {isDocked && !isChatOpen && (
           <button
             onClick={() => setIsChatOpen(true)}
-            className="shrink-0 w-10 border-l border-border-subtle bg-bg-secondary flex items-center justify-center hover:bg-bg-elevated transition cursor-pointer"
+            className="shrink-0 w-10 border-l border-border-subtle bg-bg-secondary flex items-center justify-center hover:bg-forge-terracotta/10 transition cursor-pointer"
             title="Abrir chat"
           >
-            <MessageCircle size={16} className="text-text-muted" />
+            <MessageCircle size={16} className="text-forge-terracotta/60 group-hover:text-forge-terracotta" />
           </button>
         )}
         {showDockedChat && (
