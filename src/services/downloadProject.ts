@@ -108,7 +108,7 @@ createRoot(document.getElementById('root')!).render(
 const VITE_ENV_DTS = `/// <reference types="vite/client" />
 `
 
-export async function downloadProject(files: Record<string, string>) {
+export async function downloadProject(files: Record<string, string>, projectName?: string) {
   const zip = new JSZip()
 
   // Scaffold files
@@ -133,11 +133,15 @@ export async function downloadProject(files: Record<string, string>) {
     zip.file(`src/${cleanPath}`, code)
   }
 
+  const safeName = projectName
+    ? projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '')
+    : 'puaforge-project'
+
   const blob = await zip.generateAsync({ type: 'blob' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = 'puaforge-project.zip'
+  a.download = `${safeName}.zip`
   a.click()
   URL.revokeObjectURL(url)
 }
