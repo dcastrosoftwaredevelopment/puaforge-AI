@@ -6,10 +6,55 @@ services:
       POSTGRES_USER: ${DB_USER:-puaforge}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-puaforge}
       POSTGRES_DB: ${DB_NAME:-puaforge}
-    ports:
-      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-puaforge}']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: node:22-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - '5173:5173'
+      - '3001:3001'
+    command: sh -c "npm install && npm run dev:all"
+    environment:
+      API_URL: http://localhost:3001
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-puaforge}
+      DB_PASSWORD: ${DB_PASSWORD:-puaforge}
+      DB_NAME: ${DB_NAME:-puaforge}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-local}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  studio:
+    image: node:22-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - '4983:4983'
+    command: sh -c "npm run db:studio -- --host 0.0.0.0"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-puaforge}
+      DB_PASSWORD: ${DB_PASSWORD:-puaforge}
+      DB_NAME: ${DB_NAME:-puaforge}
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   postgres_data:

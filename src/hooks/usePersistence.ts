@@ -12,8 +12,6 @@ import {
   isChatOpenAtom,
   editorFractionAtom,
   chatWidthAtom,
-  apiKeyAtom,
-  apiKeyEnabledAtom,
   type Project,
   type ViewMode,
   type DevicePreview,
@@ -34,8 +32,6 @@ export function usePersistence() {
   const setIsChatOpen = useSetAtom(isChatOpenAtom)
   const setEditorFraction = useSetAtom(editorFractionAtom)
   const setChatWidth = useSetAtom(chatWidthAtom)
-  const setApiKey = useSetAtom(apiKeyAtom)
-  const setApiKeyEnabled = useSetAtom(apiKeyEnabledAtom)
   const hydrated = useRef(false)
   const [isHydrated, setIsHydrated] = useState(false)
 
@@ -65,11 +61,6 @@ export function usePersistence() {
         const chatWidthSetting = await db.settings.get('chatWidth')
         if (chatWidthSetting) setChatWidth(parseInt(chatWidthSetting.value, 10))
 
-        const apiKeySetting = await db.settings.get('apiKey')
-        if (apiKeySetting) setApiKey(apiKeySetting.value)
-
-        const apiKeyEnabledSetting = await db.settings.get('apiKeyEnabled')
-        if (apiKeyEnabledSetting) setApiKeyEnabled(apiKeyEnabledSetting.value === 'true')
       } catch (error) {
         console.error('[persistence] Hydration error:', error)
       } finally {
@@ -146,18 +137,6 @@ export function usePersistence() {
     if (!hydrated.current) return
     db.settings.put({ key: 'chatWidth', value: String(chatWidth) })
   }, [chatWidth])
-
-  const apiKey = useAtomValue(apiKeyAtom)
-  useEffect(() => {
-    if (!hydrated.current) return
-    db.settings.put({ key: 'apiKey', value: apiKey })
-  }, [apiKey])
-
-  const apiKeyEnabled = useAtomValue(apiKeyEnabledAtom)
-  useEffect(() => {
-    if (!hydrated.current) return
-    db.settings.put({ key: 'apiKeyEnabled', value: String(apiKeyEnabled) })
-  }, [apiKeyEnabled])
 
   return { isHydrated }
 }

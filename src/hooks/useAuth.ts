@@ -2,6 +2,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useCallback } from 'react'
 import { authTokenAtom, authUserAtom, authLoadingAtom } from '@/atoms/authAtoms'
 import type { AuthUser } from '@/atoms/authAtoms'
+import { apiKeyAtom, apiKeyEnabledAtom } from '@/atoms'
 import { api } from '@/services/api'
 
 interface AuthResponse {
@@ -13,27 +14,31 @@ export function useAuth() {
   const [token, setToken] = useAtom(authTokenAtom)
   const [user, setUser] = useAtom(authUserAtom)
   const isLoading = useAtomValue(authLoadingAtom)
+  const setApiKey = useSetAtom(apiKeyAtom)
+  const setApiKeyEnabled = useSetAtom(apiKeyEnabledAtom)
 
   const saveSession = useCallback(
     ({ token, user }: AuthResponse) => {
       localStorage.setItem('auth_token', token)
       setToken(token)
       setUser(user)
+      setApiKey(user.apiKey ?? '')
+      setApiKeyEnabled(user.apiKeyEnabled)
     },
-    [setToken, setUser],
+    [setToken, setUser, setApiKey, setApiKeyEnabled],
   )
 
   const logout = useCallback(() => {
     localStorage.removeItem('auth_token')
     setToken(null)
     setUser(null)
-  }, [setToken, setUser])
+    setApiKey('')
+    setApiKeyEnabled(true)
+  }, [setToken, setUser, setApiKey, setApiKeyEnabled])
 
   const register = useCallback(
     (email: string, password: string, name: string) =>
-      api
-        .post<AuthResponse>('/api/auth/register', { email, password, name })
-        .then(saveSession),
+      api.post<AuthResponse>('/api/auth/register', { email, password, name }).then(saveSession),
     [saveSession],
   )
 
@@ -65,6 +70,8 @@ export function useAuthLoader() {
   const token = useAtomValue(authTokenAtom)
   const setUser = useSetAtom(authUserAtom)
   const setLoading = useSetAtom(authLoadingAtom)
+  const setApiKey = useSetAtom(apiKeyAtom)
+  const setApiKeyEnabled = useSetAtom(apiKeyEnabledAtom)
 
   const validate = useCallback(async () => {
     if (!token) {
@@ -74,12 +81,14 @@ export function useAuthLoader() {
     try {
       const user = await api.get<AuthUser>('/api/auth/me', { Authorization: `Bearer ${token}` })
       setUser(user)
+      setApiKey(user.apiKey ?? '')
+      setApiKeyEnabled(user.apiKeyEnabled)
     } catch {
       localStorage.removeItem('auth_token')
     } finally {
       setLoading(false)
     }
-  }, [token, setUser, setLoading])
+  }, [token, setUser, setLoading, setApiKey, setApiKeyEnabled])
 
   return { validate }
 }

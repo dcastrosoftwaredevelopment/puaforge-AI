@@ -1,7 +1,9 @@
 import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import { OAuth2Client } from 'google-auth-library'
-import { pool } from '../db.js'
+import { eq, or } from 'drizzle-orm'
+import { db } from '../db.js'
+import { users, userSettings } from '../schema.js'
 import { signToken, requireAuth } from '../middleware/auth.js'
 
 export const authRoute = Router()
@@ -17,19 +19,18 @@ authRoute.post('/auth/register', async (req, res) => {
     return
   }
 
-  const existing = await pool.query('SELECT id FROM users WHERE email = $1', [email])
-  if (existing.rows.length > 0) {
+  const existing = await db.select({ id: users.id }).from(users).where(eq(users.email, email))
+  if (existing.length > 0) {
     res.status(409).json({ error: 'Email já cadastrado' })
     return
   }
 
-  const password_hash = await bcrypt.hash(password, 10)
-  const result = await pool.query(
-    'INSERT INTO users (email, name, password_hash) VALUES ($1, $2, $3) RETURNING id, email, name',
-    [email, name, password_hash],
-  )
+  const passwordHash = await bcrypt.hash(password, 10)
+  const [user] = await db
+    .insert(users)
+    .values({ email, name, passwordHash })
+    .returning({ id: users.id, email: users.email, name: users.name })
 
-  const user = result.rows[0] as { id: string; email: string; name: string }
   const token = signToken({ userId: user.id, email: user.email })
   res.json({ token, user: { id: user.id, email: user.email, name: user.name } })
 })
@@ -43,21 +44,14 @@ authRoute.post('/auth/login', async (req, res) => {
     return
   }
 
-  const result = await pool.query(
-    'SELECT id, email, name, password_hash FROM users WHERE email = $1',
-    [email],
-  )
+  const [user] = await db.select().from(users).where(eq(users.email, email))
 
-  const user = result.rows[0] as
-    | { id: string; email: string; name: string; password_hash: string }
-    | undefined
-
-  if (!user || !user.password_hash) {
+  if (!user?.passwordHash) {
     res.status(401).json({ error: 'Email ou senha inválidos' })
     return
   }
 
-  const valid = await bcrypt.compare(password, user.password_hash)
+  const valid = await bcrypt.compare(password, user.passwordHash)
   if (!valid) {
     res.status(401).json({ error: 'Email ou senha inválidos' })
     return
@@ -89,45 +83,48 @@ authRoute.post('/auth/google', async (req, res) => {
 
   const { sub: googleId, email, name } = payload
 
-  let result = await pool.query(
-    'SELECT id, email, name FROM users WHERE google_id = $1 OR email = $2',
-    [googleId, email],
-  )
+  let [user] = await db
+    .select()
+    .from(users)
+    .where(or(eq(users.googleId, googleId), eq(users.email, email!)))
 
-  if (result.rows.length === 0) {
-    result = await pool.query(
-      'INSERT INTO users (email, name, google_id) VALUES ($1, $2, $3) RETURNING id, email, name',
-      [email, name, googleId],
-    )
+  if (!user) {
+    ;[user] = await db
+      .insert(users)
+      .values({ email: email!, name, googleId })
+      .returning()
   } else {
-    await pool.query('UPDATE users SET google_id = $1 WHERE email = $2', [googleId, email])
+    await db.update(users).set({ googleId }).where(eq(users.email, email!))
   }
 
-  const user = result.rows[0] as { id: string; email: string; name: string }
   const token = signToken({ userId: user.id, email: user.email })
   res.json({ token, user: { id: user.id, email: user.email, name: user.name } })
 })
 
 // Me
 authRoute.get('/auth/me', requireAuth, async (req, res) => {
-  const result = await pool.query('SELECT id, email, name, api_key FROM users WHERE id = $1', [
-    req.user!.userId,
-  ])
-  const user = result.rows[0] as
-    | { id: string; email: string; name: string; api_key: string | null }
-    | undefined
+  const [row] = await db
+    .select({
+      id: users.id,
+      email: users.email,
+      name: users.name,
+      apiKey: userSettings.apiKey,
+      apiKeyEnabled: userSettings.apiKeyEnabled,
+    })
+    .from(users)
+    .leftJoin(userSettings, eq(users.id, userSettings.userId))
+    .where(eq(users.id, req.user!.userId))
 
-  if (!user) {
+  if (!row) {
     res.status(404).json({ error: 'Usuário não encontrado' })
     return
   }
 
-  res.json({ id: user.id, email: user.email, name: user.name, apiKey: user.api_key })
-})
-
-// Save API key
-authRoute.post('/auth/api-key', requireAuth, async (req, res) => {
-  const { apiKey } = req.body as { apiKey: string }
-  await pool.query('UPDATE users SET api_key = $1 WHERE id = $2', [apiKey, req.user!.userId])
-  res.json({ ok: true })
+  res.json({
+    id: row.id,
+    email: row.email,
+    name: row.name,
+    apiKey: row.apiKey ?? null,
+    apiKeyEnabled: row.apiKeyEnabled ?? true,
+  })
 })

@@ -8,7 +8,8 @@ import { modelsRoute } from './routes/models.js'
 import { publishRoute } from './routes/publish.js'
 import { settingsRoute } from './routes/settings.js'
 import { authRoute } from './routes/auth.js'
-import { initDb } from './db.js'
+import { userSettingsRoute } from './routes/userSettings.js'
+import { runMigrations } from './db.js'
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 
@@ -20,6 +21,7 @@ app.use(morgan('dev'))
 app.use(express.json({ limit: '50mb' }))
 
 app.use('/api', authRoute)
+app.use('/api', userSettingsRoute)
 app.use('/api', generateRoute)
 app.use('/api', modelsRoute)
 app.use('/api', publishRoute)
@@ -39,13 +41,13 @@ if (process.env.NODE_ENV === 'production') {
   })
 }
 
-initDb()
+runMigrations()
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`)
     })
   })
   .catch((err: unknown) => {
-    console.error('Failed to initialize database:', err)
+    console.error('Failed to run migrations:', err)
     process.exit(1)
   })

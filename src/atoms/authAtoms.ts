@@ -5,6 +5,7 @@ export interface AuthUser {
   email: string
   name: string
   apiKey: string | null
+  apiKeyEnabled: boolean
 }
 
 export const authTokenAtom = atom<string | null>(localStorage.getItem('auth_token'))

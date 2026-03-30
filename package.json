@@ -10,13 +10,18 @@
     "build": "tsc -b && vite build",
     "start": "NODE_ENV=production npx tsx server/index.ts",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
+    "drizzle-orm": "^0.45.2",
     "esbuild": "^0.27.4",
     "express": "^5.2.1",
     "google-auth-library": "^10.6.2",
@@ -41,6 +46,7 @@
     "@vitejs/plugin-react": "^6.0.1",
     "clsx": "^2.1.1",
     "dexie": "^4.4.1",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",

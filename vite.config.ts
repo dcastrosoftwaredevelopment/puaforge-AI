@@ -8,6 +8,12 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), tailwindcss()],
+    server: {
+      host: true,
+      watch: {
+        usePolling: true,
+      },
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
