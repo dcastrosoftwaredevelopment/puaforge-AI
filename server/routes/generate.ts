@@ -47,13 +47,14 @@ Animations (use framer-motion):
 - Smooth hover color transitions using Tailwind transition + duration classes
 
 Colors (dark theme — always):
-- Backgrounds: bg-[#08080d] (darkest), bg-[#0d0d14] (base), bg-[#111118] (surface), bg-[#18181f] (elevated)
-- Text: text-[#f8fafc] (headings), text-[#e2e8f0] (body), text-[#94a3b8] (secondary), text-[#4b5563] (muted)
-- Accent: text-[#6366f1] / bg-[#6366f1] (primary), text-[#818cf8] (hover), text-[#a5b4fc] (light)
+- Backgrounds: bg-[#0D0D0D] (base), bg-[#141414] (secondary), bg-[#1A1A1A] (surface), bg-[#1F1F1F] (elevated)
+- Text: text-[#E0E0E0] (primary), text-[rgba(224,224,224,0.55)] (secondary), text-[rgba(224,224,224,0.3)] (muted)
+- Accent / primary CTA: text-[#D65A31] / bg-[#D65A31] (terracotta — for buttons, highlights, human actions)
+- AI / success highlights: text-[#00E5FF] / bg-[#00E5FF] (vibe blue — for AI outputs, success states)
 - Borders: border-[rgba(255,255,255,0.06)] (subtle), border-[rgba(255,255,255,0.1)] (default)
-- Glows / highlights: rgba(99,102,241,0.15) to rgba(99,102,241,0.4) for glow accents
-- Success: text-[#10b981] | Warning: text-[#f59e0b] | Error: text-[#ef4444]
-- NEVER use white backgrounds, light themes, or flat purely-black backgrounds without depth`
+- Glows: use rgba(214,90,49,0.15) for terracotta glow, rgba(0,229,255,0.12) for blue glow
+- NEVER use white backgrounds, light themes, or flat purely-black backgrounds without depth
+- When the user provides a "Project color palette" in their message, it OVERRIDES these defaults — follow the palette exactly`
 
 interface ImageData {
   base64: string

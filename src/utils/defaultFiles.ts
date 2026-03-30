@@ -16,13 +16,13 @@ export const DEFAULT_FILES: Record<string, string> = {
   '/App.tsx': `export default function App() {
   return (
     <div
-      className="relative flex items-center justify-center min-h-screen bg-[#08080d] text-[#e2e8f0] font-sans overflow-hidden"
+      className="relative flex items-center justify-center min-h-screen bg-[#0D0D0D] text-[#E0E0E0] font-sans overflow-hidden"
     >
       {/* Background glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse 70% 50% at 50% 0%, rgba(99,102,241,0.12), transparent)',
+          background: 'radial-gradient(ellipse 70% 50% at 50% 0%, rgba(214,90,49,0.1), transparent)',
         }}
       />
 
@@ -36,8 +36,8 @@ export const DEFAULT_FILES: Record<string, string> = {
       />
 
       <div className="relative text-center px-6" style={{ animation: 'fadeUp 0.6s ease both' }}>
-        <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full border border-[rgba(99,102,241,0.3)] bg-[rgba(99,102,241,0.08)] text-[11px] text-[#818cf8] tracking-widest uppercase">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#6366f1] animate-pulse" />
+        <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full border border-[rgba(214,90,49,0.3)] bg-[rgba(214,90,49,0.08)] text-[11px] text-[#D65A31] tracking-widest uppercase">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#D65A31] animate-pulse" />
           Pronto para criar
         </div>
 

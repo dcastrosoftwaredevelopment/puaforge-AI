@@ -104,15 +104,16 @@ export interface PaletteColor {
 }
 
 export const DEFAULT_PALETTE: PaletteColor[] = [
-  { id: 'primary', name: 'Primary', value: '#6366f1', locked: true },
-  { id: 'primary-light', name: 'Primary Light', value: '#818cf8', locked: true },
-  { id: 'bg-dark', name: 'Background', value: '#08080d', locked: true },
-  { id: 'bg-surface', name: 'Surface', value: '#18181f', locked: true },
-  { id: 'text', name: 'Text', value: '#f8fafc', locked: true },
-  { id: 'text-muted', name: 'Text Muted', value: '#94a3b8', locked: true },
-  { id: 'success', name: 'Success', value: '#10b981', locked: true },
-  { id: 'warning', name: 'Warning', value: '#f59e0b', locked: true },
-  { id: 'error', name: 'Error', value: '#ef4444', locked: true },
+  // Brand
+  { id: 'terracotta', name: 'Terracota (Accent)', value: '#D65A31', locked: true },
+  { id: 'vibe-blue', name: 'Vibe Blue (AI)', value: '#00E5FF', locked: true },
+  // Backgrounds
+  { id: 'bg-primary', name: 'Background Primary', value: '#0D0D0D', locked: true },
+  { id: 'bg-secondary', name: 'Background Secondary', value: '#141414', locked: true },
+  { id: 'bg-tertiary', name: 'Background Tertiary', value: '#1A1A1A', locked: true },
+  { id: 'bg-elevated', name: 'Background Elevated', value: '#1F1F1F', locked: true },
+  // Text
+  { id: 'text-primary', name: 'Text Primary', value: '#E0E0E0', locked: true },
 ]
 
-export const colorPaletteAtom = atomWithStorage<PaletteColor[]>('puaforge_color_palette', DEFAULT_PALETTE)
+export const colorPaletteAtom = atomWithStorage<PaletteColor[]>('puaforge_color_palette_v2', DEFAULT_PALETTE)
