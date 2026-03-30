@@ -28,22 +28,7 @@ export interface Message {
 export const messagesAtom = atom<Message[]>([])
 
 // Project files fed to Sandpack
-export const filesAtom = atom<Record<string, string>>({
-  '/App.tsx': `export default function App() {
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-[#0e0f16] text-[#e2e8f0] font-sans">
-      <div className="text-center">
-        <h1 className="text-4xl font-semibold text-[#f1f5f9] mb-3">
-          PuaForge AI
-        </h1>
-        <p className="text-lg text-[#64748b]">
-          Descreva o que deseja construir no chat...
-        </p>
-      </div>
-    </div>
-  )
-}`,
-})
+export const filesAtom = atom<Record<string, string>>({})
 
 // Project images (reusable assets)
 export interface ProjectImage {

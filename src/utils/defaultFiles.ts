@@ -15,15 +15,46 @@ export const DEFAULT_FILES: Record<string, string> = {
   '/index.html': TAILWIND_HTML,
   '/App.tsx': `export default function App() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#0e0f16] text-[#e2e8f0] font-sans">
-      <div className="text-center">
-        <h1 className="text-4xl font-semibold text-[#f1f5f9] mb-3">
-          PuaForge AI
+    <div
+      className="relative flex items-center justify-center min-h-screen bg-[#08080d] text-[#e2e8f0] font-sans overflow-hidden"
+    >
+      {/* Background glow */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse 70% 50% at 50% 0%, rgba(99,102,241,0.12), transparent)',
+        }}
+      />
+
+      {/* Grid overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.03]"
+        style={{
+          backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)',
+          backgroundSize: '48px 48px',
+        }}
+      />
+
+      <div className="relative text-center px-6" style={{ animation: 'fadeUp 0.6s ease both' }}>
+        <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full border border-[rgba(99,102,241,0.3)] bg-[rgba(99,102,241,0.08)] text-[11px] text-[#818cf8] tracking-widest uppercase">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#6366f1] animate-pulse" />
+          Pronto para criar
+        </div>
+
+        <h1 className="text-5xl font-bold tracking-tight text-[#f8fafc] mb-4 leading-none">
+          Descreva sua ideia
         </h1>
-        <p className="text-lg text-[#64748b]">
-          Descreva o que deseja construir no chat...
+        <p className="text-base text-[#4b5563] max-w-sm mx-auto leading-relaxed">
+          Digite no chat o que deseja construir e a IA irá gerar o código em tempo real.
         </p>
       </div>
+
+      <style>{\`
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      \`}</style>
     </div>
   )
 }`,
