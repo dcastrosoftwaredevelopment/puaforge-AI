@@ -116,3 +116,7 @@ export const DEFAULT_PALETTE: PaletteColor[] = [
 ]
 
 export const colorPaletteAtom = atom<PaletteColor[]>(DEFAULT_PALETTE)
+
+// Set to true by useProjectLoader once project data is fully loaded into atoms.
+// useDraft watches this to avoid treating the initial load as a user change.
+export const projectLoadedAtom = atom(false)

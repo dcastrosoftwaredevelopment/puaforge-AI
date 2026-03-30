@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSetAtom, useAtomValue } from 'jotai'
-import { activeProjectIdAtom, messagesAtom, filesAtom, projectImagesAtom, checkpointsAtom, colorPaletteAtom, DEFAULT_PALETTE, type ProjectImage, type Checkpoint } from '@/atoms'
+import { activeProjectIdAtom, messagesAtom, filesAtom, projectImagesAtom, checkpointsAtom, colorPaletteAtom, projectLoadedAtom, DEFAULT_PALETTE, type ProjectImage, type Checkpoint } from '@/atoms'
 import { authTokenAtom } from '@/atoms/authAtoms'
 import { depsAtom } from '@/hooks/useFiles'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
@@ -26,6 +26,7 @@ export function useProjectLoader(projectId: string | undefined) {
   const setProjectImages = useSetAtom(projectImagesAtom)
   const setCheckpoints = useSetAtom(checkpointsAtom)
   const setColorPalette = useSetAtom(colorPaletteAtom)
+  const setProjectLoaded = useSetAtom(projectLoadedAtom)
   const [isReady, setIsReady] = useState(false)
   const loadedRef = useRef<string | null>(null)
 
@@ -38,6 +39,7 @@ export function useProjectLoader(projectId: string | undefined) {
 
     let cancelled = false
     const headers = { Authorization: `Bearer ${token}` }
+    setProjectLoaded(false)
 
     async function load() {
       await waitForPersist()
@@ -109,6 +111,7 @@ export function useProjectLoader(projectId: string | undefined) {
 
         if (!cancelled) {
           loadedRef.current = projectId!
+          setProjectLoaded(true)
           setIsReady(true)
         }
       } catch {

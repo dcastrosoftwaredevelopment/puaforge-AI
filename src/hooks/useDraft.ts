@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useAtomValue } from 'jotai'
-import { activeProjectIdAtom, messagesAtom, filesAtom, type Message } from '@/atoms'
+import { activeProjectIdAtom, messagesAtom, filesAtom, projectLoadedAtom, type Message } from '@/atoms'
+
 import { authTokenAtom } from '@/atoms/authAtoms'
 import { db, dbReady } from '@/services/db'
 import { api } from '@/services/api'
@@ -14,26 +15,18 @@ export function useDraft() {
   const token = useAtomValue(authTokenAtom)
   const messagesValue = useAtomValue(messagesAtom)
   const filesValue = useAtomValue(filesAtom)
-  const hydrated = useRef(false)
+  const projectLoaded = useAtomValue(projectLoadedAtom)
   const [isDraft, setIsDraft] = useState(false)
 
-  // On project change: reset hydration flag, check for existing draft asynchronously
+  // On project change: check for existing draft
   useEffect(() => {
     if (!activeProjectId) return
-    hydrated.current = false
-
     hasDraft(activeProjectId).then((exists) => { setIsDraft(exists) })
-
-    const timer = setTimeout(() => { hydrated.current = true }, 500)
-    return () => {
-      clearTimeout(timer)
-      hydrated.current = false
-    }
   }, [activeProjectId])
 
-  // Auto-save messages to IndexedDB
+  // Auto-save messages to IndexedDB — only after project is fully loaded
   useEffect(() => {
-    if (!hydrated.current || !activeProjectId) return
+    if (!projectLoaded || !activeProjectId) return
     const pid = activeProjectId
     const entries = messagesValue.map((m) => ({ ...m, projectId: pid }))
     dbReady.then(() =>
@@ -43,11 +36,11 @@ export function useDraft() {
       }),
     ).then(() => setIsDraft(true))
      .catch((e) => console.error('[draft] messages save error:', e))
-  }, [messagesValue, activeProjectId])
+  }, [messagesValue, activeProjectId, projectLoaded])
 
-  // Auto-save files to IndexedDB
+  // Auto-save files to IndexedDB — only after project is fully loaded
   useEffect(() => {
-    if (!hydrated.current || !activeProjectId) return
+    if (!projectLoaded || !activeProjectId) return
     const pid = activeProjectId
     const entries = Object.entries(filesValue).map(([path, code]) => ({
       projectId: pid,
@@ -62,7 +55,7 @@ export function useDraft() {
       }),
     ).then(() => setIsDraft(true))
      .catch((e) => console.error('[draft] files save error:', e))
-  }, [filesValue, activeProjectId])
+  }, [filesValue, activeProjectId, projectLoaded])
 
   /** Persist current state (messages + files) to PostgreSQL */
   const saveDraft = useCallback(async () => {
