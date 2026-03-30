@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, forwardRef } from 'react'
 import { GripHorizontal, Trash2, PanelRightClose, PanelRightOpen, Minus, Download, Upload } from 'lucide-react'
 import { useFiles } from '@/hooks/useFiles'
 import { useChat } from '@/hooks/useChat'
@@ -167,7 +167,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
 
 function FloatingMode() {
   const { isOpen: isChatOpen } = useChat()
-  const { position, size, onDragStart, onResizeStart } = useFloatingPanel({
+  const { position, size, panelRef, onDragStart, onResizeStart } = useFloatingPanel({
     initialPosition: {
       x: window.innerWidth - INITIAL_WIDTH - 30,
       y: window.innerHeight - INITIAL_HEIGHT - 70,
@@ -181,6 +181,7 @@ function FloatingMode() {
 
       {isChatOpen && (
         <div
+          ref={panelRef}
           className="fixed bg-bg-secondary/95 backdrop-blur-2xl rounded-2xl shadow-2xl shadow-black/40 border border-border-default flex flex-col z-50 overflow-hidden"
           style={{
             left: position.x,
@@ -204,13 +205,13 @@ function FloatingMode() {
   )
 }
 
-export function DockedChat({ width }: { width: number }) {
+export const DockedChat = forwardRef<HTMLDivElement, { width: number }>(function DockedChat({ width }, ref) {
   return (
-    <div className="shrink-0 border-l border-border-subtle bg-bg-secondary flex flex-col h-full" style={{ width }}>
+    <div ref={ref} className="shrink-0 border-l border-border-subtle bg-bg-secondary flex flex-col h-full" style={{ width }}>
       <ChatPanel isDocked={true} />
     </div>
   )
-}
+})
 
 export default function FloatingChat() {
   const { mode: chatMode } = useChat()

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, type PointerEvent } from 'react'
+import { useState, useCallback, useRef, type PointerEvent } from 'react'
 
 interface Position { x: number; y: number }
 interface Size { width: number; height: number }
@@ -18,6 +18,13 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
 }
 
+function applyStyle(el: HTMLElement, pos: Position, size: Size) {
+  el.style.left = `${pos.x}px`
+  el.style.top = `${pos.y}px`
+  el.style.width = `${size.width}px`
+  el.style.height = `${size.height}px`
+}
+
 export function useFloatingPanel({
   initialPosition,
   initialSize,
@@ -28,11 +35,12 @@ export function useFloatingPanel({
 }: Options) {
   const [position, setPosition] = useState(initialPosition)
   const [size, setSize] = useState(initialSize)
+
+  // Live values used during drag — no state updates during drag
   const posRef = useRef(initialPosition)
   const sizeRef = useRef(initialSize)
-
-  useEffect(() => { posRef.current = position }, [position])
-  useEffect(() => { sizeRef.current = size }, [size])
+  // Ref to the panel DOM element for direct style mutation
+  const panelRef = useRef<HTMLDivElement>(null)
 
   const onDragStart = useCallback((e: PointerEvent) => {
     e.preventDefault()
@@ -49,13 +57,16 @@ export function useFloatingPanel({
         y: startPos.y + (e.clientY - startY),
       }
       posRef.current = newPos
-      setPosition(newPos)
+      // Mutate DOM directly — zero React re-renders during drag
+      if (panelRef.current) applyStyle(panelRef.current, newPos, sizeRef.current)
     }
 
     const onUp = () => {
       target.releasePointerCapture(e.pointerId)
       target.removeEventListener('pointermove', onMove)
       target.removeEventListener('pointerup', onUp)
+      // Commit to React state once on release
+      setPosition({ ...posRef.current })
     }
 
     target.addEventListener('pointermove', onMove)
@@ -82,20 +93,13 @@ export function useFloatingPanel({
       let newX = startPos.x
       let newY = startPos.y
 
-      // East/West: adjust width, West also shifts position
-      if (direction.includes('e')) {
-        newW = startSize.width + dx
-      }
+      if (direction.includes('e')) newW = startSize.width + dx
       if (direction.includes('w')) {
         const clamped = clamp(startSize.width - dx, minWidth, maxWidth)
         newX = startPos.x + (startSize.width - clamped)
         newW = clamped
       }
-
-      // South/North: adjust height, North also shifts position
-      if (direction.includes('s')) {
-        newH = startSize.height + dy
-      }
+      if (direction.includes('s')) newH = startSize.height + dy
       if (direction.includes('n')) {
         const clamped = clamp(startSize.height - dy, minHeight, maxHeight)
         newY = startPos.y + (startSize.height - clamped)
@@ -110,19 +114,22 @@ export function useFloatingPanel({
 
       sizeRef.current = finalSize
       posRef.current = finalPos
-      setSize(finalSize)
-      setPosition(finalPos)
+      // Mutate DOM directly — zero React re-renders during drag
+      if (panelRef.current) applyStyle(panelRef.current, finalPos, finalSize)
     }
 
     const onUp = () => {
       target.releasePointerCapture(e.pointerId)
       target.removeEventListener('pointermove', onMove)
       target.removeEventListener('pointerup', onUp)
+      // Commit to React state once on release
+      setSize({ ...sizeRef.current })
+      setPosition({ ...posRef.current })
     }
 
     target.addEventListener('pointermove', onMove)
     target.addEventListener('pointerup', onUp)
   }, [minWidth, minHeight, maxWidth, maxHeight])
 
-  return { position, size, onDragStart, onResizeStart }
+  return { position, size, panelRef, onDragStart, onResizeStart }
 }

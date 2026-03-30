@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Home, ImageIcon, History, RotateCcw, Save, Trash2 } from 'lucide-react'
+import { Home, ImageIcon, History, RotateCcw, Save, Trash2, Palette } from 'lucide-react'
 import { useProjectActions } from '@/hooks/useProjectActions'
 import { useProjectImages } from '@/hooks/useProjectImages'
 import { useCheckpoints } from '@/hooks/useCheckpoints'
@@ -13,6 +13,7 @@ import PublishButton from '@/components/layout/PublishButton'
 import ProjectName from '@/components/layout/ProjectName'
 import ImageAssets from '@/components/layout/ImageAssets'
 import Checkpoints from '@/components/layout/Checkpoints'
+import ColorPalette from '@/components/layout/ColorPalette'
 import ConfirmModal from '@/components/ui/ConfirmModal'
 import Tooltip from '@/components/ui/Tooltip'
 
@@ -24,10 +25,12 @@ export default function EditorHeader() {
   const { isDraft, saveDraft, discardDraft } = useDraft()
   const [showImages, setShowImages] = useState(false)
   const [showCheckpoints, setShowCheckpoints] = useState(false)
+  const [showPalette, setShowPalette] = useState(false)
   const [showDiscardModal, setShowDiscardModal] = useState(false)
   const [saving, setSaving] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
   const checkpointRef = useRef<HTMLDivElement>(null)
+  const paletteRef = useRef<HTMLDivElement>(null)
 
   const handleSave = useCallback(async () => {
     setSaving(true)
@@ -41,7 +44,7 @@ export default function EditorHeader() {
   }, [discardDraft])
 
   useEffect(() => {
-    if (!showImages && !showCheckpoints) return
+    if (!showImages && !showCheckpoints && !showPalette) return
     function handleClick(e: MouseEvent) {
       if (showImages && panelRef.current && !panelRef.current.contains(e.target as Node)) {
         setShowImages(false)
@@ -49,10 +52,13 @@ export default function EditorHeader() {
       if (showCheckpoints && checkpointRef.current && !checkpointRef.current.contains(e.target as Node)) {
         setShowCheckpoints(false)
       }
+      if (showPalette && paletteRef.current && !paletteRef.current.contains(e.target as Node)) {
+        setShowPalette(false)
+      }
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
-  }, [showImages, showCheckpoints])
+  }, [showImages, showCheckpoints, showPalette])
 
   return (
     <>
@@ -87,6 +93,23 @@ export default function EditorHeader() {
             {showImages && (
               <div className="absolute right-0 top-full mt-1 w-72 bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden">
                 <ImageAssets />
+              </div>
+            )}
+          </div>
+
+          {/* Color palette */}
+          <div className="relative" ref={paletteRef}>
+            <Tooltip content="Paleta de cores" side="bottom" align="right">
+              <button
+                onClick={() => setShowPalette(!showPalette)}
+                className="p-1.5 rounded-lg text-forge-terracotta/60 hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
+              >
+                <Palette size={15} />
+              </button>
+            </Tooltip>
+            {showPalette && (
+              <div className="absolute right-0 top-full mt-1 w-64 bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden">
+                <ColorPalette />
               </div>
             )}
           </div>

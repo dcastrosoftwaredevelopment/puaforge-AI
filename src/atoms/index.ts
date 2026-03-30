@@ -93,3 +93,31 @@ export const apiKeyEnabledAtom = atom(true)
 // Device preview
 export type DevicePreview = 'desktop' | 'tablet' | 'mobile'
 export const devicePreviewAtom = atom<DevicePreview>('desktop')
+
+// Color palette (persisted globally in localStorage)
+export interface PaletteColor {
+  id: string
+  name: string
+  value: string // hex
+  locked?: boolean // system defaults — cannot be deleted, but can be edited
+}
+
+export const DEFAULT_PALETTE: PaletteColor[] = [
+  // Brand
+  { id: 'terracotta', name: 'Terracota (Accent)', value: '#D65A31', locked: true },
+  { id: 'vibe-blue', name: 'Vibe Blue (AI)', value: '#00E5FF', locked: true },
+  // Backgrounds
+  { id: 'bg-primary', name: 'Background Primary', value: '#0D0D0D', locked: true },
+  { id: 'bg-secondary', name: 'Background Secondary', value: '#141414', locked: true },
+  { id: 'bg-tertiary', name: 'Background Tertiary', value: '#1A1A1A', locked: true },
+  { id: 'bg-elevated', name: 'Background Elevated', value: '#1F1F1F', locked: true },
+  // Text
+  { id: 'text-primary', name: 'Text Primary', value: '#E0E0E0', locked: true },
+  { id: 'code-muted', name: 'Code Text Muted', value: '#94a3b8', locked: true },
+]
+
+export const colorPaletteAtom = atom<PaletteColor[]>(DEFAULT_PALETTE)
+
+// Set to true by useProjectLoader once project data is fully loaded into atoms.
+// useDraft watches this to avoid treating the initial load as a user change.
+export const projectLoadedAtom = atom(false)

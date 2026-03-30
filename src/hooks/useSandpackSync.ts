@@ -29,7 +29,6 @@ export function useSandpackSync() {
       isFirstRunRef.current = false
       return
     }
-
     const sp = sandpackRef.current
     const prevFiles = prevFilesRef.current
     prevFilesRef.current = files

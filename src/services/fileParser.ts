@@ -1,10 +1,13 @@
+/** Unique marker embedded in every auto-generated stub. The AI never reproduces this. */
+const STUB_MARKER = '/* __puaforge_stub__ */'
+
 /**
  * Detects if a code string is an auto-generated placeholder stub.
- * Only checks for the specific stub text injected by addMissingStubs —
- * never uses line count, since the AI often generates short but valid components.
+ * Uses a unique internal marker instead of user-visible text, so the AI
+ * cannot accidentally reproduce it in real generated code.
  */
 function isStub(code: string): boolean {
-  return /em construção/i.test(code)
+  return code.includes(STUB_MARKER)
 }
 
 /**
@@ -28,7 +31,6 @@ export function mergeFiles(
 
     // If the incoming file is a stub but the existing one isn't, keep existing
     if (isStub(code) && !isStub(prev)) {
-      console.log(`[mergeFiles] Skipping stub for ${path} — keeping existing implementation`)
       continue
     }
 
@@ -75,7 +77,8 @@ function addMissingStubs(files: Record<string, string>): Record<string, string> 
 
       if (!result[resolvedPath]) {
         const componentName = resolvedPath.split('/').pop()?.replace(/\.\w+$/, '') ?? 'Component'
-        result[resolvedPath] = `export default function ${componentName}() {
+        result[resolvedPath] = `${STUB_MARKER}
+export default function ${componentName}() {
   return (
     <div className="p-4 rounded-lg border border-[rgba(255,255,255,0.1)] bg-[#151620]">
       <p className="text-[#64748b] text-sm">${componentName} — em construção</p>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { authTokenAtom } from '@/atoms/authAtoms'
 import {
@@ -22,6 +22,14 @@ function lsGet(key: string): string | null {
 }
 function lsSet(key: string, value: string) {
   try { localStorage.setItem(key, value) } catch { /* ignore */ }
+}
+
+function useDebounced(fn: (value: string) => void, delay: number) {
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  return useCallback((value: string) => {
+    if (timer.current) clearTimeout(timer.current)
+    timer.current = setTimeout(() => fn(value), delay)
+  }, [fn, delay])
 }
 
 // ─── Hook for useProjectLoader to wait for projects to load ───────────────────
@@ -115,17 +123,19 @@ export function usePersistence() {
     lsSet('isChatOpen', String(isChatOpen))
   }, [isChatOpen])
 
+  const saveEditorFraction = useDebounced((v) => lsSet('editorFraction', v), 300)
   const editorFraction = useAtomValue(editorFractionAtom)
   useEffect(() => {
     if (!hydrated.current) return
-    lsSet('editorFraction', String(editorFraction))
-  }, [editorFraction])
+    saveEditorFraction(String(editorFraction))
+  }, [editorFraction, saveEditorFraction])
 
+  const saveChatWidth = useDebounced((v) => lsSet('chatWidth', v), 300)
   const chatWidth = useAtomValue(chatWidthAtom)
   useEffect(() => {
     if (!hydrated.current) return
-    lsSet('chatWidth', String(chatWidth))
-  }, [chatWidth])
+    saveChatWidth(String(chatWidth))
+  }, [chatWidth, saveChatWidth])
 
   return { isHydrated }
 }

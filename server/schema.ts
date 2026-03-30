@@ -22,6 +22,7 @@ export const projects = pgTable('projects', {
   id: uuid('id').primaryKey(),
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   name: varchar('name', { length: 255 }).notNull(),
+  palette: jsonb('palette').$type<{ id: string; name: string; value: string; locked?: boolean }[]>(),
   createdAt: timestamp('created_at').notNull(),
   updatedAt: timestamp('updated_at').notNull(),
 })

@@ -2,9 +2,10 @@ import { useCallback, useRef, useState } from 'react'
 
 interface ResizeHandleProps {
   onResize: (delta: number) => void
+  onCommit?: () => void
 }
 
-export default function ResizeHandle({ onResize }: ResizeHandleProps) {
+export default function ResizeHandle({ onResize, onCommit }: ResizeHandleProps) {
   const [dragging, setDragging] = useState(false)
   const startX = useRef(0)
 
@@ -19,18 +20,19 @@ export default function ResizeHandle({ onResize }: ResizeHandleProps) {
     const onMove = (ev: PointerEvent) => {
       const delta = ev.clientX - startX.current
       startX.current = ev.clientX
-      onResize(delta)
+      onResize(delta) // DOM mutation in parent — no setState
     }
 
     const onUp = () => {
       setDragging(false)
+      onCommit?.() // update atom once
       target.removeEventListener('pointermove', onMove as EventListener)
       target.removeEventListener('pointerup', onUp)
     }
 
     target.addEventListener('pointermove', onMove as EventListener)
     target.addEventListener('pointerup', onUp)
-  }, [onResize])
+  }, [onResize, onCommit])
 
   return (
     <div

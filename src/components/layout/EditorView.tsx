@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { SandpackProvider } from '@codesandbox/sandpack-react'
 import { Loader2, MessageCircle } from 'lucide-react'
@@ -27,16 +27,29 @@ export default function EditorView() {
   const isDocked = chatMode === 'docked'
   const showDockedChat = isDocked && isChatOpen
 
+  // Live width during drag — mutate DOM directly, no setState per frame
+  const chatWidthRef = useRef(chatWidth)
+  chatWidthRef.current = chatWidth
+  const chatPanelRef = useRef<HTMLDivElement>(null)
+
   const onChatResize = useCallback((delta: number) => {
-    setChatWidth((prev) => Math.min(CHAT_MAX, Math.max(CHAT_MIN, prev - delta)))
+    const next = Math.min(CHAT_MAX, Math.max(CHAT_MIN, chatWidthRef.current - delta))
+    chatWidthRef.current = next
+    if (chatPanelRef.current) chatPanelRef.current.style.width = `${next}px`
+  }, [])
+
+  const onChatCommit = useCallback(() => {
+    setChatWidth(chatWidthRef.current)
   }, [setChatWidth])
 
-  const filesHash = Object.entries(files)
-    .map(([p, c]) => `${p}:${c.length}`)
-    .sort()
-    .join('|')
-  const depsKey = Object.keys(deps).sort().join(',')
-  const sandpackKey = `${projectId}-${filesHash}-${depsKey}`
+  const sandpackKey = useMemo(() => {
+    const filesHash = Object.entries(files)
+      .map(([p, c]) => `${p}:${c.length}`)
+      .sort()
+      .join('|')
+    const depsKey = Object.keys(deps).sort().join(',')
+    return `${projectId}-${filesHash}-${depsKey}`
+  }, [projectId, files, deps])
 
   if (!projectReady) {
     return (
@@ -82,8 +95,8 @@ export default function EditorView() {
         )}
         {showDockedChat && (
           <>
-            <ResizeHandle onResize={onChatResize} />
-            <DockedChat width={chatWidth} />
+            <ResizeHandle onResize={onChatResize} onCommit={onChatCommit} />
+            <DockedChat ref={chatPanelRef} width={chatWidth} />
           </>
         )}
       </div>
