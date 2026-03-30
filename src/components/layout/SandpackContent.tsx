@@ -63,7 +63,7 @@ export default function SandpackContent() {
     const totalWidth = container.offsetWidth
     if (totalWidth === 0) return
     setEditorFraction((prev) => Math.min(SPLIT_MAX, Math.max(SPLIT_MIN, prev + delta / totalWidth)))
-  }, [])
+  }, [setEditorFraction])
 
   return (
     <SandpackLayout ref={containerRef} className="flex h-full w-full">

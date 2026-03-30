@@ -16,11 +16,12 @@ export function useSandpackSync() {
   const { isDirty, setDirty } = useEditorState()
   const setActions = useSetAtom(editorActionsAtom)
   const sandpackRef = useRef(sandpack)
-  sandpackRef.current = sandpack
   const prevFilesRef = useRef(files)
   const isFirstRunRef = useRef(true)
   const isDirtyRef = useRef(isDirty)
-  isDirtyRef.current = isDirty
+
+  useEffect(() => { sandpackRef.current = sandpack })
+  useEffect(() => { isDirtyRef.current = isDirty })
 
   // Push atom changes → Sandpack (skip first run, Provider already has correct files)
   useEffect(() => {

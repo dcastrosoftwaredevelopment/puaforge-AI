@@ -27,7 +27,7 @@ export default function EditorView() {
 
   const onChatResize = useCallback((delta: number) => {
     setChatWidth((prev) => Math.min(CHAT_MAX, Math.max(CHAT_MIN, prev - delta)))
-  }, [])
+  }, [setChatWidth])
 
   const filesHash = Object.entries(files)
     .map(([p, c]) => `${p}:${c.length}`)
