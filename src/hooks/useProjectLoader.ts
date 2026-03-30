@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSetAtom, useAtomValue } from 'jotai'
-import { activeProjectIdAtom, messagesAtom, filesAtom, projectImagesAtom, checkpointsAtom, type ProjectImage, type Checkpoint } from '@/atoms'
+import { activeProjectIdAtom, messagesAtom, filesAtom, projectImagesAtom, checkpointsAtom, colorPaletteAtom, DEFAULT_PALETTE, type ProjectImage, type Checkpoint } from '@/atoms'
 import { authTokenAtom } from '@/atoms/authAtoms'
 import { depsAtom } from '@/hooks/useFiles'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
@@ -25,6 +25,7 @@ export function useProjectLoader(projectId: string | undefined) {
   const setDeps = useSetAtom(depsAtom)
   const setProjectImages = useSetAtom(projectImagesAtom)
   const setCheckpoints = useSetAtom(checkpointsAtom)
+  const setColorPalette = useSetAtom(colorPaletteAtom)
   const [isReady, setIsReady] = useState(false)
   const loadedRef = useRef<string | null>(null)
 
@@ -42,10 +43,11 @@ export function useProjectLoader(projectId: string | undefined) {
       await waitForPersist()
 
       try {
-        // Images and checkpoints always from PostgreSQL
-        const [rawImages, savedCheckpoints] = await Promise.all([
+        // Images, checkpoints and palette always from PostgreSQL
+        const [rawImages, savedCheckpoints, savedPalette] = await Promise.all([
           api.get<ProjectImage[]>(`/api/projects/${projectId}/images`, headers),
           api.get<Checkpoint[]>(`/api/projects/${projectId}/checkpoints`, headers),
+          api.get<typeof DEFAULT_PALETTE | null>(`/api/projects/${projectId}/palette`, headers),
         ])
 
         // Fetch data URLs for Sandpack preview (browser fetch works even when Sandpack iframe cannot)
@@ -97,6 +99,7 @@ export function useProjectLoader(projectId: string | undefined) {
           ? { ...files, ...generateImagesFiles(savedImages) }
           : files
 
+        setColorPalette(savedPalette ?? DEFAULT_PALETTE)
         setProjectImages(savedImages)
         setCheckpoints([...savedCheckpoints].reverse())
         setMessages(messages as never)

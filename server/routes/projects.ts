@@ -85,6 +85,33 @@ router.delete('/projects/:id', requireAuth, async (req: Request, res: Response) 
   res.json({ ok: true })
 })
 
+// ─── Palette ──────────────────────────────────────────────────────────────────
+
+router.get('/projects/:id/palette', requireAuth, async (req: Request, res: Response) => {
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
+
+  const [row] = await db
+    .select({ palette: projects.palette })
+    .from(projects)
+    .where(eq(projects.id, p(req, 'id')))
+    .limit(1)
+
+  res.json(row?.palette ?? null)
+})
+
+router.put('/projects/:id/palette', requireAuth, async (req: Request, res: Response) => {
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
+
+  const { palette } = req.body as { palette: { id: string; name: string; value: string; locked?: boolean }[] }
+  if (!Array.isArray(palette)) {
+    res.status(400).json({ error: 'palette must be an array' })
+    return
+  }
+
+  await db.update(projects).set({ palette }).where(eq(projects.id, p(req, 'id')))
+  res.json({ ok: true })
+})
+
 // ─── Messages ─────────────────────────────────────────────────────────────────
 
 router.get('/projects/:id/messages', requireAuth, async (req: Request, res: Response) => {

@@ -1,5 +1,4 @@
 import { atom } from 'jotai'
-import { atomWithStorage } from 'jotai/utils'
 
 // Project
 export interface Project {
@@ -116,4 +115,4 @@ export const DEFAULT_PALETTE: PaletteColor[] = [
   { id: 'text-primary', name: 'Text Primary', value: '#E0E0E0', locked: true },
 ]
 
-export const colorPaletteAtom = atomWithStorage<PaletteColor[]>('puaforge_color_palette_v2', DEFAULT_PALETTE)
+export const colorPaletteAtom = atom<PaletteColor[]>(DEFAULT_PALETTE)
