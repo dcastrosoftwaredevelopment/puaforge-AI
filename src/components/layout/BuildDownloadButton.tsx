@@ -1,49 +1,37 @@
-import { useState } from 'react'
 import { PackageCheck, Loader2 } from 'lucide-react'
 import { useFiles } from '@/hooks/useFiles'
 import { useProjects } from '@/hooks/useProjects'
+import { useApiCall, HttpMethod } from '@/hooks/useApiCall'
 import JSZip from 'jszip'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
 export default function BuildDownloadButton() {
   const { files } = useFiles()
   const { activeProjectId, activeProject } = useProjects()
-  const [loading, setLoading] = useState(false)
 
-  const safeName = (activeProject?.name || 'vibe-project').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '')
+  const safeName = (activeProject?.name || 'puaforge-project')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-+$/, '')
+
+  const { loading, execute: build } = useApiCall<
+    { projectId: string | null; files: Record<string, string> },
+    { html: string }
+  >(HttpMethod.POST, '/api/publish')
 
   const handleDownload = async () => {
-    setLoading(true)
-    try {
-      const res = await fetch(`${API_URL}/api/publish`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId: activeProjectId, files }),
-      })
+    const result = await build({ projectId: activeProjectId, files })
+    if (!result) return
 
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Erro ao gerar build')
-      }
+    const zip = new JSZip()
+    zip.file('index.html', result.html)
 
-      const { html } = await res.json()
-
-      const zip = new JSZip()
-      zip.file('index.html', html)
-
-      const blob = await zip.generateAsync({ type: 'blob' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${safeName}-build.zip`
-      a.click()
-      URL.revokeObjectURL(url)
-    } catch (err) {
-      console.error('[build-download]', err)
-    } finally {
-      setLoading(false)
-    }
+    const blob = await zip.generateAsync({ type: 'blob' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${safeName}-build.zip`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   return (

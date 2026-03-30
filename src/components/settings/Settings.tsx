@@ -2,62 +2,44 @@ import { useState } from 'react'
 import { Key, Eye, EyeOff, Loader2, CheckCircle2, XCircle } from 'lucide-react'
 import { useApiKey } from '@/hooks/useApiKey'
 import { useModels } from '@/hooks/useModels'
+import { useApiCall, HttpMethod } from '@/hooks/useApiCall'
 import Sidebar from '@/components/home/Sidebar'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
-
-type ValidationState = 'idle' | 'validating' | 'valid' | 'invalid'
 
 export default function Settings() {
   const { apiKey, setApiKey, apiKeyEnabled, setApiKeyEnabled } = useApiKey()
   const { refetchModels } = useModels()
   const [draft, setDraft] = useState(apiKey)
   const [showKey, setShowKey] = useState(false)
-  const [validation, setValidation] = useState<ValidationState>('idle')
-  const [validationError, setValidationError] = useState('')
+  const [validated, setValidated] = useState<boolean | null>(null)
 
   const hasChanges = draft !== apiKey
 
+  const { loading: validating, error: validationError, execute: validateKey } =
+    useApiCall<{ apiKey: string }, { valid: boolean; error?: string }>(HttpMethod.POST, '/api/settings/validate-key')
+
   const handleValidate = async () => {
     if (!draft.trim()) return
-    setValidation('validating')
-    setValidationError('')
-    try {
-      const res = await fetch(`${API_URL}/api/settings/validate-key`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKey: draft.trim() }),
-      })
-      const data = await res.json()
-      if (data.valid) {
-        setValidation('valid')
-      } else {
-        setValidation('invalid')
-        setValidationError(data.error || 'Chave inválida')
-      }
-    } catch {
-      setValidation('invalid')
-      setValidationError('Erro ao conectar com o servidor')
-    }
+    setValidated(null)
+    const result = await validateKey({ apiKey: draft.trim() })
+    setValidated(result ? result.valid : false)
   }
 
   const handleSave = async () => {
     const trimmed = draft.trim()
-    if (trimmed && validation !== 'valid') {
+    if (trimmed && validated !== true) {
       await handleValidate()
       return
     }
     setApiKey(trimmed)
     if (trimmed) refetchModels()
-    setValidation('idle')
+    setValidated(null)
   }
 
   const handleClear = () => {
     setDraft('')
     setApiKey('')
     setApiKeyEnabled(true)
-    setValidation('idle')
-    setValidationError('')
+    setValidated(null)
   }
 
   const handleToggleEnabled = () => {
@@ -116,8 +98,7 @@ export default function Settings() {
                   value={draft}
                   onChange={(e) => {
                     setDraft(e.target.value)
-                    setValidation('idle')
-                    setValidationError('')
+                    setValidated(null)
                   }}
                   placeholder="sk-ant-api03-..."
                   className="w-full bg-bg-tertiary border border-border-subtle rounded-lg px-3 py-2.5 pr-10 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-border-default transition font-mono"
@@ -131,31 +112,31 @@ export default function Settings() {
               </div>
 
               {/* Validation status */}
-              {validation === 'valid' && (
+              {validated === true && (
                 <div className="flex items-center gap-2 text-xs text-vibe-blue">
                   <CheckCircle2 size={13} />
                   Chave válida
                 </div>
               )}
-              {validation === 'invalid' && (
+              {validated === false && (
                 <div className="flex items-center gap-2 text-xs text-forge-terracotta">
                   <XCircle size={13} />
-                  {validationError}
+                  {validationError || 'Chave inválida'}
                 </div>
               )}
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleValidate}
-                  disabled={!draft.trim() || validation === 'validating'}
+                  disabled={!draft.trim() || validating}
                   className="px-3 py-1.5 rounded-lg bg-bg-elevated border border-border-subtle text-sm text-text-secondary hover:text-text-primary hover:bg-border-default disabled:opacity-30 transition cursor-pointer flex items-center gap-2"
                 >
-                  {validation === 'validating' && <Loader2 size={13} className="animate-spin" />}
+                  {validating && <Loader2 size={13} className="animate-spin" />}
                   Validar
                 </button>
                 <button
                   onClick={handleSave}
-                  disabled={!hasChanges || validation === 'validating'}
+                  disabled={!hasChanges || validating}
                   className="px-3 py-1.5 rounded-lg bg-accent/20 border border-accent/30 text-sm text-accent hover:bg-accent/30 disabled:opacity-30 transition cursor-pointer"
                 >
                   Salvar

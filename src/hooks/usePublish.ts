@@ -2,74 +2,41 @@ import { useCallback, useEffect, useState } from 'react'
 import { useAtomValue } from 'jotai'
 import { activeProjectIdAtom } from '@/atoms'
 import { useFiles } from '@/hooks/useFiles'
+import { useApiCall, HttpMethod } from '@/hooks/useApiCall'
 import { db, dbReady } from '@/services/db'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
-
-interface PublishState {
-  isPublishing: boolean
-  publishedAt: number | null
-  error: string | null
-}
 
 export function usePublish() {
   const activeProjectId = useAtomValue(activeProjectIdAtom)
   const { files } = useFiles()
-  const [state, setState] = useState<PublishState>({
-    isPublishing: false,
-    publishedAt: null,
-    error: null,
-  })
+  const [publishedAt, setPublishedAt] = useState<number | null>(null)
 
-  // Load existing published state on project change
+  const { loading: isPublishing, error, execute: callPublish } = useApiCall<
+    { projectId: string | null; files: Record<string, string> },
+    { html: string; publishedAt: number }
+  >(HttpMethod.POST, '/api/publish')
+
   useEffect(() => {
     if (!activeProjectId) return
     dbReady.then(async () => {
       const site = await db.publishedSites.get(activeProjectId)
-      if (site) {
-        setState((prev) => ({ ...prev, publishedAt: site.publishedAt }))
-      } else {
-        setState((prev) => ({ ...prev, publishedAt: null }))
-      }
+      setPublishedAt(site?.publishedAt ?? null)
     })
   }, [activeProjectId])
 
   const publish = useCallback(async () => {
-    if (!activeProjectId || state.isPublishing) return
+    if (!activeProjectId || isPublishing) return
 
-    setState((prev) => ({ ...prev, isPublishing: true, error: null }))
+    const data = await callPublish({ projectId: activeProjectId, files })
+    if (!data) return
 
-    try {
-      const response = await fetch(`${API_URL}/api/publish`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId: activeProjectId, files }),
-      })
+    await db.publishedSites.put({
+      projectId: activeProjectId,
+      html: data.html,
+      publishedAt: data.publishedAt,
+    })
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Erro ao gerar preview')
-      }
-
-      const data = await response.json()
-
-      // Save to IndexedDB
-      await db.publishedSites.put({
-        projectId: activeProjectId,
-        html: data.html,
-        publishedAt: data.publishedAt,
-      })
-
-      setState({
-        isPublishing: false,
-        publishedAt: data.publishedAt,
-        error: null,
-      })
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro ao gerar preview'
-      setState((prev) => ({ ...prev, isPublishing: false, error: message }))
-    }
-  }, [activeProjectId, files, state.isPublishing])
+    setPublishedAt(data.publishedAt)
+  }, [activeProjectId, files, isPublishing, callPublish])
 
   const openPublished = useCallback(async () => {
     if (!activeProjectId) return
@@ -81,5 +48,5 @@ export function usePublish() {
     window.open(url, '_blank')
   }, [activeProjectId])
 
-  return { ...state, publish, openPublished }
+  return { isPublishing, publishedAt, error, publish, openPublished }
 }
