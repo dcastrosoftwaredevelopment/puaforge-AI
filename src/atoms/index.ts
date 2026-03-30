@@ -1,4 +1,5 @@
 import { atom } from 'jotai'
+import { atomWithStorage } from 'jotai/utils'
 
 // Project
 export interface Project {
@@ -93,3 +94,25 @@ export const apiKeyEnabledAtom = atom(true)
 // Device preview
 export type DevicePreview = 'desktop' | 'tablet' | 'mobile'
 export const devicePreviewAtom = atom<DevicePreview>('desktop')
+
+// Color palette (persisted globally in localStorage)
+export interface PaletteColor {
+  id: string
+  name: string
+  value: string // hex
+  locked?: boolean // system defaults — cannot be deleted, but can be edited
+}
+
+export const DEFAULT_PALETTE: PaletteColor[] = [
+  { id: 'primary', name: 'Primary', value: '#6366f1', locked: true },
+  { id: 'primary-light', name: 'Primary Light', value: '#818cf8', locked: true },
+  { id: 'bg-dark', name: 'Background', value: '#08080d', locked: true },
+  { id: 'bg-surface', name: 'Surface', value: '#18181f', locked: true },
+  { id: 'text', name: 'Text', value: '#f8fafc', locked: true },
+  { id: 'text-muted', name: 'Text Muted', value: '#94a3b8', locked: true },
+  { id: 'success', name: 'Success', value: '#10b981', locked: true },
+  { id: 'warning', name: 'Warning', value: '#f59e0b', locked: true },
+  { id: 'error', name: 'Error', value: '#ef4444', locked: true },
+]
+
+export const colorPaletteAtom = atomWithStorage<PaletteColor[]>('puaforge_color_palette', DEFAULT_PALETTE)

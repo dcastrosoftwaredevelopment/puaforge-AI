@@ -10,6 +10,7 @@ import { useApiKey } from '@/hooks/useApiKey'
 import { generateCode } from '@/services/aiService'
 import { mergeFiles, extractDependencies } from '@/services/fileParser'
 import { useProjectImages } from '@/hooks/useProjectImages'
+import { useColorPalette } from '@/hooks/useColorPalette'
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 const MAX_BASE64_BYTES = 5 * 1024 * 1024 // 5MB — limite da API do Claude
@@ -96,6 +97,7 @@ export default function PromptInput() {
   const { isDirty } = useEditorState()
   const { effectiveApiKey } = useApiKey()
   const { getImagesContext } = useProjectImages()
+  const { getColorsContext } = useColorPalette()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,9 +137,9 @@ export default function PromptInput() {
 
     try {
       const imagesCtx = getImagesContext()
-      const fullPrompt = imagesCtx
-        ? `${text || 'Analise esta imagem e crie o layout correspondente.'}\n\n${imagesCtx}`
-        : (text || 'Analise esta imagem e crie o layout correspondente.')
+      const colorsCtx = getColorsContext()
+      const baseText = text || 'Analise esta imagem e crie o layout correspondente.'
+      const fullPrompt = [baseText, imagesCtx, colorsCtx].filter(Boolean).join('\n\n')
 
       const result = await generateCode({
         prompt: fullPrompt,
