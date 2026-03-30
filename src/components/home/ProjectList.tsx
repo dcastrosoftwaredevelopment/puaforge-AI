@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Plus } from 'lucide-react'
+import { useAtomValue } from 'jotai'
+import { authTokenAtom } from '@/atoms/authAtoms'
 import { useProjects } from '@/hooks/useProjects'
 import { useProjectActions } from '@/hooks/useProjectActions'
-import { db, dbReady } from '@/services/db'
+import { api } from '@/services/api'
 import Sidebar from '@/components/home/Sidebar'
 import EmptyState from '@/components/home/EmptyState'
 import ProjectCard from '@/components/home/ProjectCard'
@@ -10,22 +12,32 @@ import ProjectCard from '@/components/home/ProjectCard'
 export default function ProjectList() {
   const { projects } = useProjects()
   const { createProject, openProject, deleteProject } = useProjectActions()
+  const token = useAtomValue(authTokenAtom)
   const [publishedIds, setPublishedIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
-    dbReady.then(async () => {
-      const sites = await db.publishedSites.toArray()
-      setPublishedIds(new Set(sites.map((s) => s.projectId)))
-    })
-  }, [projects])
+    if (!token || projects.length === 0) return
+    const headers = { Authorization: `Bearer ${token}` }
+    Promise.all(
+      projects.map((p) =>
+        api.get<{ publishedAt: number }>(`/api/projects/${p.id}/published`, headers)
+          .then(() => p.id)
+          .catch(() => null),
+      ),
+    ).then((ids) => setPublishedIds(new Set(ids.filter(Boolean) as string[])))
+  }, [projects, token])
 
-  const openPreview = async (projectId: string) => {
-    const site = await db.publishedSites.get(projectId)
+  const openPreview = useCallback(async (projectId: string) => {
+    if (!token) return
+    const site = await api.get<{ html: string; publishedAt: number }>(
+      `/api/projects/${projectId}/published`,
+      { Authorization: `Bearer ${token}` },
+    ).catch(() => null)
     if (!site) return
     const blob = new Blob([site.html], { type: 'text/html' })
     const url = URL.createObjectURL(blob)
     window.open(url, '_blank')
-  }
+  }, [token])
 
   return (
     <div className="h-screen flex bg-bg-primary">

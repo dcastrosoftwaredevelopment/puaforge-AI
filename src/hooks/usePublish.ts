@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useAtomValue } from 'jotai'
 import { activeProjectIdAtom } from '@/atoms'
+import { authTokenAtom } from '@/atoms/authAtoms'
 import { useFiles } from '@/hooks/useFiles'
 import { useApiCall, HttpMethod } from '@/hooks/useApiCall'
-import { db, dbReady } from '@/services/db'
+import { api } from '@/services/api'
 
 export function usePublish() {
   const activeProjectId = useAtomValue(activeProjectIdAtom)
+  const token = useAtomValue(authTokenAtom)
   const { files } = useFiles()
   const [publishedAt, setPublishedAt] = useState<number | null>(null)
 
@@ -15,38 +17,47 @@ export function usePublish() {
     { html: string; publishedAt: number }
   >(HttpMethod.POST, '/api/publish')
 
+  const authHeaders = token ? { Authorization: `Bearer ${token}` } : undefined
+
+  // Load published state from API on project change
   useEffect(() => {
-    if (!activeProjectId) return
-    dbReady.then(async () => {
-      const site = await db.publishedSites.get(activeProjectId)
-      setPublishedAt(site?.publishedAt ?? null)
-    })
-  }, [activeProjectId])
+    if (!activeProjectId || !authHeaders) return
+    api.get<{ html: string; publishedAt: number }>(
+      `/api/projects/${activeProjectId}/published`,
+      authHeaders,
+    )
+      .then((site) => setPublishedAt(site.publishedAt))
+      .catch(() => setPublishedAt(null))
+  }, [activeProjectId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const publish = useCallback(async () => {
-    if (!activeProjectId || isPublishing) return
+    if (!activeProjectId || isPublishing || !authHeaders) return
 
     const data = await callPublish({ projectId: activeProjectId, files })
     if (!data) return
 
-    await db.publishedSites.put({
-      projectId: activeProjectId,
-      html: data.html,
-      publishedAt: data.publishedAt,
-    })
+    // Store the published HTML in the DB
+    await api.put(
+      `/api/projects/${activeProjectId}/published`,
+      { html: data.html, publishedAt: data.publishedAt },
+      authHeaders,
+    )
 
     setPublishedAt(data.publishedAt)
-  }, [activeProjectId, files, isPublishing, callPublish])
+  }, [activeProjectId, authHeaders, files, isPublishing, callPublish])
 
   const openPublished = useCallback(async () => {
-    if (!activeProjectId) return
-    const site = await db.publishedSites.get(activeProjectId)
+    if (!activeProjectId || !authHeaders) return
+    const site = await api.get<{ html: string; publishedAt: number }>(
+      `/api/projects/${activeProjectId}/published`,
+      authHeaders,
+    ).catch(() => null)
     if (!site) return
 
     const blob = new Blob([site.html], { type: 'text/html' })
     const url = URL.createObjectURL(blob)
     window.open(url, '_blank')
-  }, [activeProjectId])
+  }, [activeProjectId, authHeaders])
 
   return { isPublishing, publishedAt, error, publish, openPublished }
 }

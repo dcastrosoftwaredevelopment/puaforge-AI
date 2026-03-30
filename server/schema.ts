@@ -1,4 +1,11 @@
-import { pgTable, uuid, varchar, text, boolean, timestamp } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, text, boolean, timestamp, integer, jsonb, customType } from 'drizzle-orm/pg-core'
+
+// Custom bytea type for binary image data
+const bytea = customType<{ data: Buffer; notNull: false; default: false }>({
+  dataType() {
+    return 'bytea'
+  },
+})
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -18,6 +25,60 @@ export const userSettings = pgTable('user_settings', {
   updatedAt: timestamp('updated_at').defaultNow(),
 })
 
+export const projects = pgTable('projects', {
+  id: uuid('id').primaryKey(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at').notNull(),
+  updatedAt: timestamp('updated_at').notNull(),
+})
+
+export const messages = pgTable('messages', {
+  id: uuid('id').primaryKey(),
+  projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  role: varchar('role', { length: 20 }).notNull(),
+  content: text('content').notNull(),
+  images: jsonb('images'),
+  createdAt: timestamp('created_at').notNull(),
+})
+
+export const projectFiles = pgTable('project_files', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  path: text('path').notNull(),
+  code: text('code').notNull(),
+  updatedAt: timestamp('updated_at').notNull(),
+})
+
+export const projectImages = pgTable('project_images', {
+  id: uuid('id').primaryKey(),
+  projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 255 }).notNull(),
+  data: bytea('data').notNull(),
+  mediaType: varchar('media_type', { length: 100 }).notNull(),
+  size: integer('size').notNull(),
+})
+
+export const checkpoints = pgTable('checkpoints', {
+  id: uuid('id').primaryKey(),
+  projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 255 }).notNull(),
+  files: jsonb('files').$type<Record<string, string>>().notNull(),
+  createdAt: timestamp('created_at').notNull(),
+})
+
+export const publishedSites = pgTable('published_sites', {
+  projectId: uuid('project_id').primaryKey().references(() => projects.id, { onDelete: 'cascade' }),
+  html: text('html').notNull(),
+  publishedAt: timestamp('published_at').notNull(),
+})
+
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
 export type UserSettings = typeof userSettings.$inferSelect
+export type Project = typeof projects.$inferSelect
+export type Message = typeof messages.$inferSelect
+export type ProjectFile = typeof projectFiles.$inferSelect
+export type ProjectImage = typeof projectImages.$inferSelect
+export type Checkpoint = typeof checkpoints.$inferSelect
+export type PublishedSite = typeof publishedSites.$inferSelect

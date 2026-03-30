@@ -1,19 +1,22 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useSetAtom } from 'jotai'
+import { useSetAtom, useAtomValue } from 'jotai'
 import { activeProjectIdAtom, messagesAtom, filesAtom, projectImagesAtom, checkpointsAtom, type Message, type ProjectImage, type Checkpoint } from '@/atoms'
+import { authTokenAtom } from '@/atoms/authAtoms'
 import { depsAtom } from '@/hooks/useFiles'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
 import { extractDependencies } from '@/services/fileParser'
-import { db, dbReady } from '@/services/db'
+import { api } from '@/services/api'
 import { waitForPersist } from '@/hooks/usePersistence'
+import { generateImagesFiles } from '@/hooks/useProjectImages'
 
 /**
- * Loads project data (messages, files, deps) from IndexedDB when projectId changes.
+ * Loads project data from PostgreSQL API when projectId changes.
  * Sets atoms BEFORE activeProjectId to prevent persistence race conditions.
  */
 export function useProjectLoader(projectId: string | undefined) {
   const navigate = useNavigate()
+  const token = useAtomValue(authTokenAtom)
   const setActiveProjectId = useSetAtom(activeProjectIdAtom)
   const setMessages = useSetAtom(messagesAtom)
   const setFiles = useSetAtom(filesAtom)
@@ -25,83 +28,50 @@ export function useProjectLoader(projectId: string | undefined) {
 
   useEffect(() => {
     if (!projectId || loadedRef.current === projectId) return
+    if (!token) {
+      navigate('/', { replace: true })
+      return
+    }
 
     let cancelled = false
+    const headers = { Authorization: `Bearer ${token}` }
 
     async function load() {
-      await dbReady
       await waitForPersist()
 
-      const project = await db.projects.get(projectId!)
-      if (!project) {
-        navigate('/', { replace: true })
-        return
-      }
-      if (cancelled) return
+      try {
+        const [savedMessages, fileMap, savedImages, savedCheckpoints] = await Promise.all([
+          api.get<Message[]>(`/api/projects/${projectId}/messages`, headers),
+          api.get<Record<string, string>>(`/api/projects/${projectId}/files`, headers),
+          api.get<ProjectImage[]>(`/api/projects/${projectId}/images`, headers),
+          api.get<Checkpoint[]>(`/api/projects/${projectId}/checkpoints`, headers),
+        ])
 
-      const savedMessages = await db.messages
-        .where('projectId')
-        .equals(projectId!)
-        .sortBy('timestamp')
-      if (cancelled) return
+        if (cancelled) return
 
-      const savedFiles = await db.projectFiles
-        .where('projectId')
-        .equals(projectId!)
-        .toArray()
-      if (cancelled) return
+        const files = Object.keys(fileMap).length > 0 ? fileMap : DEFAULT_FILES
+        const detectedDeps = extractDependencies(files)
 
-      let fileMap: Record<string, string>
-      let detectedDeps: Record<string, string> = {}
-      if (savedFiles.length > 0) {
-        fileMap = {}
-        for (const f of savedFiles) fileMap[f.path] = f.code
-        detectedDeps = extractDependencies(fileMap)
-      } else {
-        fileMap = DEFAULT_FILES
-      }
+        // Inject generated image files if project has images
+        const filesWithImages = savedImages.length > 0
+          ? { ...files, ...generateImagesFiles(savedImages) }
+          : files
 
-      const savedImages = await db.projectImages
-        .where('projectId')
-        .equals(projectId!)
-        .toArray()
-      if (cancelled) return
+        setProjectImages(savedImages)
+        setCheckpoints([...savedCheckpoints].reverse())
+        setMessages(savedMessages)
+        setFiles(filesWithImages)
+        setDeps(Object.keys(detectedDeps).length > 0 ? detectedDeps : {})
+        setActiveProjectId(projectId!)
 
-      const savedCheckpoints = await db.checkpoints
-        .where('projectId')
-        .equals(projectId!)
-        .reverse()
-        .sortBy('createdAt')
-      if (cancelled) return
-
-      // Set data BEFORE activeProjectId to avoid persistence saving stale data
-      const projectImages = savedImages.map(({ projectId: _, ...img }) => img) as ProjectImage[]
-      setProjectImages(projectImages)
-      setCheckpoints(savedCheckpoints.map(({ projectId: _, ...c }) => c) as Checkpoint[])
-      setMessages(savedMessages.map(({ projectId: _, ...m }) => m) as Message[])
-      // Regenerate /assets/images.ts if project has images
-      if (projectImages.length > 0) {
-        const exports = projectImages
-          .map((img) => {
-            const base = img.name.replace(/\.[^.]+$/, '')
-            const exportName = base
-              .replace(/[^a-zA-Z0-9]+(.)/g, (_, c: string) => c.toUpperCase())
-              .replace(/[^a-zA-Z0-9]/g, '')
-              .replace(/^(\d)/, '_$1')
-            return `export const ${exportName} = '${img.dataUrl}'`
-          })
-          .join('\n')
-        fileMap['/assets/images.ts'] = `// Auto-generated — do not edit manually\n${exports}\n`
-      }
-
-      setFiles(fileMap)
-      setDeps(Object.keys(detectedDeps).length > 0 ? detectedDeps : {})
-      setActiveProjectId(projectId!)
-      db.settings.put({ key: 'activeProjectId', value: projectId! })
-
-      if (!cancelled) {
-        loadedRef.current = projectId!
-        setIsReady(true)
+        if (!cancelled) {
+          loadedRef.current = projectId!
+          setIsReady(true)
+        }
+      } catch {
+        if (!cancelled) {
+          navigate('/', { replace: true })
+        }
       }
     }
 

@@ -10,6 +10,7 @@ import { settingsRoute } from './routes/settings.js'
 import { authRoute } from './routes/auth.js'
 import { userSettingsRoute } from './routes/userSettings.js'
 import { profileRoute } from './routes/profile.js'
+import { projectsRoute } from './routes/projects.js'
 import { runMigrations } from './db.js'
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env') })
@@ -24,6 +25,7 @@ app.use(express.json({ limit: '50mb' }))
 app.use('/api', authRoute)
 app.use('/api', userSettingsRoute)
 app.use('/api', profileRoute)
+app.use('/api', projectsRoute)
 app.use('/api', generateRoute)
 app.use('/api', modelsRoute)
 app.use('/api', publishRoute)

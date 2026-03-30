@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { db, dbReady } from '@/services/db'
+import { authTokenAtom } from '@/atoms/authAtoms'
 import {
   projectsAtom,
   activeProjectIdAtom,
@@ -16,16 +16,31 @@ import {
   type ViewMode,
   type DevicePreview,
 } from '@/atoms'
+import { api } from '@/services/api'
 
-/** Resolves when the latest persistence write is done — lets readers wait for pending saves */
-let pendingPersist: Promise<void> = Promise.resolve()
+// ─── localStorage helpers ─────────────────────────────────────────────────────
+
+function lsGet(key: string): string | null {
+  try { return localStorage.getItem(key) } catch { return null }
+}
+function lsSet(key: string, value: string) {
+  try { localStorage.setItem(key, value) } catch { /* ignore */ }
+}
+
+// ─── Hook for useProjectLoader to wait for projects to load ───────────────────
+
+let pendingHydration: Promise<void> = Promise.resolve()
 export function waitForPersist() {
-  return pendingPersist
+  return pendingHydration
+}
+
+interface ApiProject {
+  id: string; name: string; createdAt: number; updatedAt: number
 }
 
 export function usePersistence() {
+  const token = useAtomValue(authTokenAtom)
   const setProjects = useSetAtom(projectsAtom)
-  const activeProjectId = useAtomValue(activeProjectIdAtom)
   const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom)
   const setViewMode = useSetAtom(viewModeAtom)
   const setDevicePreview = useSetAtom(devicePreviewAtom)
@@ -35,32 +50,40 @@ export function usePersistence() {
   const hydrated = useRef(false)
   const [isHydrated, setIsHydrated] = useState(false)
 
-  // Hydrate projects list + settings on mount
+  // Hydrate UI settings from localStorage + projects from API on mount
   useEffect(() => {
     async function hydrate() {
       try {
-        await dbReady
-        const allProjects = await db.projects.orderBy('updatedAt').reverse().toArray()
-        setProjects(allProjects as Project[])
+        // UI preferences from localStorage
+        const model = lsGet('selectedModel')
+        if (model) setSelectedModel(model)
 
-        const modelSetting = await db.settings.get('selectedModel')
-        if (modelSetting) setSelectedModel(modelSetting.value)
+        const viewMode = lsGet('viewMode')
+        if (viewMode) setViewMode(viewMode as ViewMode)
 
-        const viewModeSetting = await db.settings.get('viewMode')
-        if (viewModeSetting) setViewMode(viewModeSetting.value as ViewMode)
+        const device = lsGet('devicePreview')
+        if (device) setDevicePreview(device as DevicePreview)
 
-        const deviceSetting = await db.settings.get('devicePreview')
-        if (deviceSetting) setDevicePreview(deviceSetting.value as DevicePreview)
+        const chatOpen = lsGet('isChatOpen')
+        if (chatOpen !== null) setIsChatOpen(chatOpen === 'true')
 
-        const chatOpenSetting = await db.settings.get('isChatOpen')
-        if (chatOpenSetting) setIsChatOpen(chatOpenSetting.value === 'true')
+        const editorFraction = lsGet('editorFraction')
+        if (editorFraction) setEditorFraction(parseFloat(editorFraction))
 
-        const editorFractionSetting = await db.settings.get('editorFraction')
-        if (editorFractionSetting) setEditorFraction(parseFloat(editorFractionSetting.value))
+        const chatWidth = lsGet('chatWidth')
+        if (chatWidth) setChatWidth(parseInt(chatWidth, 10))
 
-        const chatWidthSetting = await db.settings.get('chatWidth')
-        if (chatWidthSetting) setChatWidth(parseInt(chatWidthSetting.value, 10))
+        // Projects from API (requires auth)
+        if (token) {
+          let resolve!: () => void
+          pendingHydration = new Promise<void>((r) => { resolve = r })
 
+          const projects = await api.get<ApiProject[]>('/api/projects', {
+            Authorization: `Bearer ${token}`,
+          })
+          setProjects(projects.sort((a, b) => b.updatedAt - a.updatedAt) as Project[])
+          resolve()
+        }
       } catch (error) {
         console.error('[persistence] Hydration error:', error)
       } finally {
@@ -71,72 +94,64 @@ export function usePersistence() {
     hydrate()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Persist messages — atomic transaction
-  const messagesValue = useAtomValue(messagesAtom)
-  useEffect(() => {
-    if (!hydrated.current || !activeProjectId) return
-    const pid = activeProjectId
-    const entries = messagesValue.map((m) => ({ ...m, projectId: pid }))
-    pendingPersist = db.transaction('rw', db.messages, async () => {
-      await db.messages.where('projectId').equals(pid).delete()
-      await db.messages.bulkPut(entries)
-    }).catch((e) => console.error('[persistence] messages save error:', e))
-  }, [messagesValue, activeProjectId])
-
-  // Persist files — atomic transaction
-  const filesValue = useAtomValue(filesAtom)
-  useEffect(() => {
-    if (!hydrated.current || !activeProjectId) return
-    const pid = activeProjectId
-    const entries = Object.entries(filesValue).map(([path, code]) => ({
-      projectId: pid,
-      path,
-      code,
-      updatedAt: Date.now(),
-    }))
-    pendingPersist = db.transaction('rw', db.projectFiles, async () => {
-      await db.projectFiles.where('projectId').equals(pid).delete()
-      await db.projectFiles.bulkAdd(entries)
-    }).then(() => {
-      db.projects.update(pid, { updatedAt: Date.now() })
-    }).catch((e) => console.error('[persistence] files save error:', e))
-  }, [filesValue, activeProjectId])
-
-  // Persist settings
+  // Persist UI settings to localStorage
   useEffect(() => {
     if (!hydrated.current) return
-    db.settings.put({ key: 'selectedModel', value: selectedModel })
+    lsSet('selectedModel', selectedModel)
   }, [selectedModel])
 
   const viewMode = useAtomValue(viewModeAtom)
   useEffect(() => {
     if (!hydrated.current) return
-    db.settings.put({ key: 'viewMode', value: viewMode })
+    lsSet('viewMode', viewMode)
   }, [viewMode])
 
   const devicePreview = useAtomValue(devicePreviewAtom)
   useEffect(() => {
     if (!hydrated.current) return
-    db.settings.put({ key: 'devicePreview', value: devicePreview })
+    lsSet('devicePreview', devicePreview)
   }, [devicePreview])
 
   const isChatOpen = useAtomValue(isChatOpenAtom)
   useEffect(() => {
     if (!hydrated.current) return
-    db.settings.put({ key: 'isChatOpen', value: String(isChatOpen) })
+    lsSet('isChatOpen', String(isChatOpen))
   }, [isChatOpen])
 
   const editorFraction = useAtomValue(editorFractionAtom)
   useEffect(() => {
     if (!hydrated.current) return
-    db.settings.put({ key: 'editorFraction', value: String(editorFraction) })
+    lsSet('editorFraction', String(editorFraction))
   }, [editorFraction])
 
   const chatWidth = useAtomValue(chatWidthAtom)
   useEffect(() => {
     if (!hydrated.current) return
-    db.settings.put({ key: 'chatWidth', value: String(chatWidth) })
+    lsSet('chatWidth', String(chatWidth))
   }, [chatWidth])
+
+  // Auto-save messages to API
+  const activeProjectId = useAtomValue(activeProjectIdAtom)
+  const messagesValue = useAtomValue(messagesAtom)
+  useEffect(() => {
+    if (!hydrated.current || !activeProjectId || !token) return
+    api.put(
+      `/api/projects/${activeProjectId}/messages`,
+      { msgs: messagesValue },
+      { Authorization: `Bearer ${token}` },
+    ).catch((e) => console.error('[persistence] messages save error:', e))
+  }, [messagesValue, activeProjectId, token])
+
+  // Auto-save files to API
+  const filesValue = useAtomValue(filesAtom)
+  useEffect(() => {
+    if (!hydrated.current || !activeProjectId || !token) return
+    api.put(
+      `/api/projects/${activeProjectId}/files`,
+      filesValue,
+      { Authorization: `Bearer ${token}` },
+    ).catch((e) => console.error('[persistence] files save error:', e))
+  }, [filesValue, activeProjectId, token])
 
   return { isHydrated }
 }

@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
-import { useSetAtom } from 'jotai'
+import { useSetAtom, useAtomValue } from 'jotai'
 import { useNavigate } from 'react-router-dom'
-import { db, dbReady } from '@/services/db'
+import { authTokenAtom } from '@/atoms/authAtoms'
 import {
   projectsAtom,
   activeProjectIdAtom,
@@ -14,9 +14,11 @@ import {
 import { depsAtom } from '@/hooks/useFiles'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
 import { generateProjectName } from '@/utils/projectNames'
+import { api } from '@/services/api'
 
 export function useProjectActions() {
   const navigate = useNavigate()
+  const token = useAtomValue(authTokenAtom)
   const setProjects = useSetAtom(projectsAtom)
   const setActiveProjectId = useSetAtom(activeProjectIdAtom)
   const setMessages = useSetAtom(messagesAtom)
@@ -25,18 +27,19 @@ export function useProjectActions() {
   const setProjectImages = useSetAtom(projectImagesAtom)
   const setCheckpoints = useSetAtom(checkpointsAtom)
 
+  const authHeaders = token ? { Authorization: `Bearer ${token}` } : undefined
+
   const createProject = useCallback(async () => {
-    await dbReady
+    if (!authHeaders) return
     const project: Project = {
       id: crypto.randomUUID(),
       name: generateProjectName(),
       createdAt: Date.now(),
       updatedAt: Date.now(),
     }
-    await db.projects.add(project)
+    await api.post('/api/projects', project, authHeaders)
     setProjects((prev) => [project, ...prev])
 
-    // Clear state before navigating to new project
     setActiveProjectId(project.id)
     setMessages([])
     setFiles(DEFAULT_FILES)
@@ -46,32 +49,26 @@ export function useProjectActions() {
 
     navigate(`/project/${project.id}`)
     return project
-  }, [navigate, setProjects, setActiveProjectId, setMessages, setFiles, setDeps, setProjectImages, setCheckpoints])
+  }, [authHeaders, navigate, setProjects, setActiveProjectId, setMessages, setFiles, setDeps, setProjectImages, setCheckpoints])
 
   const openProject = useCallback((id: string) => {
     navigate(`/project/${id}`)
   }, [navigate])
 
   const deleteProject = useCallback(async (id: string) => {
-    await Promise.all([
-      db.projects.delete(id),
-      db.messages.where('projectId').equals(id).delete(),
-      db.projectFiles.where('projectId').equals(id).delete(),
-      db.projectImages.where('projectId').equals(id).delete(),
-      db.checkpoints.where('projectId').equals(id).delete(),
-      db.publishedSites.delete(id),
-    ])
+    if (!authHeaders) return
+    await api.delete(`/api/projects/${id}`, authHeaders)
     setProjects((prev) => prev.filter((p) => p.id !== id))
-  }, [setProjects])
+  }, [authHeaders, setProjects])
 
   const renameProject = useCallback(async (id: string, name: string) => {
-    await db.projects.update(id, { name, updatedAt: Date.now() })
+    if (!authHeaders) return
+    await api.patch(`/api/projects/${id}`, { name }, authHeaders)
     setProjects((prev) => prev.map((p) => p.id === id ? { ...p, name } : p))
-  }, [setProjects])
+  }, [authHeaders, setProjects])
 
   const goHome = useCallback(() => {
     setActiveProjectId(null)
-    db.settings.delete('activeProjectId')
     navigate('/')
   }, [navigate, setActiveProjectId])
 

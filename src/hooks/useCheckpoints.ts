@@ -1,27 +1,31 @@
 import { useCallback } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
 import { activeProjectIdAtom, checkpointsAtom, messagesAtom, type Checkpoint } from '@/atoms'
+import { authTokenAtom } from '@/atoms/authAtoms'
 import { useFiles } from '@/hooks/useFiles'
-import { db } from '@/services/db'
+import { api } from '@/services/api'
 import { extractDependencies } from '@/services/fileParser'
 
 export function useCheckpoints() {
   const [checkpoints, setCheckpoints] = useAtom(checkpointsAtom)
   const [, setMessages] = useAtom(messagesAtom)
   const activeProjectId = useAtomValue(activeProjectIdAtom)
+  const token = useAtomValue(authTokenAtom)
   const { files, setFiles, setDeps } = useFiles()
 
+  const authHeaders = token ? { Authorization: `Bearer ${token}` } : undefined
+
   const createCheckpoint = useCallback(async (name: string) => {
-    if (!activeProjectId) return
+    if (!activeProjectId || !authHeaders) return
     const checkpoint: Checkpoint = {
       id: crypto.randomUUID(),
       name: name.trim() || `Checkpoint ${checkpoints.length + 1}`,
       files: { ...files },
       createdAt: Date.now(),
     }
-    await db.checkpoints.add({ ...checkpoint, projectId: activeProjectId })
+    await api.post(`/api/projects/${activeProjectId}/checkpoints`, checkpoint, authHeaders)
     setCheckpoints((prev) => [checkpoint, ...prev])
-  }, [activeProjectId, files, checkpoints.length, setCheckpoints])
+  }, [activeProjectId, authHeaders, files, checkpoints.length, setCheckpoints])
 
   const restoreCheckpoint = useCallback(async (id: string) => {
     const checkpoint = checkpoints.find((c) => c.id === id)
@@ -47,16 +51,18 @@ export function useCheckpoints() {
   }, [checkpoints, setFiles, setDeps, setMessages])
 
   const deleteCheckpoint = useCallback(async (id: string) => {
-    await db.checkpoints.delete(id)
+    if (!activeProjectId || !authHeaders) return
+    await api.delete(`/api/projects/${activeProjectId}/checkpoints/${id}`, authHeaders)
     setCheckpoints((prev) => prev.filter((c) => c.id !== id))
-  }, [setCheckpoints])
+  }, [activeProjectId, authHeaders, setCheckpoints])
 
   const renameCheckpoint = useCallback(async (id: string, name: string) => {
+    if (!activeProjectId || !authHeaders) return
     const trimmed = name.trim()
     if (!trimmed) return
-    await db.checkpoints.update(id, { name: trimmed })
+    await api.patch(`/api/projects/${activeProjectId}/checkpoints/${id}`, { name: trimmed }, authHeaders)
     setCheckpoints((prev) => prev.map((c) => c.id === id ? { ...c, name: trimmed } : c))
-  }, [setCheckpoints])
+  }, [activeProjectId, authHeaders, setCheckpoints])
 
   return { checkpoints, createCheckpoint, restoreCheckpoint, deleteCheckpoint, renameCheckpoint }
 }
