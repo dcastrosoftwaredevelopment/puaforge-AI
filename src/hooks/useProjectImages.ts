@@ -22,17 +22,17 @@ function toCssVarName(fileName: string): string {
 
 /**
  * Generates virtual file contents for /assets/images.ts and /assets/images.css.
- * Exported so useProjectLoader can inject these files on load.
+ * Images are referenced by their PocketBase URL — no base64 duplication.
  */
 export function generateImagesFiles(images: ProjectImage[]): Record<string, string> {
   if (images.length === 0) return {}
 
   const tsExports = images
-    .map((img) => `export const ${toExportName(img.name)} = 'var(${toCssVarName(img.name)})'`)
+    .map((img) => `export const ${toExportName(img.name)} = '${img.url}'`)
     .join('\n')
 
   const cssVars = images
-    .map((img) => `  ${toCssVarName(img.name)}: url('${img.dataUrl}');`)
+    .map((img) => `  ${toCssVarName(img.name)}: url('${img.url}');`)
     .join('\n')
 
   return {
@@ -55,10 +55,8 @@ export function useProjectImages() {
   const syncImagesFiles = useCallback((updatedImages: ProjectImage[]) => {
     setFiles((prev) => {
       const next = { ...prev }
-      // Remove old generated files
       delete next['/assets/images.ts']
       delete next['/assets/images.css']
-      // Inject new ones if there are images
       return Object.assign(next, generateImagesFiles(updatedImages))
     })
   }, [setFiles])
@@ -66,36 +64,15 @@ export function useProjectImages() {
   const addImage = useCallback(async (file: File) => {
     if (!activeProjectId || !authHeaders) return
 
-    return new Promise<ProjectImage>((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = async () => {
-        const dataUrl = reader.result as string
-        // Strip the data URL prefix to get raw base64 for storage
-        const [header, base64Data] = dataUrl.split(',', 2)
-        const mediaType = header.replace('data:', '').replace(';base64', '')
+    const formData = new FormData()
+    formData.append('file', file)
 
-        const image: ProjectImage = {
-          id: crypto.randomUUID(),
-          name: file.name,
-          dataUrl,
-          mediaType,
-          size: file.size,
-        }
+    const image = await api.upload<ProjectImage>(`/api/projects/${activeProjectId}/images`, formData, authHeaders)
 
-        await api.post(
-          `/api/projects/${activeProjectId}/images`,
-          { id: image.id, name: image.name, mediaType, size: file.size, data: base64Data },
-          authHeaders,
-        )
-
-        const updated = [...images, image]
-        setImages(updated)
-        syncImagesFiles(updated)
-        resolve(image)
-      }
-      reader.onerror = () => reject(new Error('Erro ao ler imagem'))
-      reader.readAsDataURL(file)
-    })
+    const updated = [...images, image]
+    setImages(updated)
+    syncImagesFiles(updated)
+    return image
   }, [activeProjectId, authHeaders, images, setImages, syncImagesFiles])
 
   const renameImage = useCallback(async (id: string, newName: string) => {
@@ -117,6 +94,7 @@ export function useProjectImages() {
 
   const removeImage = useCallback(async (id: string) => {
     if (!activeProjectId || !authHeaders) return
+
     await api.delete(`/api/projects/${activeProjectId}/images/${id}`, authHeaders)
     const updated = images.filter((img) => img.id !== id)
     setImages(updated)
@@ -127,9 +105,9 @@ export function useProjectImages() {
   const getImagesContext = useCallback((): string => {
     if (images.length === 0) return ''
     const list = images
-      .map((img) => `- ${toExportName(img.name)} (${img.name}) — also available as CSS var: var(${toCssVarName(img.name)})`)
+      .map((img) => `- ${toExportName(img.name)} (${img.name})\n  URL: ${img.url}\n  CSS var: var(${toCssVarName(img.name)})`)
       .join('\n')
-    return `Available project images (import from './assets/images', or use CSS variables):\n${list}`
+    return `Available project images (import from './assets/images', or use CSS variables, or use the URL directly):\n${list}`
   }, [images])
 
   return { images, addImage, renameImage, removeImage, getImagesContext }

@@ -1,8 +1,12 @@
 import { Router, type Request, type Response } from 'express'
 import { eq, and, asc } from 'drizzle-orm'
+import multer from 'multer'
 import { db } from '../db.js'
 import { projects, messages, projectFiles, projectImages, checkpoints, publishedSites } from '../schema.js'
 import { requireAuth } from '../middleware/auth.js'
+import { uploadFileToPocketBase, deleteFileFromPocketBase } from '../services/pocketbase.js'
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } })
 
 const router = Router()
 
@@ -10,6 +14,11 @@ const router = Router()
 
 function toMs(date: Date | null | undefined): number {
   return date ? date.getTime() : 0
+}
+
+/** Express 5 types req.params as string | string[] — this extracts the string value */
+function p(req: Request, name: string): string {
+  return req.params[name] as string
 }
 
 async function assertOwnership(projectId: string, userId: string, res: Response): Promise<boolean> {
@@ -58,33 +67,33 @@ router.post('/projects', requireAuth, async (req: Request, res: Response) => {
 })
 
 router.patch('/projects/:id', requireAuth, async (req: Request, res: Response) => {
-  if (!await assertOwnership(req.params.id, req.user!.userId, res)) return
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
   const { name } = req.body as { name: string }
 
   await db
     .update(projects)
     .set({ name, updatedAt: new Date() })
-    .where(eq(projects.id, req.params.id))
+    .where(eq(projects.id, p(req, 'id')))
 
   res.json({ ok: true })
 })
 
 router.delete('/projects/:id', requireAuth, async (req: Request, res: Response) => {
-  if (!await assertOwnership(req.params.id, req.user!.userId, res)) return
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
-  await db.delete(projects).where(eq(projects.id, req.params.id))
+  await db.delete(projects).where(eq(projects.id, p(req, 'id')))
   res.json({ ok: true })
 })
 
 // ─── Messages ─────────────────────────────────────────────────────────────────
 
 router.get('/projects/:id/messages', requireAuth, async (req: Request, res: Response) => {
-  if (!await assertOwnership(req.params.id, req.user!.userId, res)) return
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
   const rows = await db
     .select()
     .from(messages)
-    .where(eq(messages.projectId, req.params.id))
+    .where(eq(messages.projectId, p(req, 'id')))
     .orderBy(asc(messages.createdAt))
 
   res.json(rows.map((m) => ({
@@ -97,19 +106,19 @@ router.get('/projects/:id/messages', requireAuth, async (req: Request, res: Resp
 })
 
 router.put('/projects/:id/messages', requireAuth, async (req: Request, res: Response) => {
-  if (!await assertOwnership(req.params.id, req.user!.userId, res)) return
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
   const { msgs } = req.body as {
     msgs: Array<{ id: string; role: string; content: string; timestamp: number; images?: unknown }>
   }
 
   await db.transaction(async (tx) => {
-    await tx.delete(messages).where(eq(messages.projectId, req.params.id))
+    await tx.delete(messages).where(eq(messages.projectId, p(req, 'id')))
     if (msgs.length > 0) {
       await tx.insert(messages).values(
         msgs.map((m) => ({
           id: m.id,
-          projectId: req.params.id,
+          projectId: p(req, 'id'),
           role: m.role,
           content: m.content,
           images: m.images ?? null,
@@ -125,12 +134,12 @@ router.put('/projects/:id/messages', requireAuth, async (req: Request, res: Resp
 // ─── Files ─────────────────────────────────────────────────────────────────────
 
 router.get('/projects/:id/files', requireAuth, async (req: Request, res: Response) => {
-  if (!await assertOwnership(req.params.id, req.user!.userId, res)) return
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
   const rows = await db
     .select()
     .from(projectFiles)
-    .where(eq(projectFiles.projectId, req.params.id))
+    .where(eq(projectFiles.projectId, p(req, 'id')))
 
   const fileMap: Record<string, string> = {}
   for (const f of rows) fileMap[f.path] = f.code
@@ -138,17 +147,17 @@ router.get('/projects/:id/files', requireAuth, async (req: Request, res: Respons
 })
 
 router.put('/projects/:id/files', requireAuth, async (req: Request, res: Response) => {
-  if (!await assertOwnership(req.params.id, req.user!.userId, res)) return
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
   const files = req.body as Record<string, string>
 
   await db.transaction(async (tx) => {
-    await tx.delete(projectFiles).where(eq(projectFiles.projectId, req.params.id))
+    await tx.delete(projectFiles).where(eq(projectFiles.projectId, p(req, 'id')))
     const entries = Object.entries(files)
     if (entries.length > 0) {
       await tx.insert(projectFiles).values(
         entries.map(([path, code]) => ({
-          projectId: req.params.id,
+          projectId: p(req, 'id'),
           path,
           code,
           updatedAt: new Date(),
@@ -160,7 +169,7 @@ router.put('/projects/:id/files', requireAuth, async (req: Request, res: Respons
   await db
     .update(projects)
     .set({ updatedAt: new Date() })
-    .where(eq(projects.id, req.params.id))
+    .where(eq(projects.id, p(req, 'id')))
 
   res.json({ ok: true })
 })
@@ -168,60 +177,71 @@ router.put('/projects/:id/files', requireAuth, async (req: Request, res: Respons
 // ─── Images ─────────────────────────────────────────────────────────────────────
 
 router.get('/projects/:id/images', requireAuth, async (req: Request, res: Response) => {
-  if (!await assertOwnership(req.params.id, req.user!.userId, res)) return
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
   const rows = await db
     .select()
     .from(projectImages)
-    .where(eq(projectImages.projectId, req.params.id))
+    .where(eq(projectImages.projectId, p(req, 'id')))
 
   res.json(rows.map((img) => ({
     id: img.id,
     name: img.name,
     mediaType: img.mediaType,
     size: img.size,
-    // Reconstruct data URL from bytea buffer
-    dataUrl: `data:${img.mediaType};base64,${(img.data as Buffer).toString('base64')}`,
+    url: img.url,
   })))
 })
 
-router.post('/projects/:id/images', requireAuth, async (req: Request, res: Response) => {
-  if (!await assertOwnership(req.params.id, req.user!.userId, res)) return
+router.post('/projects/:id/images', requireAuth, upload.single('file'), async (req: Request, res: Response) => {
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
-  const { id, name, mediaType, size, data } = req.body as {
-    id: string; name: string; mediaType: string; size: number; data: string
+  if (!req.file) {
+    res.status(400).json({ error: 'Nenhum arquivo enviado' })
+    return
   }
+
+  const url = await uploadFileToPocketBase(req.file.buffer, req.file.originalname, req.file.mimetype, p(req, 'id'))
+  const id = crypto.randomUUID()
 
   await db.insert(projectImages).values({
     id,
-    projectId: req.params.id,
-    name,
-    data: Buffer.from(data, 'base64'),
-    mediaType,
-    size,
+    projectId: p(req, 'id'),
+    name: req.file.originalname,
+    url,
+    mediaType: req.file.mimetype,
+    size: req.file.size,
   })
 
-  res.json({ ok: true })
+  res.json({ id, name: req.file.originalname, url, mediaType: req.file.mimetype, size: req.file.size })
 })
 
 router.patch('/projects/:id/images/:imageId', requireAuth, async (req: Request, res: Response) => {
-  if (!await assertOwnership(req.params.id, req.user!.userId, res)) return
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
   const { name } = req.body as { name: string }
   await db
     .update(projectImages)
     .set({ name })
-    .where(and(eq(projectImages.id, req.params.imageId), eq(projectImages.projectId, req.params.id)))
+    .where(and(eq(projectImages.id, p(req, 'imageId')), eq(projectImages.projectId, p(req, 'id'))))
 
   res.json({ ok: true })
 })
 
 router.delete('/projects/:id/images/:imageId', requireAuth, async (req: Request, res: Response) => {
-  if (!await assertOwnership(req.params.id, req.user!.userId, res)) return
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
+
+  const [image] = await db
+    .select({ url: projectImages.url })
+    .from(projectImages)
+    .where(and(eq(projectImages.id, p(req, 'imageId')), eq(projectImages.projectId, p(req, 'id'))))
+    .limit(1)
+
+  if (image) await deleteFileFromPocketBase(image.url)
 
   await db
     .delete(projectImages)
-    .where(and(eq(projectImages.id, req.params.imageId), eq(projectImages.projectId, req.params.id)))
+    .where(and(eq(projectImages.id, p(req, 'imageId')), eq(projectImages.projectId, p(req, 'id'))))
 
   res.json({ ok: true })
 })
@@ -229,12 +249,12 @@ router.delete('/projects/:id/images/:imageId', requireAuth, async (req: Request,
 // ─── Checkpoints ──────────────────────────────────────────────────────────────
 
 router.get('/projects/:id/checkpoints', requireAuth, async (req: Request, res: Response) => {
-  if (!await assertOwnership(req.params.id, req.user!.userId, res)) return
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
   const rows = await db
     .select()
     .from(checkpoints)
-    .where(eq(checkpoints.projectId, req.params.id))
+    .where(eq(checkpoints.projectId, p(req, 'id')))
     .orderBy(asc(checkpoints.createdAt))
 
   res.json(rows.map((c) => ({
@@ -246,7 +266,7 @@ router.get('/projects/:id/checkpoints', requireAuth, async (req: Request, res: R
 })
 
 router.post('/projects/:id/checkpoints', requireAuth, async (req: Request, res: Response) => {
-  if (!await assertOwnership(req.params.id, req.user!.userId, res)) return
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
   const { id, name, files, createdAt } = req.body as {
     id: string; name: string; files: Record<string, string>; createdAt: number
@@ -254,7 +274,7 @@ router.post('/projects/:id/checkpoints', requireAuth, async (req: Request, res: 
 
   await db.insert(checkpoints).values({
     id,
-    projectId: req.params.id,
+    projectId: p(req, 'id'),
     name,
     files,
     createdAt: new Date(createdAt),
@@ -264,23 +284,23 @@ router.post('/projects/:id/checkpoints', requireAuth, async (req: Request, res: 
 })
 
 router.patch('/projects/:id/checkpoints/:checkpointId', requireAuth, async (req: Request, res: Response) => {
-  if (!await assertOwnership(req.params.id, req.user!.userId, res)) return
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
   const { name } = req.body as { name: string }
   await db
     .update(checkpoints)
     .set({ name })
-    .where(and(eq(checkpoints.id, req.params.checkpointId), eq(checkpoints.projectId, req.params.id)))
+    .where(and(eq(checkpoints.id, p(req, 'checkpointId')), eq(checkpoints.projectId, p(req, 'id'))))
 
   res.json({ ok: true })
 })
 
 router.delete('/projects/:id/checkpoints/:checkpointId', requireAuth, async (req: Request, res: Response) => {
-  if (!await assertOwnership(req.params.id, req.user!.userId, res)) return
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
   await db
     .delete(checkpoints)
-    .where(and(eq(checkpoints.id, req.params.checkpointId), eq(checkpoints.projectId, req.params.id)))
+    .where(and(eq(checkpoints.id, p(req, 'checkpointId')), eq(checkpoints.projectId, p(req, 'id'))))
 
   res.json({ ok: true })
 })
@@ -288,12 +308,12 @@ router.delete('/projects/:id/checkpoints/:checkpointId', requireAuth, async (req
 // ─── Published site ────────────────────────────────────────────────────────────
 
 router.get('/projects/:id/published', requireAuth, async (req: Request, res: Response) => {
-  if (!await assertOwnership(req.params.id, req.user!.userId, res)) return
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
   const [site] = await db
     .select()
     .from(publishedSites)
-    .where(eq(publishedSites.projectId, req.params.id))
+    .where(eq(publishedSites.projectId, p(req, 'id')))
     .limit(1)
 
   if (!site) {
@@ -305,13 +325,13 @@ router.get('/projects/:id/published', requireAuth, async (req: Request, res: Res
 })
 
 router.put('/projects/:id/published', requireAuth, async (req: Request, res: Response) => {
-  if (!await assertOwnership(req.params.id, req.user!.userId, res)) return
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
   const { html, publishedAt } = req.body as { html: string; publishedAt: number }
 
   await db
     .insert(publishedSites)
-    .values({ projectId: req.params.id, html, publishedAt: new Date(publishedAt) })
+    .values({ projectId: p(req, 'id'), html, publishedAt: new Date(publishedAt) })
     .onConflictDoUpdate({
       target: publishedSites.projectId,
       set: { html, publishedAt: new Date(publishedAt) },

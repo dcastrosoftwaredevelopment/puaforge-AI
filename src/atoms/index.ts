@@ -49,7 +49,7 @@ export const filesAtom = atom<Record<string, string>>({
 export interface ProjectImage {
   id: string
   name: string
-  dataUrl: string
+  url: string
   mediaType: string
   size: number
 }

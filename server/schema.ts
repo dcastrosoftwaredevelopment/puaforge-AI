@@ -1,11 +1,4 @@
-import { pgTable, uuid, varchar, text, boolean, timestamp, integer, jsonb, customType } from 'drizzle-orm/pg-core'
-
-// Custom bytea type for binary image data
-const bytea = customType<{ data: Buffer; notNull: false; default: false }>({
-  dataType() {
-    return 'bytea'
-  },
-})
+import { pgTable, uuid, varchar, text, boolean, timestamp, integer, jsonb } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -54,7 +47,7 @@ export const projectImages = pgTable('project_images', {
   id: uuid('id').primaryKey(),
   projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
   name: varchar('name', { length: 255 }).notNull(),
-  data: bytea('data').notNull(),
+  url: text('url').notNull(),
   mediaType: varchar('media_type', { length: 100 }).notNull(),
   size: integer('size').notNull(),
 })

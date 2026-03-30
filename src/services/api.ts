@@ -14,12 +14,12 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const isFormData = options.body instanceof FormData
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers: isFormData
+      ? options.headers
+      : { 'Content-Type': 'application/json', ...options.headers },
   })
 
   if (!res.ok) {
@@ -46,5 +46,9 @@ export const api = {
   },
   delete<T>(path: string, headers?: Record<string, string>) {
     return request<T>(path, { method: 'DELETE', headers })
+  },
+  /** Multipart upload — does NOT set Content-Type so the browser adds the boundary automatically */
+  upload<T>(path: string, formData: FormData, headers?: Record<string, string>) {
+    return request<T>(path, { method: 'POST', body: formData, headers })
   },
 }

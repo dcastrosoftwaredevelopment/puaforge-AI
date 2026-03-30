@@ -43,7 +43,7 @@ function CopyButton({ text }: { text: string }) {
 }
 
 function ImageRow({ img, onRename, onRemove }: {
-  img: { id: string; name: string; dataUrl: string; size: number }
+  img: { id: string; name: string; url: string; size: number }
   onRename: (id: string, name: string) => void
   onRemove: (id: string) => void
 }) {
@@ -72,7 +72,7 @@ function ImageRow({ img, onRename, onRemove }: {
   return (
     <div className="flex items-center gap-2 p-2 rounded-lg bg-bg-tertiary border border-border-subtle group">
       <img
-        src={img.dataUrl}
+        src={img.url}
         alt={img.name}
         className="w-10 h-10 rounded object-cover shrink-0"
       />

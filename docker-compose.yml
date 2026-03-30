@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-puaforge}
       POSTGRES_DB: ${DB_NAME:-puaforge}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - puaforgeai_postgres:/var/lib/postgresql/data
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-puaforge}']
       interval: 5s
@@ -27,6 +27,10 @@ services:
     environment:
       API_URL: http://localhost:3001
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      POCKETBASE_URL: http://pocketbase:8090
+      POCKETBASE_PUBLIC_URL: http://localhost:8090
+      PB_ADMIN_EMAIL: ${PB_ADMIN_EMAIL:-puaforge@puaforge.com}
+      PB_ADMIN_PASSWORD: ${PB_ADMIN_PASSWORD:-puaforge}
       DB_HOST: db
       DB_PORT: 5432
       DB_USER: ${DB_USER:-puaforge}
@@ -37,6 +41,18 @@ services:
       db:
         condition: service_healthy
 
+
+  # PocketBase — http://localhost:8090 (admin: http://localhost:8090/_/)
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:latest
+    restart: unless-stopped
+    ports:
+      - '8090:8090'
+    environment:
+      PB_ADMIN_EMAIL: ${PB_ADMIN_EMAIL:-puaforge@puaforge.com}
+      PB_ADMIN_PASSWORD: ${PB_ADMIN_PASSWORD:-puaforge}
+    volumes:
+      - puaforgeai_pocketbase:/pb_data
 
   # Adminer — http://localhost:8080
   adminer:
@@ -49,4 +65,7 @@ services:
         condition: service_healthy
 
 volumes:
-  postgres_data:
+  puaforgeai_postgres:
+    name: puaforgeai_postgres
+  puaforgeai_pocketbase:
+    name: puaforgeai_pocketbase
