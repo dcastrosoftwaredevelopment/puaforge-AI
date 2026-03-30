@@ -31,7 +31,6 @@ export function mergeFiles(
 
     // If the incoming file is a stub but the existing one isn't, keep existing
     if (isStub(code) && !isStub(prev)) {
-      console.log(`[mergeFiles] Skipping stub for ${path} — keeping existing implementation`)
       continue
     }
 
@@ -57,14 +56,6 @@ export function parseFilesFromResponse(response: string): Record<string, string>
   while ((match = regex.exec(response)) !== null) {
     const [, filePath, code] = match
     files[filePath] = code.trim()
-  }
-
-  const count = Object.keys(files).length
-  if (count === 0 && response.includes('```')) {
-    console.warn('[fileParser] Response contains code blocks but NONE have file= attribute. The AI did not follow the expected format. Code will not be applied to the editor.')
-    console.warn('[fileParser] First 300 chars of response:', response.slice(0, 300))
-  } else {
-    console.log(`[fileParser] Extracted ${count} file(s):`, Object.keys(files))
   }
 
   return addMissingStubs(files)
