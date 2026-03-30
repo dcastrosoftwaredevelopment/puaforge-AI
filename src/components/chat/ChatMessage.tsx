@@ -1,44 +1,139 @@
-import { useState } from 'react'
+import { useState, memo, useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { User, Bot, ChevronDown, ChevronUp } from 'lucide-react'
+import { User, Bot, X, FileCode } from 'lucide-react'
 import type { Message } from '@/atoms'
 
-const COLLAPSED_HEIGHT = 160 // px
+// ─── Message parser ────────────────────────────────────────────────────────────
 
-interface Props {
-  message: Message
+interface TextSegment { type: 'text'; content: string }
+interface CodeSegment { type: 'code'; language: string; filePath?: string; code: string }
+type Segment = TextSegment | CodeSegment
+
+const CODE_BLOCK_RE = /```(\w+)?(?:\s+file="([^"]+)")?\n([\s\S]*?)```/g
+
+function parseSegments(content: string): Segment[] {
+  const segments: Segment[] = []
+  let last = 0
+  let match: RegExpExecArray | null
+
+  CODE_BLOCK_RE.lastIndex = 0
+  while ((match = CODE_BLOCK_RE.exec(content)) !== null) {
+    if (match.index > last) {
+      const text = content.slice(last, match.index).trim()
+      if (text) segments.push({ type: 'text', content: text })
+    }
+    segments.push({
+      type: 'code',
+      language: match[1] || 'text',
+      filePath: match[2],
+      code: match[3].replace(/\n$/, ''),
+    })
+    last = match.index + match[0].length
+  }
+
+  const remaining = content.slice(last).trim()
+  if (remaining) segments.push({ type: 'text', content: remaining })
+
+  return segments
 }
 
-function CollapsibleCode({ children }: { children: React.ReactNode }) {
+// ─── Code block component ─────────────────────────────────────────────────────
+
+const PREVIEW_LINES = 6
+
+const CodeBlock = memo(function CodeBlock({ language, filePath, code }: CodeSegment) {
   const [expanded, setExpanded] = useState(false)
+  const lines = code.split('\n')
+  const previewCode = lines.slice(0, PREVIEW_LINES).join('\n')
+  const hasMore = lines.length > PREVIEW_LINES
 
   return (
-    <div className="relative my-2">
-      <pre
-        className="bg-bg-primary rounded-lg p-3 overflow-x-auto text-xs transition-all duration-200"
-        style={expanded ? undefined : { maxHeight: COLLAPSED_HEIGHT, overflow: 'hidden' }}
+    <>
+      <div
+        className={`my-2 rounded-lg overflow-hidden border border-[rgba(255,255,255,0.07)] ${hasMore && !expanded ? 'cursor-pointer group' : ''}`}
+        onClick={() => hasMore && !expanded && setExpanded(true)}
       >
-        <code>{children}</code>
-      </pre>
+        {/* Header */}
+        <div className="flex items-center justify-between px-3 py-1.5 bg-[#141414] border-b border-[rgba(255,255,255,0.06)]">
+          <div className="flex items-center gap-2">
+            <FileCode size={11} className="text-text-muted shrink-0" />
+            <span className="text-[11px] font-mono text-text-secondary truncate">
+              {filePath ?? language}
+            </span>
+          </div>
+          {hasMore && !expanded && (
+            <span className="text-[10px] text-text-muted opacity-0 group-hover:opacity-100 transition shrink-0 ml-2">
+              clique para expandir
+            </span>
+          )}
+        </div>
 
-      {!expanded && (
-        <div className="absolute bottom-0 left-0 right-0 h-10 rounded-b-lg bg-gradient-to-t from-bg-primary to-transparent pointer-events-none" />
+        {/* Preview */}
+        <div className="relative">
+          <pre className="m-0 px-3 py-2.5 bg-[#0D0D0D] text-[11px] font-mono text-[#94a3b8] leading-relaxed overflow-hidden whitespace-pre"
+            style={hasMore ? { maxHeight: `${PREVIEW_LINES * 18}px` } : undefined}
+          >
+            {previewCode}
+          </pre>
+          {hasMore && !expanded && (
+            <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#0D0D0D] to-transparent pointer-events-none" />
+          )}
+        </div>
+      </div>
+
+      {/* Expanded modal */}
+      {expanded && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6" onClick={() => setExpanded(false)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-3xl max-h-[80vh] rounded-xl overflow-hidden border border-[rgba(255,255,255,0.1)] shadow-2xl shadow-black/60 flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-4 py-2.5 bg-[#141414] border-b border-[rgba(255,255,255,0.06)] shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444]/60" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b]/60" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#10b981]/60" />
+                </div>
+                <span className="text-[11px] font-mono text-text-secondary ml-1">{filePath ?? language}</span>
+              </div>
+              <button
+                onClick={() => setExpanded(false)}
+                className="p-1 rounded text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+              >
+                <X size={13} />
+              </button>
+            </div>
+
+            <div className="overflow-auto flex-1">
+              <pre className="m-0 p-4 bg-[#0D0D0D] text-[11.5px] font-mono text-[#e2e8f0] leading-relaxed whitespace-pre">
+                {code.split('\n').map((line, i) => (
+                  <div key={i} className="flex">
+                    <span className="select-none text-[#374151] w-8 shrink-0 text-right pr-4">{i + 1}</span>
+                    <span>{line}</span>
+                  </div>
+                ))}
+              </pre>
+            </div>
+          </div>
+        </div>
       )}
-
-      <button
-        onClick={() => setExpanded((v) => !v)}
-        className="mt-1 flex items-center gap-1 text-[10px] text-text-muted hover:text-text-secondary transition cursor-pointer"
-      >
-        {expanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
-        {expanded ? 'Recolher código' : 'Ver código completo'}
-      </button>
-    </div>
+    </>
   )
-}
+})
 
-export default function ChatMessage({ message }: Props) {
+// ─── Chat message ──────────────────────────────────────────────────────────────
+
+interface Props { message: Message }
+
+function ChatMessage({ message }: Props) {
   const isUser = message.role === 'user'
+  const segments = useMemo(
+    () => isUser ? null : parseSegments(message.content),
+    [isUser, message.content],
+  )
 
   return (
     <div className={`flex gap-2.5 ${isUser ? 'flex-row-reverse' : ''}`}>
@@ -51,9 +146,7 @@ export default function ChatMessage({ message }: Props) {
       </div>
       <div
         className={`max-w-[85%] min-w-0 rounded-xl px-3 py-2.5 text-sm leading-relaxed break-words overflow-hidden ${
-          isUser
-            ? 'bg-chat-user text-text-primary'
-            : 'bg-chat-ai text-text-secondary'
+          isUser ? 'bg-chat-user text-text-primary' : 'bg-chat-ai text-text-secondary'
         }`}
       >
         {isUser && message.images && message.images.length > 0 && (
@@ -68,29 +161,37 @@ export default function ChatMessage({ message }: Props) {
             ))}
           </div>
         )}
+
         {isUser ? (
           <p className="whitespace-pre-wrap break-words">{message.content}</p>
         ) : (
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            components={{
-              code: ({ children, className }) => {
-                const isBlock = className?.includes('language-')
-                return isBlock ? (
-                  <CollapsibleCode>{children}</CollapsibleCode>
-                ) : (
-                  <code className="bg-bg-primary px-1.5 py-0.5 rounded text-xs text-text-primary">
-                    {children}
-                  </code>
-                )
-              },
-              pre: ({ children }) => <>{children}</>,
-            }}
-          >
-            {message.content}
-          </ReactMarkdown>
+          <>
+            {segments!.map((seg, i) =>
+              seg.type === 'text' ? (
+                <ReactMarkdown key={i} remarkPlugins={[remarkGfm]}
+                  components={{
+                    code: ({ children, className }) => {
+                      const isBlock = !!className?.includes('language-')
+                      return isBlock ? (
+                        <pre className="bg-[#0D0D0D] rounded p-2 my-1 text-[11px] font-mono text-[#94a3b8] overflow-x-auto whitespace-pre">{children}</pre>
+                      ) : (
+                        <code className="bg-bg-primary px-1.5 py-0.5 rounded text-xs text-text-primary font-mono">{children}</code>
+                      )
+                    },
+                    pre: ({ children }) => <>{children}</>,
+                  }}
+                >
+                  {seg.content}
+                </ReactMarkdown>
+              ) : (
+                <CodeBlock key={i} {...seg} />
+              )
+            )}
+          </>
         )}
       </div>
     </div>
   )
 }
+
+export default memo(ChatMessage)
