@@ -1,10 +1,40 @@
+import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { User, Bot } from 'lucide-react'
+import { User, Bot, ChevronDown, ChevronUp } from 'lucide-react'
 import type { Message } from '@/atoms'
+
+const COLLAPSED_HEIGHT = 160 // px
 
 interface Props {
   message: Message
+}
+
+function CollapsibleCode({ children }: { children: React.ReactNode }) {
+  const [expanded, setExpanded] = useState(false)
+
+  return (
+    <div className="relative my-2">
+      <pre
+        className="bg-bg-primary rounded-lg p-3 overflow-x-auto text-xs transition-all duration-200"
+        style={expanded ? undefined : { maxHeight: COLLAPSED_HEIGHT, overflow: 'hidden' }}
+      >
+        <code>{children}</code>
+      </pre>
+
+      {!expanded && (
+        <div className="absolute bottom-0 left-0 right-0 h-10 rounded-b-lg bg-gradient-to-t from-bg-primary to-transparent pointer-events-none" />
+      )}
+
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className="mt-1 flex items-center gap-1 text-[10px] text-text-muted hover:text-text-secondary transition cursor-pointer"
+      >
+        {expanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+        {expanded ? 'Recolher código' : 'Ver código completo'}
+      </button>
+    </div>
+  )
 }
 
 export default function ChatMessage({ message }: Props) {
@@ -47,9 +77,7 @@ export default function ChatMessage({ message }: Props) {
               code: ({ children, className }) => {
                 const isBlock = className?.includes('language-')
                 return isBlock ? (
-                  <pre className="bg-bg-primary rounded-lg p-3 my-2 overflow-x-auto text-xs">
-                    <code>{children}</code>
-                  </pre>
+                  <CollapsibleCode>{children}</CollapsibleCode>
                 ) : (
                   <code className="bg-bg-primary px-1.5 py-0.5 rounded text-xs text-text-primary">
                     {children}
