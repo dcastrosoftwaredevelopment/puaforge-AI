@@ -6,6 +6,7 @@ import { useFiles } from '@/hooks/useFiles'
 import { useChat } from '@/hooks/useChat'
 import { usePanelSizes } from '@/hooks/usePanelSizes'
 import { useProjectLoader } from '@/hooks/useProjectLoader'
+import { useDraft } from '@/hooks/useDraft'
 import { TAILWIND_HTML } from '@/utils/defaultFiles'
 import EditorHeader from '@/components/layout/EditorHeader'
 import SandpackContent from '@/components/layout/SandpackContent'
@@ -20,6 +21,7 @@ export default function EditorView() {
   const projectReady = useProjectLoader(projectId)
   const { files, deps } = useFiles()
   const { mode: chatMode, isOpen: isChatOpen, setIsOpen: setIsChatOpen } = useChat()
+  useDraft()
   const { chatWidth, setChatWidth } = usePanelSizes()
 
   const isDocked = chatMode === 'docked'

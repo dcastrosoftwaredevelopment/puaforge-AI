@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAtomValue } from 'jotai'
 import { activeProjectIdAtom } from '@/atoms'
 import { authTokenAtom } from '@/atoms/authAtoms'
@@ -17,7 +17,10 @@ export function usePublish() {
     { html: string; publishedAt: number }
   >(HttpMethod.POST, '/api/publish')
 
-  const authHeaders = token ? { Authorization: `Bearer ${token}` } : undefined
+  const authHeaders = useMemo(
+    () => (token ? { Authorization: `Bearer ${token}` } : undefined),
+    [token],
+  )
 
   // Load published state from API on project change
   useEffect(() => {

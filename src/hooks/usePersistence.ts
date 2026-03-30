@@ -3,9 +3,6 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { authTokenAtom } from '@/atoms/authAtoms'
 import {
   projectsAtom,
-  activeProjectIdAtom,
-  messagesAtom,
-  filesAtom,
   selectedModelAtom,
   viewModeAtom,
   devicePreviewAtom,
@@ -129,29 +126,6 @@ export function usePersistence() {
     if (!hydrated.current) return
     lsSet('chatWidth', String(chatWidth))
   }, [chatWidth])
-
-  // Auto-save messages to API
-  const activeProjectId = useAtomValue(activeProjectIdAtom)
-  const messagesValue = useAtomValue(messagesAtom)
-  useEffect(() => {
-    if (!hydrated.current || !activeProjectId || !token) return
-    api.put(
-      `/api/projects/${activeProjectId}/messages`,
-      { msgs: messagesValue },
-      { Authorization: `Bearer ${token}` },
-    ).catch((e) => console.error('[persistence] messages save error:', e))
-  }, [messagesValue, activeProjectId, token])
-
-  // Auto-save files to API
-  const filesValue = useAtomValue(filesAtom)
-  useEffect(() => {
-    if (!hydrated.current || !activeProjectId || !token) return
-    api.put(
-      `/api/projects/${activeProjectId}/files`,
-      filesValue,
-      { Authorization: `Bearer ${token}` },
-    ).catch((e) => console.error('[persistence] files save error:', e))
-  }, [filesValue, activeProjectId, token])
 
   return { isHydrated }
 }

@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useSetAtom, useAtomValue } from 'jotai'
 import { useNavigate } from 'react-router-dom'
 import { authTokenAtom } from '@/atoms/authAtoms'
@@ -27,7 +27,10 @@ export function useProjectActions() {
   const setProjectImages = useSetAtom(projectImagesAtom)
   const setCheckpoints = useSetAtom(checkpointsAtom)
 
-  const authHeaders = token ? { Authorization: `Bearer ${token}` } : undefined
+  const authHeaders = useMemo(
+    () => (token ? { Authorization: `Bearer ${token}` } : undefined),
+    [token],
+  )
 
   const createProject = useCallback(async () => {
     if (!authHeaders) return

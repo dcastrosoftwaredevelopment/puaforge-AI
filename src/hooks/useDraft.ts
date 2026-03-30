@@ -1,0 +1,126 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useAtomValue } from 'jotai'
+import { activeProjectIdAtom, messagesAtom, filesAtom, type Message } from '@/atoms'
+import { authTokenAtom } from '@/atoms/authAtoms'
+import { db, dbReady } from '@/services/db'
+import { api } from '@/services/api'
+
+/**
+ * Auto-saves messages and files to IndexedDB (draft) in real-time.
+ * isDraft = true means there are local changes not yet saved to PostgreSQL.
+ */
+export function useDraft() {
+  const activeProjectId = useAtomValue(activeProjectIdAtom)
+  const token = useAtomValue(authTokenAtom)
+  const messagesValue = useAtomValue(messagesAtom)
+  const filesValue = useAtomValue(filesAtom)
+  const hydrated = useRef(false)
+  const [isDraft, setIsDraft] = useState(false)
+
+  // On project change: reset hydration flag, check for existing draft asynchronously
+  useEffect(() => {
+    if (!activeProjectId) return
+    hydrated.current = false
+
+    hasDraft(activeProjectId).then((exists) => { setIsDraft(exists) })
+
+    const timer = setTimeout(() => { hydrated.current = true }, 500)
+    return () => {
+      clearTimeout(timer)
+      hydrated.current = false
+    }
+  }, [activeProjectId])
+
+  // Auto-save messages to IndexedDB
+  useEffect(() => {
+    if (!hydrated.current || !activeProjectId) return
+    const pid = activeProjectId
+    const entries = messagesValue.map((m) => ({ ...m, projectId: pid }))
+    dbReady.then(() =>
+      db.transaction('rw', db.messages, async () => {
+        await db.messages.where('projectId').equals(pid).delete()
+        await db.messages.bulkPut(entries)
+      }),
+    ).then(() => setIsDraft(true))
+     .catch((e) => console.error('[draft] messages save error:', e))
+  }, [messagesValue, activeProjectId])
+
+  // Auto-save files to IndexedDB
+  useEffect(() => {
+    if (!hydrated.current || !activeProjectId) return
+    const pid = activeProjectId
+    const entries = Object.entries(filesValue).map(([path, code]) => ({
+      projectId: pid,
+      path,
+      code,
+      updatedAt: Date.now(),
+    }))
+    dbReady.then(() =>
+      db.transaction('rw', db.projectFiles, async () => {
+        await db.projectFiles.where('projectId').equals(pid).delete()
+        await db.projectFiles.bulkAdd(entries)
+      }),
+    ).then(() => setIsDraft(true))
+     .catch((e) => console.error('[draft] files save error:', e))
+  }, [filesValue, activeProjectId])
+
+  /** Persist current state (messages + files) to PostgreSQL */
+  const saveDraft = useCallback(async () => {
+    if (!activeProjectId || !token) return
+    const headers = { Authorization: `Bearer ${token}` }
+    await Promise.all([
+      api.put(`/api/projects/${activeProjectId}/messages`, { msgs: messagesValue }, headers),
+      api.put(`/api/projects/${activeProjectId}/files`, filesValue, headers),
+    ])
+    setIsDraft(false)
+  }, [activeProjectId, token, messagesValue, filesValue])
+
+  /** Delete local IndexedDB draft — next load will come from PostgreSQL */
+  const discardDraft = useCallback(async () => {
+    if (!activeProjectId) return
+    await dbReady
+    await Promise.all([
+      db.messages.where('projectId').equals(activeProjectId).delete(),
+      db.projectFiles.where('projectId').equals(activeProjectId).delete(),
+    ])
+    setIsDraft(false)
+  }, [activeProjectId])
+
+  return { isDraft, saveDraft, discardDraft }
+}
+
+/** Returns true if a local draft exists for the given projectId */
+export async function hasDraft(projectId: string): Promise<boolean> {
+  await dbReady
+  const count = await db.messages.where('projectId').equals(projectId).count()
+  if (count > 0) return true
+  const fileCount = await db.projectFiles.where('projectId').equals(projectId).count()
+  return fileCount > 0
+}
+
+/** Load draft data from IndexedDB for the given projectId */
+export async function loadDraft(projectId: string): Promise<{
+  messages: Message[]
+  files: Record<string, string>
+} | null> {
+  await dbReady
+  const savedMessages = await db.messages
+    .where('projectId')
+    .equals(projectId)
+    .sortBy('timestamp')
+
+  const savedFiles = await db.projectFiles
+    .where('projectId')
+    .equals(projectId)
+    .toArray()
+
+  if (savedMessages.length === 0 && savedFiles.length === 0) return null
+
+  const files: Record<string, string> = {}
+  for (const f of savedFiles) files[f.path] = f.code
+
+  return {
+    messages: savedMessages.map(({ projectId: _, ...m }) => m) as Message[],
+    files,
+  }
+}

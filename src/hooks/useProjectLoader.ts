@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSetAtom, useAtomValue } from 'jotai'
-import { activeProjectIdAtom, messagesAtom, filesAtom, projectImagesAtom, checkpointsAtom, type Message, type ProjectImage, type Checkpoint } from '@/atoms'
+import { activeProjectIdAtom, messagesAtom, filesAtom, projectImagesAtom, checkpointsAtom, type ProjectImage, type Checkpoint } from '@/atoms'
 import { authTokenAtom } from '@/atoms/authAtoms'
 import { depsAtom } from '@/hooks/useFiles'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
@@ -9,10 +9,12 @@ import { extractDependencies } from '@/services/fileParser'
 import { api } from '@/services/api'
 import { waitForPersist } from '@/hooks/usePersistence'
 import { generateImagesFiles } from '@/hooks/useProjectImages'
+import { hasDraft, loadDraft } from '@/hooks/useDraft'
 
 /**
- * Loads project data from PostgreSQL API when projectId changes.
- * Sets atoms BEFORE activeProjectId to prevent persistence race conditions.
+ * Loads project data when projectId changes.
+ * Priority: IndexedDB draft (if exists) > PostgreSQL for messages/files.
+ * Images and checkpoints always come from PostgreSQL.
  */
 export function useProjectLoader(projectId: string | undefined) {
   const navigate = useNavigate()
@@ -40,26 +42,46 @@ export function useProjectLoader(projectId: string | undefined) {
       await waitForPersist()
 
       try {
-        const [savedMessages, fileMap, savedImages, savedCheckpoints] = await Promise.all([
-          api.get<Message[]>(`/api/projects/${projectId}/messages`, headers),
-          api.get<Record<string, string>>(`/api/projects/${projectId}/files`, headers),
+        // Images and checkpoints always from PostgreSQL
+        const [savedImages, savedCheckpoints] = await Promise.all([
           api.get<ProjectImage[]>(`/api/projects/${projectId}/images`, headers),
           api.get<Checkpoint[]>(`/api/projects/${projectId}/checkpoints`, headers),
         ])
 
         if (cancelled) return
 
-        const files = Object.keys(fileMap).length > 0 ? fileMap : DEFAULT_FILES
-        const detectedDeps = extractDependencies(files)
+        // Messages and files: prefer local draft if it exists
+        const draft = await hasDraft(projectId!)
+          ? await loadDraft(projectId!)
+          : null
 
-        // Inject generated image files if project has images
+        let messages, files: Record<string, string>
+
+        if (draft) {
+          messages = draft.messages
+          files = Object.keys(draft.files).length > 0 ? draft.files : DEFAULT_FILES
+        } else {
+          const [apiMessages, apiFiles] = await Promise.all([
+            api.get<typeof messagesAtom extends { init: infer T } ? T : never[]>(
+              `/api/projects/${projectId}/messages`,
+              headers,
+            ),
+            api.get<Record<string, string>>(`/api/projects/${projectId}/files`, headers),
+          ])
+          messages = apiMessages
+          files = Object.keys(apiFiles).length > 0 ? apiFiles : DEFAULT_FILES
+        }
+
+        if (cancelled) return
+
+        const detectedDeps = extractDependencies(files)
         const filesWithImages = savedImages.length > 0
           ? { ...files, ...generateImagesFiles(savedImages) }
           : files
 
         setProjectImages(savedImages)
         setCheckpoints([...savedCheckpoints].reverse())
-        setMessages(savedMessages)
+        setMessages(messages as never)
         setFiles(filesWithImages)
         setDeps(Object.keys(detectedDeps).length > 0 ? detectedDeps : {})
         setActiveProjectId(projectId!)
@@ -69,9 +91,7 @@ export function useProjectLoader(projectId: string | undefined) {
           setIsReady(true)
         }
       } catch {
-        if (!cancelled) {
-          navigate('/', { replace: true })
-        }
+        if (!cancelled) navigate('/', { replace: true })
       }
     }
 

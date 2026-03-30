@@ -53,7 +53,7 @@ export interface DbSetting {
 }
 
 // Database definition
-const DB_NAME = 'vibe-platform'
+const DB_NAME = 'puaforge-ai'
 const DB_VERSION = 6
 
 const db = new Dexie(DB_NAME) as Dexie & {

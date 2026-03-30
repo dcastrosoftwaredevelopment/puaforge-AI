@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
 import { activeProjectIdAtom, projectImagesAtom, type ProjectImage } from '@/atoms'
 import { authTokenAtom } from '@/atoms/authAtoms'
@@ -47,7 +47,10 @@ export function useProjectImages() {
   const token = useAtomValue(authTokenAtom)
   const { setFiles } = useFiles()
 
-  const authHeaders = token ? { Authorization: `Bearer ${token}` } : undefined
+  const authHeaders = useMemo(
+    () => (token ? { Authorization: `Bearer ${token}` } : undefined),
+    [token],
+  )
 
   const syncImagesFiles = useCallback((updatedImages: ProjectImage[]) => {
     setFiles((prev) => {

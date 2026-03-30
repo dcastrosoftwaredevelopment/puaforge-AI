@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useAtom, useAtomValue } from 'jotai'
 import { activeProjectIdAtom, checkpointsAtom, messagesAtom, type Checkpoint } from '@/atoms'
 import { authTokenAtom } from '@/atoms/authAtoms'
@@ -13,7 +13,10 @@ export function useCheckpoints() {
   const token = useAtomValue(authTokenAtom)
   const { files, setFiles, setDeps } = useFiles()
 
-  const authHeaders = token ? { Authorization: `Bearer ${token}` } : undefined
+  const authHeaders = useMemo(
+    () => (token ? { Authorization: `Bearer ${token}` } : undefined),
+    [token],
+  )
 
   const createCheckpoint = useCallback(async (name: string) => {
     if (!activeProjectId || !authHeaders) return

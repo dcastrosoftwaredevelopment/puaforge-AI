@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Globe, Loader2, ExternalLink } from 'lucide-react'
 import { usePublish } from '@/hooks/usePublish'
+import Tooltip from '@/components/ui/Tooltip'
 
 export default function PublishButton() {
   const { isPublishing, publishedAt, error, publish, openPublished } = usePublish()
@@ -33,11 +34,11 @@ export default function PublishButton() {
 
   return (
     <div className="relative" ref={panelRef}>
+      <Tooltip content="Gerar preview local do site" side="bottom" align="right">
       <button
         onClick={publishedAt ? () => setShowPanel(!showPanel) : handlePublish}
         disabled={isPublishing}
         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20 hover:bg-vibe-blue/20 disabled:opacity-50 transition cursor-pointer"
-        title="Gerar preview local do site"
       >
         {isPublishing ? (
           <Loader2 size={13} className="animate-spin" />
@@ -46,6 +47,7 @@ export default function PublishButton() {
         )}
         {isPublishing ? 'Gerando...' : 'Preview'}
       </button>
+      </Tooltip>
 
       {showPanel && (
         <div className="absolute right-0 top-full mt-1 w-72 bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden">

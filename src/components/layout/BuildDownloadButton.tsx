@@ -3,6 +3,7 @@ import { useFiles } from '@/hooks/useFiles'
 import { useProjects } from '@/hooks/useProjects'
 import { useApiCall, HttpMethod } from '@/hooks/useApiCall'
 import JSZip from 'jszip'
+import Tooltip from '@/components/ui/Tooltip'
 
 export default function BuildDownloadButton() {
   const { files } = useFiles()
@@ -35,14 +36,15 @@ export default function BuildDownloadButton() {
   }
 
   return (
-    <button
-      onClick={handleDownload}
-      disabled={loading}
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-text-secondary border border-border-subtle hover:text-text-primary hover:border-border-default bg-bg-tertiary transition disabled:opacity-40 cursor-pointer"
-      title="Download do build pronto para deploy"
-    >
-      {loading ? <Loader2 size={14} className="animate-spin" /> : <PackageCheck size={14} />}
-      Build
-    </button>
+    <Tooltip content="Gerar e baixar o build pronto para deploy" side="bottom" align="right">
+      <button
+        onClick={handleDownload}
+        disabled={loading}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-text-secondary border border-border-subtle hover:text-text-primary hover:border-border-default bg-bg-tertiary transition disabled:opacity-40 cursor-pointer"
+      >
+        {loading ? <Loader2 size={14} className="animate-spin" /> : <PackageCheck size={14} />}
+        Build
+      </button>
+    </Tooltip>
   )
 }
