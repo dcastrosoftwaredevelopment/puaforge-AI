@@ -3,7 +3,6 @@ import { Plus, RotateCcw, Lock, X } from 'lucide-react'
 import { useColorPalette } from '@/hooks/useColorPalette'
 
 function ColorRow({
-  id,
   name,
   value,
   locked,
