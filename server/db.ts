@@ -20,5 +20,6 @@ export const db = drizzle(pool, { schema })
 export async function runMigrations() {
   await migrate(db, {
     migrationsFolder: path.resolve(__dirname, '../server/migrations'),
+    migrationsSchema: 'public',
   })
 }
