@@ -1,5 +1,7 @@
 import { useRef, useState, forwardRef } from 'react'
 import { GripHorizontal, Trash2, PanelRightClose, PanelRightOpen, Minus, Download, Upload } from 'lucide-react'
+import { useAtomValue } from 'jotai'
+import { projectsAtom, activeProjectIdAtom } from '@/atoms'
 import { useFiles } from '@/hooks/useFiles'
 import { useChat } from '@/hooks/useChat'
 import { useMessages } from '@/hooks/useMessages'
@@ -33,14 +35,21 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
   const { mode: chatMode, setMode: setChatMode, setIsOpen } = useChat()
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const importRef = useRef<HTMLInputElement>(null)
+  const projects = useAtomValue(projectsAtom)
+  const activeProjectId = useAtomValue(activeProjectIdAtom)
 
   function exportMessages() {
+    const projectName = projects.find((p) => p.id === activeProjectId)?.name ?? 'projeto'
+    const slug = projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+    const now = new Date()
+    const date = now.toISOString().slice(0, 10)
+    const time = now.toTimeString().slice(0, 8).replace(/:/g, '-')
     const data = JSON.stringify(messages, null, 2)
     const blob = new Blob([data], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `chat-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `chat-${slug}-${date}-${time}.json`
     a.click()
     URL.revokeObjectURL(url)
   }
