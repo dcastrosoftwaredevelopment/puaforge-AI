@@ -9,6 +9,7 @@ import { generateImagesFiles } from '@/hooks/useProjectImages'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
 import Tooltip from '@/components/ui/Tooltip'
 import ChatMessage from './ChatMessage'
+import { CodeViewerProvider } from './CodeViewerContext'
 
 const FILE_BLOCK_RE = /```[\w]*\s+file="[^"]+"/
 
@@ -48,6 +49,7 @@ export default function ChatHistory() {
   }
 
   return (
+    <CodeViewerProvider>
     <div className="flex-1 overflow-y-auto flex flex-col pr-1">
       <div className="flex-1 space-y-3">
         {messages.map((msg) => (
@@ -76,5 +78,6 @@ export default function ChatHistory() {
         </div>
       )}
     </div>
+    </CodeViewerProvider>
   )
 }
