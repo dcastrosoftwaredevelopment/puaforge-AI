@@ -27,8 +27,10 @@ export default function Settings() {
   const handleSave = async () => {
     const trimmed = draft.trim()
     if (trimmed && validated !== true) {
-      await handleValidate()
-      return
+      const result = await validateKey({ apiKey: trimmed })
+      const isValid = result ? result.valid : false
+      setValidated(isValid)
+      if (!isValid) return
     }
     setApiKey(trimmed)
     if (trimmed) refetchModels()

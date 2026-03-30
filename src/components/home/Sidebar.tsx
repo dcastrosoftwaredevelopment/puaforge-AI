@@ -1,6 +1,17 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Layers, Settings, LogOut, UserCircle2 } from 'lucide-react'
+import { Layers, Settings, LogOut } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+
+function UserAvatar({ name }: { name?: string | null }) {
+  const initials = name
+    ? name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
+    : '?'
+  return (
+    <span className="w-5 h-5 rounded-full bg-forge-terracotta/20 text-forge-terracotta text-[10px] font-semibold flex items-center justify-center shrink-0">
+      {initials}
+    </span>
+  )
+}
 
 export default function Sidebar() {
   const location = useLocation()
@@ -38,8 +49,8 @@ export default function Sidebar() {
               : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary'
           }`}
         >
-          <UserCircle2 size={15} className="text-forge-terracotta/70 shrink-0" />
-          <span className="truncate">{user?.name ?? 'Perfil'}</span>
+          <UserAvatar name={user?.name} />
+          Perfil
         </button>
         <button
           onClick={() => navigate('/settings')}
