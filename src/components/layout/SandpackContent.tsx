@@ -77,6 +77,7 @@ export default function SandpackContent() {
           <SandpackFileExplorer />
           <SandpackCodeEditor
             showTabs
+            closableTabs
             showLineNumbers
             showInlineErrors
           />

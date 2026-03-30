@@ -36,7 +36,7 @@ export default function ResizeHandle({ onResize }: ResizeHandleProps) {
     <div
       onPointerDown={onPointerDown}
       className={`w-1 shrink-0 cursor-col-resize transition-colors select-none ${
-        dragging ? 'bg-accent' : 'bg-transparent hover:bg-border-default'
+        dragging ? 'bg-accent' : 'bg-border-subtle hover:bg-accent/60'
       }`}
     />
   )
