@@ -1,12 +1,13 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Layers, Settings, LogOut } from 'lucide-react'
+import { Layers, Settings, LogOut, UserCircle2 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 export default function Sidebar() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const isSettings = location.pathname === '/settings'
+  const isProfile = location.pathname === '/profile'
 
   return (
     <aside className="w-56 shrink-0 border-r border-border-subtle bg-bg-secondary flex flex-col">
@@ -29,6 +30,17 @@ export default function Sidebar() {
       </nav>
 
       <div className="px-2 py-3 border-t border-border-subtle space-y-1">
+        <button
+          onClick={() => navigate('/profile')}
+          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition ${
+            isProfile
+              ? 'bg-bg-elevated text-text-primary'
+              : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary'
+          }`}
+        >
+          <UserCircle2 size={15} className="text-forge-terracotta/70 shrink-0" />
+          <span className="truncate">{user?.name ?? 'Perfil'}</span>
+        </button>
         <button
           onClick={() => navigate('/settings')}
           className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition ${

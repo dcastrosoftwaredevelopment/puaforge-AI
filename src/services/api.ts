@@ -35,4 +35,7 @@ export const api = {
 
   post: <T>(path: string, body: unknown, headers?: Record<string, string>) =>
     request<T>(path, { method: 'POST', body: JSON.stringify(body), headers }),
+
+  patch: <T>(path: string, body: unknown, headers?: Record<string, string>) =>
+    request<T>(path, { method: 'PATCH', body: JSON.stringify(body), headers }),
 }

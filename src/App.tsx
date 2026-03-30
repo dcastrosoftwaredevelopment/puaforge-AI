@@ -4,6 +4,7 @@ import ProjectList from '@/components/home/ProjectList'
 import EditorView from '@/components/layout/EditorView'
 import Settings from '@/components/settings/Settings'
 import Login from '@/pages/Login'
+import Profile from '@/pages/Profile'
 import SplashScreen from '@/components/auth/SplashScreen'
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/" element={<ProjectList />} />
           <Route path="/project/:projectId" element={<EditorView />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       )}
     </>
