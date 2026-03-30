@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import * as yup from 'yup'
 import { useAuth } from '@/hooks/useAuth'
 import { useAtomValue } from 'jotai'
@@ -28,7 +27,6 @@ const passwordSchema = yup.object({
 })
 
 export default function Profile() {
-  const navigate = useNavigate()
   const { user } = useAuth()
   const token = useAtomValue(authTokenAtom)
   const authHeaders = { Authorization: `Bearer ${token}` }
@@ -104,14 +102,6 @@ export default function Profile() {
       <Sidebar />
       <main className="flex-1 overflow-auto">
         <div className="max-w-lg mx-auto px-8 py-10">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-sm text-text-muted hover:text-text-primary transition mb-8 cursor-pointer"
-          >
-            <ArrowLeft size={15} />
-            Voltar
-          </button>
-
           <h1 className="text-2xl font-semibold text-text-primary mb-8">Perfil</h1>
 
           {/* Info */}

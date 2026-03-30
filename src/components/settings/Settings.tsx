@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Key, Eye, EyeOff, Loader2, CheckCircle2, XCircle } from 'lucide-react'
 import { useApiKey } from '@/hooks/useApiKey'
 import { useModels } from '@/hooks/useModels'
@@ -11,6 +11,10 @@ export default function Settings() {
   const [draft, setDraft] = useState(apiKey)
   const [showKey, setShowKey] = useState(false)
   const [validated, setValidated] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    setDraft(apiKey)
+  }, [apiKey])
 
   const hasChanges = draft !== apiKey
 
