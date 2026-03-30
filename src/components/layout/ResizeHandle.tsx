@@ -7,6 +7,8 @@ interface ResizeHandleProps {
 export default function ResizeHandle({ onResize }: ResizeHandleProps) {
   const [dragging, setDragging] = useState(false)
   const startX = useRef(0)
+  const rafId = useRef<number | null>(null)
+  const pendingDelta = useRef(0)
 
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     e.preventDefault()
@@ -17,12 +19,24 @@ export default function ResizeHandle({ onResize }: ResizeHandleProps) {
     const target = e.currentTarget
 
     const onMove = (ev: PointerEvent) => {
-      const delta = ev.clientX - startX.current
+      pendingDelta.current += ev.clientX - startX.current
       startX.current = ev.clientX
-      onResize(delta)
+
+      if (rafId.current === null) {
+        rafId.current = requestAnimationFrame(() => {
+          onResize(pendingDelta.current)
+          pendingDelta.current = 0
+          rafId.current = null
+        })
+      }
     }
 
     const onUp = () => {
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current)
+        rafId.current = null
+      }
+      pendingDelta.current = 0
       setDragging(false)
       target.removeEventListener('pointermove', onMove as EventListener)
       target.removeEventListener('pointerup', onUp)

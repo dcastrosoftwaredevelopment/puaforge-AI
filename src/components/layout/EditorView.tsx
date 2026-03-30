@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { SandpackProvider } from '@codesandbox/sandpack-react'
 import { Loader2, MessageCircle } from 'lucide-react'
@@ -31,12 +31,14 @@ export default function EditorView() {
     setChatWidth((prev) => Math.min(CHAT_MAX, Math.max(CHAT_MIN, prev - delta)))
   }, [setChatWidth])
 
-  const filesHash = Object.entries(files)
-    .map(([p, c]) => `${p}:${c.length}`)
-    .sort()
-    .join('|')
-  const depsKey = Object.keys(deps).sort().join(',')
-  const sandpackKey = `${projectId}-${filesHash}-${depsKey}`
+  const sandpackKey = useMemo(() => {
+    const filesHash = Object.entries(files)
+      .map(([p, c]) => `${p}:${c.length}`)
+      .sort()
+      .join('|')
+    const depsKey = Object.keys(deps).sort().join(',')
+    return `${projectId}-${filesHash}-${depsKey}`
+  }, [projectId, files, deps])
 
   if (!projectReady) {
     return (
