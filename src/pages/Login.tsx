@@ -1,9 +1,31 @@
 import { useState } from 'react'
 import { GoogleLogin } from '@react-oauth/google'
 import { Loader2, Mail, Lock, User } from 'lucide-react'
+import * as yup from 'yup'
 import { useAuth } from '@/hooks/useAuth'
+import { ApiError } from '@/services/api'
+
+const ERROR_MESSAGES: Record<string, string> = {
+  ERROR_EMAIL_ALREADY_USED: 'Este email já está cadastrado. Tente fazer login.',
+  ERROR_INVALID_CREDENTIALS: 'Email ou senha incorretos.',
+  ERROR_MISSING_FIELDS: 'Preencha todos os campos.',
+  ERROR_INVALID_GOOGLE_TOKEN: 'Não foi possível autenticar com o Google.',
+  ERROR_USER_NOT_FOUND: 'Usuário não encontrado.',
+}
+
+const loginSchema = yup.object({
+  email: yup.string().email('Email inválido').required('Email é obrigatório'),
+  password: yup.string().required('Senha é obrigatória'),
+})
+
+const registerSchema = yup.object({
+  name: yup.string().required('Nome é obrigatório'),
+  email: yup.string().email('Email inválido').required('Email é obrigatório'),
+  password: yup.string().min(6, 'Mínimo de 6 caracteres').required('Senha é obrigatória'),
+})
 
 type Tab = 'login' | 'register'
+type FieldErrors = Record<string, string>
 
 export default function Login() {
   const { login, register, loginWithGoogle } = useAuth()
@@ -13,10 +35,36 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+
+  const switchTab = (t: Tab) => {
+    setTab(t)
+    setError('')
+    setFieldErrors({})
+  }
+
+  const validate = async (): Promise<boolean> => {
+    try {
+      const schema = tab === 'login' ? loginSchema : registerSchema
+      await schema.validate({ name, email, password }, { abortEarly: false })
+      setFieldErrors({})
+      return true
+    } catch (err) {
+      if (err instanceof yup.ValidationError) {
+        const errors: FieldErrors = {}
+        err.inner.forEach((e) => {
+          if (e.path) errors[e.path] = e.message
+        })
+        setFieldErrors(errors)
+      }
+      return false
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    if (!(await validate())) return
     setLoading(true)
     try {
       if (tab === 'login') {
@@ -25,7 +73,8 @@ export default function Login() {
         await register(email, password, name)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao autenticar')
+      const code = err instanceof ApiError ? err.code : 'UNKNOWN'
+      setError(ERROR_MESSAGES[code] ?? 'Erro ao autenticar. Tente novamente.')
     } finally {
       setLoading(false)
     }
@@ -37,11 +86,19 @@ export default function Login() {
     try {
       await loginWithGoogle(credential)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao autenticar com Google')
+      const code = err instanceof ApiError ? err.code : 'UNKNOWN'
+      setError(ERROR_MESSAGES[code] ?? 'Erro ao autenticar com Google. Tente novamente.')
     } finally {
       setLoading(false)
     }
   }
+
+  const inputClass = (field: string) =>
+    `w-full bg-bg-primary border rounded-lg pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none transition ${
+      fieldErrors[field]
+        ? 'border-red-500 focus:border-red-500'
+        : 'border-border-subtle focus:border-forge-terracotta'
+    }`
 
   return (
     <div className="h-screen w-screen bg-bg-primary flex items-center justify-center px-4">
@@ -56,7 +113,7 @@ export default function Login() {
             {(['login', 'register'] as Tab[]).map((t) => (
               <button
                 key={t}
-                onClick={() => { setTab(t); setError('') }}
+                onClick={() => switchTab(t)}
                 className={`flex-1 py-1.5 rounded-md text-sm font-medium transition cursor-pointer ${
                   tab === t
                     ? 'bg-forge-terracotta text-white'
@@ -70,47 +127,50 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
             {tab === 'register' && (
-              <div className="relative">
-                <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-                <input
-                  type="text"
-                  placeholder="Nome"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  className="w-full bg-bg-primary border border-border-subtle rounded-lg pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-forge-terracotta transition"
-                />
+              <div>
+                <div className="relative">
+                  <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+                  <input
+                    type="text"
+                    placeholder="Nome"
+                    value={name}
+                    onChange={(e) => { setName(e.target.value); setFieldErrors((p) => ({ ...p, name: '' })) }}
+                    className={inputClass('name')}
+                  />
+                </div>
+                {fieldErrors.name && <p className="text-xs text-red-400 mt-1 ml-1">{fieldErrors.name}</p>}
               </div>
             )}
 
-            <div className="relative">
-              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full bg-bg-primary border border-border-subtle rounded-lg pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-forge-terracotta transition"
-              />
+            <div>
+              <div className="relative">
+                <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setFieldErrors((p) => ({ ...p, email: '' })) }}
+                  className={inputClass('email')}
+                />
+              </div>
+              {fieldErrors.email && <p className="text-xs text-red-400 mt-1 ml-1">{fieldErrors.email}</p>}
             </div>
 
-            <div className="relative">
-              <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-              <input
-                type="password"
-                placeholder="Senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="w-full bg-bg-primary border border-border-subtle rounded-lg pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-forge-terracotta transition"
-              />
+            <div>
+              <div className="relative">
+                <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+                <input
+                  type="password"
+                  placeholder="Senha"
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); setFieldErrors((p) => ({ ...p, password: '' })) }}
+                  className={inputClass('password')}
+                />
+              </div>
+              {fieldErrors.password && <p className="text-xs text-red-400 mt-1 ml-1">{fieldErrors.password}</p>}
             </div>
 
-            {error && (
-              <p className="text-xs text-red-400 text-center">{error}</p>
-            )}
+            {error && <p className="text-xs text-red-400 text-center">{error}</p>}
 
             <button
               type="submit"

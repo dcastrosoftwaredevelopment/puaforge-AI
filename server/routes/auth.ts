@@ -15,13 +15,13 @@ authRoute.post('/auth/register', async (req, res) => {
   const { email, password, name } = req.body as { email: string; password: string; name: string }
 
   if (!email || !password || !name) {
-    res.status(400).json({ error: 'Email, nome e senha são obrigatórios' })
+    res.status(400).json({ code: 'ERROR_MISSING_FIELDS' })
     return
   }
 
   const existing = await db.select({ id: users.id }).from(users).where(eq(users.email, email))
   if (existing.length > 0) {
-    res.status(409).json({ error: 'Email já cadastrado' })
+    res.status(409).json({ code: 'ERROR_EMAIL_ALREADY_USED' })
     return
   }
 
@@ -40,20 +40,20 @@ authRoute.post('/auth/login', async (req, res) => {
   const { email, password } = req.body as { email: string; password: string }
 
   if (!email || !password) {
-    res.status(400).json({ error: 'Email e senha são obrigatórios' })
+    res.status(400).json({ code: 'ERROR_MISSING_FIELDS' })
     return
   }
 
   const [user] = await db.select().from(users).where(eq(users.email, email))
 
   if (!user?.passwordHash) {
-    res.status(401).json({ error: 'Email ou senha inválidos' })
+    res.status(401).json({ code: 'ERROR_INVALID_CREDENTIALS' })
     return
   }
 
   const valid = await bcrypt.compare(password, user.passwordHash)
   if (!valid) {
-    res.status(401).json({ error: 'Email ou senha inválidos' })
+    res.status(401).json({ code: 'ERROR_INVALID_CREDENTIALS' })
     return
   }
 
@@ -66,7 +66,7 @@ authRoute.post('/auth/google', async (req, res) => {
   const { credential } = req.body as { credential: string }
 
   if (!credential) {
-    res.status(400).json({ error: 'Credential do Google obrigatória' })
+    res.status(400).json({ code: 'ERROR_MISSING_FIELDS' })
     return
   }
 
@@ -77,7 +77,7 @@ authRoute.post('/auth/google', async (req, res) => {
 
   const payload = ticket.getPayload()
   if (!payload?.email) {
-    res.status(401).json({ error: 'Token do Google inválido' })
+    res.status(401).json({ code: 'ERROR_INVALID_GOOGLE_TOKEN' })
     return
   }
 
@@ -116,7 +116,7 @@ authRoute.get('/auth/me', requireAuth, async (req, res) => {
     .where(eq(users.id, req.user!.userId))
 
   if (!row) {
-    res.status(404).json({ error: 'Usuário não encontrado' })
+    res.status(404).json({ code: 'ERROR_USER_NOT_FOUND' })
     return
   }
 

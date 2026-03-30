@@ -27,7 +27,8 @@
     "google-auth-library": "^10.6.2",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
-    "pg": "^8.20.0"
+    "pg": "^8.20.0",
+    "yup": "^1.7.1"
   },
   "devDependencies": {
     "@codesandbox/sandpack-react": "^2.20.0",

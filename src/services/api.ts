@@ -2,6 +2,15 @@ declare const __API_URL__: string
 
 const BASE_URL = __API_URL__ || window.location.origin
 
+export class ApiError extends Error {
+  constructor(
+    public readonly code: string,
+    public readonly status: number,
+  ) {
+    super(code)
+  }
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
@@ -12,8 +21,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   })
 
   if (!res.ok) {
-    const text = await res.text()
-    throw new Error(`API ${res.status}: ${text}`)
+    const json = await res.json().catch(() => null)
+    const code = json?.code ?? `HTTP_${res.status}`
+    throw new ApiError(code, res.status)
   }
 
   return res.json() as Promise<T>
