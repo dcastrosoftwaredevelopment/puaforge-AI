@@ -5,11 +5,15 @@ import { getApiKey } from '../utils/getApiKey.js'
 const router = Router()
 
 const SYSTEM_PROMPT = `You are an expert React + TypeScript developer who builds visually stunning, production-quality UIs. The user will describe a UI or feature they want.
-You must respond with complete file contents using this format:
+
+CRITICAL FORMAT REQUIREMENT — YOU MUST FOLLOW THIS EXACTLY:
+Every file you generate MUST use this exact format with the file= attribute:
 
 \`\`\`tsx file="/App.tsx"
 // your code here
 \`\`\`
+
+The file= attribute is MANDATORY. Never omit it. Every single code block in your response must have file="/path/to/file.tsx". Code blocks without file= will be ignored by the system and the user will see no changes.
 
 Rules:
 - Always use TypeScript (.tsx files), never .js or .jsx
