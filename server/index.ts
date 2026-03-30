@@ -7,6 +7,8 @@ import { generateRoute } from './routes/generate.js'
 import { modelsRoute } from './routes/models.js'
 import { publishRoute } from './routes/publish.js'
 import { settingsRoute } from './routes/settings.js'
+import { authRoute } from './routes/auth.js'
+import { initDb } from './db.js'
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 
@@ -17,6 +19,7 @@ app.use(cors())
 app.use(morgan('dev'))
 app.use(express.json({ limit: '50mb' }))
 
+app.use('/api', authRoute)
 app.use('/api', generateRoute)
 app.use('/api', modelsRoute)
 app.use('/api', publishRoute)
@@ -36,7 +39,13 @@ if (process.env.NODE_ENV === 'production') {
   })
 }
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`)
-  console.log('API key: configured via frontend Settings (X-API-Key header)')
-})
+initDb()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`)
+    })
+  })
+  .catch((err: unknown) => {
+    console.error('Failed to initialize database:', err)
+    process.exit(1)
+  })
