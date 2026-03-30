@@ -28,11 +28,11 @@ export function generateImagesFiles(images: ProjectImage[]): Record<string, stri
   if (images.length === 0) return {}
 
   const tsExports = images
-    .map((img) => `export const ${toExportName(img.name)} = '${img.url}'`)
+    .map((img) => `export const ${toExportName(img.name)} = '${img.dataUrl ?? img.url}'`)
     .join('\n')
 
   const cssVars = images
-    .map((img) => `  ${toCssVarName(img.name)}: url('${img.url}');`)
+    .map((img) => `  ${toCssVarName(img.name)}: url('${img.dataUrl ?? img.url}');`)
     .join('\n')
 
   return {
@@ -67,7 +67,15 @@ export function useProjectImages() {
     const formData = new FormData()
     formData.append('file', file)
 
-    const image = await api.upload<ProjectImage>(`/api/projects/${activeProjectId}/images`, formData, authHeaders)
+    const uploaded = await api.upload<ProjectImage>(`/api/projects/${activeProjectId}/images`, formData, authHeaders)
+
+    // Create a local data URL from the original File for use in Sandpack preview
+    const dataUrl = await new Promise<string>((resolve) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as string)
+      reader.readAsDataURL(file)
+    })
+    const image = { ...uploaded, dataUrl }
 
     const updated = [...images, image]
     setImages(updated)

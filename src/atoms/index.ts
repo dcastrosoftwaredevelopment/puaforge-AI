@@ -52,6 +52,8 @@ export interface ProjectImage {
   url: string
   mediaType: string
   size: number
+  /** Data URL fetched client-side for use in Sandpack preview (not persisted) */
+  dataUrl?: string
 }
 
 export const projectImagesAtom = atom<ProjectImage[]>([])

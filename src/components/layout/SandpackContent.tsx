@@ -1,6 +1,7 @@
-import { memo, useCallback, useRef } from 'react'
+import { memo, useCallback, useRef, useState } from 'react'
 import { SandpackLayout, SandpackFileExplorer, SandpackCodeEditor, SandpackPreview } from '@codesandbox/sandpack-react'
-import { Save, Undo2 } from 'lucide-react'
+import { Save, Undo2, Search } from 'lucide-react'
+import FindInFiles from './FindInFiles'
 import { type DevicePreview } from '@/atoms'
 import { useViewMode } from '@/hooks/useViewMode'
 import { useDevicePreview } from '@/hooks/useDevicePreview'
@@ -54,6 +55,7 @@ export default function SandpackContent() {
   const { showEditor, showPreview, isSplit } = useViewMode()
   const { device } = useDevicePreview()
   const containerRef = useRef<HTMLDivElement>(null)
+  const [findOpen, setFindOpen] = useState(false)
 
   const isResponsive = device !== 'desktop'
 
@@ -73,7 +75,7 @@ export default function SandpackContent() {
         style={isSplit ? { width: `${editorFraction * 100}%` } : { flex: 1 }}
       >
         {isDirty && <EditBar onSave={saveEdits} onDiscard={discardEdits} />}
-        <div className="flex flex-1 min-h-0">
+        <div className="relative flex flex-1 min-h-0">
           <SandpackFileExplorer />
           <SandpackCodeEditor
             showTabs
@@ -81,6 +83,14 @@ export default function SandpackContent() {
             showLineNumbers
             showInlineErrors
           />
+          <button
+            onClick={() => setFindOpen((v) => !v)}
+            className="absolute top-1.5 right-2 z-10 p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+            title="Buscar em arquivos (Ctrl+Shift+F)"
+          >
+            <Search size={13} />
+          </button>
+          <FindInFiles open={findOpen} onClose={() => setFindOpen(false)} />
         </div>
       </div>
       {isSplit && <ResizeHandle onResize={onSplitResize} />}

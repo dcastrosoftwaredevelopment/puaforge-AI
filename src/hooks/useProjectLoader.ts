@@ -43,10 +43,28 @@ export function useProjectLoader(projectId: string | undefined) {
 
       try {
         // Images and checkpoints always from PostgreSQL
-        const [savedImages, savedCheckpoints] = await Promise.all([
+        const [rawImages, savedCheckpoints] = await Promise.all([
           api.get<ProjectImage[]>(`/api/projects/${projectId}/images`, headers),
           api.get<Checkpoint[]>(`/api/projects/${projectId}/checkpoints`, headers),
         ])
+
+        // Fetch data URLs for Sandpack preview (browser fetch works even when Sandpack iframe cannot)
+        const savedImages = await Promise.all(
+          rawImages.map(async (img) => {
+            try {
+              const res = await fetch(img.url)
+              const blob = await res.blob()
+              const dataUrl = await new Promise<string>((resolve) => {
+                const reader = new FileReader()
+                reader.onload = () => resolve(reader.result as string)
+                reader.readAsDataURL(blob)
+              })
+              return { ...img, dataUrl }
+            } catch {
+              return img
+            }
+          }),
+        )
 
         if (cancelled) return
 

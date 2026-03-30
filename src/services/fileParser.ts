@@ -1,10 +1,10 @@
 /**
- * Detects if a code string is a placeholder stub (auto-generated or "em construção").
+ * Detects if a code string is an auto-generated placeholder stub.
+ * Only checks for the specific stub text injected by addMissingStubs —
+ * never uses line count, since the AI often generates short but valid components.
  */
 function isStub(code: string): boolean {
-  return /em construção/i.test(code) ||
-    /placeholder/i.test(code) ||
-    code.split('\n').length <= 8
+  return /em construção/i.test(code)
 }
 
 /**

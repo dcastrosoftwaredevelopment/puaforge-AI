@@ -1,9 +1,10 @@
-import { useState } from 'react'
-import { GripHorizontal, Trash2, PanelRightClose, PanelRightOpen, Minus } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { GripHorizontal, Trash2, PanelRightClose, PanelRightOpen, Minus, Download, Upload } from 'lucide-react'
 import { useFiles } from '@/hooks/useFiles'
 import { useChat } from '@/hooks/useChat'
 import { useMessages } from '@/hooks/useMessages'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
+import type { Message } from '@/atoms'
 
 import { useFloatingPanel, type ResizeDirection } from '@/hooks/useFloatingPanel'
 import ChatHistory from './ChatHistory'
@@ -27,10 +28,38 @@ const resizeHandles: { direction: ResizeDirection; className: string }[] = [
 ]
 
 function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?: (e: React.PointerEvent) => void }) {
-  const { setMessages } = useMessages()
+  const { messages, setMessages } = useMessages()
   const { setFiles, setDeps } = useFiles()
   const { mode: chatMode, setMode: setChatMode, setIsOpen } = useChat()
   const [showClearConfirm, setShowClearConfirm] = useState(false)
+  const importRef = useRef<HTMLInputElement>(null)
+
+  function exportMessages() {
+    const data = JSON.stringify(messages, null, 2)
+    const blob = new Blob([data], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `chat-${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  function importMessages(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result as string) as Message[]
+        if (Array.isArray(parsed)) setMessages((prev) => [...prev, ...parsed])
+      } catch {
+        // invalid file — ignore
+      }
+    }
+    reader.readAsText(file)
+    e.target.value = ''
+  }
 
   return (
     <>
@@ -46,6 +75,28 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
           </span>
         </div>
         <div className="flex items-center gap-1.5">
+          <input ref={importRef} type="file" accept=".json" className="hidden" onChange={importMessages} />
+          <button
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={() => importRef.current?.click()}
+            className="group relative p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
+          >
+            <Upload size={12} />
+            <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-md bg-bg-elevated border border-border-subtle text-[10px] text-text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 transition shadow-lg z-50">
+              Importar mensagens
+            </span>
+          </button>
+          <button
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={exportMessages}
+            disabled={messages.length === 0}
+            className="group relative p-1 rounded text-text-muted hover:text-text-primary disabled:opacity-30 transition cursor-pointer"
+          >
+            <Download size={12} />
+            <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-md bg-bg-elevated border border-border-subtle text-[10px] text-text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 transition shadow-lg z-50">
+              Exportar mensagens
+            </span>
+          </button>
           <button
             onPointerDown={(e) => e.stopPropagation()}
             onClick={() => setShowClearConfirm(true)}
