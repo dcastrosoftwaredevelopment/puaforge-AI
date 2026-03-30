@@ -169,6 +169,8 @@ export default function PromptInput() {
           console.log('[PromptInput] Detected dependencies:', newDeps)
           setDeps((prev) => ({ ...prev, ...newDeps }))
         }
+      } else if (result.rawResponse.includes('```')) {
+        console.warn('[PromptInput] AI responded with code blocks but no file= attributes — editor not updated')
       }
     } catch {
       setMessages((prev) => [
