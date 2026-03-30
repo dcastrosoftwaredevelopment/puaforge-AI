@@ -23,7 +23,7 @@ export function CodeViewerProvider({ children }: { children: React.ReactNode }) 
         {entry && (
           <div className="absolute inset-0 z-20 flex flex-col bg-bg-secondary">
             {/* Header */}
-            <div className="flex items-center justify-between px-3 py-2 bg-[#141414] border-b border-[rgba(255,255,255,0.06)] shrink-0">
+            <div className="flex items-center justify-between px-3 py-2 bg-bg-secondary border-b border-border-subtle shrink-0">
               <div className="flex items-center gap-2">
                 <div className="flex gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#ef4444]/50" />
@@ -87,12 +87,12 @@ const editorTheme: Record<string, React.CSSProperties> = {
 function CodeContent({ entry }: { entry: { language: string; code: string } }) {
   return (
     <Suspense fallback={
-      <pre className="m-0 p-4 bg-[#0D0D0D] text-[11.5px] font-mono text-[#94a3b8] leading-relaxed whitespace-pre h-full">{entry.code}</pre>
+      <pre className="m-0 p-4 bg-bg-primary text-[11.5px] font-mono text-code-muted leading-relaxed whitespace-pre h-full">{entry.code}</pre>
     }>
       <SyntaxHighlighter
         language={entry.language || 'tsx'}
         style={editorTheme}
-        customStyle={{ margin: 0, padding: '16px', background: '#0D0D0D', fontSize: '11.5px', minHeight: '100%' }}
+        customStyle={{ margin: 0, padding: '16px', background: 'var(--color-bg-primary)', fontSize: '11.5px', minHeight: '100%' }}
         showLineNumbers
         lineNumberStyle={{ color: '#374151', minWidth: '2.5em', paddingRight: '1em', userSelect: 'none' }}
         wrapLongLines={false}

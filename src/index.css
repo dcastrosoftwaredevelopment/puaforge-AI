@@ -19,6 +19,7 @@
   --color-text-primary: #E0E0E0;
   --color-text-secondary: rgba(224, 224, 224, 0.55);
   --color-text-muted: rgba(224, 224, 224, 0.3);
+  --color-code-muted: #94a3b8;
   --color-chat-user: rgba(255, 255, 255, 0.07);
   --color-chat-ai: rgba(255, 255, 255, 0.03);
 

@@ -113,6 +113,7 @@ export const DEFAULT_PALETTE: PaletteColor[] = [
   { id: 'bg-elevated', name: 'Background Elevated', value: '#1F1F1F', locked: true },
   // Text
   { id: 'text-primary', name: 'Text Primary', value: '#E0E0E0', locked: true },
+  { id: 'code-muted', name: 'Code Text Muted', value: '#94a3b8', locked: true },
 ]
 
 export const colorPaletteAtom = atom<PaletteColor[]>(DEFAULT_PALETTE)

@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { User, Bot, FileCode } from 'lucide-react'
@@ -39,6 +39,37 @@ function parseSegments(content: string): Segment[] {
   return segments
 }
 
+// ─── Collapsible text component ───────────────────────────────────────────────
+
+const TEXT_COLLAPSE_CHARS = 400
+
+function CollapsibleText({ children, content, fadeColor = 'var(--color-bg-secondary)' }: { children: React.ReactNode; content: string; fadeColor?: string }) {
+  const [expanded, setExpanded] = useState(false)
+  const isLong = content.length > TEXT_COLLAPSE_CHARS
+
+  if (!isLong) return <>{children}</>
+
+  return (
+    <div>
+      <div
+        className="relative overflow-hidden"
+        style={expanded ? undefined : { maxHeight: '110px' }}
+      >
+        {children}
+        {!expanded && (
+          <div className="absolute bottom-0 left-0 right-0 h-10" style={{ background: `linear-gradient(to top, ${fadeColor}, transparent)` }} />
+        )}
+      </div>
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className="mt-1 text-[11px] text-text-muted hover:text-vibe-blue transition-colors cursor-pointer"
+      >
+        {expanded ? 'ver menos ↑' : 'ver mais ↓'}
+      </button>
+    </div>
+  )
+}
+
 // ─── Code block component ─────────────────────────────────────────────────────
 
 const PREVIEW_LINES = 6
@@ -51,11 +82,11 @@ const CodeBlock = memo(function CodeBlock({ language, filePath, code }: CodeSegm
 
   return (
     <div
-      className="my-2 rounded-lg overflow-hidden border border-[rgba(255,255,255,0.07)] cursor-pointer group"
+      className="my-2 rounded-lg overflow-hidden border border-border-subtle cursor-pointer group"
       onClick={() => open({ language, filePath, code })}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-1.5 bg-[#141414] border-b border-[rgba(255,255,255,0.06)]">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-bg-secondary border-b border-border-subtle">
         <div className="flex items-center gap-2">
           <FileCode size={11} className="text-text-muted shrink-0" />
           <span className="text-[11px] font-mono text-text-secondary truncate">
@@ -77,13 +108,13 @@ const CodeBlock = memo(function CodeBlock({ language, filePath, code }: CodeSegm
       {/* Plain preview */}
       <div className="relative">
         <pre
-          className="m-0 px-3 py-2.5 bg-[#0D0D0D] text-[11px] font-mono text-[#94a3b8] leading-relaxed overflow-hidden whitespace-pre"
+          className="m-0 px-3 py-2.5 bg-bg-primary text-[11px] font-mono text-code-muted leading-relaxed overflow-hidden whitespace-pre"
           style={{ maxHeight: `${PREVIEW_LINES * 18}px` }}
         >
           {previewCode}
         </pre>
         {hasMore && (
-          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#0D0D0D] to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-bg-primary to-transparent" />
         )}
       </div>
     </div>
@@ -129,26 +160,30 @@ function ChatMessage({ message }: Props) {
         )}
 
         {isUser ? (
-          <p className="whitespace-pre-wrap break-words">{message.content}</p>
+          <CollapsibleText content={message.content} fadeColor="var(--color-bg-tertiary)">
+            <p className="whitespace-pre-wrap break-words">{message.content}</p>
+          </CollapsibleText>
         ) : (
           <>
             {segments!.map((seg, i) =>
               seg.type === 'text' ? (
-                <ReactMarkdown key={i} remarkPlugins={[remarkGfm]}
-                  components={{
-                    code: ({ children, className }) => {
-                      const isBlock = !!className?.includes('language-')
-                      return isBlock ? (
-                        <pre className="bg-[#0D0D0D] rounded p-2 my-1 text-[11px] font-mono text-[#94a3b8] overflow-x-auto whitespace-pre">{children}</pre>
-                      ) : (
-                        <code className="bg-bg-primary px-1.5 py-0.5 rounded text-xs text-text-primary font-mono">{children}</code>
-                      )
-                    },
-                    pre: ({ children }) => <>{children}</>,
-                  }}
-                >
-                  {seg.content}
-                </ReactMarkdown>
+                <CollapsibleText key={i} content={seg.content} fadeColor="var(--color-bg-secondary)">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}
+                    components={{
+                      code: ({ children, className }) => {
+                        const isBlock = !!className?.includes('language-')
+                        return isBlock ? (
+                          <pre className="bg-bg-primary rounded p-2 my-1 text-[11px] font-mono text-code-muted overflow-x-auto whitespace-pre">{children}</pre>
+                        ) : (
+                          <code className="bg-bg-primary px-1.5 py-0.5 rounded text-xs text-text-primary font-mono">{children}</code>
+                        )
+                      },
+                      pre: ({ children }) => <>{children}</>,
+                    }}
+                  >
+                    {seg.content}
+                  </ReactMarkdown>
+                </CollapsibleText>
               ) : (
                 <CodeBlock key={i} {...seg} />
               )
