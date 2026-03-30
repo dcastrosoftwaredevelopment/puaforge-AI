@@ -37,21 +37,13 @@ services:
       db:
         condition: service_healthy
 
-  studio:
-    image: node:22-alpine
-    working_dir: /app
-    volumes:
-      - .:/app
-      - /app/node_modules
+
+  # Adminer — http://localhost:8080
+  adminer:
+    image: adminer
+    restart: unless-stopped
     ports:
-      - '4983:4983'
-    command: sh -c "npm run db:studio -- --host 0.0.0.0"
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: ${DB_USER:-puaforge}
-      DB_PASSWORD: ${DB_PASSWORD:-puaforge}
-      DB_NAME: ${DB_NAME:-puaforge}
+      - '8080:8080'
     depends_on:
       db:
         condition: service_healthy
