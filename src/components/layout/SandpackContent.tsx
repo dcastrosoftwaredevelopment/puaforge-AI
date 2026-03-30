@@ -59,18 +59,31 @@ export default function SandpackContent() {
 
   const isResponsive = device !== 'desktop'
 
+  const editorFractionRef = useRef(editorFraction)
+  editorFractionRef.current = editorFraction
+  const editorPanelRef = useRef<HTMLDivElement>(null)
+  const previewPanelRef = useRef<HTMLDivElement>(null)
+
   const onSplitResize = useCallback((delta: number) => {
     const container = containerRef.current
     if (!container) return
     const totalWidth = container.offsetWidth
     if (totalWidth === 0) return
-    setEditorFraction((prev) => Math.min(SPLIT_MAX, Math.max(SPLIT_MIN, prev + delta / totalWidth)))
+    const next = Math.min(SPLIT_MAX, Math.max(SPLIT_MIN, editorFractionRef.current + delta / totalWidth))
+    editorFractionRef.current = next
+    if (editorPanelRef.current) editorPanelRef.current.style.width = `${next * 100}%`
+    if (previewPanelRef.current) previewPanelRef.current.style.width = `${(1 - next) * 100}%`
+  }, [])
+
+  const onSplitCommit = useCallback(() => {
+    setEditorFraction(editorFractionRef.current)
   }, [setEditorFraction])
 
   return (
     <SandpackLayout ref={containerRef} className="flex h-full w-full">
       <SandpackSyncBridge />
       <div
+        ref={editorPanelRef}
         className={showEditor ? 'flex flex-col min-w-0 h-full' : 'hidden'}
         style={isSplit ? { width: `${editorFraction * 100}%` } : { flex: 1 }}
       >
@@ -93,8 +106,9 @@ export default function SandpackContent() {
           <FindInFiles open={findOpen} onClose={() => setFindOpen(false)} />
         </div>
       </div>
-      {isSplit && <ResizeHandle onResize={onSplitResize} />}
+      {isSplit && <ResizeHandle onResize={onSplitResize} onCommit={onSplitCommit} />}
       <div
+        ref={previewPanelRef}
         className={
           showPreview
             ? 'relative min-w-0 h-full flex items-start justify-center overflow-auto'

@@ -2,13 +2,12 @@ import { useCallback, useRef, useState } from 'react'
 
 interface ResizeHandleProps {
   onResize: (delta: number) => void
+  onCommit?: () => void
 }
 
-export default function ResizeHandle({ onResize }: ResizeHandleProps) {
+export default function ResizeHandle({ onResize, onCommit }: ResizeHandleProps) {
   const [dragging, setDragging] = useState(false)
   const startX = useRef(0)
-  const rafId = useRef<number | null>(null)
-  const pendingDelta = useRef(0)
 
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     e.preventDefault()
@@ -19,32 +18,21 @@ export default function ResizeHandle({ onResize }: ResizeHandleProps) {
     const target = e.currentTarget
 
     const onMove = (ev: PointerEvent) => {
-      pendingDelta.current += ev.clientX - startX.current
+      const delta = ev.clientX - startX.current
       startX.current = ev.clientX
-
-      if (rafId.current === null) {
-        rafId.current = requestAnimationFrame(() => {
-          onResize(pendingDelta.current)
-          pendingDelta.current = 0
-          rafId.current = null
-        })
-      }
+      onResize(delta) // DOM mutation in parent — no setState
     }
 
     const onUp = () => {
-      if (rafId.current !== null) {
-        cancelAnimationFrame(rafId.current)
-        rafId.current = null
-      }
-      pendingDelta.current = 0
       setDragging(false)
+      onCommit?.() // update atom once
       target.removeEventListener('pointermove', onMove as EventListener)
       target.removeEventListener('pointerup', onUp)
     }
 
     target.addEventListener('pointermove', onMove as EventListener)
     target.addEventListener('pointerup', onUp)
-  }, [onResize])
+  }, [onResize, onCommit])
 
   return (
     <div
