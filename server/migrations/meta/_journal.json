@@ -57,6 +57,13 @@
       "when": 1775350000000,
       "tag": "0007_published_sites_subdomain",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1775440000000,
+      "tag": "0008_subdomain_separate_publish",
+      "breakpoints": true
     }
   ]
 }
