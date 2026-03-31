@@ -15,10 +15,12 @@ import { depsAtom } from '@/hooks/useFiles'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
 import { generateProjectName } from '@/utils/projectNames'
 import { api } from '@/services/api'
+import { usePlanLimit } from '@/hooks/usePlanLimit'
 
 export function useProjectActions() {
   const navigate = useNavigate()
   const token = useAtomValue(authTokenAtom)
+  const withPlanLimit = usePlanLimit()
   const setProjects = useSetAtom(projectsAtom)
   const setActiveProjectId = useSetAtom(activeProjectIdAtom)
   const setMessages = useSetAtom(messagesAtom)
@@ -40,7 +42,8 @@ export function useProjectActions() {
       createdAt: Date.now(),
       updatedAt: Date.now(),
     }
-    await api.post('/api/projects', project, authHeaders)
+    const result = await withPlanLimit(() => api.post('/api/projects', project, authHeaders))
+    if (!result) return
     setProjects((prev) => [project, ...prev])
 
     setActiveProjectId(project.id)

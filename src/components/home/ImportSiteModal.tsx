@@ -18,6 +18,7 @@ import { authTokenAtom } from '@/atoms/authAtoms'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
 import { generateProjectName } from '@/utils/projectNames'
 import { api } from '@/services/api'
+import { usePlanLimit } from '@/hooks/usePlanLimit'
 
 // Same logic as in useProjectImages — converts filename to JS identifier
 function toExportName(fileName: string): string {
@@ -62,6 +63,7 @@ export default function ImportSiteModal({ onClose }: Props) {
   const setProjectImages = useSetAtom(projectImagesAtom)
   const setCheckpoints = useSetAtom(checkpointsAtom)
   const setPendingImport = useSetAtom(pendingImportAtom)
+  const withPlanLimit = usePlanLimit()
 
   const [tab, setTab] = useState<Tab>('url')
   const [url, setUrl] = useState('')
@@ -111,11 +113,15 @@ export default function ImportSiteModal({ onClose }: Props) {
         body = { htmlContent }
       }
 
-      const { html, images, warning } = await api.post<{ html: string; images: ImportedImage[]; warning?: string }>(
-        '/api/import-site',
-        body,
-        authHeaders,
+      const importResult = await withPlanLimit(() =>
+        api.post<{ html: string; images: ImportedImage[]; warning?: string }>(
+          '/api/import-site',
+          body,
+          authHeaders,
+        )
       )
+      if (!importResult) { setStep('idle'); return }
+      const { html, images, warning } = importResult
       if (warning) setWarning(warning)
 
       // 2. Create project via API (no navigation yet — we upload images first)

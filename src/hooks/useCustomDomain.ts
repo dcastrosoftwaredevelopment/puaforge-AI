@@ -3,11 +3,13 @@ import { useAtom, useAtomValue } from 'jotai'
 import { customDomainAtom, activeProjectIdAtom } from '@/atoms'
 import { authTokenAtom } from '@/atoms/authAtoms'
 import { api } from '@/services/api'
+import { usePlanLimit } from '@/hooks/usePlanLimit'
 
 export function useCustomDomain() {
   const [customDomain, setCustomDomain] = useAtom(customDomainAtom)
   const activeProjectId = useAtomValue(activeProjectIdAtom)
   const token = useAtomValue(authTokenAtom)
+  const withPlanLimit = usePlanLimit()
 
   const saveDomain = useCallback(async (domain: string | null, force = false) => {
     if (!activeProjectId || !token) return
@@ -20,11 +22,12 @@ export function useCustomDomain() {
       if (!valid) throw new Error('Domínio inválido. Use o formato: meu-site.com')
     }
 
-    await api.put(
+    const result = await withPlanLimit(() => api.put(
       `/api/projects/${activeProjectId}/domain`,
       { customDomain: normalized, force },
       { Authorization: `Bearer ${token}` },
-    )
+    ))
+    if (!result) return
     setCustomDomain(normalized)
   }, [activeProjectId, token, setCustomDomain])
 

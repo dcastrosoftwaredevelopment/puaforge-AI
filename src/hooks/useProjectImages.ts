@@ -4,6 +4,7 @@ import { activeProjectIdAtom, projectImagesAtom, type ProjectImage } from '@/ato
 import { authTokenAtom } from '@/atoms/authAtoms'
 import { useFiles } from '@/hooks/useFiles'
 import { api } from '@/services/api'
+import { usePlanLimit } from '@/hooks/usePlanLimit'
 
 /** Converts a name like "hero-bg.jpg" to a valid JS identifier like "heroBg" */
 function toExportName(fileName: string): string {
@@ -46,6 +47,7 @@ export function useProjectImages() {
   const activeProjectId = useAtomValue(activeProjectIdAtom)
   const token = useAtomValue(authTokenAtom)
   const { setFiles } = useFiles()
+  const withPlanLimit = usePlanLimit()
 
   const authHeaders = useMemo(
     () => (token ? { Authorization: `Bearer ${token}` } : undefined),
@@ -67,7 +69,8 @@ export function useProjectImages() {
     const formData = new FormData()
     formData.append('file', file)
 
-    const uploaded = await api.upload<ProjectImage>(`/api/projects/${activeProjectId}/images`, formData, authHeaders)
+    const uploaded = await withPlanLimit(() => api.upload<ProjectImage>(`/api/projects/${activeProjectId}/images`, formData, authHeaders))
+    if (!uploaded) return
 
     // Create a local data URL from the original File for use in Sandpack preview
     const dataUrl = await new Promise<string>((resolve) => {

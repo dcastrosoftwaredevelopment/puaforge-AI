@@ -5,6 +5,7 @@ import { authTokenAtom } from '@/atoms/authAtoms'
 import { useFiles } from '@/hooks/useFiles'
 import { useApiCall, HttpMethod } from '@/hooks/useApiCall'
 import { api } from '@/services/api'
+import { usePlanLimit } from '@/hooks/usePlanLimit'
 
 export function usePublish() {
   const activeProjectId = useAtomValue(activeProjectIdAtom)
@@ -13,6 +14,7 @@ export function usePublish() {
   const [publishedAt, setPublishedAt] = useState<number | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
 
+  const withPlanLimit = usePlanLimit()
   const { loading: isPublishing, error: buildError, execute: callPublish } = useApiCall<
     { projectId: string | null; files: Record<string, string> },
     { html: string; publishedAt: number }
@@ -41,7 +43,7 @@ export function usePublish() {
     if (!activeProjectId || isPublishing || !authHeaders) return
     setSaveError(null)
 
-    const data = await callPublish({ projectId: activeProjectId, files })
+    const data = await withPlanLimit(() => callPublish({ projectId: activeProjectId, files }))
     if (!data) return
 
     try {

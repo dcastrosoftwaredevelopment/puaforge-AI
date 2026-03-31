@@ -5,6 +5,7 @@ import { authTokenAtom } from '@/atoms/authAtoms'
 import { useFiles } from '@/hooks/useFiles'
 import { api } from '@/services/api'
 import { extractDependencies } from '@/services/fileParser'
+import { usePlanLimit } from '@/hooks/usePlanLimit'
 
 export function useCheckpoints() {
   const [checkpoints, setCheckpoints] = useAtom(checkpointsAtom)
@@ -12,6 +13,7 @@ export function useCheckpoints() {
   const activeProjectId = useAtomValue(activeProjectIdAtom)
   const token = useAtomValue(authTokenAtom)
   const { files, setFiles, setDeps } = useFiles()
+  const withPlanLimit = usePlanLimit()
 
   const authHeaders = useMemo(
     () => (token ? { Authorization: `Bearer ${token}` } : undefined),
@@ -26,7 +28,8 @@ export function useCheckpoints() {
       files: { ...files },
       createdAt: Date.now(),
     }
-    await api.post(`/api/projects/${activeProjectId}/checkpoints`, checkpoint, authHeaders)
+    const result = await withPlanLimit(() => api.post(`/api/projects/${activeProjectId}/checkpoints`, checkpoint, authHeaders))
+    if (!result) return
     setCheckpoints((prev) => [checkpoint, ...prev])
   }, [activeProjectId, authHeaders, files, checkpoints.length, setCheckpoints])
 
