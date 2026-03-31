@@ -427,7 +427,15 @@ router.put('/projects/:id/published', requireAuth, async (req: Request, res: Res
 
   const { html, publishedAt } = req.body as { html: string; publishedAt: number }
 
-  const pbRecordId = await savePublishedSite(p(req, 'id'), html)
+  let pbRecordId: string
+  try {
+    pbRecordId = await savePublishedSite(p(req, 'id'), html)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Erro ao salvar no PocketBase'
+    console.error('[published] PocketBase save failed:', message)
+    res.status(500).json({ code: 'POCKETBASE_ERROR', error: message })
+    return
+  }
 
   await db
     .insert(publishedSites)

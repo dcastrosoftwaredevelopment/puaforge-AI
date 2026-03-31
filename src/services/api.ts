@@ -8,7 +8,7 @@ export class ApiError extends Error {
   data: Record<string, unknown> | null
 
   constructor(code: string, status: number, data?: Record<string, unknown> | null) {
-    super(code)
+    super((data?.error as string | undefined) ?? code)
     this.code = code
     this.status = status
     this.data = data ?? null
