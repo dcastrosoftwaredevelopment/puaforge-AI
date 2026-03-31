@@ -69,6 +69,7 @@ export default function ImportSiteModal({ onClose }: Props) {
   const [step, setStep] = useState<Step>('idle')
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 })
   const [error, setError] = useState<string | null>(null)
+  const [warning, setWarning] = useState<string | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -110,11 +111,12 @@ export default function ImportSiteModal({ onClose }: Props) {
         body = { htmlContent }
       }
 
-      const { html, images } = await api.post<{ html: string; images: ImportedImage[] }>(
+      const { html, images, warning } = await api.post<{ html: string; images: ImportedImage[]; warning?: string }>(
         '/api/import-site',
         body,
         authHeaders,
       )
+      if (warning) setWarning(warning)
 
       // 2. Create project via API (no navigation yet — we upload images first)
       const project: Project = {
@@ -305,6 +307,13 @@ ${truncatedHtml}`
               <CheckCircle2 size={13} />
               {t('import.done')}
             </div>
+          )}
+
+          {/* Warning (SPA detection, etc.) */}
+          {warning && (
+            <p className="text-xs text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-lg px-3 py-2">
+              {warning}
+            </p>
           )}
 
           {/* Error */}

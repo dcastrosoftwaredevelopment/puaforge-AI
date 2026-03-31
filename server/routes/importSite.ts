@@ -41,34 +41,65 @@ function extractImageUrls(html: string, baseUrl?: string): string[] {
 }
 
 /**
- * Strips noise from HTML before sending to the AI:
- * - Script tag contents (keeps src= for external dep hints)
- * - Noscript blocks
- * - HTML comments
- * - Tracking/analytics data-* attributes
- * - Inline event handlers (onclick, onmouseover, etc.)
- * - Collapses excess whitespace
+ * Aggressively strips noise from HTML before sending to the AI.
+ * Returns cleaned HTML and a flag indicating if the page is a JS-rendered SPA
+ * (in which case the body has essentially no static content).
  */
-function cleanHtml(html: string): string {
-  return html
-    // Remove script contents but keep <script src="..."> as a comment hint
-    .replace(/<script([^>]*)>([\s\S]*?)<\/script>/gi, (_, attrs: string) => {
-      const src = /src=["']([^"']+)["']/.exec(attrs)?.[1]
-      return src ? `<!-- external script: ${src} -->` : ''
+function cleanHtml(html: string): { html: string; isSpa: boolean } {
+  let cleaned = html
+
+  // 1. Collapse the entire <head> to just title + meta description
+  cleaned = cleaned.replace(/<head[\s\S]*?<\/head>/gi, (head) => {
+    const title = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(head)?.[0] ?? ''
+    const desc = /<meta[^>]+name=["']description["'][^>]*>/i.exec(head)?.[0] ?? ''
+    return `<head>${title}${desc}</head>`
+  })
+
+  // 2. Remove all <script> blocks (robust multi-pass to handle edge cases)
+  //    Repeat until stable in case of nested/malformed tags
+  let prev = ''
+  while (prev !== cleaned) {
+    prev = cleaned
+    cleaned = cleaned.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, (match) => {
+      const src = /\bsrc=["']([^"']+)["']/.exec(match)?.[1]
+      return src ? `<!-- script: ${src} -->` : ''
     })
-    // Remove noscript blocks
+  }
+
+  // 3. Remove <noscript>, <template>, <svg> blocks
+  cleaned = cleaned
     .replace(/<noscript[\s\S]*?<\/noscript>/gi, '')
-    // Remove HTML comments
-    .replace(/<!--[\s\S]*?-->/g, '')
-    // Remove inline event handlers
-    .replace(/\s+on\w+="[^"]*"/gi, '')
-    .replace(/\s+on\w+='[^']*'/gi, '')
-    // Remove tracking/analytics data attributes
-    .replace(/\s+data-(gtm|analytics|track|pixel|fb|ga|segment|heap|mixpanel|amplitude|clarity|hotjar|intercom|hubspot|pardot|marketo)\w*="[^"]*"/gi, '')
-    // Collapse runs of whitespace (but preserve newlines for readability)
+    .replace(/<template[\s\S]*?<\/template>/gi, '')
+    .replace(/<svg[\s\S]*?<\/svg>/gi, '')
+
+  // 4. Remove HTML comments
+  cleaned = cleaned.replace(/<!--[\s\S]*?-->/g, '')
+
+  // 5. Remove inline event handlers (onclick, onmouseover, etc.)
+  cleaned = cleaned.replace(/\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*')/gi, '')
+
+  // 6. Strip noisy tag attributes: integrity, nonce, crossorigin, data-*, aria-hidden
+  cleaned = cleaned.replace(/\s+(?:integrity|nonce|crossorigin|data-[\w:-]+|aria-hidden)\s*=\s*(?:"[^"]*"|'[^']*')/gi, '')
+
+  // 7. Remove long style attributes (likely contain base64 or generated styles)
+  cleaned = cleaned.replace(/\s+style\s*=\s*"[^"]{150,}"/gi, '')
+  cleaned = cleaned.replace(/\s+style\s*=\s*'[^']{150,}'/gi, '')
+
+  // 8. Remove empty tags left behind
+  cleaned = cleaned.replace(/<(?:div|span|p|section|article)\s*><\/(?:div|span|p|section|article)>/gi, '')
+
+  // 9. Collapse whitespace
+  cleaned = cleaned
     .replace(/[ \t]{2,}/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
+
+  // 10. SPA detection: if body text content is nearly empty, it's JS-rendered
+  const bodyInner = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(cleaned)?.[1] ?? cleaned
+  const visibleText = bodyInner.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
+  const isSpa = visibleText.length < 200
+
+  return { html: cleaned, isSpa }
 }
 
 function suggestName(url: string, index: number): string {
@@ -140,7 +171,13 @@ router.post('/import-site', requireAuth, async (req, res) => {
       .map((r) => (r.status === 'fulfilled' ? r.value : null))
       .filter((x): x is NonNullable<typeof x> => x !== null)
 
-    res.json({ html: cleanHtml(html), images })
+    const { html: cleanedHtml, isSpa } = cleanHtml(html)
+    const warning = isSpa
+      ? 'This page appears to be a JavaScript-rendered app (SPA). No static HTML content was found — the AI will have limited information to work with.'
+      : undefined
+
+    console.log(`[import-site] cleaned html: ${cleanedHtml.length} chars${isSpa ? ' (SPA detected)' : ''}`)
+    res.json({ html: cleanedHtml, images, warning })
   } catch (err) {
     console.error('[import-site]', err)
     res.status(500).json({ error: 'Failed to import site' })
