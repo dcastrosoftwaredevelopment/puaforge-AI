@@ -131,6 +131,9 @@ export const en = {
     subdomainAvailable: 'Available!',
     subdomainTaken: 'This slug is already taken.',
     subdomainInvalid: 'Only lowercase letters, numbers and hyphens. Min 3 chars.',
+    saveError: 'Failed to save publication. Please try again.',
+    subdomainSaveError: 'Failed to save subdomain. Please try again.',
+    domainSaveError: 'Failed to save domain. Please try again.',
   },
 
   chat: {

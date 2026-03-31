@@ -131,6 +131,9 @@ export const pt = {
     subdomainAvailable: 'Disponível!',
     subdomainTaken: 'Este slug já está em uso.',
     subdomainInvalid: 'Apenas letras minúsculas, números e hífens. Mín. 3 caracteres.',
+    saveError: 'Erro ao salvar publicação. Tente novamente.',
+    subdomainSaveError: 'Erro ao salvar subdomínio. Tente novamente.',
+    domainSaveError: 'Erro ao salvar domínio. Tente novamente.',
   },
 
   chat: {

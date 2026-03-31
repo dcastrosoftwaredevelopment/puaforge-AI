@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAtomValue } from 'jotai'
 import { activeProjectIdAtom } from '@/atoms'
 import { authTokenAtom } from '@/atoms/authAtoms'
+import { useTranslation } from 'react-i18next'
 import { api, ApiError, PlanLimitError } from '@/services/api'
 import { useSetAtom } from 'jotai'
 import { upgradePromptAtom } from '@/atoms'
@@ -16,6 +17,7 @@ export function useSubdomain(publishedSubdomain: string | null, onSaved?: (slug:
   const token = useAtomValue(authTokenAtom)
   const authHeaders = token ? { Authorization: `Bearer ${token}` } : undefined
 
+  const { t } = useTranslation()
   const setUpgradePrompt = useSetAtom(upgradePromptAtom)
   const [slugInput, setSlugInput] = useState('')
   const [status, setStatus] = useState<SlugStatus>('idle')
@@ -90,7 +92,7 @@ export function useSubdomain(publishedSubdomain: string | null, onSaved?: (slug:
       } else if (e instanceof ApiError && e.status === 409) {
         setStatus('taken')
       } else {
-        setSaveError(e instanceof Error ? e.message : 'Erro ao salvar subdomain')
+        setSaveError(t('publish.subdomainSaveError'))
       }
     } finally {
       setSaving(false)

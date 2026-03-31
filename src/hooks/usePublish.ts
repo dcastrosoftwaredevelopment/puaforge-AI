@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAtomValue } from 'jotai'
 import { activeProjectIdAtom } from '@/atoms'
 import { authTokenAtom } from '@/atoms/authAtoms'
@@ -8,6 +9,7 @@ import { api } from '@/services/api'
 import { usePlanLimit } from '@/hooks/usePlanLimit'
 
 export function usePublish() {
+  const { t } = useTranslation()
   const activeProjectId = useAtomValue(activeProjectIdAtom)
   const token = useAtomValue(authTokenAtom)
   const { files } = useFiles()
@@ -64,7 +66,7 @@ export function usePublish() {
       if (result.subdomain) setSubdomain(result.subdomain)
     } catch (e) {
       console.error('[publish] save error:', e)
-      setSaveError(e instanceof Error ? e.message : 'Erro ao salvar publicação')
+      setSaveError(t('publish.saveError'))
     }
   }, [activeProjectId, authHeaders, files, isPublishing, callPublish])
 

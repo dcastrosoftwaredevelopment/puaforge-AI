@@ -61,7 +61,7 @@ export default function PublishButton() {
       } else if (e instanceof ApiError && e.status === 409) {
         setDomainError(t('publish.domainTaken'))
       } else {
-        setDomainError(e instanceof Error ? e.message : t('publish.domainTaken'))
+        setDomainError(t('publish.domainSaveError'))
       }
     } finally {
       setSavingDomain(false)
