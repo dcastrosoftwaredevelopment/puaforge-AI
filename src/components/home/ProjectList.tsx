@@ -66,6 +66,7 @@ export default function ProjectList() {
               >
                 <Import size={16} />
                 {t('import.button')}
+                <span className="px-1 py-0.5 rounded text-[9px] font-semibold tracking-wide uppercase bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20">{t('import.beta')}</span>
               </button>
               <button
                 onClick={createProject}
