@@ -38,15 +38,18 @@ export const PLAN_LIMITS = {
   canPublish: boolean
 }>
 
-const SUPERUSER_EMAILS = (process.env.SUPERUSER_EMAILS ?? '')
-  .split(',')
-  .map((e) => e.trim().toLowerCase())
-  .filter(Boolean)
+function getSuperUserEmails(): string[] {
+  return (process.env.SUPERUSER_EMAILS ?? '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean)
+}
 
 export async function isSuperUser(userId: string): Promise<boolean> {
-  if (SUPERUSER_EMAILS.length === 0) return false
+  const emails = getSuperUserEmails()
+  if (emails.length === 0) return false
   const [user] = await db.select({ email: users.email }).from(users).where(eq(users.id, userId)).limit(1)
-  return !!user && SUPERUSER_EMAILS.includes(user.email.toLowerCase())
+  return !!user && emails.includes(user.email.toLowerCase())
 }
 
 export class PlanLimitError extends Error {
