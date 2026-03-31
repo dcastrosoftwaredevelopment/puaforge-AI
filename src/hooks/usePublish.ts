@@ -50,7 +50,7 @@ export function usePublish() {
     if (!activeProjectId || isPublishing || !authHeaders) return
     setSaveError(null)
 
-    const data = await withPlanLimit(() => callPublish({ projectId: activeProjectId, files }))
+    const data = await withPlanLimit(() => callPublish({ projectId: activeProjectId, files }, authHeaders))
     if (!data) return
 
     try {
