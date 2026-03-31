@@ -81,9 +81,7 @@ function collectExternalImports(files: Record<string, string>): string[] {
   for (const code of Object.values(files)) {
     let match
     while ((match = importRegex.exec(code)) !== null) {
-      const full = match[1]
-      const pkg = full.startsWith('@') ? full.split('/').slice(0, 2).join('/') : full.split('/')[0]
-      imports.add(pkg)
+      imports.add(match[1]) // keep full specifier (e.g. react-icons/fa6, not just react-icons)
     }
   }
 
