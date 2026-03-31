@@ -11,6 +11,7 @@ import { authRoute } from './routes/auth.js'
 import { userSettingsRoute } from './routes/userSettings.js'
 import { profileRoute } from './routes/profile.js'
 import { projectsRoute } from './routes/projects.js'
+import { importSiteRoute } from './routes/importSite.js'
 import { runMigrations } from './db.js'
 import { siteServingMiddleware } from './middleware/siteServing.js'
 
@@ -34,6 +35,7 @@ app.use('/api', generateRoute)
 app.use('/api', modelsRoute)
 app.use('/api', publishRoute)
 app.use('/api', settingsRoute)
+app.use('/api', importSiteRoute)
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' })

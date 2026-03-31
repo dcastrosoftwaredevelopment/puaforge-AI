@@ -3,15 +3,9 @@ import TextareaAutosize from 'react-textarea-autosize'
 import { Send, ImagePlus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { type MessageImage } from '@/atoms'
-import { useFiles } from '@/hooks/useFiles'
 import { useMessages } from '@/hooks/useMessages'
-import { useModels } from '@/hooks/useModels'
 import { useEditorState } from '@/hooks/useEditorState'
-import { useApiKey } from '@/hooks/useApiKey'
-import { generateCode } from '@/services/aiService'
-import { mergeFiles, extractDependencies } from '@/services/fileParser'
-import { useProjectImages } from '@/hooks/useProjectImages'
-import { useColorPalette } from '@/hooks/useColorPalette'
+import { useMessageSender } from '@/hooks/useMessageSender'
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 const MAX_BASE64_BYTES = 5 * 1024 * 1024 // 5MB — limite da API do Claude
@@ -93,13 +87,9 @@ export default function PromptInput() {
   const [pendingImages, setPendingImages] = useState<MessageImage[]>([])
   const [imageError, setImageError] = useState<string | null>(null)
   const { t } = useTranslation()
-  const { messages, setMessages, isGenerating, setIsGenerating } = useMessages()
-  const { files, setFiles, setDeps } = useFiles()
-  const { selectedModel } = useModels()
+  const { isGenerating } = useMessages()
   const { isDirty } = useEditorState()
-  const { effectiveApiKey } = useApiKey()
-  const { getImagesContext } = useProjectImages()
-  const { getColorsContext } = useColorPalette()
+  const { sendMessage } = useMessageSender()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,65 +115,9 @@ export default function PromptInput() {
     if ((!text && pendingImages.length === 0) || isGenerating || isDirty) return
 
     const images = pendingImages.length > 0 ? [...pendingImages] : undefined
-    const userMsg = {
-      id: crypto.randomUUID(),
-      role: 'user' as const,
-      content: text || t('chat.imageOnly'),
-      timestamp: Date.now(),
-      images,
-    }
-    setMessages((prev) => [...prev, userMsg])
     setPrompt('')
     setPendingImages([])
-    setIsGenerating(true)
-
-    try {
-      const imagesCtx = getImagesContext()
-      const colorsCtx = getColorsContext()
-      const baseText = text || t('chat.imageDefaultPrompt')
-      const fullPrompt = [baseText, imagesCtx, colorsCtx].filter(Boolean).join('\n\n')
-
-      const result = await generateCode({
-        prompt: fullPrompt,
-        model: selectedModel,
-        currentFiles: files,
-        history: messages.map((m) => ({ role: m.role, content: m.content, images: m.images })),
-        images,
-        apiKey: effectiveApiKey || undefined,
-      })
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          role: 'assistant',
-          content: result.rawResponse,
-          timestamp: Date.now(),
-        },
-      ])
-
-      if (Object.keys(result.files).length > 0) {
-        const merged = mergeFiles(files, result.files)
-        setFiles(merged)
-
-        const newDeps = extractDependencies(merged)
-        if (Object.keys(newDeps).length > 0) {
-          setDeps((prev) => ({ ...prev, ...newDeps }))
-        }
-      }
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          role: 'assistant',
-          content: t('chat.generateError'),
-          timestamp: Date.now(),
-        },
-      ])
-    } finally {
-      setIsGenerating(false)
-    }
+    await sendMessage(text, images)
   }
 
   const handleKeyDown = (e: KeyboardEvent) => {

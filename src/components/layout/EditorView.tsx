@@ -1,12 +1,15 @@
-import { useCallback, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { SandpackProvider } from '@codesandbox/sandpack-react'
 import { Loader2, MessageCircle } from 'lucide-react'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { useFiles } from '@/hooks/useFiles'
 import { useChat } from '@/hooks/useChat'
 import { usePanelSizes } from '@/hooks/usePanelSizes'
 import { useProjectLoader } from '@/hooks/useProjectLoader'
 import { useDraft } from '@/hooks/useDraft'
+import { useMessageSender } from '@/hooks/useMessageSender'
+import { pendingImportAtom } from '@/atoms'
 import { TAILWIND_HTML } from '@/utils/defaultFiles'
 import EditorHeader from '@/components/layout/EditorHeader'
 import SandpackContent from '@/components/layout/SandpackContent'
@@ -23,6 +26,16 @@ export default function EditorView() {
   const { mode: chatMode, isOpen: isChatOpen, setIsOpen: setIsChatOpen } = useChat()
   useDraft()
   const { chatWidth, setChatWidth } = usePanelSizes()
+
+  const pendingImport = useAtomValue(pendingImportAtom)
+  const setPendingImport = useSetAtom(pendingImportAtom)
+  const { sendMessage } = useMessageSender()
+
+  useEffect(() => {
+    if (!projectReady || !pendingImport || pendingImport.projectId !== projectId) return
+    setPendingImport(null)
+    void sendMessage(pendingImport.prompt)
+  }, [projectReady, pendingImport, projectId, setPendingImport, sendMessage])
 
   const isDocked = chatMode === 'docked'
   const showDockedChat = isDocked && isChatOpen

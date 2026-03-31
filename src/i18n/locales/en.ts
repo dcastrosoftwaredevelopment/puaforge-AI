@@ -226,4 +226,21 @@ export const en = {
     results_other: '{{count}} results',
     noResults: 'No results for "{{query}}"',
   },
+
+  import: {
+    tooltip: 'Import existing site',
+    title: 'Import site',
+    urlTab: 'URL',
+    fileTab: 'HTML file',
+    urlLabel: 'Site URL',
+    urlPlaceholder: 'https://my-site.com',
+    fileHint: 'Drag or click to select an HTML file',
+    fetching: 'Fetching site content...',
+    uploadingImages: 'Uploading images ({{current}}/{{total}})...',
+    done: 'Site imported successfully!',
+    errorFileType: 'Please select an .html file',
+    errorGeneric: 'Failed to import site. Please try again.',
+    hint: 'The site content will be converted into a React + Tailwind CSS project by the AI.',
+    button: 'Import',
+  },
 }
