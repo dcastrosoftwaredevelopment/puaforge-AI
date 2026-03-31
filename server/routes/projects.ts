@@ -5,7 +5,7 @@ import { db } from '../db.js'
 import { projects, messages, projectFiles, projectImages, checkpoints, publishedSites } from '../schema.js'
 import { requireAuth } from '../middleware/auth.js'
 import { uploadFileToPocketBase, deleteFileFromPocketBase, savePublishedSite, fetchPublishedSite } from '../services/pocketbase.js'
-import { invalidateSiteCache } from '../middleware/siteServing.js'
+import { invalidateSiteCache, invalidateSubdomainCache } from '../middleware/siteServing.js'
 import { checkProjectLimit, checkDomainLimit, checkStorageLimit, checkCheckpointLimit, PlanLimitError } from '../services/plans.js'
 
 function handlePlanLimit(err: unknown, res: Response): boolean {
@@ -448,7 +448,7 @@ router.get('/projects/:id/published', requireAuth, async (req: Request, res: Res
     return
   }
 
-  res.json({ html, publishedAt: toMs(site.publishedAt) })
+  res.json({ html, publishedAt: toMs(site.publishedAt), subdomain: site.subdomain ?? null })
 })
 
 router.put('/projects/:id/published', requireAuth, async (req: Request, res: Response) => {
@@ -466,15 +466,110 @@ router.put('/projects/:id/published', requireAuth, async (req: Request, res: Res
     return
   }
 
+  // Preserve existing subdomain (never overwrite once set)
+  const [existing] = await db
+    .select({ subdomain: publishedSites.subdomain })
+    .from(publishedSites)
+    .where(eq(publishedSites.projectId, p(req, 'id')))
+    .limit(1)
+
+  const subdomain = existing?.subdomain ?? null
+
   await db
     .insert(publishedSites)
-    .values({ projectId: p(req, 'id'), pbRecordId, publishedAt: new Date(publishedAt) })
+    .values({ projectId: p(req, 'id'), pbRecordId, subdomain, publishedAt: new Date(publishedAt) })
     .onConflictDoUpdate({
       target: publishedSites.projectId,
       set: { pbRecordId, publishedAt: new Date(publishedAt) },
     })
 
-  res.json({ ok: true })
+  if (subdomain) invalidateSubdomainCache(subdomain)
+
+  res.json({ ok: true, subdomain })
+})
+
+// ─── Subdomain ────────────────────────────────────────────────────────────────
+
+const SUBDOMAIN_REGEX = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/
+const RESERVED_SUBDOMAINS = new Set(['www', 'api', 'app', 'mail', 'ftp', 'admin', 'static', 'cdn', 'status', 'blog', 'docs'])
+
+function isValidSubdomain(slug: string): boolean {
+  return SUBDOMAIN_REGEX.test(slug) && !slug.includes('--') && !RESERVED_SUBDOMAINS.has(slug)
+}
+
+/** Check if a subdomain slug is available (public — no auth required) */
+router.get('/subdomains/check', async (req: Request, res: Response) => {
+  const slug = (req.query.slug as string ?? '').toLowerCase().trim()
+
+  if (!slug) {
+    res.status(400).json({ error: 'slug is required' })
+    return
+  }
+
+  if (!isValidSubdomain(slug)) {
+    res.json({ available: false, reason: 'invalid' })
+    return
+  }
+
+  const [existing] = await db
+    .select({ projectId: publishedSites.projectId })
+    .from(publishedSites)
+    .where(eq(publishedSites.subdomain, slug))
+    .limit(1)
+
+  res.json({ available: !existing })
+})
+
+/** Set the subdomain for a project (can only be done once per project) */
+router.put('/projects/:id/subdomain', requireAuth, async (req: Request, res: Response) => {
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
+
+  const slug = (req.body.subdomain as string ?? '').toLowerCase().trim()
+
+  if (!slug) {
+    res.status(400).json({ error: 'subdomain is required' })
+    return
+  }
+
+  if (!isValidSubdomain(slug)) {
+    res.status(400).json({ code: 'INVALID_SUBDOMAIN', error: 'Subdomain inválido' })
+    return
+  }
+
+  // Prevent changing an already-set subdomain
+  const [existing] = await db
+    .select({ subdomain: publishedSites.subdomain })
+    .from(publishedSites)
+    .where(eq(publishedSites.projectId, p(req, 'id')))
+    .limit(1)
+
+  if (existing?.subdomain) {
+    res.status(409).json({ code: 'SUBDOMAIN_ALREADY_SET', error: 'Subdomain já definido para este projeto' })
+    return
+  }
+
+  // Check uniqueness
+  const [conflict] = await db
+    .select({ projectId: publishedSites.projectId })
+    .from(publishedSites)
+    .where(eq(publishedSites.subdomain, slug))
+    .limit(1)
+
+  if (conflict) {
+    res.status(409).json({ code: 'SUBDOMAIN_TAKEN', error: 'Este subdomain já está em uso' })
+    return
+  }
+
+  // Save — upsert so it works whether the site has been published or not yet
+  await db
+    .insert(publishedSites)
+    .values({ projectId: p(req, 'id'), pbRecordId: '', subdomain: slug, publishedAt: new Date(0) })
+    .onConflictDoUpdate({
+      target: publishedSites.projectId,
+      set: { subdomain: slug },
+    })
+
+  res.json({ ok: true, subdomain: slug })
 })
 
 export { router as projectsRoute }

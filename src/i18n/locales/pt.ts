@@ -124,6 +124,13 @@ export const pt = {
     dnsWithoutIp: 'Aponte um registro <A/> no DNS do seu domínio para o IP deste servidor.',
     lastPublished: 'Última publicação',
     openLocal: 'Abrir preview local',
+    subdomainLabel: 'URL do seu site',
+    subdomainPlaceholder: 'meu-site',
+    subdomainHint: 'Escolha uma URL permanente para o seu site. Não pode ser alterada após salvar.',
+    subdomainChecking: 'Verificando disponibilidade...',
+    subdomainAvailable: 'Disponível!',
+    subdomainTaken: 'Este slug já está em uso.',
+    subdomainInvalid: 'Apenas letras minúsculas, números e hífens. Mín. 3 caracteres.',
   },
 
   chat: {

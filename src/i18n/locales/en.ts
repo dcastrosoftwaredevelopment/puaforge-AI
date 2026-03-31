@@ -124,6 +124,13 @@ export const en = {
     dnsWithoutIp: 'Point an <A/> record in your domain\'s DNS to this server\'s IP.',
     lastPublished: 'Last published',
     openLocal: 'Open local preview',
+    subdomainLabel: 'Your site URL',
+    subdomainPlaceholder: 'my-site',
+    subdomainHint: 'Choose a permanent URL for your site. Cannot be changed after saving.',
+    subdomainChecking: 'Checking availability...',
+    subdomainAvailable: 'Available!',
+    subdomainTaken: 'This slug is already taken.',
+    subdomainInvalid: 'Only lowercase letters, numbers and hyphens. Min 3 chars.',
   },
 
   chat: {

@@ -65,6 +65,7 @@ export const checkpoints = pgTable('checkpoints', {
 export const publishedSites = pgTable('published_sites', {
   projectId: uuid('project_id').primaryKey().references(() => projects.id, { onDelete: 'cascade' }),
   pbRecordId: varchar('pb_record_id', { length: 255 }).notNull(), // PocketBase record ID
+  subdomain: varchar('subdomain', { length: 63 }).unique(),
   publishedAt: timestamp('published_at').notNull(),
 })
 
