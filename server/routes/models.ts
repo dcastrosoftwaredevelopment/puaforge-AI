@@ -12,7 +12,7 @@ router.get('/models', async (req: Request, res: Response) => {
   }
 
   try {
-    const client = new Anthropic({ apiKey })
+    const client = new Anthropic({ apiKey, timeout: 30_000 })
     const page = await client.models.list({ limit: 100 })
 
     const models = page.data

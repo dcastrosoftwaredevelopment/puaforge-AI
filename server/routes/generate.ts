@@ -93,7 +93,7 @@ router.post('/generate', async (req: Request<object, object, GenerateBody>, res:
     const modelId = model || 'claude-haiku-4-5-20251001'
     console.log('[generate] Calling Anthropic SDK | model:', modelId)
 
-    const client = new Anthropic({ apiKey })
+    const client = new Anthropic({ apiKey, timeout: 5 * 60 * 1000 })
 
     const conversationMessages = buildConversation(history, prompt, currentFiles, images)
 
