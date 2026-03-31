@@ -132,10 +132,10 @@ createRoot(document.getElementById('root')!).render(React.createElement(App))
 
     const bundledJs = result.outputFiles[0].text
 
-    const externalPkgs = collectExternalImports(projectFiles)
+    // Build import map from the actual bundled output — this is the source of truth
+    // for what the browser needs to resolve, not the source files.
+    const externalPkgs = collectExternalImports({ '/__bundle__.js': bundledJs })
     const allPkgs = new Set(['react', 'react-dom', ...externalPkgs])
-    allPkgs.add('react-dom/client')
-    allPkgs.add('react/jsx-runtime')
 
     const importMap: Record<string, string> = {}
     for (const pkg of allPkgs) {
