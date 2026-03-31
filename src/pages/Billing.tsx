@@ -193,7 +193,7 @@ export default function Billing() {
                       {t('billing.currentPlan')}
                     </span>
                   )}
-                  {plan.comingSoon && (
+                  {plan.comingSoon && !plan.current && (
                     <span className={`text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded border ${plan.badgeColor}`}>
                       {t('billing.comingSoon')}
                     </span>
