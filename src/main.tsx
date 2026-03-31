@@ -5,6 +5,9 @@ import { GoogleOAuthProvider } from '@react-oauth/google'
 import './index.css'
 import './i18n'
 import App from './App'
+import { initAnalytics } from '@/lib/analytics'
+
+initAnalytics()
 
 declare const __GOOGLE_CLIENT_ID__: string
 

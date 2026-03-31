@@ -1,5 +1,7 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import { usePersistence } from '@/hooks/usePersistence'
+import { trackPageView } from '@/lib/analytics'
 import ProjectList from '@/components/home/ProjectList'
 import EditorView from '@/components/layout/EditorView'
 import Settings from '@/components/settings/Settings'
@@ -11,6 +13,11 @@ import UpgradeModal from '@/components/billing/UpgradeModal'
 
 export default function App() {
   const { isHydrated } = usePersistence()
+  const location = useLocation()
+
+  useEffect(() => {
+    trackPageView(location.pathname)
+  }, [location.pathname])
 
   return (
     <>

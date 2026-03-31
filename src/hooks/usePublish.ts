@@ -7,6 +7,7 @@ import { useFiles } from '@/hooks/useFiles'
 import { useApiCall, HttpMethod } from '@/hooks/useApiCall'
 import { api } from '@/services/api'
 import { usePlanLimit } from '@/hooks/usePlanLimit'
+import { track } from '@/lib/analytics'
 
 export function usePublish() {
   const { t } = useTranslation()
@@ -72,6 +73,7 @@ export function usePublish() {
         authHeaders,
       )
       setPublishedAt(data.publishedAt)
+      track('publish_domain', { first_time: publishedAt === null })
     } catch (e) {
       console.error('[publish] domain save error:', e)
       setDomainSaveError(t('publish.saveError'))
@@ -95,6 +97,7 @@ export function usePublish() {
         authHeaders,
       )
       setSubdomainPublishedAt(data.publishedAt)
+      track('publish_subdomain', { first_time: subdomainPublishedAt === null })
     } catch (e) {
       console.error('[publish] subdomain save error:', e)
       setSubdomainSaveError(t('publish.saveError'))
