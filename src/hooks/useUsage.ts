@@ -56,6 +56,47 @@ export function useUsage() {
   return { data, loading, refetch: fetch }
 }
 
+export interface PlanLimits {
+  maxProjects: number
+  maxCustomDomains: number
+  maxImportsPerMonth: number
+  maxStorageBytes: number
+  maxCheckpointsPerProject: number
+  canPublish: boolean
+}
+
+export type PlansConfig = Record<'free' | 'indie' | 'pro', PlanLimits>
+
+function deserializeLimits(raw: PlanLimits): PlanLimits {
+  const inf = (n: number) => (n === -1 ? Infinity : n)
+  return {
+    ...raw,
+    maxProjects: inf(raw.maxProjects),
+    maxCustomDomains: inf(raw.maxCustomDomains),
+    maxImportsPerMonth: inf(raw.maxImportsPerMonth),
+    maxStorageBytes: inf(raw.maxStorageBytes),
+    maxCheckpointsPerProject: inf(raw.maxCheckpointsPerProject),
+  }
+}
+
+export function usePlansConfig() {
+  const [plans, setPlans] = useState<PlansConfig | null>(null)
+
+  useEffect(() => {
+    api.get<Record<string, PlanLimits>>('/api/plans')
+      .then((raw) => {
+        setPlans(
+          Object.fromEntries(
+            Object.entries(raw).map(([k, v]) => [k, deserializeLimits(v)]),
+          ) as PlansConfig,
+        )
+      })
+      .catch(() => {})
+  }, [])
+
+  return plans
+}
+
 export function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes}B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)}KB`

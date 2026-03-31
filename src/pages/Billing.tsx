@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Check, Zap, Rocket, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import Sidebar from '@/components/home/Sidebar'
-import { useUsage, formatBytes, formatLimit } from '@/hooks/useUsage'
+import { useUsage, usePlansConfig, formatBytes, formatLimit } from '@/hooks/useUsage'
 
 interface PlanFeature {
   text: string
@@ -52,7 +52,16 @@ function UsageRow({ label, used, limit, unit }: { label: string; used: number; l
 export default function Billing() {
   const { t } = useTranslation()
   const { data: usage } = useUsage()
+  const plansConfig = usePlansConfig()
   const [interested, setInterested] = useState<Record<string, boolean>>({})
+
+  function lim(n: number, unit?: 'bytes'): string {
+    if (n === Infinity) return '∞'
+    if (unit === 'bytes') return formatBytes(n)
+    return String(n)
+  }
+
+  const f = plansConfig
 
   const plans: Plan[] = [
     {
@@ -63,17 +72,17 @@ export default function Billing() {
       color: 'text-text-secondary',
       borderColor: 'border-border-default',
       badgeColor: 'bg-bg-elevated text-text-secondary border-border-subtle',
-      current: true,
+      current: usage?.plan === 'free' || !usage,
       comingSoon: false,
       features: [
-        { text: t('billing.features.free.projects'), available: true },
-        { text: t('billing.features.free.preview'), available: true },
-        { text: t('billing.features.free.export'), available: true },
-        { text: t('billing.features.free.publish'), available: false },
-        { text: t('billing.features.free.domain'), available: false },
-        { text: t('billing.features.free.import'), available: false },
-        { text: t('billing.features.free.images'), available: false },
-        { text: t('billing.features.free.checkpoints'), available: false },
+        { text: t('billing.features.projects', { count: lim(f?.free.maxProjects ?? 1) }), available: true },
+        { text: t('billing.features.preview'), available: true },
+        { text: t('billing.features.export'), available: true },
+        { text: t('billing.features.publish'), available: f?.free.canPublish ?? false },
+        { text: t('billing.features.domain', { count: lim(f?.free.maxCustomDomains ?? 0) }), available: (f?.free.maxCustomDomains ?? 0) > 0 },
+        { text: t('billing.features.import', { count: lim(f?.free.maxImportsPerMonth ?? 0) }), available: (f?.free.maxImportsPerMonth ?? 0) > 0 },
+        { text: t('billing.features.storage', { size: lim(f?.free.maxStorageBytes ?? 0, 'bytes') }), available: (f?.free.maxStorageBytes ?? 0) > 0 },
+        { text: t('billing.features.checkpoints', { count: lim(f?.free.maxCheckpointsPerProject ?? 0) }), available: (f?.free.maxCheckpointsPerProject ?? 0) > 0 },
       ],
     },
     {
@@ -84,17 +93,17 @@ export default function Billing() {
       color: 'text-vibe-blue',
       borderColor: 'border-vibe-blue/30',
       badgeColor: 'bg-vibe-blue/10 text-vibe-blue border-vibe-blue/20',
-      current: false,
+      current: usage?.plan === 'indie',
       comingSoon: true,
       features: [
-        { text: t('billing.features.indie.projects'), available: true },
-        { text: t('billing.features.indie.preview'), available: true },
-        { text: t('billing.features.indie.export'), available: true },
-        { text: t('billing.features.indie.publish'), available: true },
-        { text: t('billing.features.indie.domain'), available: true },
-        { text: t('billing.features.indie.import'), available: true },
-        { text: t('billing.features.indie.images'), available: true },
-        { text: t('billing.features.indie.checkpoints'), available: true },
+        { text: t('billing.features.projects', { count: lim(f?.indie.maxProjects ?? 3) }), available: true },
+        { text: t('billing.features.preview'), available: true },
+        { text: t('billing.features.export'), available: true },
+        { text: t('billing.features.publish'), available: f?.indie.canPublish ?? true },
+        { text: t('billing.features.domain', { count: lim(f?.indie.maxCustomDomains ?? 1) }), available: true },
+        { text: t('billing.features.import', { count: lim(f?.indie.maxImportsPerMonth ?? 3) }), available: true },
+        { text: t('billing.features.storage', { size: lim(f?.indie.maxStorageBytes ?? 0, 'bytes') }), available: true },
+        { text: t('billing.features.checkpoints', { count: lim(f?.indie.maxCheckpointsPerProject ?? 10) }), available: true },
       ],
     },
     {
@@ -105,17 +114,17 @@ export default function Billing() {
       color: 'text-forge-terracotta',
       borderColor: 'border-forge-terracotta/30',
       badgeColor: 'bg-forge-terracotta/10 text-forge-terracotta border-forge-terracotta/20',
-      current: false,
+      current: usage?.plan === 'pro',
       comingSoon: true,
       features: [
-        { text: t('billing.features.pro.projects'), available: true },
-        { text: t('billing.features.pro.preview'), available: true },
-        { text: t('billing.features.pro.export'), available: true },
-        { text: t('billing.features.pro.publish'), available: true },
-        { text: t('billing.features.pro.domains'), available: true },
-        { text: t('billing.features.pro.import'), available: true },
-        { text: t('billing.features.pro.images'), available: true },
-        { text: t('billing.features.pro.checkpoints'), available: true },
+        { text: t('billing.features.projects', { count: lim(f?.pro.maxProjects ?? Infinity) }), available: true },
+        { text: t('billing.features.preview'), available: true },
+        { text: t('billing.features.export'), available: true },
+        { text: t('billing.features.publish'), available: f?.pro.canPublish ?? true },
+        { text: t('billing.features.domains', { count: lim(f?.pro.maxCustomDomains ?? 5) }), available: true },
+        { text: t('billing.features.import', { count: lim(f?.pro.maxImportsPerMonth ?? Infinity) }), available: true },
+        { text: t('billing.features.storage', { size: lim(f?.pro.maxStorageBytes ?? 0, 'bytes') }), available: true },
+        { text: t('billing.features.checkpoints', { count: lim(f?.pro.maxCheckpointsPerProject ?? Infinity) }), available: true },
       ],
     },
   ]

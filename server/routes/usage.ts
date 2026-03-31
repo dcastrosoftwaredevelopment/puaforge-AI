@@ -71,4 +71,25 @@ router.get('/projects/:id/checkpoints/usage', requireAuth, async (req, res) => {
   res.json({ used: value, limit: limits.maxCheckpointsPerProject })
 })
 
+// Public endpoint — no auth required, just returns the plan limits config
+router.get('/plans', (_req, res) => {
+  function serializeLimit(n: number) { return n === Infinity ? -1 : n }
+
+  const plans = Object.fromEntries(
+    Object.entries(PLAN_LIMITS).map(([plan, limits]) => [
+      plan,
+      {
+        maxProjects: serializeLimit(limits.maxProjects),
+        maxCustomDomains: serializeLimit(limits.maxCustomDomains),
+        maxImportsPerMonth: serializeLimit(limits.maxImportsPerMonth),
+        maxStorageBytes: serializeLimit(limits.maxStorageBytes),
+        maxCheckpointsPerProject: serializeLimit(limits.maxCheckpointsPerProject),
+        canPublish: limits.canPublish,
+      },
+    ]),
+  )
+
+  res.json(plans)
+})
+
 export { router as usageRoute }
