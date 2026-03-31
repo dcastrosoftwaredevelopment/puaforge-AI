@@ -1,6 +1,6 @@
 import { eq, and, count, sql, isNotNull } from 'drizzle-orm'
 import { db } from '../db.js'
-import { subscriptions, projects, projectImages, checkpoints, users } from '../schema.js'
+import { subscriptions, projects, projectImages, checkpoints, users, publishedSites } from '../schema.js'
 
 export type Plan = 'free' | 'indie' | 'pro'
 
@@ -11,7 +11,7 @@ export const PLAN_LIMITS = {
     maxImportsPerMonth: 0,
     maxStorageBytes: 0,
     maxCheckpointsPerProject: 0,
-    canPublish: false,
+    maxPublishedSites: 1,
   },
   indie: {
     maxProjects: 3,
@@ -19,7 +19,7 @@ export const PLAN_LIMITS = {
     maxImportsPerMonth: 3,
     maxStorageBytes: 100 * 1024 * 1024, // 100MB
     maxCheckpointsPerProject: 10,
-    canPublish: true,
+    maxPublishedSites: 1,
   },
   pro: {
     maxProjects: Infinity,
@@ -27,7 +27,7 @@ export const PLAN_LIMITS = {
     maxImportsPerMonth: Infinity,
     maxStorageBytes: 1024 * 1024 * 1024, // 1GB
     maxCheckpointsPerProject: Infinity,
-    canPublish: true,
+    maxPublishedSites: 5,
   },
 } as const satisfies Record<Plan, {
   maxProjects: number
@@ -35,7 +35,7 @@ export const PLAN_LIMITS = {
   maxImportsPerMonth: number
   maxStorageBytes: number
   maxCheckpointsPerProject: number
-  canPublish: boolean
+  maxPublishedSites: number
 }>
 
 function getSuperUserEmails(): string[] {
@@ -111,10 +111,19 @@ export async function checkProjectLimit(userId: string): Promise<void> {
 export async function checkPublishAccess(userId: string): Promise<void> {
   if (await isSuperUser(userId)) return
   const plan = await getUserPlan(userId)
-  if (!PLAN_LIMITS[plan].canPublish) {
+  const limits = PLAN_LIMITS[plan]
+  if (limits.maxPublishedSites === Infinity) return
+
+  const [{ value }] = await db
+    .select({ value: count() })
+    .from(publishedSites)
+    .innerJoin(projects, eq(projects.id, publishedSites.projectId))
+    .where(and(eq(projects.userId, userId), isNotNull(publishedSites.subdomain)))
+
+  if (value >= limits.maxPublishedSites) {
     throw new PlanLimitError(
-      'Publicação de sites não está disponível no plano Gratuito.',
-      'indie',
+      `Limite de ${limits.maxPublishedSites} site(s) publicado(s) atingido para o plano ${planLabel(plan)}.`,
+      plan === 'free' ? 'indie' : 'pro',
       'publish',
     )
   }

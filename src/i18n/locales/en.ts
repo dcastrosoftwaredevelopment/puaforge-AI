@@ -298,7 +298,7 @@ export const en = {
       projects: '{{count}} project(s)',
       preview: 'Live preview',
       export: 'ZIP export + standalone build',
-      publish: 'Publishing',
+      publish: 'Publishing — {{count}} site(s)',
       domain: '{{count}} custom domain(s)',
       domains: '{{count}} custom domains',
       import: 'Import site — {{count}}×/month',

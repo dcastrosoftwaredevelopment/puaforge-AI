@@ -84,7 +84,7 @@ router.get('/plans', (_req, res) => {
         maxImportsPerMonth: serializeLimit(limits.maxImportsPerMonth),
         maxStorageBytes: serializeLimit(limits.maxStorageBytes),
         maxCheckpointsPerProject: serializeLimit(limits.maxCheckpointsPerProject),
-        canPublish: limits.canPublish,
+        maxPublishedSites: serializeLimit(limits.maxPublishedSites),
       },
     ]),
   )

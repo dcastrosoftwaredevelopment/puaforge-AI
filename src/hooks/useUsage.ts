@@ -62,7 +62,7 @@ export interface PlanLimits {
   maxImportsPerMonth: number
   maxStorageBytes: number
   maxCheckpointsPerProject: number
-  canPublish: boolean
+  maxPublishedSites: number
 }
 
 export type PlansConfig = Record<'free' | 'indie' | 'pro', PlanLimits>
@@ -76,6 +76,7 @@ function deserializeLimits(raw: PlanLimits): PlanLimits {
     maxImportsPerMonth: inf(raw.maxImportsPerMonth),
     maxStorageBytes: inf(raw.maxStorageBytes),
     maxCheckpointsPerProject: inf(raw.maxCheckpointsPerProject),
+    maxPublishedSites: inf(raw.maxPublishedSites),
   }
 }
 
