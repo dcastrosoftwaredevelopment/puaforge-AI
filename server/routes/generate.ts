@@ -125,7 +125,7 @@ router.post('/generate', async (req: Request<object, object, GenerateBody>, res:
   } catch (error) {
     if (error instanceof Anthropic.APIError) {
       console.error('[generate] Anthropic API Error:', error.status, error.message)
-      res.status(error.status).json({ error: error.message })
+      res.status(error.status ?? 500).json({ error: error.message })
     } else {
       const message = error instanceof Error ? error.message : 'Unknown error'
       console.error('[generate] Error:', message)
