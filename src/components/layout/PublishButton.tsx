@@ -117,7 +117,8 @@ export default function PublishButton() {
                 <div className="space-y-1.5">
                   <span className="text-[11px] font-medium text-text-secondary">{t('publish.subdomainLabel')}</span>
 
-                  {subdomain ? (
+                  {/* Active subdomain link */}
+                  {subdomain && !slugInput && (
                     <a
                       href={`https://${subdomain}.${appDomain}`}
                       target="_blank"
@@ -127,39 +128,40 @@ export default function PublishButton() {
                       <ExternalLink size={12} />
                       {subdomain}.{appDomain}
                     </a>
-                  ) : (
-                    <>
-                      <div className="flex gap-1.5">
-                        <div className="flex-1 flex items-center bg-bg-elevated border border-border-subtle rounded-lg overflow-hidden focus-within:border-vibe-blue/40 transition">
-                          <input
-                            type="text"
-                            value={slugInput}
-                            onChange={(e) => handleSlugChange(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === 'Enter' && status === 'available') void saveSubdomain() }}
-                            placeholder={t('publish.subdomainPlaceholder')}
-                            className="flex-1 bg-transparent px-2.5 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none font-mono min-w-0"
-                            maxLength={63}
-                          />
-                          <span className="px-2 text-[10px] text-text-muted shrink-0 border-l border-border-subtle py-1.5 bg-bg-primary">
-                            .{appDomain}
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => void saveSubdomain()}
-                          disabled={saving || status !== 'available'}
-                          className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary disabled:opacity-40 transition cursor-pointer"
-                        >
-                          {saving ? <Loader2 size={12} className="animate-spin" /> : <Link size={12} />}
-                        </button>
-                      </div>
-                      {slugStatusLabel && (
-                        <p className={`text-[10px] ${slugStatusColor}`}>{slugStatusLabel}</p>
-                      )}
-                      {saveError && (
-                        <p className="text-[10px] text-forge-terracotta">{saveError}</p>
-                      )}
-                      <p className="text-[10px] text-text-muted">{t('publish.subdomainHint')}</p>
-                    </>
+                  )}
+
+                  {/* Input to set or change subdomain */}
+                  <div className="flex gap-1.5">
+                    <div className="flex-1 flex items-center bg-bg-elevated border border-border-subtle rounded-lg overflow-hidden focus-within:border-vibe-blue/40 transition">
+                      <input
+                        type="text"
+                        value={slugInput}
+                        onChange={(e) => handleSlugChange(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' && status === 'available') void saveSubdomain() }}
+                        placeholder={subdomain ?? t('publish.subdomainPlaceholder')}
+                        className="flex-1 bg-transparent px-2.5 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none font-mono min-w-0"
+                        maxLength={63}
+                      />
+                      <span className="px-2 text-[10px] text-text-muted shrink-0 border-l border-border-subtle py-1.5 bg-bg-primary">
+                        .{appDomain}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => void saveSubdomain()}
+                      disabled={saving || status !== 'available'}
+                      className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary disabled:opacity-40 transition cursor-pointer"
+                    >
+                      {saving ? <Loader2 size={12} className="animate-spin" /> : <Link size={12} />}
+                    </button>
+                  </div>
+                  {slugStatusLabel && (
+                    <p className={`text-[10px] ${slugStatusColor}`}>{slugStatusLabel}</p>
+                  )}
+                  {saveError && (
+                    <p className="text-[10px] text-forge-terracotta">{saveError}</p>
+                  )}
+                  {!subdomain && (
+                    <p className="text-[10px] text-text-muted">{t('publish.subdomainHint')}</p>
                   )}
                 </div>
 

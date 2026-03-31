@@ -7,7 +7,7 @@ import { api, ApiError } from '@/services/api'
 /** Regex that matches valid subdomain slugs: lowercase letters, digits, hyphens; no leading/trailing/double hyphens */
 const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/
 
-export type SlugStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid' | 'already_set'
+export type SlugStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid'
 
 export function useSubdomain(publishedSubdomain: string | null, onSaved?: (slug: string) => void) {
   const activeProjectId = useAtomValue(activeProjectIdAtom)
@@ -20,12 +20,12 @@ export function useSubdomain(publishedSubdomain: string | null, onSaved?: (slug:
   const [saveError, setSaveError] = useState<string | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // When the project changes (or subdomain loads), reset input
+  // Reset input when project changes
   useEffect(() => {
     setSlugInput('')
     setStatus('idle')
     setSaveError(null)
-  }, [activeProjectId, publishedSubdomain])
+  }, [activeProjectId])
 
   const handleSlugChange = useCallback((value: string) => {
     // Mask: only allow a-z0-9 and hyphens, auto-lowercase
@@ -45,6 +45,12 @@ export function useSubdomain(publishedSubdomain: string | null, onSaved?: (slug:
       return
     }
 
+    // If the user typed back the current subdomain, no need to check
+    if (masked === publishedSubdomain) {
+      setStatus('available')
+      return
+    }
+
     setStatus('checking')
     debounceRef.current = setTimeout(async () => {
       try {
@@ -60,7 +66,7 @@ export function useSubdomain(publishedSubdomain: string | null, onSaved?: (slug:
         setStatus('idle')
       }
     }, 400)
-  }, [])
+  }, [publishedSubdomain])
 
   const saveSubdomain = useCallback(async () => {
     if (!activeProjectId || !authHeaders || status !== 'available') return
@@ -77,8 +83,7 @@ export function useSubdomain(publishedSubdomain: string | null, onSaved?: (slug:
       setStatus('idle')
     } catch (e) {
       if (e instanceof ApiError && e.status === 409) {
-        if (e.code === 'SUBDOMAIN_TAKEN') setStatus('taken')
-        else if (e.code === 'SUBDOMAIN_ALREADY_SET') setStatus('already_set')
+        setStatus('taken')
       } else {
         setSaveError(e instanceof Error ? e.message : 'Erro ao salvar subdomain')
       }

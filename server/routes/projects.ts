@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from 'express'
-import { eq, and, asc } from 'drizzle-orm'
+import { eq, and, asc, ne } from 'drizzle-orm'
 import multer from 'multer'
 import { db } from '../db.js'
 import { projects, messages, projectFiles, projectImages, checkpoints, publishedSites } from '../schema.js'
@@ -520,7 +520,7 @@ router.get('/subdomains/check', async (req: Request, res: Response) => {
   res.json({ available: !existing })
 })
 
-/** Set the subdomain for a project (can only be done once per project) */
+/** Set or update the subdomain for a project */
 router.put('/projects/:id/subdomain', requireAuth, async (req: Request, res: Response) => {
   if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
@@ -536,28 +536,28 @@ router.put('/projects/:id/subdomain', requireAuth, async (req: Request, res: Res
     return
   }
 
-  // Prevent changing an already-set subdomain
+  // Fetch current subdomain to invalidate cache on change
   const [existing] = await db
     .select({ subdomain: publishedSites.subdomain })
     .from(publishedSites)
     .where(eq(publishedSites.projectId, p(req, 'id')))
     .limit(1)
 
-  if (existing?.subdomain) {
-    res.status(409).json({ code: 'SUBDOMAIN_ALREADY_SET', error: 'Subdomain já definido para este projeto' })
-    return
-  }
-
-  // Check uniqueness
+  // Check uniqueness — exclude this project's own row
   const [conflict] = await db
     .select({ projectId: publishedSites.projectId })
     .from(publishedSites)
-    .where(eq(publishedSites.subdomain, slug))
+    .where(and(eq(publishedSites.subdomain, slug), ne(publishedSites.projectId, p(req, 'id'))))
     .limit(1)
 
   if (conflict) {
     res.status(409).json({ code: 'SUBDOMAIN_TAKEN', error: 'Este subdomain já está em uso' })
     return
+  }
+
+  // Invalidate old subdomain cache if changing
+  if (existing?.subdomain && existing.subdomain !== slug) {
+    invalidateSubdomainCache(existing.subdomain)
   }
 
   // Save — upsert so it works whether the site has been published or not yet
