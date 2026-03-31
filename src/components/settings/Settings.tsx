@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Key, Eye, EyeOff, Loader2, CheckCircle2, XCircle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useApiKey } from '@/hooks/useApiKey'
 import { useModels } from '@/hooks/useModels'
 import { useApiCall, HttpMethod } from '@/hooks/useApiCall'
@@ -8,6 +9,7 @@ import Sidebar from '@/components/home/Sidebar'
 export default function Settings() {
   const { apiKey, setApiKey, apiKeyEnabled, setApiKeyEnabled } = useApiKey()
   const { refetchModels } = useModels()
+  const { t } = useTranslation()
   const [draft, setDraft] = useState(apiKey)
   const [showKey, setShowKey] = useState(false)
   const [validated, setValidated] = useState<boolean | null>(null)
@@ -60,8 +62,8 @@ export default function Settings() {
       <main className="flex-1 overflow-auto">
         <div className="max-w-2xl mx-auto px-8 py-10 space-y-8">
           <div>
-            <h1 className="text-2xl font-semibold text-text-primary">Configurações</h1>
-            <p className="text-sm text-text-muted mt-1">Gerencie as configurações da plataforma</p>
+            <h1 className="text-2xl font-semibold text-text-primary">{t('settings.title')}</h1>
+            <p className="text-sm text-text-muted mt-1">{t('settings.subtitle')}</p>
           </div>
 
           {/* API Key Section */}
@@ -69,7 +71,7 @@ export default function Settings() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <Key size={16} className="text-forge-terracotta" />
-                <h2 className="text-base font-semibold text-text-primary">Claude API Key</h2>
+                <h2 className="text-base font-semibold text-text-primary">{t('settings.apiKeySection')}</h2>
               </div>
               {apiKey && (
                 <button
@@ -86,14 +88,13 @@ export default function Settings() {
                 </button>
               )}
             </div>
-            <p className="text-sm text-text-secondary leading-relaxed">
-              Configure sua chave da API do Claude para usar a plataforma.
-              A chave é necessária para gerar código e listar os modelos disponíveis.
+            <p className="text-sm text-text-secondary leading-relaxed" style={{ whiteSpace: 'pre-line' }}>
+              {t('settings.apiKeyDescription')}
             </p>
 
             {apiKey && !apiKeyEnabled && (
               <div className="text-xs text-forge-terracotta bg-forge-terracotta/10 border border-forge-terracotta/20 rounded-lg px-3 py-2">
-                Chave desabilitada. A geração de código e listagem de modelos não funcionarão até habilitar novamente.
+                {t('settings.apiKeyDisabledWarning')}
               </div>
             )}
 
@@ -106,7 +107,7 @@ export default function Settings() {
                     setDraft(e.target.value)
                     setValidated(null)
                   }}
-                  placeholder="sk-ant-api03-..."
+                  placeholder={t('settings.apiKeyPlaceholder')}
                   className="w-full bg-bg-tertiary border border-border-subtle rounded-lg px-3 py-2.5 pr-10 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-border-default transition font-mono"
                 />
                 <button
@@ -121,13 +122,13 @@ export default function Settings() {
               {validated === true && (
                 <div className="flex items-center gap-2 text-xs text-vibe-blue">
                   <CheckCircle2 size={13} />
-                  Chave válida
+                  {t('settings.apiKeyValid')}
                 </div>
               )}
               {validated === false && (
                 <div className="flex items-center gap-2 text-xs text-forge-terracotta">
                   <XCircle size={13} />
-                  {validationError || 'Chave inválida'}
+                  {validationError || t('settings.apiKeyInvalid')}
                 </div>
               )}
 
@@ -138,28 +139,28 @@ export default function Settings() {
                   className="px-3 py-1.5 rounded-lg bg-bg-elevated border border-border-subtle text-sm text-text-secondary hover:text-text-primary hover:bg-border-default disabled:opacity-30 transition cursor-pointer flex items-center gap-2"
                 >
                   {validating && <Loader2 size={13} className="animate-spin" />}
-                  Validar
+                  {t('settings.validate')}
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={!hasChanges || validating}
                   className="px-3 py-1.5 rounded-lg bg-accent/20 border border-accent/30 text-sm text-accent hover:bg-accent/30 disabled:opacity-30 transition cursor-pointer"
                 >
-                  Salvar
+                  {t('settings.save')}
                 </button>
                 {apiKey && (
                   <button
                     onClick={handleClear}
                     className="px-3 py-1.5 rounded-lg bg-bg-elevated border border-border-subtle text-sm text-forge-terracotta hover:bg-forge-terracotta/10 hover:border-forge-terracotta/30 transition cursor-pointer"
                   >
-                    Remover chave
+                    {t('settings.remove')}
                   </button>
                 )}
               </div>
 
               {apiKey && !hasChanges && apiKeyEnabled && (
                 <p className="text-xs text-text-muted">
-                  Chave configurada e ativa. As requisições usarão esta chave ao invés da chave do servidor.
+                  {t('settings.apiKeyActive')}
                 </p>
               )}
             </div>

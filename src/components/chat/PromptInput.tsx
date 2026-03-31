@@ -1,6 +1,7 @@
 import { useRef, useState, type KeyboardEvent } from 'react'
 import TextareaAutosize from 'react-textarea-autosize'
 import { Send, ImagePlus, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { type MessageImage } from '@/atoms'
 import { useFiles } from '@/hooks/useFiles'
 import { useMessages } from '@/hooks/useMessages'
@@ -91,6 +92,7 @@ export default function PromptInput() {
   const [prompt, setPrompt] = useState('')
   const [pendingImages, setPendingImages] = useState<MessageImage[]>([])
   const [imageError, setImageError] = useState<string | null>(null)
+  const { t } = useTranslation()
   const { messages, setMessages, isGenerating, setIsGenerating } = useMessages()
   const { files, setFiles, setDeps } = useFiles()
   const { selectedModel } = useModels()
@@ -107,7 +109,7 @@ export default function PromptInput() {
       const newImages = await Promise.all(selectedFiles.map(fileToMessageImage))
       setPendingImages((prev) => [...prev, ...newImages])
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Erro ao processar imagem'
+      const msg = err instanceof Error ? err.message : t('chat.imageErrors.readError')
       setImageError(msg)
       setTimeout(() => setImageError(null), 4000)
     }
@@ -126,7 +128,7 @@ export default function PromptInput() {
     const userMsg = {
       id: crypto.randomUUID(),
       role: 'user' as const,
-      content: text || '(imagem enviada)',
+      content: text || t('chat.imageOnly'),
       timestamp: Date.now(),
       images,
     }
@@ -138,7 +140,7 @@ export default function PromptInput() {
     try {
       const imagesCtx = getImagesContext()
       const colorsCtx = getColorsContext()
-      const baseText = text || 'Analise esta imagem e crie o layout correspondente.'
+      const baseText = text || t('chat.imageDefaultPrompt')
       const fullPrompt = [baseText, imagesCtx, colorsCtx].filter(Boolean).join('\n\n')
 
       const result = await generateCode({
@@ -175,7 +177,7 @@ export default function PromptInput() {
         {
           id: crypto.randomUUID(),
           role: 'assistant',
-          content: 'Erro ao gerar código. Tente novamente.',
+          content: t('chat.generateError'),
           timestamp: Date.now(),
         },
       ])
@@ -197,7 +199,7 @@ export default function PromptInput() {
     <div className="space-y-2">
       {isDirty && (
         <div className="text-xs text-forge-terracotta bg-forge-terracotta/10 border border-forge-terracotta/20 rounded-lg px-3 py-2">
-          Você está editando o código. Salve ou descarte as alterações no editor para voltar a usar a IA.
+          {t('chat.editingWarning')}
         </div>
       )}
       {imageError && (
@@ -232,7 +234,7 @@ export default function PromptInput() {
           minRows={4}
           maxRows={8}
           className="w-full bg-bg-tertiary border border-border-subtle rounded-xl p-3 pr-20 text-sm text-text-primary placeholder-text-muted resize-none focus:outline-none focus:border-border-default transition"
-          placeholder="Descreva o que deseja construir..."
+          placeholder={t('chat.placeholder')}
           disabled={isDisabled}
         />
         <div className="absolute right-2.5 bottom-2.5 flex items-center gap-1">
@@ -248,7 +250,7 @@ export default function PromptInput() {
             onClick={() => fileInputRef.current?.click()}
             disabled={isDisabled}
             className="p-1.5 rounded-lg bg-bg-elevated text-text-muted border border-border-subtle hover:text-forge-terracotta hover:border-forge-terracotta/30 disabled:opacity-20 transition cursor-pointer"
-            title="Enviar imagem"
+            title={t('chat.sendImage')}
           >
             <ImagePlus size={14} />
           </button>

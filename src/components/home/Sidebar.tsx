@@ -1,6 +1,8 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Layers, Settings, LogOut } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/useAuth'
+import { useLanguage } from '@/hooks/useLanguage'
 
 function UserAvatar({ name }: { name?: string | null }) {
   const initials = name
@@ -17,6 +19,8 @@ export default function Sidebar() {
   const location = useLocation()
   const navigate = useNavigate()
   const { logout, user } = useAuth()
+  const { t } = useTranslation()
+  const { toggle } = useLanguage()
   const isSettings = location.pathname === '/settings'
   const isProfile = location.pathname === '/profile'
 
@@ -35,7 +39,7 @@ export default function Sidebar() {
             }`}
         >
           <Layers size={15} className="text-forge-terracotta/70" />
-          Projetos
+          {t('sidebar.projects')}
         </button>
       </nav>
 
@@ -48,7 +52,7 @@ export default function Sidebar() {
             }`}
         >
           <UserAvatar name={user?.name} />
-          Perfil
+          {t('sidebar.profile')}
         </button>
         <button
           onClick={() => navigate('/settings')}
@@ -58,14 +62,22 @@ export default function Sidebar() {
             }`}
         >
           <Settings size={15} className="text-forge-terracotta/70" />
-          Configurações
+          {t('sidebar.settings')}
         </button>
         <button
           onClick={logout}
           className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition text-text-secondary hover:bg-red-500/10 hover:text-red-400"
         >
           <LogOut size={15} />
-          Sair
+          {t('sidebar.logout')}
+        </button>
+        <button
+          onClick={toggle}
+          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium cursor-pointer transition text-text-muted hover:text-text-secondary hover:bg-bg-elevated"
+        >
+          <span className="text-[10px] font-mono border border-border-subtle rounded px-1.5 py-0.5">
+            {t('sidebar.language')}
+          </span>
         </button>
       </div>
     </aside>

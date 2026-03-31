@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Search, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useSandpack } from '@codesandbox/sandpack-react'
 import { useFiles } from '@/hooks/useFiles'
 
@@ -46,6 +47,7 @@ export default function FindInFiles({ open, onClose }: Props) {
   const { files } = useFiles()
   const { sandpack } = useSandpack()
   const inputRef = useRef<HTMLInputElement>(null)
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (open) {
@@ -75,13 +77,13 @@ export default function FindInFiles({ open, onClose }: Props) {
           ref={inputRef}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Buscar em todos os arquivos..."
+          placeholder={t('findInFiles.placeholder')}
           className="flex-1 bg-transparent text-sm text-text-primary placeholder-text-muted outline-none"
           onKeyDown={(e) => e.key === 'Escape' && onClose()}
         />
         {query && (
           <span className="text-xs text-text-muted shrink-0">
-            {results.length} {results.length === 1 ? 'resultado' : 'resultados'}
+            {t('findInFiles.results', { count: results.length })}
           </span>
         )}
         <button onClick={onClose} className="text-text-muted hover:text-text-primary transition cursor-pointer">
@@ -123,7 +125,7 @@ export default function FindInFiles({ open, onClose }: Props) {
       )}
 
       {query && results.length === 0 && (
-        <p className="px-3 py-4 text-xs text-text-muted text-center">Nenhum resultado para "{query}"</p>
+        <p className="px-3 py-4 text-xs text-text-muted text-center">{t('findInFiles.noResults', { query })}</p>
       )}
     </div>
   )

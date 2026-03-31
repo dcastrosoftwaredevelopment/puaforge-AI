@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { ImagePlus, Trash2, Copy, Pencil, Check, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useProjectImages } from '@/hooks/useProjectImages'
 
 function toExportName(fileName: string): string {
@@ -22,6 +23,7 @@ function baseName(fileName: string): string {
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false)
+  const { t } = useTranslation()
 
   const handleCopy = () => {
     navigator.clipboard.writeText(text)
@@ -30,12 +32,12 @@ function CopyButton({ text }: { text: string }) {
   }
 
   return copied ? (
-    <span className="text-[10px] text-success">Copiado!</span>
+    <span className="text-[10px] text-success">{t('common.copied')}</span>
   ) : (
     <button
       onClick={handleCopy}
       className="p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
-      title="Copiar texto para o chat"
+      title={t('images.copyToChat')}
     >
       <Copy size={12} />
     </button>
@@ -50,6 +52,7 @@ function ImageRow({ img, onRename, onRemove }: {
   const [editing, setEditing] = useState(false)
   const [editValue, setEditValue] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+  const { t } = useTranslation()
 
   const startEditing = () => {
     setEditValue(baseName(img.name))
@@ -101,7 +104,7 @@ function ImageRow({ img, onRename, onRemove }: {
           <p
             className="text-xs text-text-primary truncate cursor-pointer hover:text-accent transition"
             onDoubleClick={startEditing}
-            title="Duplo-clique para renomear"
+            title={t('images.doubleClickRename')}
           >
             {img.name}
           </p>
@@ -110,18 +113,18 @@ function ImageRow({ img, onRename, onRemove }: {
       </div>
       {!editing && (
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-          <CopyButton text={`usa a imagem ${exportName}`} />
+          <CopyButton text={t('images.copyTemplate', { name: exportName })} />
           <button
             onClick={startEditing}
             className="p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
-            title="Renomear"
+            title={t('images.rename')}
           >
             <Pencil size={12} />
           </button>
           <button
             onClick={() => onRemove(img.id)}
             className="p-1 rounded text-text-muted hover:text-forge-terracotta transition cursor-pointer"
-            title="Remover imagem"
+            title={t('images.remove')}
           >
             <Trash2 size={12} />
           </button>
@@ -134,6 +137,7 @@ function ImageRow({ img, onRename, onRemove }: {
 export default function ImageAssets() {
   const { images, addImage, renameImage, removeImage } = useProjectImages()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { t } = useTranslation()
 
   const handleFiles = async (files: FileList | null) => {
     if (!files) return
@@ -147,7 +151,7 @@ export default function ImageAssets() {
   return (
     <div className="p-3 space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-text-secondary">Imagens do projeto</span>
+        <span className="text-xs font-medium text-text-secondary">{t('images.title')}</span>
         <input
           ref={fileInputRef}
           type="file"
@@ -161,18 +165,17 @@ export default function ImageAssets() {
           className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary bg-bg-elevated border border-border-subtle rounded-md transition cursor-pointer"
         >
           <ImagePlus size={12} />
-          Upload
+          {t('images.upload')}
         </button>
       </div>
 
       {images.length === 0 ? (
         <div className="text-center py-4 space-y-2">
           <p className="text-xs text-text-muted">
-            Faça upload de imagens para usar no seu site
+            {t('images.empty')}
           </p>
-          <p className="text-[10px] text-text-muted/70 leading-relaxed">
-            No chat, peça para a IA usar pelo nome.<br />
-            Ex: "usa a imagem logo como background"
+          <p className="text-[10px] text-text-muted/70 leading-relaxed whitespace-pre-line">
+            {t('images.emptyHint')}
           </p>
         </div>
       ) : (
@@ -186,7 +189,7 @@ export default function ImageAssets() {
             />
           ))}
           <p className="text-[10px] text-text-muted/70 leading-relaxed pt-1">
-            Clique no nome da variável para copiar o texto pronto para o chat.
+            {t('images.helper')}
           </p>
         </div>
       )}

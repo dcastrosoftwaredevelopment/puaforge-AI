@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm'
 import { User, Bot, FileCode } from 'lucide-react'
 import type { Message } from '@/atoms'
 import { useCodeViewer } from './CodeViewerContext'
+import { useTranslation } from 'react-i18next'
 
 // ─── Message parser ────────────────────────────────────────────────────────────
 
@@ -45,6 +46,7 @@ const TEXT_COLLAPSE_CHARS = 400
 
 function CollapsibleText({ children, content, fadeColor = 'var(--color-bg-secondary)' }: { children: React.ReactNode; content: string; fadeColor?: string }) {
   const [expanded, setExpanded] = useState(false)
+  const { t } = useTranslation()
   const isLong = content.length > TEXT_COLLAPSE_CHARS
 
   if (!isLong) return <>{children}</>
@@ -64,7 +66,7 @@ function CollapsibleText({ children, content, fadeColor = 'var(--color-bg-second
         onClick={() => setExpanded((v) => !v)}
         className="mt-1 text-[11px] text-text-muted hover:text-vibe-blue transition-colors cursor-pointer"
       >
-        {expanded ? 'ver menos ↑' : 'ver mais ↓'}
+        {expanded ? t('chat.showLess') : t('chat.showMore')}
       </button>
     </div>
   )
@@ -76,6 +78,7 @@ const PREVIEW_LINES = 6
 
 const CodeBlock = memo(function CodeBlock({ language, filePath, code }: CodeSegment) {
   const { open } = useCodeViewer()
+  const { t } = useTranslation()
   const lines = code.split('\n')
   const previewCode = lines.slice(0, PREVIEW_LINES).join('\n')
   const hasMore = lines.length > PREVIEW_LINES
@@ -95,12 +98,12 @@ const CodeBlock = memo(function CodeBlock({ language, filePath, code }: CodeSegm
         </div>
         {hasMore && (
           <span className="text-[10px] text-text-muted shrink-0 ml-2 group-hover:text-vibe-blue transition-colors">
-            +{lines.length - PREVIEW_LINES} linhas — clique para expandir
+            {t('chat.codeLines', { count: lines.length - PREVIEW_LINES })}
           </span>
         )}
         {!hasMore && (
           <span className="text-[10px] text-text-muted shrink-0 ml-2 group-hover:text-vibe-blue transition-colors opacity-0 group-hover:opacity-100">
-            clique para ver
+            {t('chat.codeClick')}
           </span>
         )}
       </div>

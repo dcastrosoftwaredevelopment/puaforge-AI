@@ -1,35 +1,37 @@
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import * as yup from 'yup'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/useAuth'
 import { useAtomValue } from 'jotai'
 import { authTokenAtom } from '@/atoms/authAtoms'
 import { api, ApiError } from '@/services/api'
 import Sidebar from '@/components/home/Sidebar'
 
-const ERROR_MESSAGES: Record<string, string> = {
-  ERROR_INVALID_CURRENT_PASSWORD: 'Senha atual incorreta.',
-  ERROR_MISSING_CURRENT_PASSWORD: 'Informe a senha atual para alterá-la.',
-  ERROR_NO_PASSWORD_SET: 'Sua conta usa login pelo Google. Defina uma senha primeiro.',
-}
-
-const profileSchema = yup.object({
-  name: yup.string().required('Nome é obrigatório'),
-})
-
-const passwordSchema = yup.object({
-  currentPassword: yup.string().required('Senha atual é obrigatória'),
-  newPassword: yup.string().min(6, 'Mínimo de 6 caracteres').required('Nova senha é obrigatória'),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref('newPassword')], 'As senhas não coincidem')
-    .required('Confirme a nova senha'),
-})
-
 export default function Profile() {
   const { user } = useAuth()
   const token = useAtomValue(authTokenAtom)
   const authHeaders = { Authorization: `Bearer ${token}` }
+  const { t } = useTranslation()
+
+  const ERROR_MESSAGES: Record<string, string> = {
+    ERROR_INVALID_CURRENT_PASSWORD: t('profile.errors.wrongPassword'),
+    ERROR_MISSING_CURRENT_PASSWORD: t('profile.errors.missingCurrentPassword'),
+    ERROR_NO_PASSWORD_SET: t('profile.errors.googleAccount'),
+  }
+
+  const profileSchema = yup.object({
+    name: yup.string().required(t('profile.errors.nameRequired')),
+  })
+
+  const passwordSchema = yup.object({
+    currentPassword: yup.string().required(t('profile.errors.currentPasswordRequired')),
+    newPassword: yup.string().min(6, t('profile.errors.minChars')).required(t('profile.errors.newPasswordRequired')),
+    confirmPassword: yup
+      .string()
+      .oneOf([yup.ref('newPassword')], t('profile.errors.passwordMismatch'))
+      .required(t('profile.errors.confirmPasswordRequired')),
+  })
 
   const [name, setName] = useState(user?.name ?? '')
   const [nameError, setNameError] = useState('')
@@ -102,18 +104,18 @@ export default function Profile() {
       <Sidebar />
       <main className="flex-1 overflow-auto">
         <div className="max-w-lg mx-auto px-8 py-10">
-          <h1 className="text-2xl font-semibold text-text-primary mb-8">Perfil</h1>
+          <h1 className="text-2xl font-semibold text-text-primary mb-8">{t('profile.title')}</h1>
 
           {/* Info */}
           <div className="bg-bg-secondary border border-border-subtle rounded-xl p-5 mb-6">
-            <p className="text-xs text-text-muted mb-1">Email</p>
+            <p className="text-xs text-text-muted mb-1">{t('profile.emailLabel')}</p>
             <p className="text-sm text-text-primary">{user?.email}</p>
-            <p className="text-xs text-text-muted mt-2">O email não pode ser alterado.</p>
+            <p className="text-xs text-text-muted mt-2">{t('profile.emailNote')}</p>
           </div>
 
           {/* Name */}
           <div className="bg-bg-secondary border border-border-subtle rounded-xl p-5 mb-6">
-            <h2 className="text-sm font-medium text-text-primary mb-4">Nome</h2>
+            <h2 className="text-sm font-medium text-text-primary mb-4">{t('profile.nameSection')}</h2>
             <form onSubmit={handleSaveName} className="flex flex-col gap-3">
               <div>
                 <input
@@ -121,10 +123,10 @@ export default function Profile() {
                   value={name}
                   onChange={(e) => { setName(e.target.value); setNameError(''); setNameSuccess(false) }}
                   className={inputClass(nameError)}
-                  placeholder="Seu nome"
+                  placeholder={t('profile.namePlaceholder')}
                 />
                 {nameError && <p className="text-xs text-red-400 mt-1">{nameError}</p>}
-                {nameSuccess && <p className="text-xs text-vibe-blue mt-1">Nome atualizado com sucesso.</p>}
+                {nameSuccess && <p className="text-xs text-vibe-blue mt-1">{t('profile.nameSuccess')}</p>}
               </div>
               <button
                 type="submit"
@@ -132,14 +134,14 @@ export default function Profile() {
                 className="self-end flex items-center gap-2 px-4 py-2 bg-forge-terracotta text-white text-sm font-medium rounded-lg hover:bg-forge-terracotta/90 transition disabled:opacity-50 cursor-pointer"
               >
                 {nameSaving && <Loader2 size={13} className="animate-spin" />}
-                Salvar
+                {t('common.save')}
               </button>
             </form>
           </div>
 
           {/* Password */}
           <div className="bg-bg-secondary border border-border-subtle rounded-xl p-5">
-            <h2 className="text-sm font-medium text-text-primary mb-4">Alterar senha</h2>
+            <h2 className="text-sm font-medium text-text-primary mb-4">{t('profile.passwordSection')}</h2>
             <form onSubmit={handleSavePassword} className="flex flex-col gap-3">
               <div>
                 <input
@@ -147,7 +149,7 @@ export default function Profile() {
                   value={currentPassword}
                   onChange={(e) => { setCurrentPassword(e.target.value); setPasswordErrors((p) => ({ ...p, currentPassword: '' })) }}
                   className={inputClass(passwordErrors.currentPassword)}
-                  placeholder="Senha atual"
+                  placeholder={t('profile.currentPassword')}
                 />
                 {passwordErrors.currentPassword && <p className="text-xs text-red-400 mt-1">{passwordErrors.currentPassword}</p>}
               </div>
@@ -157,7 +159,7 @@ export default function Profile() {
                   value={newPassword}
                   onChange={(e) => { setNewPassword(e.target.value); setPasswordErrors((p) => ({ ...p, newPassword: '' })) }}
                   className={inputClass(passwordErrors.newPassword)}
-                  placeholder="Nova senha"
+                  placeholder={t('profile.newPassword')}
                 />
                 {passwordErrors.newPassword && <p className="text-xs text-red-400 mt-1">{passwordErrors.newPassword}</p>}
               </div>
@@ -167,19 +169,19 @@ export default function Profile() {
                   value={confirmPassword}
                   onChange={(e) => { setConfirmPassword(e.target.value); setPasswordErrors((p) => ({ ...p, confirmPassword: '' })) }}
                   className={inputClass(passwordErrors.confirmPassword)}
-                  placeholder="Confirmar nova senha"
+                  placeholder={t('profile.confirmPassword')}
                 />
                 {passwordErrors.confirmPassword && <p className="text-xs text-red-400 mt-1">{passwordErrors.confirmPassword}</p>}
               </div>
               {passwordError && <p className="text-xs text-red-400">{passwordError}</p>}
-              {passwordSuccess && <p className="text-xs text-vibe-blue">Senha alterada com sucesso.</p>}
+              {passwordSuccess && <p className="text-xs text-vibe-blue">{t('profile.passwordSuccess')}</p>}
               <button
                 type="submit"
                 disabled={passwordSaving}
                 className="self-end flex items-center gap-2 px-4 py-2 bg-forge-terracotta text-white text-sm font-medium rounded-lg hover:bg-forge-terracotta/90 transition disabled:opacity-50 cursor-pointer"
               >
                 {passwordSaving && <Loader2 size={13} className="animate-spin" />}
-                Alterar senha
+                {t('profile.changePassword')}
               </button>
             </form>
           </div>

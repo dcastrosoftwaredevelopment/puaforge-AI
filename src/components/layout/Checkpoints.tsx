@@ -1,9 +1,10 @@
 import { useState, useRef } from 'react'
 import { Save, RotateCcw, Trash2, Pencil, Check, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useCheckpoints } from '@/hooks/useCheckpoints'
 
-function formatDate(ts: number): string {
-  return new Date(ts).toLocaleDateString('pt-BR', {
+function formatDate(ts: number, locale: string): string {
+  return new Date(ts).toLocaleDateString(locale === 'pt' ? 'pt-BR' : 'en-US', {
     day: '2-digit',
     month: 'short',
     hour: '2-digit',
@@ -20,6 +21,7 @@ function CheckpointRow({ checkpoint, onRestore, onDelete, onRename }: {
   const [editing, setEditing] = useState(false)
   const [editValue, setEditValue] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+  const { t, i18n } = useTranslation()
 
   const startEditing = () => {
     setEditValue(checkpoint.name)
@@ -64,13 +66,13 @@ function CheckpointRow({ checkpoint, onRestore, onDelete, onRename }: {
           <p
             className="text-xs text-text-primary truncate cursor-pointer hover:text-accent transition"
             onDoubleClick={startEditing}
-            title="Duplo-clique para renomear"
+            title={t('checkpoints.doubleClickRename')}
           >
             {checkpoint.name}
           </p>
         )}
         <p className="text-[10px] text-text-muted">
-          {formatDate(checkpoint.createdAt)} &middot; {fileCount} arquivo{fileCount !== 1 ? 's' : ''}
+          {formatDate(checkpoint.createdAt, i18n.language)} &middot; {t('checkpoints.files', { count: fileCount })}
         </p>
       </div>
       {!editing && (
@@ -78,21 +80,21 @@ function CheckpointRow({ checkpoint, onRestore, onDelete, onRename }: {
           <button
             onClick={() => onRestore(checkpoint.id)}
             className="p-1 rounded text-text-muted hover:text-accent transition cursor-pointer"
-            title="Restaurar"
+            title={t('checkpoints.restore')}
           >
             <RotateCcw size={12} />
           </button>
           <button
             onClick={startEditing}
             className="p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
-            title="Renomear"
+            title={t('checkpoints.rename')}
           >
             <Pencil size={12} />
           </button>
           <button
             onClick={() => onDelete(checkpoint.id)}
             className="p-1 rounded text-text-muted hover:text-forge-terracotta transition cursor-pointer"
-            title="Excluir"
+            title={t('checkpoints.delete')}
           >
             <Trash2 size={12} />
           </button>
@@ -106,6 +108,7 @@ export default function Checkpoints() {
   const { checkpoints, createCheckpoint, restoreCheckpoint, deleteCheckpoint, renameCheckpoint } = useCheckpoints()
   const [newName, setNewName] = useState('')
   const [showInput, setShowInput] = useState(false)
+  const { t } = useTranslation()
 
   const handleCreate = () => {
     createCheckpoint(newName)
@@ -116,7 +119,7 @@ export default function Checkpoints() {
   return (
     <div className="p-3 space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-text-secondary">Checkpoints</span>
+        <span className="text-xs font-medium text-text-secondary">{t('checkpoints.title')}</span>
         {showInput ? (
           <div className="flex items-center gap-1">
             <input
@@ -126,7 +129,7 @@ export default function Checkpoints() {
                 if (e.key === 'Enter') handleCreate()
                 if (e.key === 'Escape') setShowInput(false)
               }}
-              placeholder="Nome do checkpoint..."
+              placeholder={t('checkpoints.placeholder')}
               className="w-36 text-xs bg-bg-elevated border border-border-default rounded px-2 py-1 text-text-primary outline-none focus:border-accent placeholder-text-muted"
               autoFocus
             />
@@ -149,14 +152,14 @@ export default function Checkpoints() {
             className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary bg-bg-elevated border border-border-subtle rounded-md transition cursor-pointer"
           >
             <Save size={12} />
-            Salvar
+            {t('checkpoints.save')}
           </button>
         )}
       </div>
 
       {checkpoints.length === 0 ? (
         <p className="text-xs text-text-muted text-center py-4">
-          Salve checkpoints para poder restaurar versões anteriores
+          {t('checkpoints.empty')}
         </p>
       ) : (
         <div className="space-y-2 max-h-64 overflow-y-auto">

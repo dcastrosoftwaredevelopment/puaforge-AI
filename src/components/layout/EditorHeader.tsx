@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Home, ImageIcon, History, RotateCcw, Save, Trash2, Palette } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useProjectActions } from '@/hooks/useProjectActions'
 import { useProjectImages } from '@/hooks/useProjectImages'
 import { useCheckpoints } from '@/hooks/useCheckpoints'
@@ -23,6 +24,7 @@ export default function EditorHeader() {
   const { checkpoints } = useCheckpoints()
   const { resetPanels } = usePanelSizes()
   const { isDraft, saveDraft, discardDraft } = useDraft()
+  const { t } = useTranslation()
   const [showImages, setShowImages] = useState(false)
   const [showCheckpoints, setShowCheckpoints] = useState(false)
   const [showPalette, setShowPalette] = useState(false)
@@ -64,7 +66,7 @@ export default function EditorHeader() {
     <>
       <header className="h-11 border-b border-border-subtle flex items-center justify-between px-4 shrink-0 bg-bg-secondary">
         <div className="flex items-center gap-3">
-          <Tooltip content="Voltar para projetos" side="bottom" align="left">
+          <Tooltip content={t('editor.backToProjects')} side="bottom" align="left">
             <button
               onClick={goHome}
               className="p-1.5 rounded-lg text-forge-terracotta/60 hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
@@ -79,7 +81,7 @@ export default function EditorHeader() {
         <div className="flex items-center gap-3">
           {/* Images */}
           <div className="relative" ref={panelRef}>
-            <Tooltip content="Imagens do projeto" side="bottom" align="right">
+            <Tooltip content={t('editor.images')} side="bottom" align="right">
               <button
                 onClick={() => setShowImages(!showImages)}
                 className="flex items-center gap-1.5 p-1.5 rounded-lg text-forge-terracotta/60 hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
@@ -99,7 +101,7 @@ export default function EditorHeader() {
 
           {/* Color palette */}
           <div className="relative" ref={paletteRef}>
-            <Tooltip content="Paleta de cores" side="bottom" align="right">
+            <Tooltip content={t('editor.palette')} side="bottom" align="right">
               <button
                 onClick={() => setShowPalette(!showPalette)}
                 className="p-1.5 rounded-lg text-forge-terracotta/60 hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
@@ -116,7 +118,7 @@ export default function EditorHeader() {
 
           {/* Checkpoints */}
           <div className="relative" ref={checkpointRef}>
-            <Tooltip content="Checkpoints do projeto" side="bottom" align="right">
+            <Tooltip content={t('editor.checkpoints')} side="bottom" align="right">
               <button
                 onClick={() => setShowCheckpoints(!showCheckpoints)}
                 className="flex items-center gap-1.5 p-1.5 rounded-lg text-forge-terracotta/60 hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
@@ -135,7 +137,7 @@ export default function EditorHeader() {
           </div>
 
           {/* Reset panels */}
-          <Tooltip content="Resetar tamanho dos painéis" side="bottom" align="right">
+          <Tooltip content={t('editor.resetPanels')} side="bottom" align="right">
             <button
               onClick={resetPanels}
               className="p-1.5 rounded-lg text-forge-terracotta/60 hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
@@ -152,17 +154,17 @@ export default function EditorHeader() {
             <>
               <div className="w-px h-4 bg-border-subtle" />
               <Tooltip
-                content={<>Alterações salvas localmente. Clique em <strong className="text-text-primary">Salvar</strong> para não perder as modificações.</>}
+                content={<>{t('editor.draftTooltip').replace('**Salvar**', '')}<strong className="text-text-primary">{t('common.save')}</strong>{t('editor.draftTooltip').split('**Salvar**')[1]}</>}
                 side="bottom"
                 align="center"
                 width="w-44"
               >
                 <span className="flex items-center gap-1.5 text-[11px] text-text-muted cursor-default">
                   <span className="w-1.5 h-1.5 rounded-full bg-forge-terracotta animate-pulse" />
-                  Rascunho local
+                  {t('editor.draftLabel')}
                 </span>
               </Tooltip>
-              <Tooltip content="Descartar rascunho e reverter para a versão salva" side="bottom" align="right" width="w-44">
+              <Tooltip content={t('editor.discardTooltip')} side="bottom" align="right" width="w-44">
                 <button
                   onClick={() => setShowDiscardModal(true)}
                   className="p-1.5 rounded-lg text-text-muted hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
@@ -176,7 +178,7 @@ export default function EditorHeader() {
                 className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-accent/15 text-accent hover:bg-accent/25 disabled:opacity-50 transition cursor-pointer"
               >
                 <Save size={13} />
-                {saving ? 'Salvando…' : 'Salvar'}
+                {saving ? t('common.saving') : t('common.save')}
               </button>
             </>
           )}
@@ -189,10 +191,10 @@ export default function EditorHeader() {
 
       <ConfirmModal
         open={showDiscardModal}
-        title="Descartar rascunho"
-        message="Isso vai apagar todas as alterações locais não salvas e reverter o projeto para a última versão salva. Essa ação não pode ser desfeita."
-        confirmLabel="Descartar"
-        cancelLabel="Cancelar"
+        title={t('editor.discardTitle')}
+        message={t('editor.discardMessage')}
+        confirmLabel={t('common.discard')}
+        cancelLabel={t('common.cancel')}
         onConfirm={handleDiscard}
         onCancel={() => setShowDiscardModal(false)}
       />

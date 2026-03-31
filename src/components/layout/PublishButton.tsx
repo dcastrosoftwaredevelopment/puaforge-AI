@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 
 declare const __SERVER_IP__: string
 import { Globe, Loader2, ExternalLink, Check, AlertTriangle } from 'lucide-react'
+import { useTranslation, Trans } from 'react-i18next'
 import { usePublish } from '@/hooks/usePublish'
 import { useCustomDomain } from '@/hooks/useCustomDomain'
 import { ApiError } from '@/services/api'
@@ -10,6 +11,7 @@ import Tooltip from '@/components/ui/Tooltip'
 export default function PublishButton() {
   const { isPublishing, publishedAt, error, publish, openPublished } = usePublish()
   const { customDomain, saveDomain } = useCustomDomain()
+  const { t, i18n } = useTranslation()
   const [showPanel, setShowPanel] = useState(false)
   const [domainInput, setDomainInput] = useState('')
   const [savingDomain, setSavingDomain] = useState(false)
@@ -51,9 +53,9 @@ export default function PublishButton() {
       if (e instanceof ApiError && e.code === 'DOMAIN_OWN_PROJECT') {
         setOwnProjectConflict(e.data?.conflictingProjectName as string ?? '')
       } else if (e instanceof ApiError && e.status === 409) {
-        setDomainError('Este domínio já está em uso')
+        setDomainError(t('publish.domainTaken'))
       } else {
-        setDomainError(e instanceof Error ? e.message : 'Erro ao salvar domínio')
+        setDomainError(e instanceof Error ? e.message : t('publish.domainTaken'))
       }
     } finally {
       setSavingDomain(false)
@@ -61,7 +63,7 @@ export default function PublishButton() {
   }
 
   const formatDate = (ts: number) =>
-    new Date(ts).toLocaleDateString('pt-BR', {
+    new Date(ts).toLocaleDateString(i18n.language === 'pt' ? 'pt-BR' : 'en-US', {
       day: '2-digit',
       month: 'short',
       hour: '2-digit',
@@ -70,14 +72,14 @@ export default function PublishButton() {
 
   return (
     <div className="relative" ref={panelRef}>
-      <Tooltip content="Publicar site" side="bottom" align="right">
+      <Tooltip content={t('publish.tooltip')} side="bottom" align="right">
         <button
           onClick={() => setShowPanel(!showPanel)}
           disabled={isPublishing}
           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20 hover:bg-vibe-blue/20 disabled:opacity-50 transition cursor-pointer"
         >
           {isPublishing ? <Loader2 size={13} className="animate-spin" /> : <Globe size={13} />}
-          {isPublishing ? 'Publicando...' : 'Publicar'}
+          {isPublishing ? t('publish.publishing') : t('publish.publish')}
         </button>
       </Tooltip>
 
@@ -87,14 +89,14 @@ export default function PublishButton() {
 
             {/* Domain config */}
             <div className="space-y-1.5">
-              <span className="text-[11px] font-medium text-text-secondary">Domínio personalizado</span>
+              <span className="text-[11px] font-medium text-text-secondary">{t('publish.domainLabel')}</span>
               <div className="flex gap-1.5">
                 <input
                   type="text"
                   value={domainInput}
                   onChange={(e) => setDomainInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') void handleSaveDomain() }}
-                  placeholder="meu-site.com"
+                  placeholder={t('publish.domainPlaceholder')}
                   className="flex-1 bg-bg-elevated border border-border-subtle rounded-lg px-2.5 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-vibe-blue/40 font-mono"
                 />
                 <button
@@ -102,7 +104,7 @@ export default function PublishButton() {
                   disabled={savingDomain}
                   className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary disabled:opacity-50 transition cursor-pointer"
                 >
-                  {savingDomain ? <Loader2 size={12} className="animate-spin" /> : domainSaved ? <Check size={12} className="text-vibe-blue" /> : 'Salvar'}
+                  {savingDomain ? <Loader2 size={12} className="animate-spin" /> : domainSaved ? <Check size={12} className="text-vibe-blue" /> : t('publish.saveDomain')}
                 </button>
               </div>
               {domainError && (
@@ -113,7 +115,7 @@ export default function PublishButton() {
                   <div className="flex items-start gap-1.5">
                     <AlertTriangle size={11} className="text-amber-400 mt-0.5 shrink-0" />
                     <p className="text-[10px] text-amber-300 leading-relaxed">
-                      Este domínio está em uso no projeto <span className="font-semibold">"{ownProjectConflict}"</span>. Aquele projeto perderá a publicação.
+                      {t('publish.ownConflict', { name: ownProjectConflict })}
                     </p>
                   </div>
                   <div className="flex gap-1.5">
@@ -122,25 +124,33 @@ export default function PublishButton() {
                       disabled={savingDomain}
                       className="flex-1 px-2 py-1 rounded-md text-[10px] font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 disabled:opacity-50 transition cursor-pointer"
                     >
-                      Confirmar
+                      {t('publish.confirmOverride')}
                     </button>
                     <button
                       onClick={() => setOwnProjectConflict(null)}
                       className="flex-1 px-2 py-1 rounded-md text-[10px] font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition cursor-pointer"
                     >
-                      Cancelar
+                      {t('publish.cancelOverride')}
                     </button>
                   </div>
                 </div>
               )}
               {__SERVER_IP__ ? (
                 <p className="text-[10px] text-text-muted leading-relaxed">
-                  Aponte um registro <span className="font-mono text-text-secondary">A</span> no DNS do seu domínio para{' '}
-                  <span className="font-mono text-vibe-blue select-all">{__SERVER_IP__}</span>.
+                  <Trans
+                    i18nKey="publish.dnsWithIp"
+                    components={{
+                      A: <span className="font-mono text-text-secondary">A</span>,
+                      ip: <span className="font-mono text-vibe-blue select-all">{__SERVER_IP__}</span>,
+                    }}
+                  />
                 </p>
               ) : (
                 <p className="text-[10px] text-text-muted leading-relaxed">
-                  Aponte um registro <span className="font-mono text-text-secondary">A</span> no DNS do seu domínio para o IP deste servidor.
+                  <Trans
+                    i18nKey="publish.dnsWithoutIp"
+                    components={{ A: <span className="font-mono text-text-secondary">A</span> }}
+                  />
                 </p>
               )}
             </div>
@@ -157,7 +167,7 @@ export default function PublishButton() {
             {publishedAt && (
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-medium text-text-secondary">Última publicação</span>
+                  <span className="text-[11px] font-medium text-text-secondary">{t('publish.lastPublished')}</span>
                   <span className="text-[10px] text-text-muted">{formatDate(publishedAt)}</span>
                 </div>
                 {customDomain && (
@@ -176,7 +186,7 @@ export default function PublishButton() {
                   className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition cursor-pointer"
                 >
                   <ExternalLink size={12} />
-                  Abrir preview local
+                  {t('publish.openLocal')}
                 </button>
               </div>
             )}
@@ -187,7 +197,7 @@ export default function PublishButton() {
               className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20 hover:bg-vibe-blue/20 disabled:opacity-50 transition cursor-pointer"
             >
               {isPublishing ? <Loader2 size={12} className="animate-spin" /> : <Globe size={12} />}
-              {isPublishing ? 'Publicando...' : publishedAt ? 'Republicar' : 'Publicar agora'}
+              {isPublishing ? t('publish.publishing') : publishedAt ? t('publish.republish') : t('publish.publishNow')}
             </button>
 
           </div>

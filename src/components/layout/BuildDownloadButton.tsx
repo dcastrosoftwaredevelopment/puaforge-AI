@@ -1,4 +1,5 @@
 import { PackageCheck, Loader2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useFiles } from '@/hooks/useFiles'
 import { useProjects } from '@/hooks/useProjects'
 import { useApiCall, HttpMethod } from '@/hooks/useApiCall'
@@ -8,6 +9,7 @@ import Tooltip from '@/components/ui/Tooltip'
 export default function BuildDownloadButton() {
   const { files } = useFiles()
   const { activeProjectId, activeProject } = useProjects()
+  const { t } = useTranslation()
 
   const safeName = (activeProject?.name || 'puaforge-project')
     .toLowerCase()
@@ -36,7 +38,7 @@ export default function BuildDownloadButton() {
   }
 
   return (
-    <Tooltip content="Gerar e baixar o build pronto para deploy" side="bottom" align="right">
+    <Tooltip content={t('editor.buildTooltip')} side="bottom" align="right">
       <button
         onClick={handleDownload}
         disabled={loading}

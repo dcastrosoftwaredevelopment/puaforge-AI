@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Plus } from 'lucide-react'
 import { useAtomValue } from 'jotai'
+import { useTranslation } from 'react-i18next'
 import { authTokenAtom } from '@/atoms/authAtoms'
 import { useProjects } from '@/hooks/useProjects'
 import { useProjectActions } from '@/hooks/useProjectActions'
@@ -13,6 +14,7 @@ export default function ProjectList() {
   const { projects } = useProjects()
   const { createProject, openProject, deleteProject } = useProjectActions()
   const token = useAtomValue(authTokenAtom)
+  const { t } = useTranslation()
   const [publishedIds, setPublishedIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
@@ -47,11 +49,11 @@ export default function ProjectList() {
         <div className="max-w-4xl mx-auto px-8 py-10">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-2xl font-semibold text-text-primary">Projetos</h1>
+              <h1 className="text-2xl font-semibold text-text-primary">{t('projects.title')}</h1>
               <p className="text-sm text-text-muted mt-1">
                 {projects.length === 0
-                  ? 'Crie seu primeiro projeto para começar'
-                  : `${projects.length} projeto${projects.length > 1 ? 's' : ''}`}
+                  ? t('projects.emptyHint')
+                  : t('projects.count', { count: projects.length })}
               </p>
             </div>
             <button
@@ -59,7 +61,7 @@ export default function ProjectList() {
               className="flex items-center gap-2 px-4 py-2 bg-forge-terracotta/10 border border-forge-terracotta/30 hover:bg-forge-terracotta/20 text-forge-terracotta text-sm font-medium rounded-lg transition cursor-pointer"
             >
               <Plus size={16} />
-              Novo Projeto
+              {t('projects.newProject')}
             </button>
           </div>
 

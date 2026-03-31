@@ -2,34 +2,36 @@ import { useState } from 'react'
 import { GoogleLogin } from '@react-oauth/google'
 import { Loader2, Mail, Lock, User } from 'lucide-react'
 import * as yup from 'yup'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/useAuth'
 import { ApiError } from '@/services/api'
-
-const ERROR_MESSAGES: Record<string, string> = {
-  ERROR_EMAIL_ALREADY_USED: 'Este email já está cadastrado. Tente fazer login.',
-  ERROR_INVALID_CREDENTIALS: 'Email ou senha incorretos.',
-  ERROR_MISSING_FIELDS: 'Preencha todos os campos.',
-  ERROR_INVALID_GOOGLE_TOKEN: 'Não foi possível autenticar com o Google.',
-  ERROR_USER_NOT_FOUND: 'Usuário não encontrado.',
-}
-
-const loginSchema = yup.object({
-  email: yup.string().email('Email inválido').required('Email é obrigatório'),
-  password: yup.string().required('Senha é obrigatória'),
-})
-
-const registerSchema = yup.object({
-  name: yup.string().required('Nome é obrigatório'),
-  email: yup.string().email('Email inválido').required('Email é obrigatório'),
-  password: yup.string().min(6, 'Mínimo de 6 caracteres').required('Senha é obrigatória'),
-})
 
 type Tab = 'login' | 'register'
 type FieldErrors = Record<string, string>
 
 export default function Login() {
   const { login, register, loginWithGoogle } = useAuth()
+  const { t } = useTranslation()
   const [tab, setTab] = useState<Tab>('login')
+
+  const ERROR_MESSAGES: Record<string, string> = {
+    ERROR_EMAIL_ALREADY_USED: t('login.errors.emailInUse'),
+    ERROR_INVALID_CREDENTIALS: t('login.errors.invalidCredentials'),
+    ERROR_MISSING_FIELDS: t('login.errors.missingFields'),
+    ERROR_INVALID_GOOGLE_TOKEN: t('login.errors.googleFailed'),
+    ERROR_USER_NOT_FOUND: t('login.errors.userNotFound'),
+  }
+
+  const loginSchema = yup.object({
+    email: yup.string().email(t('login.errors.invalidEmail')).required(t('login.errors.emailRequired')),
+    password: yup.string().required(t('login.errors.passwordRequired')),
+  })
+
+  const registerSchema = yup.object({
+    name: yup.string().required(t('login.errors.nameRequired')),
+    email: yup.string().email(t('login.errors.invalidEmail')).required(t('login.errors.emailRequired')),
+    password: yup.string().min(6, t('login.errors.minChars')).required(t('login.errors.passwordRequired')),
+  })
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -74,7 +76,7 @@ export default function Login() {
       }
     } catch (err) {
       const code = err instanceof ApiError ? err.code : 'UNKNOWN'
-      setError(ERROR_MESSAGES[code] ?? 'Erro ao autenticar. Tente novamente.')
+      setError(ERROR_MESSAGES[code] ?? t('login.errors.genericError'))
     } finally {
       setLoading(false)
     }
@@ -87,7 +89,7 @@ export default function Login() {
       await loginWithGoogle(credential)
     } catch (err) {
       const code = err instanceof ApiError ? err.code : 'UNKNOWN'
-      setError(ERROR_MESSAGES[code] ?? 'Erro ao autenticar com Google. Tente novamente.')
+      setError(ERROR_MESSAGES[code] ?? t('login.errors.googleGenericError'))
     } finally {
       setLoading(false)
     }
@@ -110,17 +112,17 @@ export default function Login() {
 
         <div className="bg-bg-secondary border border-border-subtle rounded-2xl p-6">
           <div className="flex rounded-lg bg-bg-primary p-1 mb-6">
-            {(['login', 'register'] as Tab[]).map((t) => (
+            {(['login', 'register'] as Tab[]).map((tabKey) => (
               <button
-                key={t}
-                onClick={() => switchTab(t)}
+                key={tabKey}
+                onClick={() => switchTab(tabKey)}
                 className={`flex-1 py-1.5 rounded-md text-sm font-medium transition cursor-pointer ${
-                  tab === t
+                  tab === tabKey
                     ? 'bg-forge-terracotta text-white'
                     : 'text-text-muted hover:text-text-primary'
                 }`}
               >
-                {t === 'login' ? 'Entrar' : 'Cadastrar'}
+                {tabKey === 'login' ? t('login.loginTab') : t('login.registerTab')}
               </button>
             ))}
           </div>
@@ -132,7 +134,7 @@ export default function Login() {
                   <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
                   <input
                     type="text"
-                    placeholder="Nome"
+                    placeholder={t('login.namePlaceholder')}
                     value={name}
                     onChange={(e) => { setName(e.target.value); setFieldErrors((p) => ({ ...p, name: '' })) }}
                     className={inputClass('name')}
@@ -147,7 +149,7 @@ export default function Login() {
                 <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
                 <input
                   type="email"
-                  placeholder="Email"
+                  placeholder={t('login.emailPlaceholder')}
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); setFieldErrors((p) => ({ ...p, email: '' })) }}
                   className={inputClass('email')}
@@ -161,7 +163,7 @@ export default function Login() {
                 <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
                 <input
                   type="password"
-                  placeholder="Senha"
+                  placeholder={t('login.passwordPlaceholder')}
                   value={password}
                   onChange={(e) => { setPassword(e.target.value); setFieldErrors((p) => ({ ...p, password: '' })) }}
                   className={inputClass('password')}
@@ -178,7 +180,7 @@ export default function Login() {
               className="w-full py-2 rounded-lg bg-forge-terracotta text-white text-sm font-medium hover:bg-forge-terracotta/90 transition disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2 mt-1"
             >
               {loading && <Loader2 size={14} className="animate-spin" />}
-              {tab === 'login' ? 'Entrar' : 'Criar conta'}
+              {tab === 'login' ? t('login.loginTab') : t('login.registerButton')}
             </button>
           </form>
 
@@ -187,7 +189,7 @@ export default function Login() {
               <div className="w-full border-t border-border-subtle" />
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-bg-secondary px-3 text-xs text-text-muted">ou</span>
+              <span className="bg-bg-secondary px-3 text-xs text-text-muted">{t('common.or')}</span>
             </div>
           </div>
 
@@ -196,7 +198,7 @@ export default function Login() {
               onSuccess={(res) => {
                 if (res.credential) handleGoogle(res.credential)
               }}
-              onError={() => setError('Erro ao autenticar com Google')}
+              onError={() => setError(t('login.errors.googleGenericError'))}
               theme="filled_black"
               shape="rectangular"
               text={tab === 'login' ? 'signin_with' : 'signup_with'}

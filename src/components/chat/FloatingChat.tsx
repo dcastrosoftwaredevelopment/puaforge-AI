@@ -1,6 +1,7 @@
 import { useRef, useState, forwardRef } from 'react'
 import { GripHorizontal, Trash2, PanelRightClose, PanelRightOpen, Minus, Download, Upload } from 'lucide-react'
 import { useAtomValue } from 'jotai'
+import { useTranslation } from 'react-i18next'
 import { projectsAtom, activeProjectIdAtom } from '@/atoms'
 import { useFiles } from '@/hooks/useFiles'
 import { useChat } from '@/hooks/useChat'
@@ -37,6 +38,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
   const importRef = useRef<HTMLInputElement>(null)
   const projects = useAtomValue(projectsAtom)
   const activeProjectId = useAtomValue(activeProjectIdAtom)
+  const { t } = useTranslation()
 
   function exportMessages() {
     const projectName = projects.find((p) => p.id === activeProjectId)?.name ?? 'projeto'
@@ -92,7 +94,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
           >
             <Upload size={12} />
             <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-md bg-bg-elevated border border-border-subtle text-[10px] text-text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 transition shadow-lg z-50">
-              Importar mensagens
+              {t('chat.importMessages')}
             </span>
           </button>
           <button
@@ -103,7 +105,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
           >
             <Download size={12} />
             <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-md bg-bg-elevated border border-border-subtle text-[10px] text-text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 transition shadow-lg z-50">
-              Exportar mensagens
+              {t('chat.exportMessages')}
             </span>
           </button>
           <button
@@ -113,7 +115,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
           >
             <Trash2 size={12} />
             <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-md bg-bg-elevated border border-border-subtle text-[10px] text-text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 transition shadow-lg z-50">
-              Limpar conversa
+              {t('chat.clearChat')}
             </span>
           </button>
           {isDocked && (
@@ -124,7 +126,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
             >
               <Minus size={13} />
               <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-md bg-bg-elevated border border-border-subtle text-[10px] text-text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 transition shadow-lg z-50">
-                Minimizar chat
+                {t('chat.minimize')}
               </span>
             </button>
           )}
@@ -135,7 +137,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
           >
             {chatMode === 'docked' ? <PanelRightOpen size={13} /> : <PanelRightClose size={13} />}
             <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-md bg-bg-elevated border border-border-subtle text-[10px] text-text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 transition shadow-lg z-50">
-              {chatMode === 'docked' ? 'Modo flutuante' : 'Fixar no painel'}
+              {chatMode === 'docked' ? t('chat.toFloating') : t('chat.toDocked')}
             </span>
           </button>
           {!isDocked && <GripHorizontal size={14} className="text-text-muted" />}
@@ -152,16 +154,16 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
         <PromptInput />
         <div className="flex items-center justify-between">
           <ModelSelector />
-          <span className="text-[10px] text-text-muted">Shift+Enter para nova linha</span>
+          <span className="text-[10px] text-text-muted">{t('chat.shiftEnter')}</span>
         </div>
       </div>
 
       <ConfirmModal
         open={showClearConfirm}
-        title="Limpar conversa"
-        message="Isso vai apagar todo o histórico de mensagens e resetar o código para o estado inicial. Esta ação não pode ser desfeita."
-        confirmLabel="Limpar"
-        cancelLabel="Cancelar"
+        title={t('chat.clearTitle')}
+        message={t('chat.clearMessage')}
+        confirmLabel={t('chat.clear')}
+        cancelLabel={t('chat.cancel')}
         onConfirm={() => {
           setMessages([])
           setFiles(DEFAULT_FILES)

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { Plus, RotateCcw, Lock, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useColorPalette } from '@/hooks/useColorPalette'
 
 function ColorRow({
@@ -19,6 +20,7 @@ function ColorRow({
   const colorInputRef = useRef<HTMLInputElement>(null)
   const [editingName, setEditingName] = useState(false)
   const [nameVal, setNameVal] = useState(name)
+  const { t } = useTranslation()
 
   function commitName() {
     setEditingName(false)
@@ -34,7 +36,7 @@ function ColorRow({
         className="w-6 h-6 rounded-md border border-[rgba(255,255,255,0.12)] shrink-0 cursor-pointer transition hover:scale-110"
         style={{ background: value }}
         onClick={() => colorInputRef.current?.click()}
-        title="Alterar cor"
+        title={t('palette.changeColor')}
       />
       <input
         ref={colorInputRef}
@@ -58,7 +60,7 @@ function ColorRow({
         <span
           className="flex-1 text-xs text-text-secondary truncate cursor-pointer hover:text-text-primary transition"
           onClick={() => setEditingName(true)}
-          title="Clique para editar o nome"
+          title={t('palette.editName')}
         >
           {name}
         </span>
@@ -74,7 +76,7 @@ function ColorRow({
         <button
           onClick={onRemove}
           className="p-0.5 rounded text-text-muted/40 hover:text-forge-terracotta opacity-0 group-hover:opacity-100 transition cursor-pointer shrink-0"
-          title="Remover cor"
+          title={t('palette.removeColor')}
         >
           <X size={11} />
         </button>
@@ -85,26 +87,27 @@ function ColorRow({
 
 export default function ColorPalette() {
   const { palette, addColor, updateColor, removeColor, resetToDefaults } = useColorPalette()
+  const { t } = useTranslation()
 
   return (
     <div className="flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2.5 border-b border-border-subtle">
-        <span className="text-xs font-semibold text-text-secondary">Paleta de cores</span>
+        <span className="text-xs font-semibold text-text-secondary">{t('palette.title')}</span>
         <div className="flex items-center gap-1">
           <button
             onClick={resetToDefaults}
             className="p-1 rounded text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
-            title="Restaurar padrão"
+            title={t('palette.resetDefault')}
           >
             <RotateCcw size={11} />
           </button>
           <button
-            onClick={() => addColor({ name: 'Nova cor', value: '#6366f1' })}
+            onClick={() => addColor({ name: t('palette.newColor'), value: '#6366f1' })}
             className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] text-accent bg-accent/10 hover:bg-accent/20 transition cursor-pointer"
           >
             <Plus size={11} />
-            Adicionar
+            {t('palette.addColor')}
           </button>
         </div>
       </div>
@@ -134,7 +137,7 @@ export default function ColorPalette() {
       </div>
 
       <p className="px-3 py-2 text-[10px] text-text-muted border-t border-border-subtle leading-relaxed">
-        Clique no swatch para alterar a cor. Clique no nome para renomear. A IA usará estas cores automaticamente.
+        {t('palette.helper')}
       </p>
     </div>
   )

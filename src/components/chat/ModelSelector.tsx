@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronDown, Check, Cpu, Loader2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useModels } from '@/hooks/useModels'
 
 export default function ModelSelector() {
   const { models, selectedModel, setSelectedModel, loading } = useModels()
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -23,7 +25,7 @@ export default function ModelSelector() {
     return (
       <div className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-text-muted">
         <Loader2 size={12} className="animate-spin" />
-        <span>Carregando modelos...</span>
+        <span>{t('chat.loadingModels')}</span>
       </div>
     )
   }
@@ -32,7 +34,7 @@ export default function ModelSelector() {
     return (
       <div className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-text-muted">
         <Cpu size={12} />
-        <span>Sem modelos</span>
+        <span>{t('chat.noModels')}</span>
       </div>
     )
   }

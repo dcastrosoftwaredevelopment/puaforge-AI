@@ -1,4 +1,5 @@
 import { Trash2, Globe } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { Project } from '@/atoms'
 
 interface ProjectCardProps {
@@ -10,6 +11,8 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ project, hasPreview, onOpen, onDelete, onPreview }: ProjectCardProps) {
+  const { t, i18n } = useTranslation()
+
   return (
     <div
       onClick={onOpen}
@@ -19,7 +22,7 @@ export default function ProjectCard({ project, hasPreview, onOpen, onDelete, onP
         {project.name}
       </h3>
       <p className="text-xs text-text-muted">
-        {new Date(project.updatedAt).toLocaleDateString('pt-BR', {
+        {new Date(project.updatedAt).toLocaleDateString(i18n.language === 'pt' ? 'pt-BR' : 'en-US', {
           day: '2-digit',
           month: 'short',
           year: 'numeric',
@@ -36,7 +39,7 @@ export default function ProjectCard({ project, hasPreview, onOpen, onDelete, onP
               onPreview()
             }}
             className="p-1.5 rounded-lg text-text-muted hover:text-forge-terracotta hover:bg-bg-primary transition"
-            title="Abrir preview"
+            title={t('projects.openPreview')}
           >
             <Globe size={14} />
           </button>
@@ -47,7 +50,7 @@ export default function ProjectCard({ project, hasPreview, onOpen, onDelete, onP
             onDelete()
           }}
           className="p-1.5 rounded-lg text-text-muted hover:text-forge-terracotta hover:bg-bg-primary transition"
-          title="Excluir projeto"
+          title={t('projects.deleteProject')}
         >
           <Trash2 size={14} />
         </button>
