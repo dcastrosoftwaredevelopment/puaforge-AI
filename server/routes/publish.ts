@@ -76,7 +76,7 @@ function normalizePath(p: string): string {
 
 function collectExternalImports(files: Record<string, string>): string[] {
   const imports = new Set<string>()
-  const importRegex = /(?:import|from)\s+['"]([^./'][^'"]*)['"]/g
+  const importRegex = /(?:import|from)\s*['"]([^./'][^'"]*)['"]/g
 
   for (const code of Object.values(files)) {
     let match
