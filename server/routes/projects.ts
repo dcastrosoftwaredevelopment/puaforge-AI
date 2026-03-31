@@ -6,7 +6,7 @@ import { projects, messages, projectFiles, projectImages, checkpoints, published
 import { requireAuth } from '../middleware/auth.js'
 import { uploadFileToPocketBase, deleteFileFromPocketBase, savePublishedSite, fetchPublishedSite } from '../services/pocketbase.js'
 import { invalidateSiteCache, invalidateSubdomainCache } from '../middleware/siteServing.js'
-import { checkProjectLimit, checkDomainLimit, checkStorageLimit, checkCheckpointLimit, PlanLimitError } from '../services/plans.js'
+import { checkProjectLimit, checkDomainLimit, checkStorageLimit, checkCheckpointLimit, checkPublishAccess, PlanLimitError } from '../services/plans.js'
 
 function handlePlanLimit(err: unknown, res: Response): boolean {
   if (err instanceof PlanLimitError) {
@@ -523,6 +523,7 @@ router.get('/subdomains/check', async (req: Request, res: Response) => {
 /** Set or update the subdomain for a project */
 router.put('/projects/:id/subdomain', requireAuth, async (req: Request, res: Response) => {
   if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
+  try { await checkPublishAccess(req.user!.userId) } catch (err) { if (handlePlanLimit(err, res)) return; throw err }
 
   const slug = (req.body.subdomain as string ?? '').toLowerCase().trim()
 

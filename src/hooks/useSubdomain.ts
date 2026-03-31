@@ -2,7 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAtomValue } from 'jotai'
 import { activeProjectIdAtom } from '@/atoms'
 import { authTokenAtom } from '@/atoms/authAtoms'
-import { api, ApiError } from '@/services/api'
+import { api, ApiError, PlanLimitError } from '@/services/api'
+import { useSetAtom } from 'jotai'
+import { upgradePromptAtom } from '@/atoms'
 
 /** Regex that matches valid subdomain slugs: lowercase letters, digits, hyphens; no leading/trailing/double hyphens */
 const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/
@@ -14,6 +16,7 @@ export function useSubdomain(publishedSubdomain: string | null, onSaved?: (slug:
   const token = useAtomValue(authTokenAtom)
   const authHeaders = token ? { Authorization: `Bearer ${token}` } : undefined
 
+  const setUpgradePrompt = useSetAtom(upgradePromptAtom)
   const [slugInput, setSlugInput] = useState('')
   const [status, setStatus] = useState<SlugStatus>('idle')
   const [saving, setSaving] = useState(false)
@@ -82,7 +85,9 @@ export function useSubdomain(publishedSubdomain: string | null, onSaved?: (slug:
       setSlugInput('')
       setStatus('idle')
     } catch (e) {
-      if (e instanceof ApiError && e.status === 409) {
+      if (e instanceof PlanLimitError) {
+        setUpgradePrompt({ requiredPlan: e.requiredPlan, limitType: e.limitType, message: '' })
+      } else if (e instanceof ApiError && e.status === 409) {
         setStatus('taken')
       } else {
         setSaveError(e instanceof Error ? e.message : 'Erro ao salvar subdomain')
