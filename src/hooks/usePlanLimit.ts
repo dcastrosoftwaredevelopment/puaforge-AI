@@ -2,9 +2,17 @@ import { useSetAtom } from 'jotai'
 import { upgradePromptAtom } from '@/atoms'
 import { PlanLimitError } from '@/services/api'
 
+/** Thrown after opening the upgrade modal so callers can also show inline errors */
+export class PlanLimitUIError extends Error {
+  constructor(public readonly original: PlanLimitError) {
+    super('plan_limit')
+  }
+}
+
 /**
- * Returns a helper that wraps any async call and automatically opens the
- * upgrade modal if the server returns a plan limit error (403 upgradeRequired).
+ * Returns a helper that wraps any async call and opens the upgrade modal if
+ * the server returns a plan limit error (403 upgradeRequired). Also re-throws
+ * a PlanLimitUIError so callers can show an inline error alongside the modal.
  *
  * Usage:
  *   const withPlanLimit = usePlanLimit()
@@ -23,7 +31,7 @@ export function usePlanLimit() {
           limitType: err.limitType,
           message: '', // resolved in the modal via i18n
         })
-        return null
+        throw new PlanLimitUIError(err)
       }
       throw err
     }
