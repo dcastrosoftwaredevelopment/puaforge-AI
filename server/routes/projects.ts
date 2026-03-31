@@ -523,7 +523,6 @@ router.get('/subdomains/check', async (req: Request, res: Response) => {
 /** Set or update the subdomain for a project */
 router.put('/projects/:id/subdomain', requireAuth, async (req: Request, res: Response) => {
   if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
-  try { await checkPublishAccess(req.user!.userId) } catch (err) { if (handlePlanLimit(err, res)) return; throw err }
 
   const slug = (req.body.subdomain as string ?? '').toLowerCase().trim()
 
@@ -537,12 +536,17 @@ router.put('/projects/:id/subdomain', requireAuth, async (req: Request, res: Res
     return
   }
 
-  // Fetch current subdomain to invalidate cache on change
+  // Fetch current subdomain first — limit check only applies when claiming a new slot
   const [existing] = await db
     .select({ subdomain: publishedSites.subdomain })
     .from(publishedSites)
     .where(eq(publishedSites.projectId, p(req, 'id')))
     .limit(1)
+
+  // Only enforce the publish limit when the project doesn't yet have a subdomain (new slot)
+  if (!existing?.subdomain) {
+    try { await checkPublishAccess(req.user!.userId) } catch (err) { if (handlePlanLimit(err, res)) return; throw err }
+  }
 
   // Check uniqueness — exclude this project's own row
   const [conflict] = await db
