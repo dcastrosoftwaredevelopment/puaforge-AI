@@ -5,7 +5,6 @@ import { db } from '../db.js'
 import { projects } from '../schema.js'
 import { invalidateSiteCache } from '../middleware/siteServing.js'
 import { requireAuth } from '../middleware/auth.js'
-import { checkPublishAccess, PlanLimitError } from '../services/plans.js'
 
 const router = Router()
 
@@ -85,17 +84,6 @@ router.post('/publish', requireAuth, async (req: Request<object, object, Publish
   }
 
   try {
-    if (req.user) {
-      try { await checkPublishAccess(req.user.userId) }
-      catch (err) {
-        if (err instanceof PlanLimitError) {
-          res.status(403).json({ error: err.message, upgradeRequired: true, requiredPlan: err.requiredPlan, limitType: err.limitType })
-          return
-        }
-        throw err
-      }
-    }
-
     const [project] = await db
       .select({ name: projects.name, customDomain: projects.customDomain })
       .from(projects)
