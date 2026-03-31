@@ -99,6 +99,14 @@ router.post('/publish', async (req: Request<object, object, PublishBody>, res: R
   }
 
   try {
+    const [project] = await db
+      .select({ name: projects.name, customDomain: projects.customDomain })
+      .from(projects)
+      .where(eq(projects.id, projectId))
+      .limit(1)
+
+    const projectName = project?.name ?? 'Site Publicado'
+
     const projectFiles: Record<string, string> = {}
     for (const [path, code] of Object.entries(files)) {
       if (path !== '/index.html') {
@@ -141,7 +149,7 @@ createRoot(document.getElementById('root')!).render(React.createElement(App))
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Site Publicado</title>
+  <title>${projectName}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script type="importmap">
     ${JSON.stringify({ imports: importMap }, null, 2)}
@@ -161,12 +169,6 @@ ${bundledJs}
     console.log(`[publish] Site built for project: ${projectId}`)
 
     // Invalidate site cache for this project's custom domain (if any)
-    const [project] = await db
-      .select({ customDomain: projects.customDomain })
-      .from(projects)
-      .where(eq(projects.id, projectId))
-      .limit(1)
-
     if (project?.customDomain) {
       invalidateSiteCache(project.customDomain)
     }

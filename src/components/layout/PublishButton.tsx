@@ -127,7 +127,7 @@ export default function PublishButton() {
                   <span className="text-[11px] font-medium text-text-secondary">Última publicação</span>
                   <span className="text-[10px] text-text-muted">{formatDate(publishedAt)}</span>
                 </div>
-                {customDomain ? (
+                {customDomain && (
                   <a
                     href={`https://${customDomain}`}
                     target="_blank"
@@ -137,15 +137,14 @@ export default function PublishButton() {
                     <ExternalLink size={12} />
                     {customDomain}
                   </a>
-                ) : (
-                  <button
-                    onClick={openPublished}
-                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20 hover:bg-vibe-blue/20 transition cursor-pointer"
-                  >
-                    <ExternalLink size={12} />
-                    Abrir preview local
-                  </button>
                 )}
+                <button
+                  onClick={openPublished}
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition cursor-pointer"
+                >
+                  <ExternalLink size={12} />
+                  Abrir preview local
+                </button>
               </div>
             )}
 
