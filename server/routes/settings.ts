@@ -8,7 +8,7 @@ router.post('/settings/validate-key', async (req: Request, res: Response) => {
   const { apiKey } = req.body
 
   if (!apiKey) {
-    res.status(400).json({ valid: false, error: 'API key é obrigatória' })
+    res.status(400).json({ code: 'MISSING_API_KEY', valid: false, error: 'API key is required' })
     return
   }
 
@@ -18,9 +18,9 @@ router.post('/settings/validate-key', async (req: Request, res: Response) => {
     res.json({ valid: true })
   } catch (error) {
     if (error instanceof Anthropic.APIError) {
-      res.json({ valid: false, error: `Chave inválida: ${error.message}` })
+      res.json({ code: 'INVALID_API_KEY', valid: false, error: `Invalid key: ${error.message}` })
     } else {
-      res.json({ valid: false, error: 'Erro ao validar chave' })
+      res.json({ code: 'VALIDATION_ERROR', valid: false, error: 'Failed to validate key' })
     }
   }
 })

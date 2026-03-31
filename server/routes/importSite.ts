@@ -164,12 +164,12 @@ router.post('/import-site', requireAuth, async (req, res) => {
         signal: AbortSignal.timeout(15_000),
       })
       if (!response.ok) {
-        res.status(400).json({ error: `Could not fetch URL: HTTP ${response.status}` })
+        res.status(400).json({ code: 'FETCH_FAILED', error: `Could not fetch URL: HTTP ${response.status}` })
         return
       }
       const contentType = response.headers.get('content-type') ?? ''
       if (!contentType.includes('html')) {
-        res.status(400).json({ error: 'URL does not point to an HTML page' })
+        res.status(400).json({ code: 'NOT_HTML', error: 'URL does not point to an HTML page' })
         return
       }
       html = await response.text()
@@ -177,7 +177,7 @@ router.post('/import-site', requireAuth, async (req, res) => {
     } else if (htmlContent) {
       html = htmlContent
     } else {
-      res.status(400).json({ error: 'Provide url or htmlContent' })
+      res.status(400).json({ code: 'MISSING_INPUT', error: 'Provide url or htmlContent' })
       return
     }
 
@@ -237,7 +237,7 @@ router.post('/import-site', requireAuth, async (req, res) => {
     res.json({ html: cleanedHtml, images, warning })
   } catch (err) {
     console.error('[import-site]', err)
-    res.status(500).json({ error: 'Failed to import site' })
+    res.status(500).json({ code: 'IMPORT_ERROR', error: 'Failed to import site' })
   }
 })
 

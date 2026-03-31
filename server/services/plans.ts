@@ -101,7 +101,7 @@ export async function checkProjectLimit(userId: string): Promise<void> {
 
   if (value >= limits.maxProjects) {
     throw new PlanLimitError(
-      `Limite de ${limits.maxProjects} projeto(s) atingido para o plano ${planLabel(plan)}.`,
+      `Project limit of ${limits.maxProjects} reached for the ${planLabel(plan)} plan.`,
       plan === 'free' ? 'indie' : 'pro',
       'projects',
     )
@@ -122,7 +122,7 @@ export async function checkPublishAccess(userId: string): Promise<void> {
 
   if (value >= limits.maxPublishedSites) {
     throw new PlanLimitError(
-      `Limite de ${limits.maxPublishedSites} site(s) publicado(s) atingido para o plano ${planLabel(plan)}.`,
+      `Published site limit of ${limits.maxPublishedSites} reached for the ${planLabel(plan)} plan.`,
       plan === 'free' ? 'indie' : 'pro',
       'publish',
     )
@@ -135,7 +135,7 @@ export async function checkDomainLimit(userId: string): Promise<void> {
   const limits = PLAN_LIMITS[plan]
   if (limits.maxCustomDomains === 0) {
     throw new PlanLimitError(
-      'Domínios customizados não estão disponíveis no plano Gratuito.',
+      'Custom domains are not available on the Free plan.',
       'indie',
       'customDomain',
     )
@@ -152,8 +152,8 @@ export async function checkDomainLimit(userId: string): Promise<void> {
 
   if (value >= limits.maxCustomDomains) {
     throw new PlanLimitError(
-      `Limite de ${limits.maxCustomDomains} domínio(s) customizado(s) atingido para o plano ${planLabel(plan)}.`,
-      plan === 'indie' ? 'pro' : 'pro',
+      `Custom domain limit of ${limits.maxCustomDomains} reached for the ${planLabel(plan)} plan.`,
+      'pro',
       'customDomain',
     )
   }
@@ -166,7 +166,7 @@ export async function checkImportLimit(userId: string): Promise<void> {
 
   if (limits.maxImportsPerMonth === 0) {
     throw new PlanLimitError(
-      'Importação de sites não está disponível no plano Gratuito.',
+      'Site import is not available on the Free plan.',
       'indie',
       'imports',
     )
@@ -190,8 +190,8 @@ export async function checkImportLimit(userId: string): Promise<void> {
 
   if (sub.importsThisMonth >= limits.maxImportsPerMonth) {
     throw new PlanLimitError(
-      `Limite de ${limits.maxImportsPerMonth} import(s) por mês atingido para o plano ${planLabel(plan)}.`,
-      plan === 'indie' ? 'pro' : 'pro',
+      `Monthly import limit of ${limits.maxImportsPerMonth} reached for the ${planLabel(plan)} plan.`,
+      'pro',
       'imports',
     )
   }
@@ -214,7 +214,7 @@ export async function checkStorageLimit(userId: string, newFileBytes: number): P
   const limits = PLAN_LIMITS[plan]
   if (limits.maxStorageBytes === 0) {
     throw new PlanLimitError(
-      'Upload de imagens não está disponível no plano Gratuito.',
+      'Image upload is not available on the Free plan.',
       'indie',
       'storage',
     )
@@ -231,8 +231,8 @@ export async function checkStorageLimit(userId: string, newFileBytes: number): P
   if (total + newFileBytes > limits.maxStorageBytes) {
     const limitMb = Math.round(limits.maxStorageBytes / 1024 / 1024)
     throw new PlanLimitError(
-      `Limite de armazenamento de ${limitMb}MB atingido para o plano ${planLabel(plan)}.`,
-      plan === 'indie' ? 'pro' : 'pro',
+      `Storage limit of ${limitMb}MB reached for the ${planLabel(plan)} plan.`,
+      'pro',
       'storage',
     )
   }
@@ -244,7 +244,7 @@ export async function checkCheckpointLimit(userId: string, projectId: string): P
   const limits = PLAN_LIMITS[plan]
   if (limits.maxCheckpointsPerProject === 0) {
     throw new PlanLimitError(
-      'Checkpoints não estão disponíveis no plano Gratuito.',
+      'Checkpoints are not available on the Free plan.',
       'indie',
       'checkpoints',
     )
@@ -258,13 +258,13 @@ export async function checkCheckpointLimit(userId: string, projectId: string): P
 
   if (value >= limits.maxCheckpointsPerProject) {
     throw new PlanLimitError(
-      `Limite de ${limits.maxCheckpointsPerProject} checkpoint(s) por projeto atingido para o plano ${planLabel(plan)}.`,
-      plan === 'indie' ? 'pro' : 'pro',
+      `Checkpoint limit of ${limits.maxCheckpointsPerProject} per project reached for the ${planLabel(plan)} plan.`,
+      'pro',
       'checkpoints',
     )
   }
 }
 
 function planLabel(plan: Plan): string {
-  return plan === 'free' ? 'Gratuito' : plan === 'indie' ? 'Indie' : 'Pro'
+  return plan === 'free' ? 'Free' : plan === 'indie' ? 'Indie' : 'Pro'
 }

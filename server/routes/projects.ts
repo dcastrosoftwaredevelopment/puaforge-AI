@@ -39,7 +39,7 @@ async function assertOwnership(projectId: string, userId: string, res: Response)
     .limit(1)
 
   if (!project) {
-    res.status(404).json({ error: 'Projeto não encontrado' })
+    res.status(404).json({ code: 'PROJECT_NOT_FOUND', error: 'Project not found' })
     return false
   }
   return true
@@ -147,7 +147,7 @@ router.put('/projects/:id/domain', requireAuth, async (req: Request, res: Respon
 
       if (!ownedByUser) {
         // Domain belongs to another user — always block
-        res.status(409).json({ code: 'DOMAIN_TAKEN', error: 'Este domínio já está em uso' })
+        res.status(409).json({ code: 'DOMAIN_TAKEN', error: 'Domain is already in use' })
         return
       }
 
@@ -194,7 +194,7 @@ router.put('/projects/:id/palette', requireAuth, async (req: Request, res: Respo
 
   const { palette } = req.body as { palette: { id: string; name: string; value: string; locked?: boolean }[] }
   if (!Array.isArray(palette)) {
-    res.status(400).json({ error: 'palette must be an array' })
+    res.status(400).json({ code: 'INVALID_PALETTE', error: 'palette must be an array' })
     return
   }
 
@@ -314,7 +314,7 @@ router.post('/projects/:id/images', requireAuth, upload.single('file'), async (r
   if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
   if (!req.file) {
-    res.status(400).json({ error: 'Nenhum arquivo enviado' })
+    res.status(400).json({ code: 'NO_FILE', error: 'No file provided' })
     return
   }
 
@@ -438,13 +438,13 @@ router.get('/projects/:id/published', requireAuth, async (req: Request, res: Res
     .limit(1)
 
   if (!site) {
-    res.status(404).json({ error: 'Não publicado' })
+    res.status(404).json({ code: 'NOT_PUBLISHED', error: 'Site not published' })
     return
   }
 
   const html = await fetchPublishedSite(site.pbRecordId)
   if (!html) {
-    res.status(404).json({ error: 'Arquivo HTML não encontrado no PocketBase' })
+    res.status(404).json({ code: 'HTML_NOT_FOUND', error: 'HTML file not found in storage' })
     return
   }
 
@@ -502,7 +502,7 @@ router.get('/subdomains/check', async (req: Request, res: Response) => {
   const slug = (req.query.slug as string ?? '').toLowerCase().trim()
 
   if (!slug) {
-    res.status(400).json({ error: 'slug is required' })
+    res.status(400).json({ code: 'MISSING_SLUG', error: 'slug is required' })
     return
   }
 
@@ -528,12 +528,12 @@ router.put('/projects/:id/subdomain', requireAuth, async (req: Request, res: Res
   const slug = (req.body.subdomain as string ?? '').toLowerCase().trim()
 
   if (!slug) {
-    res.status(400).json({ error: 'subdomain is required' })
+    res.status(400).json({ code: 'MISSING_SUBDOMAIN', error: 'subdomain is required' })
     return
   }
 
   if (!isValidSubdomain(slug)) {
-    res.status(400).json({ code: 'INVALID_SUBDOMAIN', error: 'Subdomain inválido' })
+    res.status(400).json({ code: 'INVALID_SUBDOMAIN', error: 'Invalid subdomain' })
     return
   }
 
@@ -552,7 +552,7 @@ router.put('/projects/:id/subdomain', requireAuth, async (req: Request, res: Res
     .limit(1)
 
   if (conflict) {
-    res.status(409).json({ code: 'SUBDOMAIN_TAKEN', error: 'Este subdomain já está em uso' })
+    res.status(409).json({ code: 'SUBDOMAIN_TAKEN', error: 'Subdomain is already taken' })
     return
   }
 
