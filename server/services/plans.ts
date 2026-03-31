@@ -1,6 +1,6 @@
 import { eq, and, count, sql, isNotNull } from 'drizzle-orm'
 import { db } from '../db.js'
-import { subscriptions, projects, projectImages, checkpoints } from '../schema.js'
+import { subscriptions, projects, projectImages, checkpoints, users } from '../schema.js'
 
 export type Plan = 'free' | 'indie' | 'pro'
 
@@ -38,6 +38,17 @@ export const PLAN_LIMITS = {
   canPublish: boolean
 }>
 
+const SUPERUSER_EMAILS = (process.env.SUPERUSER_EMAILS ?? '')
+  .split(',')
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean)
+
+export async function isSuperUser(userId: string): Promise<boolean> {
+  if (SUPERUSER_EMAILS.length === 0) return false
+  const [user] = await db.select({ email: users.email }).from(users).where(eq(users.id, userId)).limit(1)
+  return !!user && SUPERUSER_EMAILS.includes(user.email.toLowerCase())
+}
+
 export class PlanLimitError extends Error {
   constructor(
     message: string,
@@ -68,12 +79,14 @@ export async function getOrCreateSubscription(userId: string) {
 }
 
 export async function getUserPlan(userId: string): Promise<Plan> {
+  if (await isSuperUser(userId)) return 'pro'
   const sub = await getOrCreateSubscription(userId)
   if (sub.status !== 'active') return 'free'
   return sub.plan as Plan
 }
 
 export async function checkProjectLimit(userId: string): Promise<void> {
+  if (await isSuperUser(userId)) return
   const plan = await getUserPlan(userId)
   const limits = PLAN_LIMITS[plan]
   if (limits.maxProjects === Infinity) return
@@ -93,6 +106,7 @@ export async function checkProjectLimit(userId: string): Promise<void> {
 }
 
 export async function checkPublishAccess(userId: string): Promise<void> {
+  if (await isSuperUser(userId)) return
   const plan = await getUserPlan(userId)
   if (!PLAN_LIMITS[plan].canPublish) {
     throw new PlanLimitError(
@@ -104,6 +118,7 @@ export async function checkPublishAccess(userId: string): Promise<void> {
 }
 
 export async function checkDomainLimit(userId: string): Promise<void> {
+  if (await isSuperUser(userId)) return
   const plan = await getUserPlan(userId)
   const limits = PLAN_LIMITS[plan]
   if (limits.maxCustomDomains === 0) {
@@ -133,6 +148,7 @@ export async function checkDomainLimit(userId: string): Promise<void> {
 }
 
 export async function checkImportLimit(userId: string): Promise<void> {
+  if (await isSuperUser(userId)) return
   const plan = await getUserPlan(userId)
   const limits = PLAN_LIMITS[plan]
 
@@ -181,6 +197,7 @@ export async function incrementImportCount(userId: string): Promise<void> {
 }
 
 export async function checkStorageLimit(userId: string, newFileBytes: number): Promise<void> {
+  if (await isSuperUser(userId)) return
   const plan = await getUserPlan(userId)
   const limits = PLAN_LIMITS[plan]
   if (limits.maxStorageBytes === 0) {
@@ -210,6 +227,7 @@ export async function checkStorageLimit(userId: string, newFileBytes: number): P
 }
 
 export async function checkCheckpointLimit(userId: string, projectId: string): Promise<void> {
+  if (await isSuperUser(userId)) return
   const plan = await getUserPlan(userId)
   const limits = PLAN_LIMITS[plan]
   if (limits.maxCheckpointsPerProject === 0) {
