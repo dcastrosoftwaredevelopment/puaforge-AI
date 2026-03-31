@@ -78,6 +78,11 @@ export async function siteServingMiddleware(req: Request, res: Response, next: N
 
     if (!site) return next()
 
+    if (!site.pbRecordId) {
+      res.status(404).send('<html><body><p>Este site ainda não foi publicado.</p></body></html>')
+      return
+    }
+
     await serveSite(cacheKey, site.pbRecordId, site.projectId, res)
     return
   }
