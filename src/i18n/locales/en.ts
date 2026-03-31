@@ -291,6 +291,7 @@ export const en = {
     interestConfirmed: "We'll notify you soon!",
     currentUsage: 'Current usage',
     usageDomains: 'Custom domains',
+    usagePublishedSites: 'Temporary URLs',
     byokNote: 'All plans use your own Anthropic API key (BYOK). AI costs are billed directly by Anthropic.',
     plans: {
       free: 'Free',

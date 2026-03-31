@@ -291,6 +291,7 @@ export const pt = {
     interestConfirmed: 'Avisaremos você em breve!',
     currentUsage: 'Uso atual',
     usageDomains: 'Domínios customizados',
+    usagePublishedSites: 'URLs temporárias',
     byokNote: 'Todos os planos utilizam sua própria chave da API Anthropic (BYOK). Os custos de IA são cobrados diretamente pela Anthropic.',
     plans: {
       free: 'Gratuito',

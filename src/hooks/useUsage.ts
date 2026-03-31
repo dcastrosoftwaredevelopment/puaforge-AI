@@ -15,6 +15,7 @@ export interface Usage {
   customDomains: UsageMetric
   importsThisMonth: UsageMetric
   storageBytes: UsageMetric
+  publishedSites: UsageMetric
 }
 
 export interface UserUsage {
@@ -41,6 +42,7 @@ export function useUsage() {
           customDomains: deserialize(raw.usage.customDomains),
           importsThisMonth: deserialize(raw.usage.importsThisMonth),
           storageBytes: deserialize(raw.usage.storageBytes),
+          publishedSites: deserialize(raw.usage.publishedSites),
         },
       }
       setData(result)
