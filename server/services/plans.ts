@@ -1,4 +1,4 @@
-import { eq, and, count, sql } from 'drizzle-orm'
+import { eq, and, count, sql, isNotNull } from 'drizzle-orm'
 import { db } from '../db.js'
 import { subscriptions, projects, projectImages, checkpoints } from '../schema.js'
 
@@ -120,7 +120,7 @@ export async function checkDomainLimit(userId: string): Promise<void> {
     .from(projects)
     .where(and(
       eq(projects.userId, userId),
-      sql`${projects.customDomain} IS NOT NULL`,
+      isNotNull(projects.customDomain),
     ))
 
   if (value >= limits.maxCustomDomains) {

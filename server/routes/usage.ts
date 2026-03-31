@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { eq, count, sql } from 'drizzle-orm'
+import { eq, count, sql, and, isNotNull } from 'drizzle-orm'
 import { db } from '../db.js'
 import { projects, projectImages, checkpoints } from '../schema.js'
 import { requireAuth } from '../middleware/auth.js'
@@ -27,7 +27,7 @@ router.get('/user/usage', requireAuth, async (req, res) => {
   const [{ domainCount }] = await db
     .select({ domainCount: count() })
     .from(projects)
-    .where(sql`${projects.userId} = ${userId} AND ${projects.customDomain} IS NOT NULL`)
+    .where(and(eq(projects.userId, userId), isNotNull(projects.customDomain)))
 
   // Total storage
   const [{ storageBytes }] = await db

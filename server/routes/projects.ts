@@ -116,8 +116,18 @@ router.put('/projects/:id/domain', requireAuth, async (req: Request, res: Respon
 
   const { customDomain, force } = req.body as { customDomain: string | null; force?: boolean }
 
+  // Only enforce the domain limit when ADDING a new domain to a project that doesn't have one yet.
+  // Updating or clearing an existing domain is always allowed (grandfather existing domains).
   if (customDomain) {
-    try { await checkDomainLimit(req.user!.userId) } catch (err) { if (handlePlanLimit(err, res)) return; throw err }
+    const [current] = await db
+      .select({ customDomain: projects.customDomain })
+      .from(projects)
+      .where(eq(projects.id, p(req, 'id')))
+      .limit(1)
+    const isNewDomain = !current?.customDomain
+    if (isNewDomain) {
+      try { await checkDomainLimit(req.user!.userId) } catch (err) { if (handlePlanLimit(err, res)) return; throw err }
+    }
   }
 
   if (customDomain) {
