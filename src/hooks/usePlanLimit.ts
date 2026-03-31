@@ -21,7 +21,7 @@ export function usePlanLimit() {
         setUpgradePrompt({
           requiredPlan: err.requiredPlan,
           limitType: err.limitType,
-          message: err.message,
+          message: '', // resolved in the modal via i18n
         })
         return null
       }

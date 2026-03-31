@@ -253,9 +253,20 @@ export const en = {
   },
 
   upgrade: {
-    title: 'Upgrade required',
-    requiredPlan: 'This feature requires the {{plan}} plan.',
+    title: 'Paid plan feature',
     seePlans: 'See plans',
+    maybeLater: 'Maybe later',
+    requiredPlanPrefix: 'Available from the',
+    requiredPlanSuffix: 'plan.',
+    limits: {
+      projects: 'You have reached the project limit for your current plan.',
+      publish: 'Publishing is not available on the Free plan.',
+      customDomain: 'Custom domains are not available on your current plan.',
+      imports: 'You have reached your monthly import limit.',
+      storage: 'You have reached the storage limit for your current plan.',
+      checkpoints: 'You have reached the checkpoint limit for this project.',
+      unknown: 'This feature is not available on your current plan.',
+    },
   },
 
   billing: {

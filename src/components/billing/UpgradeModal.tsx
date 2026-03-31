@@ -1,8 +1,17 @@
 import { useAtom } from 'jotai'
-import { X, Zap } from 'lucide-react'
+import { X, ArrowRight, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { upgradePromptAtom } from '@/atoms'
+
+const LIMIT_TYPE_MAP: Record<string, string> = {
+  projects: 'projects',
+  publish: 'publish',
+  customDomain: 'customDomain',
+  imports: 'imports',
+  storage: 'storage',
+  checkpoints: 'checkpoints',
+}
 
 export default function UpgradeModal() {
   const [prompt, setPrompt] = useAtom(upgradePromptAtom)
@@ -12,42 +21,67 @@ export default function UpgradeModal() {
   if (!prompt) return null
 
   const planLabel = prompt.requiredPlan === 'indie' ? 'Indie' : 'Pro'
+  const limitKey = LIMIT_TYPE_MAP[prompt.limitType] ?? 'unknown'
+  const limitMessage = t(`upgrade.limits.${limitKey}`)
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-      <div className="w-full max-w-sm bg-bg-secondary border border-border-default rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border-subtle">
-          <div className="flex items-center gap-2 text-sm font-semibold text-text-primary">
-            <Zap size={15} className="text-forge-terracotta" />
-            {t('upgrade.title')}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
+      <div className="w-full max-w-sm bg-bg-secondary border border-border-subtle rounded-2xl shadow-2xl shadow-black/60 overflow-hidden">
+
+        {/* Top accent bar */}
+        <div className="h-0.5 bg-gradient-to-r from-transparent via-vibe-blue/40 to-transparent" />
+
+        {/* Header */}
+        <div className="flex items-start justify-between px-5 pt-5 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-vibe-blue/10 border border-vibe-blue/20 flex items-center justify-center shrink-0">
+              <Sparkles size={15} className="text-vibe-blue" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-text-primary">{t('upgrade.title')}</p>
+              <p className="text-[11px] text-text-muted mt-0.5">
+                {t('upgrade.requiredPlanPrefix')}{' '}
+                <span className="font-semibold text-vibe-blue">{planLabel}</span>
+                {t('upgrade.requiredPlanSuffix') ? ` ${t('upgrade.requiredPlanSuffix')}` : ''}
+              </p>
+            </div>
           </div>
           <button
             onClick={() => setPrompt(null)}
-            className="p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
+            className="p-1 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer mt-0.5"
           >
-            <X size={15} />
+            <X size={14} />
           </button>
         </div>
 
-        <div className="p-5 space-y-4">
-          <p className="text-sm text-text-secondary leading-relaxed">{prompt.message}</p>
+        {/* Body */}
+        <div className="px-5 pb-5 space-y-4">
+          <p className="text-sm text-text-secondary leading-relaxed">
+            {limitMessage}
+          </p>
 
-          <div className="p-3 rounded-lg bg-forge-terracotta/5 border border-forge-terracotta/20 text-xs text-forge-terracotta">
-            {t('upgrade.requiredPlan', { plan: planLabel })}
+          {/* Plan hint */}
+          <div className="flex items-center gap-2.5 p-3 rounded-xl bg-bg-elevated border border-border-subtle">
+            <div className="w-1.5 h-1.5 rounded-full bg-vibe-blue shrink-0" />
+            <p className="text-xs text-text-muted leading-relaxed">
+              {t('billing.plans.' + prompt.requiredPlan)} — {prompt.requiredPlan === 'indie' ? 'R$39/mês' : 'R$99/mês'}
+            </p>
           </div>
 
-          <div className="flex gap-2 pt-1">
+          {/* Actions */}
+          <div className="flex gap-2">
             <button
               onClick={() => setPrompt(null)}
-              className="flex-1 py-2 rounded-lg text-sm text-text-secondary border border-border-subtle hover:bg-bg-elevated transition cursor-pointer"
+              className="flex-1 py-2 rounded-lg text-xs text-text-muted border border-border-subtle hover:bg-bg-elevated hover:text-text-secondary transition cursor-pointer"
             >
-              {t('common.cancel')}
+              {t('upgrade.maybeLater')}
             </button>
             <button
               onClick={() => { setPrompt(null); navigate('/billing') }}
-              className="flex-1 py-2 rounded-lg text-sm font-medium bg-forge-terracotta/10 text-forge-terracotta border border-forge-terracotta/30 hover:bg-forge-terracotta/20 transition cursor-pointer"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20 hover:bg-vibe-blue/15 transition cursor-pointer"
             >
               {t('upgrade.seePlans')}
+              <ArrowRight size={12} />
             </button>
           </div>
         </div>

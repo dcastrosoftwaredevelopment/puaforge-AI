@@ -253,9 +253,20 @@ export const pt = {
   },
 
   upgrade: {
-    title: 'Upgrade necessário',
-    requiredPlan: 'Este recurso requer o plano {{plan}}.',
+    title: 'Recurso do plano pago',
     seePlans: 'Ver planos',
+    maybeLater: 'Agora não',
+    requiredPlanPrefix: 'Disponível a partir do plano',
+    requiredPlanSuffix: '',
+    limits: {
+      projects: 'Você atingiu o limite de projetos do seu plano atual.',
+      publish: 'Publicação de sites não está disponível no plano Gratuito.',
+      customDomain: 'Domínios customizados não estão disponíveis no seu plano atual.',
+      imports: 'Você atingiu o limite de importações do mês.',
+      storage: 'Você atingiu o limite de armazenamento do seu plano.',
+      checkpoints: 'Você atingiu o limite de checkpoints deste projeto.',
+      unknown: 'Este recurso não está disponível no seu plano atual.',
+    },
   },
 
   billing: {
