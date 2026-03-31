@@ -46,7 +46,7 @@ export const pt = {
     discardTitle: 'Descartar rascunho',
     discardMessage: 'Isso vai apagar todas as alterações locais não salvas e reverter o projeto para a última versão salva. Essa ação não pode ser desfeita.',
     openChat: 'Abrir chat',
-    export: 'Export',
+    export: 'Exportar',
     exportTooltip: 'Baixar arquivos do projeto como .zip',
     build: 'Build',
     buildTooltip: 'Gerar e baixar o build pronto para deploy',
