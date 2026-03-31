@@ -107,13 +107,20 @@ router.put('/projects/:id/domain', requireAuth, async (req: Request, res: Respon
 
   if (customDomain) {
     const [existing] = await db
-      .select({ id: projects.id, userId: projects.userId, name: projects.name })
+      .select({ id: projects.id, name: projects.name })
       .from(projects)
       .where(eq(projects.customDomain, customDomain))
       .limit(1)
 
     if (existing && existing.id !== p(req, 'id')) {
-      if (existing.userId !== req.user!.userId) {
+      // Check if the conflicting project belongs to the current user
+      const [ownedByUser] = await db
+        .select({ id: projects.id })
+        .from(projects)
+        .where(and(eq(projects.id, existing.id), eq(projects.userId, req.user!.userId)))
+        .limit(1)
+
+      if (!ownedByUser) {
         // Domain belongs to another user — always block
         res.status(409).json({ code: 'DOMAIN_TAKEN', error: 'Este domínio já está em uso' })
         return
