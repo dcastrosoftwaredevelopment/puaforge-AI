@@ -9,6 +9,7 @@ import { usePublish } from '@/hooks/usePublish'
 import { useCustomDomain } from '@/hooks/useCustomDomain'
 import { useSubdomain } from '@/hooks/useSubdomain'
 import { ApiError } from '@/services/api'
+import { PlanLimitUIError } from '@/hooks/usePlanLimit'
 import Tooltip from '@/components/ui/Tooltip'
 
 export default function PublishButton() {
@@ -64,7 +65,9 @@ export default function PublishButton() {
       setDomainSaved(true)
       setTimeout(() => setDomainSaved(false), 2000)
     } catch (e) {
-      if (e instanceof ApiError && e.code === 'DOMAIN_OWN_PROJECT') {
+      if (e instanceof PlanLimitUIError) {
+        setDomainInputError(t('publish.domainLimitReached'))
+      } else if (e instanceof ApiError && e.code === 'DOMAIN_OWN_PROJECT') {
         setOwnProjectConflict(e.data?.conflictingProjectName as string ?? '')
       } else if (e instanceof ApiError && e.status === 409) {
         setDomainInputError(t('publish.domainTaken'))

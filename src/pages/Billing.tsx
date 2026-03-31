@@ -173,6 +173,11 @@ export default function Billing() {
                 used={usage.usage.customDomains.used}
                 limit={usage.usage.customDomains.limit}
               />
+              <UsageRow
+                label={t('billing.usagePublishedSites')}
+                used={usage.usage.publishedSites.used}
+                limit={usage.usage.publishedSites.limit}
+              />
             </div>
           )}
 

@@ -32,8 +32,8 @@ export function usePublish() {
     [token],
   )
 
-  const isPublishingToDomain = isGenerating && isSavingToDomain || isSavingToDomain
-  const isPublishingToSubdomain = isGenerating && isSavingToSubdomain || isSavingToSubdomain
+  const isPublishingToDomain = isSavingToDomain
+  const isPublishingToSubdomain = isSavingToSubdomain
   const isBusy = isGenerating || isSavingToDomain || isSavingToSubdomain
 
   // Load published state from API on project change
@@ -63,10 +63,9 @@ export function usePublish() {
     setDomainSaveError(null)
     setIsSavingToDomain(true)
 
-    const data = await withPlanLimit(() => callPublish({ projectId: activeProjectId, files }, authHeaders))
-    if (!data) { setIsSavingToDomain(false); return }
-
     try {
+      const data = await withPlanLimit(() => callPublish({ projectId: activeProjectId, files }, authHeaders))
+      if (!data) return
       await api.put(
         `/api/projects/${activeProjectId}/published`,
         { html: data.html, publishedAt: data.publishedAt },
@@ -87,10 +86,9 @@ export function usePublish() {
     setSubdomainSaveError(null)
     setIsSavingToSubdomain(true)
 
-    const data = await withPlanLimit(() => callPublish({ projectId: activeProjectId, files }, authHeaders))
-    if (!data) { setIsSavingToSubdomain(false); return }
-
     try {
+      const data = await withPlanLimit(() => callPublish({ projectId: activeProjectId, files }, authHeaders))
+      if (!data) return
       await api.put(
         `/api/projects/${activeProjectId}/published/subdomain`,
         { html: data.html, publishedAt: data.publishedAt },
@@ -130,7 +128,7 @@ export function usePublish() {
     publishedAt,
     subdomainPublishedAt,
     subdomain,
-    domainError: buildError ?? domainSaveError,
+    domainError: domainSaveError,
     subdomainError: subdomainSaveError,
     publish,
     publishToSubdomain,

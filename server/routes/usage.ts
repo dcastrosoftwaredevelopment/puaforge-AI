@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { eq, count, sql, and, isNotNull } from 'drizzle-orm'
 import { db } from '../db.js'
-import { projects, projectImages, checkpoints } from '../schema.js'
+import { projects, projectImages, checkpoints, publishedSites } from '../schema.js'
 import { requireAuth } from '../middleware/auth.js'
 import { getOrCreateSubscription, getUserPlan, PLAN_LIMITS } from '../services/plans.js'
 
@@ -29,6 +29,13 @@ router.get('/user/usage', requireAuth, async (req, res) => {
     .from(projects)
     .where(and(eq(projects.userId, userId), isNotNull(projects.customDomain)))
 
+  // Subdomain (temporary URL) count
+  const [{ subdomainCount }] = await db
+    .select({ subdomainCount: count() })
+    .from(publishedSites)
+    .innerJoin(projects, eq(publishedSites.projectId, projects.id))
+    .where(and(eq(projects.userId, userId), isNotNull(publishedSites.subdomain)))
+
   // Total storage
   const [{ storageBytes }] = await db
     .select({ storageBytes: sql<number>`coalesce(sum(${projectImages.size}), 0)` })
@@ -52,6 +59,7 @@ router.get('/user/usage', requireAuth, async (req, res) => {
       customDomains: { used: domainCount, limit: serializeLimit(limits.maxCustomDomains) },
       importsThisMonth: { used: importsThisMonth, limit: serializeLimit(limits.maxImportsPerMonth) },
       storageBytes: { used: Number(storageBytes), limit: serializeLimit(limits.maxStorageBytes) },
+      publishedSites: { used: subdomainCount, limit: serializeLimit(limits.maxPublishedSites) },
     },
   })
 })

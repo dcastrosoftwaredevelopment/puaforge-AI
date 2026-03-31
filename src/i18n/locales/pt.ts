@@ -133,6 +133,8 @@ export const pt = {
     subdomainInvalid: 'Apenas letras minúsculas, números e hífens. Mín. 3 caracteres.',
     saveError: 'Erro ao salvar publicação. Tente novamente.',
     subdomainSaveError: 'Erro ao salvar subdomínio. Tente novamente.',
+    subdomainLimitReached: 'Limite de URLs temporárias atingido. Faça upgrade para ter mais.',
+    domainLimitReached: 'Limite de domínios customizados atingido. Faça upgrade para ter mais.',
     domainSaveError: 'Erro ao salvar domínio. Tente novamente.',
   },
 
@@ -270,8 +272,8 @@ export const pt = {
     requiredPlanSuffix: '',
     limits: {
       projects: 'Você atingiu o limite de projetos do seu plano atual.',
-      publish: 'Publicação de sites não está disponível no plano Gratuito.',
-      customDomain: 'Domínios customizados não estão disponíveis no seu plano atual.',
+      publish: 'Você atingiu o limite de URLs temporárias do seu plano.',
+      customDomain: 'Você atingiu o limite de domínios customizados do seu plano.',
       imports: 'Você atingiu o limite de importações do mês.',
       storage: 'Você atingiu o limite de armazenamento do seu plano.',
       checkpoints: 'Você atingiu o limite de checkpoints deste projeto.',
@@ -291,6 +293,7 @@ export const pt = {
     interestConfirmed: 'Avisaremos você em breve!',
     currentUsage: 'Uso atual',
     usageDomains: 'Domínios customizados',
+    usagePublishedSites: 'URLs temporárias',
     byokNote: 'Todos os planos utilizam sua própria chave da API Anthropic (BYOK). Os custos de IA são cobrados diretamente pela Anthropic.',
     plans: {
       free: 'Gratuito',

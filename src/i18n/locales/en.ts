@@ -133,6 +133,8 @@ export const en = {
     subdomainInvalid: 'Only lowercase letters, numbers and hyphens. Min 3 chars.',
     saveError: 'Failed to save publication. Please try again.',
     subdomainSaveError: 'Failed to save subdomain. Please try again.',
+    subdomainLimitReached: 'Temporary URL limit reached for your plan. Upgrade to get more.',
+    domainLimitReached: 'Custom domain limit reached for your plan. Upgrade to get more.',
     domainSaveError: 'Failed to save domain. Please try again.',
   },
 
@@ -270,8 +272,8 @@ export const en = {
     requiredPlanSuffix: 'plan.',
     limits: {
       projects: 'You have reached the project limit for your current plan.',
-      publish: 'Publishing is not available on the Free plan.',
-      customDomain: 'Custom domains are not available on your current plan.',
+      publish: 'You\'ve reached the temporary URL limit for your plan.',
+      customDomain: 'You\'ve reached the custom domain limit for your plan.',
       imports: 'You have reached your monthly import limit.',
       storage: 'You have reached the storage limit for your current plan.',
       checkpoints: 'You have reached the checkpoint limit for this project.',
@@ -291,6 +293,7 @@ export const en = {
     interestConfirmed: "We'll notify you soon!",
     currentUsage: 'Current usage',
     usageDomains: 'Custom domains',
+    usagePublishedSites: 'Temporary URLs',
     byokNote: 'All plans use your own Anthropic API key (BYOK). AI costs are billed directly by Anthropic.',
     plans: {
       free: 'Free',

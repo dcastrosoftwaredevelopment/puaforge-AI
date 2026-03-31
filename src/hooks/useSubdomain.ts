@@ -3,9 +3,8 @@ import { useAtomValue } from 'jotai'
 import { activeProjectIdAtom } from '@/atoms'
 import { authTokenAtom } from '@/atoms/authAtoms'
 import { useTranslation } from 'react-i18next'
-import { api, ApiError, PlanLimitError } from '@/services/api'
-import { useSetAtom } from 'jotai'
-import { upgradePromptAtom } from '@/atoms'
+import { api, ApiError } from '@/services/api'
+import { usePlanLimit, PlanLimitUIError } from '@/hooks/usePlanLimit'
 
 /** Regex that matches valid subdomain slugs: lowercase letters, digits, hyphens; no leading/trailing/double hyphens */
 const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/
@@ -18,7 +17,7 @@ export function useSubdomain(publishedSubdomain: string | null, onSaved?: (slug:
   const authHeaders = token ? { Authorization: `Bearer ${token}` } : undefined
 
   const { t } = useTranslation()
-  const setUpgradePrompt = useSetAtom(upgradePromptAtom)
+  const withPlanLimit = usePlanLimit()
   const [slugInput, setSlugInput] = useState('')
   const [status, setStatus] = useState<SlugStatus>('idle')
   const [saving, setSaving] = useState(false)
@@ -78,17 +77,17 @@ export function useSubdomain(publishedSubdomain: string | null, onSaved?: (slug:
     setSaving(true)
     setSaveError(null)
     try {
-      await api.put(
+      await withPlanLimit(() => api.put(
         `/api/projects/${activeProjectId}/subdomain`,
         { subdomain: slugInput },
         authHeaders,
-      )
+      ))
       onSaved?.(slugInput)
       setSlugInput('')
       setStatus('idle')
     } catch (e) {
-      if (e instanceof PlanLimitError) {
-        setUpgradePrompt({ requiredPlan: e.requiredPlan, limitType: e.limitType, message: '' })
+      if (e instanceof PlanLimitUIError) {
+        setSaveError(t('publish.subdomainLimitReached'))
       } else if (e instanceof ApiError && e.status === 409) {
         setStatus('taken')
       } else {
