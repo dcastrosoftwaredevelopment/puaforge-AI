@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
+
+declare const __SERVER_IP__: string
 import { Globe, Loader2, ExternalLink, Check } from 'lucide-react'
 import { usePublish } from '@/hooks/usePublish'
 import { useCustomDomain } from '@/hooks/useCustomDomain'
@@ -98,9 +100,16 @@ export default function PublishButton() {
               {domainError && (
                 <p className="text-[10px] text-forge-terracotta">{domainError}</p>
               )}
-              <p className="text-[10px] text-text-muted leading-relaxed">
-                Aponte o DNS do seu domínio para o IP deste servidor. O site será servido automaticamente.
-              </p>
+              {__SERVER_IP__ ? (
+                <p className="text-[10px] text-text-muted leading-relaxed">
+                  Aponte um registro <span className="font-mono text-text-secondary">A</span> no DNS do seu domínio para{' '}
+                  <span className="font-mono text-vibe-blue select-all">{__SERVER_IP__}</span>.
+                </p>
+              ) : (
+                <p className="text-[10px] text-text-muted leading-relaxed">
+                  Aponte um registro <span className="font-mono text-text-secondary">A</span> no DNS do seu domínio para o IP deste servidor.
+                </p>
+              )}
             </div>
 
             <div className="border-t border-border-subtle" />

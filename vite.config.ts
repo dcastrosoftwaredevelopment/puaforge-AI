@@ -22,6 +22,7 @@ export default defineConfig(({ mode }) => {
     define: {
       __API_URL__: JSON.stringify(env.API_URL || ''),
       __GOOGLE_CLIENT_ID__: JSON.stringify(env.GOOGLE_CLIENT_ID || ''),
+      __SERVER_IP__: JSON.stringify(env.SERVER_IP || ''),
     },
   }
 })
