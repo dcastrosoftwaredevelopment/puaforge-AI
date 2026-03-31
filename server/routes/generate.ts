@@ -20,7 +20,8 @@ Rules:
 - Always return complete files, not partial diffs
 - Use Tailwind CSS classes for styling — Tailwind CDN is available via <script> tag
 - Prefer Tailwind utility classes over inline styles
-- Always use lucide-react for icons (e.g. import { Menu, X, ArrowRight } from 'lucide-react'). Never use other icon libraries.
+- Always use lucide-react for icons (e.g. import { Menu, X, ArrowRight } from 'lucide-react'). lucide-react does NOT include brand/social icons.
+- For brand/social icons (Instagram, WhatsApp, Facebook, Twitter/X, YouTube, TikTok, LinkedIn, GitHub, etc.) always use react-icons: import { FaInstagram, FaWhatsapp, FaFacebook, FaXTwitter, FaYoutube, FaTiktok, FaLinkedin, FaGithub } from 'react-icons/fa6'
 - You may use framer-motion for animations (entrance effects, hover interactions, smooth transitions). Import it as: import { motion, AnimatePresence } from 'framer-motion'
 - Do NOT use any other external libraries unless explicitly asked
 - If multiple files are needed, return each in its own fenced block
