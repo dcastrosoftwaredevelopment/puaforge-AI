@@ -42,15 +42,17 @@ router.get('/user/usage', requireAuth, async (req, res) => {
   const isNewMonth = now.getMonth() !== resetAt.getMonth() || now.getFullYear() !== resetAt.getFullYear()
   const importsThisMonth = isNewMonth ? 0 : sub.importsThisMonth
 
+  // Infinity cannot be serialized to JSON — use -1 as sentinel for "unlimited"
+  function serializeLimit(n: number) { return n === Infinity ? -1 : n }
+
   res.json({
     plan,
     usage: {
-      projects: { used: projectCount, limit: limits.maxProjects },
-      customDomains: { used: domainCount, limit: limits.maxCustomDomains },
-      importsThisMonth: { used: importsThisMonth, limit: limits.maxImportsPerMonth },
-      storageBytes: { used: Number(storageBytes), limit: limits.maxStorageBytes },
+      projects: { used: projectCount, limit: serializeLimit(limits.maxProjects) },
+      customDomains: { used: domainCount, limit: serializeLimit(limits.maxCustomDomains) },
+      importsThisMonth: { used: importsThisMonth, limit: serializeLimit(limits.maxImportsPerMonth) },
+      storageBytes: { used: Number(storageBytes), limit: serializeLimit(limits.maxStorageBytes) },
     },
-    // Per-project checkpoint counts are fetched separately since they vary per project
   })
 })
 

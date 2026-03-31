@@ -31,7 +31,18 @@ export function useUsage() {
     if (!token) return
     setLoading(true)
     try {
-      const result = await api.get<UserUsage>('/api/user/usage', { Authorization: `Bearer ${token}` })
+      const raw = await api.get<UserUsage>('/api/user/usage', { Authorization: `Bearer ${token}` })
+      // Deserialize -1 sentinel back to Infinity
+      const deserialize = (m: UsageMetric): UsageMetric => ({ used: m.used, limit: m.limit === -1 ? Infinity : m.limit })
+      const result: UserUsage = {
+        plan: raw.plan,
+        usage: {
+          projects: deserialize(raw.usage.projects),
+          customDomains: deserialize(raw.usage.customDomains),
+          importsThisMonth: deserialize(raw.usage.importsThisMonth),
+          storageBytes: deserialize(raw.usage.storageBytes),
+        },
+      }
       setData(result)
     } catch {
       // non-critical
