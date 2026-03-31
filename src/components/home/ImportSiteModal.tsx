@@ -197,7 +197,10 @@ ${truncatedHtml}`
       <div className="w-full max-w-lg bg-bg-secondary border border-border-default rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border-subtle">
-          <h2 className="text-sm font-semibold text-text-primary">{t('import.title')}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-text-primary">{t('import.title')}</h2>
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold tracking-wide uppercase bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20">{t('import.beta')}</span>
+          </div>
           <button
             onClick={onClose}
             className="p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
@@ -325,7 +328,7 @@ ${truncatedHtml}`
 
           {/* Hint */}
           <p className="text-[10px] text-text-muted leading-relaxed">
-            {t('import.hint')}
+            {t('import.betaHint')}
           </p>
 
           {/* Actions */}

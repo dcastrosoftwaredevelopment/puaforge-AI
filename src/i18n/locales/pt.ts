@@ -242,5 +242,7 @@ export const pt = {
     errorGeneric: 'Erro ao importar site. Tente novamente.',
     hint: 'O conteúdo do site será convertido em um projeto React com Tailwind CSS pela IA.',
     button: 'Importar',
+    beta: 'Beta',
+    betaHint: 'Esta funcionalidade está em beta. Os resultados podem variar dependendo da complexidade do site.',
   },
 } as const

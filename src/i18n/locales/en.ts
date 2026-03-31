@@ -242,5 +242,7 @@ export const en = {
     errorGeneric: 'Failed to import site. Please try again.',
     hint: 'The site content will be converted into a React + Tailwind CSS project by the AI.',
     button: 'Import',
+    beta: 'Beta',
+    betaHint: 'This feature is in beta. Results may vary depending on the complexity of the site.',
   },
 }
