@@ -11,7 +11,7 @@ import { useDraft } from '@/hooks/useDraft'
 import { useMessageSender } from '@/hooks/useMessageSender'
 import { pendingImportAtom } from '@/atoms'
 import { extractDependencies } from '@/services/fileParser'
-import { TAILWIND_HTML } from '@/utils/defaultFiles'
+import { TAILWIND_HTML, buildPackageJson } from '@/utils/defaultFiles'
 import EditorHeader from '@/components/layout/EditorHeader'
 import SandpackContent from '@/components/layout/SandpackContent'
 import ResizeHandle from '@/components/layout/ResizeHandle'
@@ -23,22 +23,32 @@ const CHAT_MAX = 600
 export default function EditorView() {
   const { projectId } = useParams<{ projectId: string }>()
   const projectReady = useProjectLoader(projectId)
-  const { files, deps } = useFiles()
+  const { files, setFiles, deps, setDeps } = useFiles()
   const { mode: chatMode, isOpen: isChatOpen, setIsOpen: setIsChatOpen } = useChat()
   useDraft()
   const { chatWidth, setChatWidth } = usePanelSizes()
-
-  const { setDeps } = useFiles()
 
   const pendingImport = useAtomValue(pendingImportAtom)
   const setPendingImport = useSetAtom(pendingImportAtom)
   const { sendMessage } = useMessageSender()
 
-  // Keep deps in sync when files change (e.g. manual edits adding new imports)
+  // When files change: extract new deps from imports (skip package.json to avoid circular update)
   useEffect(() => {
-    const newDeps = extractDependencies(files)
-    if (Object.keys(newDeps).length > 0) setDeps((prev) => ({ ...prev, ...newDeps }))
+    const filesToScan = Object.fromEntries(
+      Object.entries(files).filter(([p]) => p !== '/package.json'),
+    )
+    const newDeps = extractDependencies(filesToScan)
+    setDeps((prev) => {
+      const hasNew = Object.keys(newDeps).some((k) => !(k in prev))
+      return hasNew ? { ...prev, ...newDeps } : prev
+    })
   }, [files, setDeps])
+
+  // When deps change: keep package.json in sync so it's visible in the editor
+  useEffect(() => {
+    const next = buildPackageJson(deps)
+    setFiles((prev) => prev['/package.json'] === next ? prev : { ...prev, '/package.json': next })
+  }, [deps, setFiles])
 
   useEffect(() => {
     if (!projectReady || !pendingImport || pendingImport.projectId !== projectId) return

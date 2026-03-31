@@ -11,8 +11,26 @@ export const TAILWIND_HTML = `<!DOCTYPE html>
   </body>
 </html>`
 
+export const DEFAULT_PACKAGE_JSON = {
+  name: 'puaforgeai-project',
+  version: '1.0.0',
+  dependencies: {
+    react: '^18.0.0',
+    'react-dom': '^18.0.0',
+  },
+}
+
+export function buildPackageJson(extraDeps: Record<string, string> = {}): string {
+  return JSON.stringify(
+    { ...DEFAULT_PACKAGE_JSON, dependencies: { ...DEFAULT_PACKAGE_JSON.dependencies, ...extraDeps } },
+    null,
+    2,
+  )
+}
+
 export const DEFAULT_FILES: Record<string, string> = {
   '/index.html': TAILWIND_HTML,
+  '/package.json': buildPackageJson(),
   '/App.tsx': `export default function App() {
   return (
     <div
