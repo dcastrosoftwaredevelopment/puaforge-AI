@@ -442,15 +442,18 @@ router.get('/projects/:id/published', requireAuth, async (req: Request, res: Res
     return
   }
 
-  const html = await fetchPublishedSite(site.pbRecordId)
-  if (!html) {
-    res.status(404).json({ code: 'HTML_NOT_FOUND', error: 'HTML file not found in storage' })
-    return
-  }
+  // Fetch custom-domain HTML only if it has been published (pbRecordId non-empty)
+  const html = site.pbRecordId ? await fetchPublishedSite(site.pbRecordId) : null
 
-  res.json({ html, publishedAt: toMs(site.publishedAt), subdomain: site.subdomain ?? null })
+  res.json({
+    html: html ?? null,
+    publishedAt: site.pbRecordId ? toMs(site.publishedAt) : null,
+    subdomainPublishedAt: site.subdomainPublishedAt ? toMs(site.subdomainPublishedAt) : null,
+    subdomain: site.subdomain ?? null,
+  })
 })
 
+/** Publish to custom domain (production) — independent from subdomain */
 router.put('/projects/:id/published', requireAuth, async (req: Request, res: Response) => {
   if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
@@ -460,32 +463,59 @@ router.put('/projects/:id/published', requireAuth, async (req: Request, res: Res
   try {
     pbRecordId = await savePublishedSite(p(req, 'id'), html)
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Erro ao salvar no PocketBase'
+    const message = err instanceof Error ? err.message : 'PocketBase save failed'
     console.error('[published] PocketBase save failed:', message)
     res.status(500).json({ code: 'POCKETBASE_ERROR', error: message })
     return
   }
 
-  // Preserve existing subdomain (never overwrite once set)
-  const [existing] = await db
-    .select({ subdomain: publishedSites.subdomain })
-    .from(publishedSites)
-    .where(eq(publishedSites.projectId, p(req, 'id')))
-    .limit(1)
-
-  const subdomain = existing?.subdomain ?? null
-
   await db
     .insert(publishedSites)
-    .values({ projectId: p(req, 'id'), pbRecordId, subdomain, publishedAt: new Date(publishedAt) })
+    .values({ projectId: p(req, 'id'), pbRecordId, publishedAt: new Date(publishedAt) })
     .onConflictDoUpdate({
       target: publishedSites.projectId,
       set: { pbRecordId, publishedAt: new Date(publishedAt) },
     })
 
-  if (subdomain) invalidateSubdomainCache(subdomain)
+  res.json({ ok: true })
+})
 
-  res.json({ ok: true, subdomain })
+/** Publish to subdomain (temporary URL) — independent from custom domain */
+router.put('/projects/:id/published/subdomain', requireAuth, async (req: Request, res: Response) => {
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
+
+  // Must have a subdomain slug claimed first
+  const [site] = await db
+    .select({ subdomain: publishedSites.subdomain })
+    .from(publishedSites)
+    .where(eq(publishedSites.projectId, p(req, 'id')))
+    .limit(1)
+
+  if (!site?.subdomain) {
+    res.status(400).json({ code: 'NO_SUBDOMAIN', error: 'Claim a subdomain slug before publishing to it' })
+    return
+  }
+
+  const { html, publishedAt } = req.body as { html: string; publishedAt: number }
+
+  let subdomainPbRecordId: string
+  try {
+    subdomainPbRecordId = await savePublishedSite(p(req, 'id'), html)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'PocketBase save failed'
+    console.error('[published/subdomain] PocketBase save failed:', message)
+    res.status(500).json({ code: 'POCKETBASE_ERROR', error: message })
+    return
+  }
+
+  await db
+    .update(publishedSites)
+    .set({ subdomainPbRecordId, subdomainPublishedAt: new Date(publishedAt) })
+    .where(eq(publishedSites.projectId, p(req, 'id')))
+
+  invalidateSubdomainCache(site.subdomain)
+
+  res.json({ ok: true })
 })
 
 // ─── Subdomain ────────────────────────────────────────────────────────────────

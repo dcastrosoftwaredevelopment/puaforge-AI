@@ -14,11 +14,15 @@ export function usePublish() {
   const token = useAtomValue(authTokenAtom)
   const { files } = useFiles()
   const [publishedAt, setPublishedAt] = useState<number | null>(null)
+  const [subdomainPublishedAt, setSubdomainPublishedAt] = useState<number | null>(null)
   const [subdomain, setSubdomain] = useState<string | null>(null)
-  const [saveError, setSaveError] = useState<string | null>(null)
+  const [domainSaveError, setDomainSaveError] = useState<string | null>(null)
+  const [subdomainSaveError, setSubdomainSaveError] = useState<string | null>(null)
+  const [isSavingToDomain, setIsSavingToDomain] = useState(false)
+  const [isSavingToSubdomain, setIsSavingToSubdomain] = useState(false)
 
   const withPlanLimit = usePlanLimit()
-  const { loading: isPublishing, error: buildError, execute: callPublish } = useApiCall<
+  const { loading: isGenerating, error: buildError, execute: callPublish } = useApiCall<
     { projectId: string | null; files: Record<string, string> },
     { html: string; publishedAt: number }
   >(HttpMethod.POST, '/api/publish')
@@ -28,65 +32,109 @@ export function usePublish() {
     [token],
   )
 
-  const error = buildError ?? saveError
+  const isPublishingToDomain = isGenerating && isSavingToDomain || isSavingToDomain
+  const isPublishingToSubdomain = isGenerating && isSavingToSubdomain || isSavingToSubdomain
+  const isBusy = isGenerating || isSavingToDomain || isSavingToSubdomain
 
   // Load published state from API on project change
   useEffect(() => {
     if (!activeProjectId || !authHeaders) return
-    setSaveError(null)
-    api.get<{ html: string; publishedAt: number; subdomain: string | null }>(
+    setDomainSaveError(null)
+    setSubdomainSaveError(null)
+    api.get<{ html: string | null; publishedAt: number | null; subdomainPublishedAt: number | null; subdomain: string | null }>(
       `/api/projects/${activeProjectId}/published`,
       authHeaders,
     )
       .then((site) => {
-        setPublishedAt(site.publishedAt)
+        setPublishedAt(site.publishedAt ?? null)
+        setSubdomainPublishedAt(site.subdomainPublishedAt ?? null)
         setSubdomain(site.subdomain ?? null)
       })
       .catch(() => {
         setPublishedAt(null)
+        setSubdomainPublishedAt(null)
         setSubdomain(null)
       })
   }, [activeProjectId]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  /** Publish to custom domain (production) */
   const publish = useCallback(async () => {
-    if (!activeProjectId || isPublishing || !authHeaders) return
-    setSaveError(null)
+    if (!activeProjectId || isBusy || !authHeaders) return
+    setDomainSaveError(null)
+    setIsSavingToDomain(true)
 
     const data = await withPlanLimit(() => callPublish({ projectId: activeProjectId, files }, authHeaders))
-    if (!data) return
+    if (!data) { setIsSavingToDomain(false); return }
 
     try {
-      // Store the published HTML in the DB
-      const result = await api.put<{ ok: boolean; subdomain: string | null }>(
+      await api.put(
         `/api/projects/${activeProjectId}/published`,
         { html: data.html, publishedAt: data.publishedAt },
         authHeaders,
       )
       setPublishedAt(data.publishedAt)
-      if (result.subdomain) setSubdomain(result.subdomain)
     } catch (e) {
-      console.error('[publish] save error:', e)
-      setSaveError(t('publish.saveError'))
+      console.error('[publish] domain save error:', e)
+      setDomainSaveError(t('publish.saveError'))
+    } finally {
+      setIsSavingToDomain(false)
     }
-  }, [activeProjectId, authHeaders, files, isPublishing, callPublish])
+  }, [activeProjectId, authHeaders, files, isBusy, callPublish]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  /** Publish to subdomain (temporary URL) */
+  const publishToSubdomain = useCallback(async () => {
+    if (!activeProjectId || isBusy || !authHeaders) return
+    setSubdomainSaveError(null)
+    setIsSavingToSubdomain(true)
+
+    const data = await withPlanLimit(() => callPublish({ projectId: activeProjectId, files }, authHeaders))
+    if (!data) { setIsSavingToSubdomain(false); return }
+
+    try {
+      await api.put(
+        `/api/projects/${activeProjectId}/published/subdomain`,
+        { html: data.html, publishedAt: data.publishedAt },
+        authHeaders,
+      )
+      setSubdomainPublishedAt(data.publishedAt)
+    } catch (e) {
+      console.error('[publish] subdomain save error:', e)
+      setSubdomainSaveError(t('publish.saveError'))
+    } finally {
+      setIsSavingToSubdomain(false)
+    }
+  }, [activeProjectId, authHeaders, files, isBusy, callPublish]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const openPublished = useCallback(async () => {
     if (!activeProjectId || !authHeaders) return
-    const site = await api.get<{ html: string; publishedAt: number }>(
+    const site = await api.get<{ html: string | null; publishedAt: number | null }>(
       `/api/projects/${activeProjectId}/published`,
       authHeaders,
     ).catch(() => null)
-    if (!site) return
+    if (!site?.html) return
 
     const blob = new Blob([site.html], { type: 'text/html' })
     const url = URL.createObjectURL(blob)
     window.open(url, '_blank')
   }, [activeProjectId, authHeaders])
 
-  // Called by useSubdomain after a successful subdomain save so the UI updates immediately
+  // Called by useSubdomain after a successful slug save so the UI updates immediately
   const onSubdomainSaved = useCallback((slug: string) => {
     setSubdomain(slug)
   }, [])
 
-  return { isPublishing, publishedAt, subdomain, error, publish, openPublished, setSaveError, onSubdomainSaved }
+  return {
+    isBusy,
+    isPublishingToDomain,
+    isPublishingToSubdomain,
+    publishedAt,
+    subdomainPublishedAt,
+    subdomain,
+    domainError: buildError ?? domainSaveError,
+    subdomainError: subdomainSaveError,
+    publish,
+    publishToSubdomain,
+    openPublished,
+    onSubdomainSaved,
+  }
 }

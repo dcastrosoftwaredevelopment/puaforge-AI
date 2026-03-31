@@ -71,19 +71,19 @@ export async function siteServingMiddleware(req: Request, res: Response, next: N
     }
 
     const [site] = await db
-      .select({ pbRecordId: publishedSites.pbRecordId, projectId: publishedSites.projectId })
+      .select({ subdomainPbRecordId: publishedSites.subdomainPbRecordId, projectId: publishedSites.projectId })
       .from(publishedSites)
       .where(eq(publishedSites.subdomain, subdomain))
       .limit(1)
 
     if (!site) return next()
 
-    if (!site.pbRecordId) {
+    if (!site.subdomainPbRecordId) {
       res.status(404).send('<html><body><p>Este site ainda não foi publicado.</p></body></html>')
       return
     }
 
-    await serveSite(cacheKey, site.pbRecordId, site.projectId, res)
+    await serveSite(cacheKey, site.subdomainPbRecordId, site.projectId, res)
     return
   }
 
