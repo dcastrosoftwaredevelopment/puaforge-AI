@@ -74,20 +74,6 @@ function normalizePath(p: string): string {
   return '/' + result.join('/')
 }
 
-function collectExternalImports(files: Record<string, string>): string[] {
-  const imports = new Set<string>()
-  const importRegex = /(?:import|from)\s*['"]([^./'][^'"]*)['"]/g
-
-  for (const code of Object.values(files)) {
-    let match
-    while ((match = importRegex.exec(code)) !== null) {
-      imports.add(match[1]) // keep full specifier (e.g. react-icons/fa6, not just react-icons)
-    }
-  }
-
-  return Array.from(imports)
-}
-
 router.post('/publish', async (req: Request<object, object, PublishBody>, res: Response) => {
   const { projectId, files } = req.body
 
@@ -128,14 +114,19 @@ createRoot(document.getElementById('root')!).render(React.createElement(App))
       minify: true,
       jsx: 'automatic',
       target: 'es2020',
+      metafile: true,
     })
 
     const bundledJs = result.outputFiles[0].text
 
-    // Build import map from the actual bundled output — this is the source of truth
-    // for what the browser needs to resolve, not the source files.
-    const externalPkgs = collectExternalImports({ '/__bundle__.js': bundledJs })
-    const allPkgs = new Set(['react', 'react-dom', ...externalPkgs])
+    // Use esbuild metafile to get the exact set of external imports in the bundle
+    const externalPkgs = new Set<string>()
+    for (const output of Object.values(result.metafile.outputs)) {
+      for (const imp of output.imports) {
+        if (imp.external) externalPkgs.add(imp.path)
+      }
+    }
+    const allPkgs = new Set(['react', 'react-dom', 'react-dom/client', ...externalPkgs])
 
     const importMap: Record<string, string> = {}
     for (const pkg of allPkgs) {
