@@ -5,6 +5,7 @@ import { authTokenAtom } from '@/atoms/authAtoms'
 import { useTranslation } from 'react-i18next'
 import { api, ApiError } from '@/services/api'
 import { usePlanLimit, PlanLimitUIError } from '@/hooks/usePlanLimit'
+import { track } from '@/lib/analytics'
 
 /** Regex that matches valid subdomain slugs: lowercase letters, digits, hyphens; no leading/trailing/double hyphens */
 const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/
@@ -82,6 +83,7 @@ export function useSubdomain(publishedSubdomain: string | null, onSaved?: (slug:
         { subdomain: slugInput },
         authHeaders,
       ))
+      track('subdomain_slug_saved')
       onSaved?.(slugInput)
       setSlugInput('')
       setStatus('idle')

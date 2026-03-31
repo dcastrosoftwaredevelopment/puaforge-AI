@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Check, Zap, Rocket, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import Sidebar from '@/components/home/Sidebar'
 import { useUsage, usePlansConfig, formatBytes, formatLimit } from '@/hooks/useUsage'
+import { track } from '@/lib/analytics'
 
 interface PlanFeature {
   text: string
@@ -54,6 +55,8 @@ export default function Billing() {
   const { data: usage } = useUsage()
   const plansConfig = usePlansConfig()
   const [interested, setInterested] = useState<Record<string, boolean>>({})
+
+  useEffect(() => { track('billing_page_view') }, [])
 
   function lim(n: number, unit?: 'bytes'): string {
     if (n === Infinity) return '∞'
@@ -131,6 +134,7 @@ export default function Billing() {
 
   const handleInterest = (planKey: string) => {
     setInterested((prev) => ({ ...prev, [planKey]: true }))
+    track('plan_interest_click', { plan: planKey })
   }
 
   return (

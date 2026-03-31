@@ -1,8 +1,10 @@
 import { useAtom } from 'jotai'
+import { useEffect } from 'react'
 import { X, ArrowRight, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { upgradePromptAtom } from '@/atoms'
+import { track } from '@/lib/analytics'
 
 const LIMIT_TYPE_MAP: Record<string, string> = {
   projects: 'projects',
@@ -17,6 +19,11 @@ export default function UpgradeModal() {
   const [prompt, setPrompt] = useAtom(upgradePromptAtom)
   const navigate = useNavigate()
   const { t } = useTranslation()
+
+  useEffect(() => {
+    if (!prompt) return
+    track('upgrade_modal_view', { limit_type: prompt.limitType, required_plan: prompt.requiredPlan })
+  }, [prompt])
 
   if (!prompt) return null
 
@@ -71,13 +78,13 @@ export default function UpgradeModal() {
           {/* Actions */}
           <div className="flex gap-2">
             <button
-              onClick={() => setPrompt(null)}
+              onClick={() => { track('upgrade_modal_dismiss', { limit_type: prompt.limitType }); setPrompt(null) }}
               className="flex-1 py-2 rounded-lg text-xs text-text-muted border border-border-subtle hover:bg-bg-elevated hover:text-text-secondary transition cursor-pointer"
             >
               {t('upgrade.maybeLater')}
             </button>
             <button
-              onClick={() => { setPrompt(null); navigate('/billing') }}
+              onClick={() => { track('upgrade_modal_see_plans', { limit_type: prompt.limitType }); setPrompt(null); navigate('/billing') }}
               className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20 hover:bg-vibe-blue/15 transition cursor-pointer"
             >
               {t('upgrade.seePlans')}
