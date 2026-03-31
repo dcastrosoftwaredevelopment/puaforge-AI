@@ -3,6 +3,7 @@ import { LRUCache } from 'lru-cache'
 import { eq } from 'drizzle-orm'
 import { db } from '../db.js'
 import { projects, publishedSites } from '../schema.js'
+import { fetchPublishedSite } from '../services/pocketbase.js'
 
 interface CachedSite {
   html: string
@@ -48,7 +49,7 @@ export async function siteServingMiddleware(req: Request, res: Response, next: N
     return res.send(cached.html)
   }
 
-  // Lookup in DB
+  // Lookup project by custom domain
   const [project] = await db
     .select({ id: projects.id })
     .from(projects)
@@ -57,8 +58,9 @@ export async function siteServingMiddleware(req: Request, res: Response, next: N
 
   if (!project) return next()
 
+  // Get PocketBase record ID from PostgreSQL
   const [site] = await db
-    .select({ html: publishedSites.html })
+    .select({ pbRecordId: publishedSites.pbRecordId })
     .from(publishedSites)
     .where(eq(publishedSites.projectId, project.id))
     .limit(1)
@@ -68,10 +70,17 @@ export async function siteServingMiddleware(req: Request, res: Response, next: N
     return
   }
 
-  siteCache.set(host, { html: site.html, projectId: project.id })
+  // Fetch HTML from PocketBase
+  const html = await fetchPublishedSite(site.pbRecordId)
+  if (!html) {
+    res.status(404).send('<html><body><p>Arquivo do site não encontrado.</p></body></html>')
+    return
+  }
+
+  siteCache.set(host, { html, projectId: project.id })
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8')
   res.setHeader('Cache-Control', 'public, max-age=300')
   res.setHeader('X-Served-By', 'PuaForge')
-  res.send(site.html)
+  res.send(html)
 }

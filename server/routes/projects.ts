@@ -4,7 +4,7 @@ import multer from 'multer'
 import { db } from '../db.js'
 import { projects, messages, projectFiles, projectImages, checkpoints, publishedSites } from '../schema.js'
 import { requireAuth } from '../middleware/auth.js'
-import { uploadFileToPocketBase, deleteFileFromPocketBase } from '../services/pocketbase.js'
+import { uploadFileToPocketBase, deleteFileFromPocketBase, savePublishedSite, fetchPublishedSite } from '../services/pocketbase.js'
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } })
 
@@ -389,7 +389,13 @@ router.get('/projects/:id/published', requireAuth, async (req: Request, res: Res
     return
   }
 
-  res.json({ html: site.html, publishedAt: toMs(site.publishedAt) })
+  const html = await fetchPublishedSite(site.pbRecordId)
+  if (!html) {
+    res.status(404).json({ error: 'Arquivo HTML não encontrado no PocketBase' })
+    return
+  }
+
+  res.json({ html, publishedAt: toMs(site.publishedAt) })
 })
 
 router.put('/projects/:id/published', requireAuth, async (req: Request, res: Response) => {
@@ -397,12 +403,14 @@ router.put('/projects/:id/published', requireAuth, async (req: Request, res: Res
 
   const { html, publishedAt } = req.body as { html: string; publishedAt: number }
 
+  const pbRecordId = await savePublishedSite(p(req, 'id'), html)
+
   await db
     .insert(publishedSites)
-    .values({ projectId: p(req, 'id'), html, publishedAt: new Date(publishedAt) })
+    .values({ projectId: p(req, 'id'), pbRecordId, publishedAt: new Date(publishedAt) })
     .onConflictDoUpdate({
       target: publishedSites.projectId,
-      set: { html, publishedAt: new Date(publishedAt) },
+      set: { pbRecordId, publishedAt: new Date(publishedAt) },
     })
 
   res.json({ ok: true })
