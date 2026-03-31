@@ -9,7 +9,7 @@ export function useCustomDomain() {
   const activeProjectId = useAtomValue(activeProjectIdAtom)
   const token = useAtomValue(authTokenAtom)
 
-  const saveDomain = useCallback(async (domain: string | null) => {
+  const saveDomain = useCallback(async (domain: string | null, force = false) => {
     if (!activeProjectId || !token) return
 
     const normalized = domain?.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '') || null
@@ -22,7 +22,7 @@ export function useCustomDomain() {
 
     await api.put(
       `/api/projects/${activeProjectId}/domain`,
-      { customDomain: normalized },
+      { customDomain: normalized, force },
       { Authorization: `Bearer ${token}` },
     )
     setCustomDomain(normalized)

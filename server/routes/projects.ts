@@ -5,6 +5,7 @@ import { db } from '../db.js'
 import { projects, messages, projectFiles, projectImages, checkpoints, publishedSites } from '../schema.js'
 import { requireAuth } from '../middleware/auth.js'
 import { uploadFileToPocketBase, deleteFileFromPocketBase, savePublishedSite, fetchPublishedSite } from '../services/pocketbase.js'
+import { invalidateSiteCache } from '../middleware/siteServing.js'
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } })
 
@@ -102,19 +103,35 @@ router.get('/projects/:id/domain', requireAuth, async (req: Request, res: Respon
 router.put('/projects/:id/domain', requireAuth, async (req: Request, res: Response) => {
   if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
-  const { customDomain } = req.body as { customDomain: string | null }
+  const { customDomain, force } = req.body as { customDomain: string | null; force?: boolean }
 
-  // Check if domain is already taken by another project
   if (customDomain) {
     const [existing] = await db
-      .select({ id: projects.id })
+      .select({ id: projects.id, userId: projects.userId, name: projects.name })
       .from(projects)
       .where(eq(projects.customDomain, customDomain))
       .limit(1)
 
     if (existing && existing.id !== p(req, 'id')) {
-      res.status(409).json({ error: 'Este domínio já está em uso por outro projeto' })
-      return
+      if (existing.userId !== req.user!.userId) {
+        // Domain belongs to another user — always block
+        res.status(409).json({ code: 'DOMAIN_TAKEN', error: 'Este domínio já está em uso' })
+        return
+      }
+
+      // Domain belongs to one of the user's own projects
+      if (!force) {
+        res.status(409).json({
+          code: 'DOMAIN_OWN_PROJECT',
+          error: `Este domínio está em uso no projeto "${existing.name}"`,
+          conflictingProjectName: existing.name,
+        })
+        return
+      }
+
+      // force=true: remove domain from the conflicting project and invalidate cache
+      await db.update(projects).set({ customDomain: null }).where(eq(projects.id, existing.id))
+      invalidateSiteCache(customDomain)
     }
   }
 

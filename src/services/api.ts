@@ -5,11 +5,13 @@ const BASE_URL = __API_URL__ || window.location.origin
 export class ApiError extends Error {
   code: string
   status: number
+  data: Record<string, unknown> | null
 
-  constructor(code: string, status: number) {
+  constructor(code: string, status: number, data?: Record<string, unknown> | null) {
     super(code)
     this.code = code
     this.status = status
+    this.data = data ?? null
   }
 }
 
@@ -25,7 +27,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (!res.ok) {
     const json = await res.json().catch(() => null)
     const code = (json?.code as string | undefined) ?? `HTTP_${res.status}`
-    throw new ApiError(code, res.status)
+    throw new ApiError(code, res.status, json)
   }
 
   return res.json() as Promise<T>

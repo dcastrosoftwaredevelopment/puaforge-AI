@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 
 declare const __SERVER_IP__: string
-import { Globe, Loader2, ExternalLink, Check } from 'lucide-react'
+import { Globe, Loader2, ExternalLink, Check, AlertTriangle } from 'lucide-react'
 import { usePublish } from '@/hooks/usePublish'
 import { useCustomDomain } from '@/hooks/useCustomDomain'
+import { ApiError } from '@/services/api'
 import Tooltip from '@/components/ui/Tooltip'
 
 export default function PublishButton() {
@@ -14,6 +15,7 @@ export default function PublishButton() {
   const [savingDomain, setSavingDomain] = useState(false)
   const [domainError, setDomainError] = useState<string | null>(null)
   const [domainSaved, setDomainSaved] = useState(false)
+  const [ownProjectConflict, setOwnProjectConflict] = useState<string | null>(null)
   const panelRef = useRef<HTMLDivElement>(null)
 
   // Sync input with current domain when panel opens
@@ -37,16 +39,22 @@ export default function PublishButton() {
     setShowPanel(true)
   }
 
-  const handleSaveDomain = async () => {
+  const handleSaveDomain = async (force = false) => {
     setSavingDomain(true)
     setDomainError(null)
+    setOwnProjectConflict(null)
     try {
-      await saveDomain(domainInput || null)
+      await saveDomain(domainInput || null, force)
       setDomainSaved(true)
       setTimeout(() => setDomainSaved(false), 2000)
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Erro ao salvar domínio'
-      setDomainError(msg)
+      if (e instanceof ApiError && e.code === 'DOMAIN_OWN_PROJECT') {
+        setOwnProjectConflict(e.data?.conflictingProjectName as string ?? '')
+      } else if (e instanceof ApiError && e.status === 409) {
+        setDomainError('Este domínio já está em uso')
+      } else {
+        setDomainError(e instanceof Error ? e.message : 'Erro ao salvar domínio')
+      }
     } finally {
       setSavingDomain(false)
     }
@@ -85,12 +93,12 @@ export default function PublishButton() {
                   type="text"
                   value={domainInput}
                   onChange={(e) => setDomainInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleSaveDomain() }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') void handleSaveDomain() }}
                   placeholder="meu-site.com"
                   className="flex-1 bg-bg-elevated border border-border-subtle rounded-lg px-2.5 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-vibe-blue/40 font-mono"
                 />
                 <button
-                  onClick={handleSaveDomain}
+                  onClick={() => handleSaveDomain()}
                   disabled={savingDomain}
                   className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary disabled:opacity-50 transition cursor-pointer"
                 >
@@ -99,6 +107,31 @@ export default function PublishButton() {
               </div>
               {domainError && (
                 <p className="text-[10px] text-forge-terracotta">{domainError}</p>
+              )}
+              {ownProjectConflict !== null && (
+                <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-2 space-y-2">
+                  <div className="flex items-start gap-1.5">
+                    <AlertTriangle size={11} className="text-amber-400 mt-0.5 shrink-0" />
+                    <p className="text-[10px] text-amber-300 leading-relaxed">
+                      Este domínio está em uso no projeto <span className="font-semibold">"{ownProjectConflict}"</span>. Aquele projeto perderá a publicação.
+                    </p>
+                  </div>
+                  <div className="flex gap-1.5">
+                    <button
+                      onClick={() => void handleSaveDomain(true)}
+                      disabled={savingDomain}
+                      className="flex-1 px-2 py-1 rounded-md text-[10px] font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 disabled:opacity-50 transition cursor-pointer"
+                    >
+                      Confirmar
+                    </button>
+                    <button
+                      onClick={() => setOwnProjectConflict(null)}
+                      className="flex-1 px-2 py-1 rounded-md text-[10px] font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition cursor-pointer"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
               )}
               {__SERVER_IP__ ? (
                 <p className="text-[10px] text-text-muted leading-relaxed">
