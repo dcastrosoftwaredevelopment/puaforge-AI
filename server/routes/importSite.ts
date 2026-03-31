@@ -40,6 +40,37 @@ function extractImageUrls(html: string, baseUrl?: string): string[] {
   return Array.from(urls).filter((u) => /^https?:\/\//.test(u) || u.startsWith('//'))
 }
 
+/**
+ * Strips noise from HTML before sending to the AI:
+ * - Script tag contents (keeps src= for external dep hints)
+ * - Noscript blocks
+ * - HTML comments
+ * - Tracking/analytics data-* attributes
+ * - Inline event handlers (onclick, onmouseover, etc.)
+ * - Collapses excess whitespace
+ */
+function cleanHtml(html: string): string {
+  return html
+    // Remove script contents but keep <script src="..."> as a comment hint
+    .replace(/<script([^>]*)>([\s\S]*?)<\/script>/gi, (_, attrs: string) => {
+      const src = /src=["']([^"']+)["']/.exec(attrs)?.[1]
+      return src ? `<!-- external script: ${src} -->` : ''
+    })
+    // Remove noscript blocks
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, '')
+    // Remove HTML comments
+    .replace(/<!--[\s\S]*?-->/g, '')
+    // Remove inline event handlers
+    .replace(/\s+on\w+="[^"]*"/gi, '')
+    .replace(/\s+on\w+='[^']*'/gi, '')
+    // Remove tracking/analytics data attributes
+    .replace(/\s+data-(gtm|analytics|track|pixel|fb|ga|segment|heap|mixpanel|amplitude|clarity|hotjar|intercom|hubspot|pardot|marketo)\w*="[^"]*"/gi, '')
+    // Collapse runs of whitespace (but preserve newlines for readability)
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
 function suggestName(url: string, index: number): string {
   try {
     const pathname = new URL(url.startsWith('//') ? `https:${url}` : url).pathname
@@ -109,7 +140,7 @@ router.post('/import-site', requireAuth, async (req, res) => {
       .map((r) => (r.status === 'fulfilled' ? r.value : null))
       .filter((x): x is NonNullable<typeof x> => x !== null)
 
-    res.json({ html, images })
+    res.json({ html: cleanHtml(html), images })
   } catch (err) {
     console.error('[import-site]', err)
     res.status(500).json({ error: 'Failed to import site' })
