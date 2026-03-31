@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Check, Zap, Rocket, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import Sidebar from '@/components/home/Sidebar'
+import { useUsage, formatBytes, formatLimit } from '@/hooks/useUsage'
 
 interface PlanFeature {
   text: string
@@ -21,8 +22,36 @@ interface Plan {
   features: PlanFeature[]
 }
 
+function UsageRow({ label, used, limit, unit }: { label: string; used: number; limit: number; unit?: string }) {
+  const isUnlimited = limit === Infinity || limit >= 1e9
+  const pct = isUnlimited ? 0 : Math.min(100, (used / limit) * 100)
+  const isWarning = pct >= 80
+  const usedLabel = unit === 'bytes' ? formatBytes(used) : String(used)
+  const limitLabel = formatLimit(limit, unit)
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-text-secondary">{label}</span>
+        <span className={`font-mono ${isWarning ? 'text-yellow-400' : 'text-text-muted'}`}>
+          {usedLabel}{!isUnlimited && ` / ${limitLabel}`}{isUnlimited && ` / ${limitLabel}`}
+        </span>
+      </div>
+      {!isUnlimited && (
+        <div className="h-1 bg-bg-primary rounded-full overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all ${isWarning ? 'bg-yellow-400' : 'bg-forge-terracotta/60'}`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Billing() {
   const { t } = useTranslation()
+  const { data: usage } = useUsage()
   const [interested, setInterested] = useState<Record<string, boolean>>({})
 
   const plans: Plan[] = [
@@ -105,6 +134,38 @@ export default function Billing() {
             <h1 className="text-xl font-semibold text-text-primary">{t('billing.title')}</h1>
             <p className="text-sm text-text-muted mt-1">{t('billing.subtitle')}</p>
           </div>
+
+          {usage && (
+            <div className="mb-8 p-5 rounded-xl border border-border-subtle bg-bg-secondary space-y-3">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-semibold text-text-primary">{t('billing.currentUsage')}</span>
+                <span className="text-[10px] px-2 py-0.5 rounded border font-semibold uppercase tracking-wide bg-forge-terracotta/10 text-forge-terracotta border-forge-terracotta/20">
+                  {usage.plan === 'free' ? t('billing.plans.free') : usage.plan === 'indie' ? 'Indie' : 'Pro'}
+                </span>
+              </div>
+              <UsageRow
+                label={t('sidebar.usageProjects')}
+                used={usage.usage.projects.used}
+                limit={usage.usage.projects.limit}
+              />
+              <UsageRow
+                label={t('sidebar.usageStorage')}
+                used={usage.usage.storageBytes.used}
+                limit={usage.usage.storageBytes.limit}
+                unit="bytes"
+              />
+              <UsageRow
+                label={t('sidebar.usageImports')}
+                used={usage.usage.importsThisMonth.used}
+                limit={usage.usage.importsThisMonth.limit}
+              />
+              <UsageRow
+                label={t('billing.usageDomains')}
+                used={usage.usage.customDomains.used}
+                limit={usage.usage.customDomains.limit}
+              />
+            </div>
+          )}
 
           <div className="grid grid-cols-3 gap-4">
             {plans.map((plan) => (

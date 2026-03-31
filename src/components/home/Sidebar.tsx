@@ -3,6 +3,32 @@ import { Layers, Settings, LogOut, CreditCard } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/useAuth'
 import { useLanguage } from '@/hooks/useLanguage'
+import { useUsage, formatBytes, formatLimit } from '@/hooks/useUsage'
+
+function UsageBar({ used, limit, unit }: { used: number; limit: number; unit?: string }) {
+  const isUnlimited = limit === Infinity || limit >= 1e9
+  const pct = isUnlimited ? 0 : Math.min(100, (used / limit) * 100)
+  const isWarning = pct >= 80
+  const usedLabel = unit === 'bytes' ? formatBytes(used) : String(used)
+  const limitLabel = formatLimit(limit, unit)
+
+  return (
+    <div className="space-y-1">
+      <div className="flex justify-between text-[10px]">
+        <span className={isWarning ? 'text-yellow-400' : 'text-text-muted'}>{usedLabel}</span>
+        <span className="text-text-muted">{limitLabel}</span>
+      </div>
+      {!isUnlimited && (
+        <div className="h-0.5 bg-bg-elevated rounded-full overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all ${isWarning ? 'bg-yellow-400' : 'bg-forge-terracotta/50'}`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      )}
+    </div>
+  )
+}
 
 function UserAvatar({ name }: { name?: string | null }) {
   const initials = name
@@ -21,9 +47,12 @@ export default function Sidebar() {
   const { logout, user } = useAuth()
   const { t } = useTranslation()
   const { toggle } = useLanguage()
+  const { data: usage } = useUsage()
   const isSettings = location.pathname === '/settings'
   const isProfile = location.pathname === '/profile'
   const isBilling = location.pathname === '/billing'
+
+  const planLabel = usage?.plan === 'indie' ? 'Indie' : usage?.plan === 'pro' ? 'Pro' : t('billing.plans.free')
 
   return (
     <aside className="w-56 shrink-0 border-r border-border-subtle bg-bg-secondary flex flex-col">
@@ -43,6 +72,41 @@ export default function Sidebar() {
           {t('sidebar.projects')}
         </button>
       </nav>
+
+      {usage && (
+        <div className="px-3 py-3 border-t border-border-subtle space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-text-muted uppercase tracking-wide">{t('sidebar.plan')}</span>
+            <span className="text-[10px] font-semibold text-forge-terracotta">{planLabel}</span>
+          </div>
+          <div className="space-y-2">
+            <div>
+              <span className="text-[10px] text-text-muted">{t('sidebar.usageProjects')}</span>
+              <UsageBar used={usage.usage.projects.used} limit={usage.usage.projects.limit} />
+            </div>
+            {usage.usage.storageBytes.limit > 0 && (
+              <div>
+                <span className="text-[10px] text-text-muted">{t('sidebar.usageStorage')}</span>
+                <UsageBar used={usage.usage.storageBytes.used} limit={usage.usage.storageBytes.limit} unit="bytes" />
+              </div>
+            )}
+            {usage.usage.importsThisMonth.limit > 0 && (
+              <div>
+                <span className="text-[10px] text-text-muted">{t('sidebar.usageImports')}</span>
+                <UsageBar used={usage.usage.importsThisMonth.used} limit={usage.usage.importsThisMonth.limit} />
+              </div>
+            )}
+          </div>
+          {usage.plan === 'free' && (
+            <button
+              onClick={() => navigate('/billing')}
+              className="w-full py-1.5 rounded-lg text-[10px] font-medium bg-forge-terracotta/10 text-forge-terracotta border border-forge-terracotta/20 hover:bg-forge-terracotta/20 transition cursor-pointer"
+            >
+              {t('sidebar.upgrade')}
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="px-2 py-3 border-t border-border-subtle space-y-1">
         <button

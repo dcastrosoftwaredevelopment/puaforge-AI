@@ -21,6 +21,11 @@ export const en = {
     settings: 'Settings',
     logout: 'Logout',
     language: 'PT',
+    plan: 'Plan',
+    usageProjects: 'Projects',
+    usageStorage: 'Storage',
+    usageImports: 'Imports/month',
+    upgrade: 'Upgrade plan',
   },
 
   projects: {
@@ -263,6 +268,8 @@ export const en = {
     activePlan: 'Active plan',
     notifyMe: "I'm interested",
     interestConfirmed: "We'll notify you soon!",
+    currentUsage: 'Current usage',
+    usageDomains: 'Custom domains',
     byokNote: 'All plans use your own Anthropic API key (BYOK). AI costs are billed directly by Anthropic.',
     plans: {
       free: 'Free',

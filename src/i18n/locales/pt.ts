@@ -21,6 +21,11 @@ export const pt = {
     settings: 'Configurações',
     logout: 'Sair',
     language: 'EN',
+    plan: 'Plano',
+    usageProjects: 'Projetos',
+    usageStorage: 'Armazenamento',
+    usageImports: 'Imports/mês',
+    upgrade: 'Fazer upgrade',
   },
 
   projects: {
@@ -263,6 +268,8 @@ export const pt = {
     activePlan: 'Plano ativo',
     notifyMe: 'Tenho interesse',
     interestConfirmed: 'Avisaremos você em breve!',
+    currentUsage: 'Uso atual',
+    usageDomains: 'Domínios customizados',
     byokNote: 'Todos os planos utilizam sua própria chave da API Anthropic (BYOK). Os custos de IA são cobrados diretamente pela Anthropic.',
     plans: {
       free: 'Gratuito',
