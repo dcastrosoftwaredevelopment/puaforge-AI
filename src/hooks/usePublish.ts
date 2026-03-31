@@ -23,7 +23,7 @@ export function usePublish() {
   const [isSavingToSubdomain, setIsSavingToSubdomain] = useState(false)
 
   const withPlanLimit = usePlanLimit()
-  const { loading: isGenerating, error: buildError, execute: callPublish } = useApiCall<
+  const { loading: isGenerating, execute: callPublish } = useApiCall<
     { projectId: string | null; files: Record<string, string> },
     { html: string; publishedAt: number }
   >(HttpMethod.POST, '/api/publish')
