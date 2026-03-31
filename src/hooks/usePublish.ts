@@ -11,8 +11,9 @@ export function usePublish() {
   const token = useAtomValue(authTokenAtom)
   const { files } = useFiles()
   const [publishedAt, setPublishedAt] = useState<number | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
-  const { loading: isPublishing, error, execute: callPublish } = useApiCall<
+  const { loading: isPublishing, error: buildError, execute: callPublish } = useApiCall<
     { projectId: string | null; files: Record<string, string> },
     { html: string; publishedAt: number }
   >(HttpMethod.POST, '/api/publish')
@@ -22,9 +23,12 @@ export function usePublish() {
     [token],
   )
 
+  const error = buildError ?? saveError
+
   // Load published state from API on project change
   useEffect(() => {
     if (!activeProjectId || !authHeaders) return
+    setSaveError(null)
     api.get<{ html: string; publishedAt: number }>(
       `/api/projects/${activeProjectId}/published`,
       authHeaders,
@@ -35,18 +39,23 @@ export function usePublish() {
 
   const publish = useCallback(async () => {
     if (!activeProjectId || isPublishing || !authHeaders) return
+    setSaveError(null)
 
     const data = await callPublish({ projectId: activeProjectId, files })
     if (!data) return
 
-    // Store the published HTML in the DB
-    await api.put(
-      `/api/projects/${activeProjectId}/published`,
-      { html: data.html, publishedAt: data.publishedAt },
-      authHeaders,
-    )
-
-    setPublishedAt(data.publishedAt)
+    try {
+      // Store the published HTML in the DB
+      await api.put(
+        `/api/projects/${activeProjectId}/published`,
+        { html: data.html, publishedAt: data.publishedAt },
+        authHeaders,
+      )
+      setPublishedAt(data.publishedAt)
+    } catch (e) {
+      console.error('[publish] save error:', e)
+      setSaveError(e instanceof Error ? e.message : 'Erro ao salvar publicação')
+    }
   }, [activeProjectId, authHeaders, files, isPublishing, callPublish])
 
   const openPublished = useCallback(async () => {
@@ -62,5 +71,5 @@ export function usePublish() {
     window.open(url, '_blank')
   }, [activeProjectId, authHeaders])
 
-  return { isPublishing, publishedAt, error, publish, openPublished }
+  return { isPublishing, publishedAt, error, publish, openPublished, setSaveError }
 }
