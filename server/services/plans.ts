@@ -9,7 +9,7 @@ export const PLAN_LIMITS = {
     maxProjects: 1,
     maxCustomDomains: 0,
     maxImportsPerMonth: 0,
-    maxStorageBytes: 0,
+    maxStorageBytes: 5 * 1024 * 1024, // 5MB
     maxCheckpointsPerProject: 0,
     maxPublishedSites: 1,
   },
