@@ -68,6 +68,19 @@ export const publishedSites = pgTable('published_sites', {
   publishedAt: timestamp('published_at').notNull(),
 })
 
+export const subscriptions = pgTable('subscriptions', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  plan: varchar('plan', { length: 20 }).notNull().default('free'), // 'free' | 'indie' | 'pro'
+  status: varchar('status', { length: 20 }).notNull().default('active'), // 'active' | 'canceled' | 'past_due'
+  currentPeriodEnd: timestamp('current_period_end'), // null for free
+  importsThisMonth: integer('imports_this_month').notNull().default(0),
+  importsResetAt: timestamp('imports_reset_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
 export type UserSettings = typeof userSettings.$inferSelect
@@ -77,3 +90,4 @@ export type ProjectFile = typeof projectFiles.$inferSelect
 export type ProjectImage = typeof projectImages.$inferSelect
 export type Checkpoint = typeof checkpoints.$inferSelect
 export type PublishedSite = typeof publishedSites.$inferSelect
+export type Subscription = typeof subscriptions.$inferSelect

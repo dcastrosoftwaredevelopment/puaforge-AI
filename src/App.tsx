@@ -7,6 +7,7 @@ import Login from '@/pages/Login'
 import Profile from '@/pages/Profile'
 import Billing from '@/pages/Billing'
 import SplashScreen from '@/components/auth/SplashScreen'
+import UpgradeModal from '@/components/billing/UpgradeModal'
 
 export default function App() {
   const { isHydrated } = usePersistence()
@@ -14,6 +15,7 @@ export default function App() {
   return (
     <>
       <SplashScreen />
+      <UpgradeModal />
       {isHydrated && (
         <Routes>
           <Route path="/login" element={<Login />} />

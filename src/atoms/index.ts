@@ -132,3 +132,11 @@ export interface PendingImport {
   prompt: string
 }
 export const pendingImportAtom = atom<PendingImport | null>(null)
+
+// Plan upgrade modal
+export interface UpgradePrompt {
+  requiredPlan: 'indie' | 'pro'
+  limitType: string
+  message: string
+}
+export const upgradePromptAtom = atom<UpgradePrompt | null>(null)

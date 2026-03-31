@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { requireAuth } from '../middleware/auth.js'
+import { checkImportLimit, incrementImportCount, PlanLimitError } from '../services/plans.js'
 
 const router = Router()
 
@@ -143,6 +144,15 @@ function suggestName(url: string, index: number): string {
 
 router.post('/import-site', requireAuth, async (req, res) => {
   try {
+    try { await checkImportLimit(req.user!.userId) }
+    catch (err) {
+      if (err instanceof PlanLimitError) {
+        res.status(403).json({ error: err.message, upgradeRequired: true, requiredPlan: err.requiredPlan, limitType: err.limitType })
+        return
+      }
+      throw err
+    }
+
     const { url, htmlContent } = req.body as { url?: string; htmlContent?: string }
 
     let html: string
@@ -223,6 +233,7 @@ router.post('/import-site', requireAuth, async (req, res) => {
       : undefined
 
     console.log(`[import-site] cleaned html: ${cleanedHtml.length} chars${isSpa ? ' (SPA detected)' : ''}`)
+    await incrementImportCount(req.user!.userId)
     res.json({ html: cleanedHtml, images, warning })
   } catch (err) {
     console.error('[import-site]', err)

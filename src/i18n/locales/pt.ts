@@ -247,6 +247,12 @@ export const pt = {
     betaHint: 'Esta funcionalidade está em beta. Os resultados podem variar dependendo da complexidade do site.',
   },
 
+  upgrade: {
+    title: 'Upgrade necessário',
+    requiredPlan: 'Este recurso requer o plano {{plan}}.',
+    seePlans: 'Ver planos',
+  },
+
   billing: {
     title: 'Planos',
     subtitle: 'Escolha o plano ideal para o seu uso. Você sempre usa sua própria chave da API do Claude.',

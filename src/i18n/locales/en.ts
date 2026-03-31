@@ -247,6 +247,12 @@ export const en = {
     betaHint: 'This feature is in beta. Results may vary depending on the complexity of the site.',
   },
 
+  upgrade: {
+    title: 'Upgrade required',
+    requiredPlan: 'This feature requires the {{plan}} plan.',
+    seePlans: 'See plans',
+  },
+
   billing: {
     title: 'Plans',
     subtitle: 'Choose the right plan for your needs. You always use your own Claude API key.',

@@ -43,6 +43,13 @@
       "when": 1775170000000,
       "tag": "0005_published_sites_pb",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1775260000000,
+      "tag": "0006_plan_access",
+      "breakpoints": true
     }
   ]
 }

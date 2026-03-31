@@ -6,6 +6,15 @@ import { projects, messages, projectFiles, projectImages, checkpoints, published
 import { requireAuth } from '../middleware/auth.js'
 import { uploadFileToPocketBase, deleteFileFromPocketBase, savePublishedSite, fetchPublishedSite } from '../services/pocketbase.js'
 import { invalidateSiteCache } from '../middleware/siteServing.js'
+import { checkProjectLimit, checkDomainLimit, checkStorageLimit, checkCheckpointLimit, PlanLimitError } from '../services/plans.js'
+
+function handlePlanLimit(err: unknown, res: Response): boolean {
+  if (err instanceof PlanLimitError) {
+    res.status(403).json({ error: err.message, upgradeRequired: true, requiredPlan: err.requiredPlan, limitType: err.limitType })
+    return true
+  }
+  return false
+}
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } })
 
@@ -49,6 +58,8 @@ router.get('/projects', requireAuth, async (req: Request, res: Response) => {
 })
 
 router.post('/projects', requireAuth, async (req: Request, res: Response) => {
+  try { await checkProjectLimit(req.user!.userId) } catch (err) { if (handlePlanLimit(err, res)) return; throw err }
+
   const { id, name, createdAt, updatedAt } = req.body as {
     id: string; name: string; createdAt: number; updatedAt: number
   }
@@ -104,6 +115,10 @@ router.put('/projects/:id/domain', requireAuth, async (req: Request, res: Respon
   if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
   const { customDomain, force } = req.body as { customDomain: string | null; force?: boolean }
+
+  if (customDomain) {
+    try { await checkDomainLimit(req.user!.userId) } catch (err) { if (handlePlanLimit(err, res)) return; throw err }
+  }
 
   if (customDomain) {
     const [existing] = await db
@@ -293,6 +308,8 @@ router.post('/projects/:id/images', requireAuth, upload.single('file'), async (r
     return
   }
 
+  try { await checkStorageLimit(req.user!.userId, req.file.size) } catch (err) { if (handlePlanLimit(err, res)) return; throw err }
+
   const url = await uploadFileToPocketBase(req.file.buffer, req.file.originalname, req.file.mimetype, p(req, 'id'))
   const id = crypto.randomUUID()
 
@@ -359,6 +376,8 @@ router.get('/projects/:id/checkpoints', requireAuth, async (req: Request, res: R
 
 router.post('/projects/:id/checkpoints', requireAuth, async (req: Request, res: Response) => {
   if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
+
+  try { await checkCheckpointLimit(req.user!.userId, p(req, 'id')) } catch (err) { if (handlePlanLimit(err, res)) return; throw err }
 
   const { id, name, files, createdAt } = req.body as {
     id: string; name: string; files: Record<string, string>; createdAt: number

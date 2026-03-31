@@ -15,6 +15,18 @@ export class ApiError extends Error {
   }
 }
 
+export class PlanLimitError extends Error {
+  requiredPlan: 'indie' | 'pro'
+  limitType: string
+
+  constructor(message: string, requiredPlan: 'indie' | 'pro', limitType: string) {
+    super(message)
+    this.name = 'PlanLimitError'
+    this.requiredPlan = requiredPlan
+    this.limitType = limitType
+  }
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const isFormData = options.body instanceof FormData
   const res = await fetch(`${BASE_URL}${path}`, {
@@ -26,6 +38,13 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!res.ok) {
     const json = await res.json().catch(() => null)
+    if (res.status === 403 && json?.upgradeRequired) {
+      throw new PlanLimitError(
+        (json.error as string) ?? 'Upgrade required',
+        (json.requiredPlan as 'indie' | 'pro') ?? 'indie',
+        (json.limitType as string) ?? 'unknown',
+      )
+    }
     const code = (json?.code as string | undefined) ?? `HTTP_${res.status}`
     throw new ApiError(code, res.status, json)
   }
