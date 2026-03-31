@@ -5,6 +5,7 @@ import EditorView from '@/components/layout/EditorView'
 import Settings from '@/components/settings/Settings'
 import Login from '@/pages/Login'
 import Profile from '@/pages/Profile'
+import Billing from '@/pages/Billing'
 import SplashScreen from '@/components/auth/SplashScreen'
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/project/:projectId" element={<EditorView />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/billing" element={<Billing />} />
         </Routes>
       )}
     </>

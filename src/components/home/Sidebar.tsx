@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Layers, Settings, LogOut } from 'lucide-react'
+import { Layers, Settings, LogOut, CreditCard } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/useAuth'
 import { useLanguage } from '@/hooks/useLanguage'
@@ -23,6 +23,7 @@ export default function Sidebar() {
   const { toggle } = useLanguage()
   const isSettings = location.pathname === '/settings'
   const isProfile = location.pathname === '/profile'
+  const isBilling = location.pathname === '/billing'
 
   return (
     <aside className="w-56 shrink-0 border-r border-border-subtle bg-bg-secondary flex flex-col">
@@ -53,6 +54,16 @@ export default function Sidebar() {
         >
           <UserAvatar name={user?.name} />
           {t('sidebar.profile')}
+        </button>
+        <button
+          onClick={() => navigate('/billing')}
+          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition ${isBilling
+            ? 'bg-bg-elevated text-text-primary'
+            : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary'
+            }`}
+        >
+          <CreditCard size={15} className="text-forge-terracotta/70" />
+          {t('sidebar.billing')}
         </button>
         <button
           onClick={() => navigate('/settings')}
