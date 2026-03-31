@@ -1,5 +1,9 @@
 import { Router, type Request, type Response } from 'express'
 import * as esbuild from 'esbuild'
+import { eq } from 'drizzle-orm'
+import { db } from '../db.js'
+import { projects } from '../schema.js'
+import { invalidateSiteCache } from '../middleware/siteServing.js'
 
 const router = Router()
 
@@ -155,6 +159,17 @@ ${bundledJs}
 </html>`
 
     console.log(`[publish] Site built for project: ${projectId}`)
+
+    // Invalidate site cache for this project's custom domain (if any)
+    const [project] = await db
+      .select({ customDomain: projects.customDomain })
+      .from(projects)
+      .where(eq(projects.id, projectId))
+      .limit(1)
+
+    if (project?.customDomain) {
+      invalidateSiteCache(project.customDomain)
+    }
 
     res.json({ html, publishedAt: Date.now() })
   } catch (error) {

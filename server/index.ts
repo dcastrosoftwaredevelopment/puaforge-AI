@@ -12,6 +12,7 @@ import { userSettingsRoute } from './routes/userSettings.js'
 import { profileRoute } from './routes/profile.js'
 import { projectsRoute } from './routes/projects.js'
 import { runMigrations } from './db.js'
+import { siteServingMiddleware } from './middleware/siteServing.js'
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 
@@ -21,6 +22,9 @@ const PORT = process.env.PORT || 3001
 app.use(cors())
 app.use(morgan('dev'))
 app.use(express.json({ limit: '50mb' }))
+
+// Serve published sites on custom domains — must be before /api routes
+app.use(siteServingMiddleware)
 
 app.use('/api', authRoute)
 app.use('/api', userSettingsRoute)

@@ -85,6 +85,47 @@ router.delete('/projects/:id', requireAuth, async (req: Request, res: Response) 
   res.json({ ok: true })
 })
 
+// ─── Domain ───────────────────────────────────────────────────────────────────
+
+router.get('/projects/:id/domain', requireAuth, async (req: Request, res: Response) => {
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
+
+  const [row] = await db
+    .select({ customDomain: projects.customDomain })
+    .from(projects)
+    .where(eq(projects.id, p(req, 'id')))
+    .limit(1)
+
+  res.json({ customDomain: row?.customDomain ?? null })
+})
+
+router.put('/projects/:id/domain', requireAuth, async (req: Request, res: Response) => {
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
+
+  const { customDomain } = req.body as { customDomain: string | null }
+
+  // Check if domain is already taken by another project
+  if (customDomain) {
+    const [existing] = await db
+      .select({ id: projects.id })
+      .from(projects)
+      .where(eq(projects.customDomain, customDomain))
+      .limit(1)
+
+    if (existing && existing.id !== p(req, 'id')) {
+      res.status(409).json({ error: 'Este domínio já está em uso por outro projeto' })
+      return
+    }
+  }
+
+  await db
+    .update(projects)
+    .set({ customDomain: customDomain ?? null })
+    .where(eq(projects.id, p(req, 'id')))
+
+  res.json({ ok: true })
+})
+
 // ─── Palette ──────────────────────────────────────────────────────────────────
 
 router.get('/projects/:id/palette', requireAuth, async (req: Request, res: Response) => {

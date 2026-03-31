@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSetAtom, useAtomValue } from 'jotai'
-import { activeProjectIdAtom, messagesAtom, filesAtom, projectImagesAtom, checkpointsAtom, colorPaletteAtom, projectLoadedAtom, DEFAULT_PALETTE, type ProjectImage, type Checkpoint } from '@/atoms'
+import { activeProjectIdAtom, messagesAtom, filesAtom, projectImagesAtom, checkpointsAtom, colorPaletteAtom, customDomainAtom, projectLoadedAtom, DEFAULT_PALETTE, type ProjectImage, type Checkpoint } from '@/atoms'
 import { authTokenAtom } from '@/atoms/authAtoms'
 import { depsAtom } from '@/hooks/useFiles'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
@@ -26,6 +26,7 @@ export function useProjectLoader(projectId: string | undefined) {
   const setProjectImages = useSetAtom(projectImagesAtom)
   const setCheckpoints = useSetAtom(checkpointsAtom)
   const setColorPalette = useSetAtom(colorPaletteAtom)
+  const setCustomDomain = useSetAtom(customDomainAtom)
   const setProjectLoaded = useSetAtom(projectLoadedAtom)
   const [isReady, setIsReady] = useState(false)
   const loadedRef = useRef<string | null>(null)
@@ -45,11 +46,12 @@ export function useProjectLoader(projectId: string | undefined) {
       await waitForPersist()
 
       try {
-        // Images, checkpoints and palette always from PostgreSQL
-        const [rawImages, savedCheckpoints, savedPalette] = await Promise.all([
+        // Images, checkpoints, palette and domain always from PostgreSQL
+        const [rawImages, savedCheckpoints, savedPalette, domainData] = await Promise.all([
           api.get<ProjectImage[]>(`/api/projects/${projectId}/images`, headers),
           api.get<Checkpoint[]>(`/api/projects/${projectId}/checkpoints`, headers),
           api.get<typeof DEFAULT_PALETTE | null>(`/api/projects/${projectId}/palette`, headers),
+          api.get<{ customDomain: string | null }>(`/api/projects/${projectId}/domain`, headers),
         ])
 
         // Fetch data URLs for Sandpack preview (browser fetch works even when Sandpack iframe cannot)
@@ -102,6 +104,7 @@ export function useProjectLoader(projectId: string | undefined) {
           : files
 
         setColorPalette(savedPalette ?? DEFAULT_PALETTE)
+        setCustomDomain(domainData.customDomain)
         setProjectImages(savedImages)
         setCheckpoints([...savedCheckpoints].reverse())
         setMessages(messages as never)
