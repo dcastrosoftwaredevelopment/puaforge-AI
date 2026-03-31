@@ -1,12 +1,12 @@
 import { Router, type Request, type Response } from 'express'
-import { eq, and, asc } from 'drizzle-orm'
+import { eq, and, asc, ne } from 'drizzle-orm'
 import multer from 'multer'
 import { db } from '../db.js'
 import { projects, messages, projectFiles, projectImages, checkpoints, publishedSites } from '../schema.js'
 import { requireAuth } from '../middleware/auth.js'
 import { uploadFileToPocketBase, deleteFileFromPocketBase, savePublishedSite, fetchPublishedSite } from '../services/pocketbase.js'
-import { invalidateSiteCache } from '../middleware/siteServing.js'
-import { checkProjectLimit, checkDomainLimit, checkStorageLimit, checkCheckpointLimit, PlanLimitError } from '../services/plans.js'
+import { invalidateSiteCache, invalidateSubdomainCache } from '../middleware/siteServing.js'
+import { checkProjectLimit, checkDomainLimit, checkStorageLimit, checkCheckpointLimit, checkPublishAccess, PlanLimitError } from '../services/plans.js'
 
 function handlePlanLimit(err: unknown, res: Response): boolean {
   if (err instanceof PlanLimitError) {
@@ -39,7 +39,7 @@ async function assertOwnership(projectId: string, userId: string, res: Response)
     .limit(1)
 
   if (!project) {
-    res.status(404).json({ error: 'Projeto não encontrado' })
+    res.status(404).json({ code: 'PROJECT_NOT_FOUND', error: 'Project not found' })
     return false
   }
   return true
@@ -147,7 +147,7 @@ router.put('/projects/:id/domain', requireAuth, async (req: Request, res: Respon
 
       if (!ownedByUser) {
         // Domain belongs to another user — always block
-        res.status(409).json({ code: 'DOMAIN_TAKEN', error: 'Este domínio já está em uso' })
+        res.status(409).json({ code: 'DOMAIN_TAKEN', error: 'Domain is already in use' })
         return
       }
 
@@ -194,7 +194,7 @@ router.put('/projects/:id/palette', requireAuth, async (req: Request, res: Respo
 
   const { palette } = req.body as { palette: { id: string; name: string; value: string; locked?: boolean }[] }
   if (!Array.isArray(palette)) {
-    res.status(400).json({ error: 'palette must be an array' })
+    res.status(400).json({ code: 'INVALID_PALETTE', error: 'palette must be an array' })
     return
   }
 
@@ -314,7 +314,7 @@ router.post('/projects/:id/images', requireAuth, upload.single('file'), async (r
   if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
   if (!req.file) {
-    res.status(400).json({ error: 'Nenhum arquivo enviado' })
+    res.status(400).json({ code: 'NO_FILE', error: 'No file provided' })
     return
   }
 
@@ -438,19 +438,22 @@ router.get('/projects/:id/published', requireAuth, async (req: Request, res: Res
     .limit(1)
 
   if (!site) {
-    res.status(404).json({ error: 'Não publicado' })
+    res.status(404).json({ code: 'NOT_PUBLISHED', error: 'Site not published' })
     return
   }
 
-  const html = await fetchPublishedSite(site.pbRecordId)
-  if (!html) {
-    res.status(404).json({ error: 'Arquivo HTML não encontrado no PocketBase' })
-    return
-  }
+  // Fetch custom-domain HTML only if it has been published (pbRecordId non-empty)
+  const html = site.pbRecordId ? await fetchPublishedSite(site.pbRecordId) : null
 
-  res.json({ html, publishedAt: toMs(site.publishedAt) })
+  res.json({
+    html: html ?? null,
+    publishedAt: site.pbRecordId ? toMs(site.publishedAt) : null,
+    subdomainPublishedAt: site.subdomainPublishedAt ? toMs(site.subdomainPublishedAt) : null,
+    subdomain: site.subdomain ?? null,
+  })
 })
 
+/** Publish to custom domain (production) — independent from subdomain */
 router.put('/projects/:id/published', requireAuth, async (req: Request, res: Response) => {
   if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
@@ -460,7 +463,7 @@ router.put('/projects/:id/published', requireAuth, async (req: Request, res: Res
   try {
     pbRecordId = await savePublishedSite(p(req, 'id'), html)
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Erro ao salvar no PocketBase'
+    const message = err instanceof Error ? err.message : 'PocketBase save failed'
     console.error('[published] PocketBase save failed:', message)
     res.status(500).json({ code: 'POCKETBASE_ERROR', error: message })
     return
@@ -475,6 +478,133 @@ router.put('/projects/:id/published', requireAuth, async (req: Request, res: Res
     })
 
   res.json({ ok: true })
+})
+
+/** Publish to subdomain (temporary URL) — independent from custom domain */
+router.put('/projects/:id/published/subdomain', requireAuth, async (req: Request, res: Response) => {
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
+
+  // Must have a subdomain slug claimed first
+  const [site] = await db
+    .select({ subdomain: publishedSites.subdomain })
+    .from(publishedSites)
+    .where(eq(publishedSites.projectId, p(req, 'id')))
+    .limit(1)
+
+  if (!site?.subdomain) {
+    res.status(400).json({ code: 'NO_SUBDOMAIN', error: 'Claim a subdomain slug before publishing to it' })
+    return
+  }
+
+  const { html, publishedAt } = req.body as { html: string; publishedAt: number }
+
+  let subdomainPbRecordId: string
+  try {
+    subdomainPbRecordId = await savePublishedSite(p(req, 'id'), html)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'PocketBase save failed'
+    console.error('[published/subdomain] PocketBase save failed:', message)
+    res.status(500).json({ code: 'POCKETBASE_ERROR', error: message })
+    return
+  }
+
+  await db
+    .update(publishedSites)
+    .set({ subdomainPbRecordId, subdomainPublishedAt: new Date(publishedAt) })
+    .where(eq(publishedSites.projectId, p(req, 'id')))
+
+  invalidateSubdomainCache(site.subdomain)
+
+  res.json({ ok: true })
+})
+
+// ─── Subdomain ────────────────────────────────────────────────────────────────
+
+const SUBDOMAIN_REGEX = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/
+const RESERVED_SUBDOMAINS = new Set(['www', 'api', 'app', 'mail', 'ftp', 'admin', 'static', 'cdn', 'status', 'blog', 'docs'])
+
+function isValidSubdomain(slug: string): boolean {
+  return SUBDOMAIN_REGEX.test(slug) && !slug.includes('--') && !RESERVED_SUBDOMAINS.has(slug)
+}
+
+/** Check if a subdomain slug is available (public — no auth required) */
+router.get('/subdomains/check', async (req: Request, res: Response) => {
+  const slug = (req.query.slug as string ?? '').toLowerCase().trim()
+
+  if (!slug) {
+    res.status(400).json({ code: 'MISSING_SLUG', error: 'slug is required' })
+    return
+  }
+
+  if (!isValidSubdomain(slug)) {
+    res.json({ available: false, reason: 'invalid' })
+    return
+  }
+
+  const [existing] = await db
+    .select({ projectId: publishedSites.projectId })
+    .from(publishedSites)
+    .where(eq(publishedSites.subdomain, slug))
+    .limit(1)
+
+  res.json({ available: !existing })
+})
+
+/** Set or update the subdomain for a project */
+router.put('/projects/:id/subdomain', requireAuth, async (req: Request, res: Response) => {
+  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
+
+  const slug = (req.body.subdomain as string ?? '').toLowerCase().trim()
+
+  if (!slug) {
+    res.status(400).json({ code: 'MISSING_SUBDOMAIN', error: 'subdomain is required' })
+    return
+  }
+
+  if (!isValidSubdomain(slug)) {
+    res.status(400).json({ code: 'INVALID_SUBDOMAIN', error: 'Invalid subdomain' })
+    return
+  }
+
+  // Fetch current subdomain first — limit check only applies when claiming a new slot
+  const [existing] = await db
+    .select({ subdomain: publishedSites.subdomain })
+    .from(publishedSites)
+    .where(eq(publishedSites.projectId, p(req, 'id')))
+    .limit(1)
+
+  // Only enforce the publish limit when the project doesn't yet have a subdomain (new slot)
+  if (!existing?.subdomain) {
+    try { await checkPublishAccess(req.user!.userId) } catch (err) { if (handlePlanLimit(err, res)) return; throw err }
+  }
+
+  // Check uniqueness — exclude this project's own row
+  const [conflict] = await db
+    .select({ projectId: publishedSites.projectId })
+    .from(publishedSites)
+    .where(and(eq(publishedSites.subdomain, slug), ne(publishedSites.projectId, p(req, 'id'))))
+    .limit(1)
+
+  if (conflict) {
+    res.status(409).json({ code: 'SUBDOMAIN_TAKEN', error: 'Subdomain is already taken' })
+    return
+  }
+
+  // Invalidate old subdomain cache if changing
+  if (existing?.subdomain && existing.subdomain !== slug) {
+    invalidateSubdomainCache(existing.subdomain)
+  }
+
+  // Save — upsert so it works whether the site has been published or not yet
+  await db
+    .insert(publishedSites)
+    .values({ projectId: p(req, 'id'), pbRecordId: '', subdomain: slug, publishedAt: new Date(0) })
+    .onConflictDoUpdate({
+      target: publishedSites.projectId,
+      set: { subdomain: slug },
+    })
+
+  res.json({ ok: true, subdomain: slug })
 })
 
 export { router as projectsRoute }

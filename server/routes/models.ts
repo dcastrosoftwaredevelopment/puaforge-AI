@@ -24,11 +24,11 @@ router.get('/models', async (req: Request, res: Response) => {
   } catch (error) {
     if (error instanceof Anthropic.APIError) {
       console.error('[models] Anthropic API Error:', error.status, error.message)
-      res.status(error.status ?? 500).json({ error: error.message })
+      res.status(error.status ?? 500).json({ code: 'ANTHROPIC_ERROR', error: error.message })
     } else {
       const message = error instanceof Error ? error.message : 'Unknown error'
       console.error('[models] Error:', message)
-      res.status(500).json({ error: message })
+      res.status(500).json({ code: 'MODELS_ERROR', error: message })
     }
   }
 })

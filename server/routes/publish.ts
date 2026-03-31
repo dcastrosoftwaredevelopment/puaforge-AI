@@ -80,7 +80,7 @@ router.post('/publish', requireAuth, async (req: Request<object, object, Publish
   const { projectId, files } = req.body
 
   if (!projectId || !files) {
-    res.status(400).json({ error: 'projectId and files are required' })
+    res.status(400).json({ code: 'MISSING_FIELDS', error: 'projectId and files are required' })
     return
   }
 
@@ -179,7 +179,7 @@ ${bundledJs}
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     console.error('[publish] Build error:', message)
-    res.status(500).json({ error: message })
+    res.status(500).json({ code: 'BUILD_ERROR', error: message })
   }
 })
 

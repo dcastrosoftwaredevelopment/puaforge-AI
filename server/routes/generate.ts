@@ -78,7 +78,7 @@ router.post('/generate', async (req: Request<object, object, GenerateBody>, res:
   const { prompt, model, currentFiles, history, images } = req.body
 
   if (!prompt) {
-    res.status(400).json({ error: 'Prompt is required' })
+    res.status(400).json({ code: 'MISSING_PROMPT', error: 'Prompt is required' })
     return
   }
 
@@ -86,7 +86,7 @@ router.post('/generate', async (req: Request<object, object, GenerateBody>, res:
   console.log('[generate] API key from frontend:', apiKey ? 'yes' : 'no')
 
   if (!apiKey) {
-    res.status(401).json({ error: 'API key não configurada. Acesse Configurações para adicionar sua chave do Claude.' })
+    res.status(401).json({ code: 'MISSING_API_KEY', error: 'API key not configured. Go to Settings to add your Claude API key.' })
     return
   }
 
@@ -126,11 +126,11 @@ router.post('/generate', async (req: Request<object, object, GenerateBody>, res:
   } catch (error) {
     if (error instanceof Anthropic.APIError) {
       console.error('[generate] Anthropic API Error:', error.status, error.message)
-      res.status(error.status ?? 500).json({ error: error.message })
+      res.status(error.status ?? 500).json({ code: 'ANTHROPIC_ERROR', error: error.message })
     } else {
       const message = error instanceof Error ? error.message : 'Unknown error'
       console.error('[generate] Error:', message)
-      res.status(500).json({ error: message })
+      res.status(500).json({ code: 'GENERATE_ERROR', error: message })
     }
   }
 })

@@ -19,28 +19,75 @@ const siteCache = new LRUCache<string, CachedSite>({
   sizeCalculation: (entry) => entry.html.length,
 })
 
-/** Called by publish route to invalidate the cache for a domain immediately */
+/** Called by publish route to invalidate the cache for a custom domain immediately */
 export function invalidateSiteCache(domain: string) {
   siteCache.delete(domain)
 }
 
+/** Called by publish route to invalidate the cache for a subdomain immediately */
+export function invalidateSubdomainCache(subdomain: string) {
+  siteCache.delete(`sub:${subdomain}`)
+}
+
+async function serveSite(cacheKey: string, pbRecordId: string, projectId: string, res: Response) {
+  const html = await fetchPublishedSite(pbRecordId)
+  if (!html) {
+    res.status(404).send('<html><body><p>Arquivo do site não encontrado.</p></body></html>')
+    return
+  }
+  siteCache.set(cacheKey, { html, projectId })
+  res.setHeader('Content-Type', 'text/html; charset=utf-8')
+  res.setHeader('Cache-Control', 'public, max-age=300')
+  res.setHeader('X-Served-By', 'PuaForge')
+  res.send(html)
+}
+
 /**
- * Intercepts requests from custom domains and serves the published HTML.
+ * Intercepts requests from custom domains and subdomains, serving the published HTML.
  * Must be mounted BEFORE all /api routes in server/index.ts.
  *
- * Detection: if the Host header does not match APP_DOMAIN (env var),
- * treat it as a custom project domain.
+ * - Subdomain of APP_DOMAIN (e.g. mysite.puaforge.com) → look up by subdomain column
+ * - Any other domain (e.g. mysite.com) → look up by customDomain column
+ * - The root APP_DOMAIN itself always passes through to the app
  */
 export async function siteServingMiddleware(req: Request, res: Response, next: NextFunction) {
   const appDomain = process.env.APP_DOMAIN ?? ''
   const host = (req.hostname ?? '').toLowerCase().replace(/:\d+$/, '')
 
-  // Pass through if it's the app's own domain or no domain configured
-  if (!host || !appDomain || host === appDomain || host.endsWith(`.${appDomain}`)) {
-    return next()
+  // Always pass through root app domain
+  if (!host || !appDomain || host === appDomain) return next()
+
+  // Handle subdomains of app domain (e.g. mysite.puaforge.com)
+  if (host.endsWith(`.${appDomain}`)) {
+    const subdomain = host.slice(0, host.length - appDomain.length - 1)
+    const cacheKey = `sub:${subdomain}`
+
+    const cached = siteCache.get(cacheKey)
+    if (cached) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8')
+      res.setHeader('Cache-Control', 'public, max-age=300')
+      res.setHeader('X-Served-By', 'PuaForge')
+      return res.send(cached.html)
+    }
+
+    const [site] = await db
+      .select({ subdomainPbRecordId: publishedSites.subdomainPbRecordId, projectId: publishedSites.projectId })
+      .from(publishedSites)
+      .where(eq(publishedSites.subdomain, subdomain))
+      .limit(1)
+
+    if (!site) return next()
+
+    if (!site.subdomainPbRecordId) {
+      res.status(404).send('<html><body><p>Este site ainda não foi publicado.</p></body></html>')
+      return
+    }
+
+    await serveSite(cacheKey, site.subdomainPbRecordId, site.projectId, res)
+    return
   }
 
-  // Check cache first
+  // Handle fully custom domains (e.g. mysite.com)
   const cached = siteCache.get(host)
   if (cached) {
     res.setHeader('Content-Type', 'text/html; charset=utf-8')
@@ -49,7 +96,6 @@ export async function siteServingMiddleware(req: Request, res: Response, next: N
     return res.send(cached.html)
   }
 
-  // Lookup project by custom domain
   const [project] = await db
     .select({ id: projects.id })
     .from(projects)
@@ -58,7 +104,6 @@ export async function siteServingMiddleware(req: Request, res: Response, next: N
 
   if (!project) return next()
 
-  // Get PocketBase record ID from PostgreSQL
   const [site] = await db
     .select({ pbRecordId: publishedSites.pbRecordId })
     .from(publishedSites)
@@ -70,17 +115,5 @@ export async function siteServingMiddleware(req: Request, res: Response, next: N
     return
   }
 
-  // Fetch HTML from PocketBase
-  const html = await fetchPublishedSite(site.pbRecordId)
-  if (!html) {
-    res.status(404).send('<html><body><p>Arquivo do site não encontrado.</p></body></html>')
-    return
-  }
-
-  siteCache.set(host, { html, projectId: project.id })
-
-  res.setHeader('Content-Type', 'text/html; charset=utf-8')
-  res.setHeader('Cache-Control', 'public, max-age=300')
-  res.setHeader('X-Served-By', 'PuaForge')
-  res.send(html)
+  await serveSite(host, site.pbRecordId, project.id, res)
 }

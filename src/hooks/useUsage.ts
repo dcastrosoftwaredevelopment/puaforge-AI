@@ -62,7 +62,7 @@ export interface PlanLimits {
   maxImportsPerMonth: number
   maxStorageBytes: number
   maxCheckpointsPerProject: number
-  canPublish: boolean
+  maxPublishedSites: number
 }
 
 export type PlansConfig = Record<'free' | 'indie' | 'pro', PlanLimits>
@@ -76,6 +76,7 @@ function deserializeLimits(raw: PlanLimits): PlanLimits {
     maxImportsPerMonth: inf(raw.maxImportsPerMonth),
     maxStorageBytes: inf(raw.maxStorageBytes),
     maxCheckpointsPerProject: inf(raw.maxCheckpointsPerProject),
+    maxPublishedSites: inf(raw.maxPublishedSites),
   }
 }
 
@@ -100,11 +101,12 @@ export function usePlansConfig() {
 export function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes}B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)}KB`
-  return `${(bytes / 1024 / 1024).toFixed(1)}MB`
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(0)}MB`
+  return `${(bytes / 1024 / 1024 / 1024).toFixed(1)}GB`
 }
 
 export function formatLimit(limit: number, unit?: string): string {
-  if (limit === Infinity || limit >= 1e9) return '∞'
+  if (limit === Infinity) return '∞'
   if (unit === 'bytes') return formatBytes(limit)
   return String(limit)
 }

@@ -1,24 +1,43 @@
 import { useState, useRef, useEffect } from 'react'
 
+declare const __APP_DOMAIN__: string
 declare const __SERVER_IP__: string
-import { Globe, Loader2, ExternalLink, Check, AlertTriangle } from 'lucide-react'
+
+import { Globe, Loader2, ExternalLink, Check, AlertTriangle, Link } from 'lucide-react'
 import { useTranslation, Trans } from 'react-i18next'
 import { usePublish } from '@/hooks/usePublish'
 import { useCustomDomain } from '@/hooks/useCustomDomain'
+import { useSubdomain } from '@/hooks/useSubdomain'
 import { ApiError } from '@/services/api'
 import Tooltip from '@/components/ui/Tooltip'
 
 export default function PublishButton() {
-  const { isPublishing, publishedAt, error, publish, openPublished } = usePublish()
+  const {
+    isBusy,
+    isPublishingToDomain,
+    isPublishingToSubdomain,
+    publishedAt,
+    subdomainPublishedAt,
+    subdomain,
+    domainError,
+    subdomainError,
+    publish,
+    publishToSubdomain,
+    openPublished,
+    onSubdomainSaved,
+  } = usePublish()
   const { customDomain, saveDomain } = useCustomDomain()
+  const { slugInput, status, saving, saveError, handleSlugChange, saveSubdomain } = useSubdomain(subdomain, onSubdomainSaved)
   const { t, i18n } = useTranslation()
   const [showPanel, setShowPanel] = useState(false)
   const [domainInput, setDomainInput] = useState('')
   const [savingDomain, setSavingDomain] = useState(false)
-  const [domainError, setDomainError] = useState<string | null>(null)
+  const [domainInputError, setDomainInputError] = useState<string | null>(null)
   const [domainSaved, setDomainSaved] = useState(false)
   const [ownProjectConflict, setOwnProjectConflict] = useState<string | null>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+
+  const appDomain = __APP_DOMAIN__
 
   // Sync input with current domain when panel opens
   useEffect(() => {
@@ -36,14 +55,9 @@ export default function PublishButton() {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [showPanel])
 
-  const handlePublish = async () => {
-    await publish()
-    setShowPanel(true)
-  }
-
   const handleSaveDomain = async (force = false) => {
     setSavingDomain(true)
-    setDomainError(null)
+    setDomainInputError(null)
     setOwnProjectConflict(null)
     try {
       await saveDomain(domainInput || null, force)
@@ -53,9 +67,9 @@ export default function PublishButton() {
       if (e instanceof ApiError && e.code === 'DOMAIN_OWN_PROJECT') {
         setOwnProjectConflict(e.data?.conflictingProjectName as string ?? '')
       } else if (e instanceof ApiError && e.status === 409) {
-        setDomainError(t('publish.domainTaken'))
+        setDomainInputError(t('publish.domainTaken'))
       } else {
-        setDomainError(e instanceof Error ? e.message : t('publish.domainTaken'))
+        setDomainInputError(t('publish.domainSaveError'))
       }
     } finally {
       setSavingDomain(false)
@@ -70,16 +84,34 @@ export default function PublishButton() {
       minute: '2-digit',
     })
 
+  const slugStatusColor = {
+    idle: 'text-text-muted',
+    checking: 'text-text-muted',
+    available: 'text-green-400',
+    taken: 'text-forge-terracotta',
+    invalid: 'text-forge-terracotta',
+    already_set: 'text-text-muted',
+  }[status]
+
+  const slugStatusLabel = {
+    idle: '',
+    checking: t('publish.subdomainChecking'),
+    available: t('publish.subdomainAvailable'),
+    taken: t('publish.subdomainTaken'),
+    invalid: t('publish.subdomainInvalid'),
+    already_set: '',
+  }[status]
+
   return (
     <div className="relative" ref={panelRef}>
       <Tooltip content={t('publish.tooltip')} side="bottom" align="right">
         <button
           onClick={() => setShowPanel(!showPanel)}
-          disabled={isPublishing}
+          disabled={isBusy}
           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20 hover:bg-vibe-blue/20 disabled:opacity-50 transition cursor-pointer"
         >
-          {isPublishing ? <Loader2 size={13} className="animate-spin" /> : <Globe size={13} />}
-          {isPublishing ? t('publish.publishing') : t('publish.publish')}
+          {isBusy ? <Loader2 size={13} className="animate-spin" /> : <Globe size={13} />}
+          {t('publish.publish')}
         </button>
       </Tooltip>
 
@@ -87,7 +119,94 @@ export default function PublishButton() {
         <div className="absolute right-0 top-full mt-1 w-80 bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden">
           <div className="p-3 space-y-3">
 
-            {/* Domain config */}
+            {/* ── Subdomain section (temporary URL) ── */}
+            {appDomain && (
+              <>
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-medium text-text-secondary">{t('publish.subdomainLabel')}</span>
+
+                  {/* Active subdomain link */}
+                  {subdomain && !slugInput && (
+                    <a
+                      href={`https://${subdomain}.${appDomain}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20 hover:bg-vibe-blue/20 transition"
+                    >
+                      <ExternalLink size={12} />
+                      {subdomain}.{appDomain}
+                    </a>
+                  )}
+
+                  {/* Input to set or change subdomain */}
+                  <div className="flex gap-1.5">
+                    <div className="flex-1 flex items-center bg-bg-elevated border border-border-subtle rounded-lg overflow-hidden focus-within:border-vibe-blue/40 transition">
+                      <input
+                        type="text"
+                        value={slugInput}
+                        onChange={(e) => handleSlugChange(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' && status === 'available') void saveSubdomain() }}
+                        placeholder={subdomain ?? t('publish.subdomainPlaceholder')}
+                        className="flex-1 bg-transparent px-2.5 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none font-mono min-w-0"
+                        maxLength={63}
+                      />
+                      <span className="px-2 text-[10px] text-text-muted shrink-0 border-l border-border-subtle py-1.5 bg-bg-primary">
+                        .{appDomain}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => void saveSubdomain()}
+                      disabled={saving || status !== 'available'}
+                      className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary disabled:opacity-40 transition cursor-pointer"
+                    >
+                      {saving ? <Loader2 size={12} className="animate-spin" /> : <Link size={12} />}
+                    </button>
+                  </div>
+                  {slugStatusLabel && (
+                    <p className={`text-[10px] ${slugStatusColor}`}>{slugStatusLabel}</p>
+                  )}
+                  {saveError && (
+                    <p className="text-[10px] text-forge-terracotta">{saveError}</p>
+                  )}
+                  {!subdomain && (
+                    <p className="text-[10px] text-text-muted">{t('publish.subdomainHint')}</p>
+                  )}
+
+                  {/* Subdomain publish button */}
+                  {subdomain && (
+                    <>
+                      {subdomainError && (
+                        <div className="text-xs text-forge-terracotta bg-forge-terracotta/10 border border-forge-terracotta/20 rounded-lg px-3 py-2">
+                          {subdomainError}
+                        </div>
+                      )}
+                      {subdomainPublishedAt && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-text-muted">{t('publish.lastPublished')}</span>
+                          <span className="text-[10px] text-text-muted">{formatDate(subdomainPublishedAt)}</span>
+                        </div>
+                      )}
+                      <button
+                        onClick={() => void publishToSubdomain()}
+                        disabled={isBusy}
+                        className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20 hover:bg-vibe-blue/20 disabled:opacity-50 transition cursor-pointer"
+                      >
+                        {isPublishingToSubdomain ? <Loader2 size={12} className="animate-spin" /> : <Globe size={12} />}
+                        {isPublishingToSubdomain
+                          ? t('publish.publishing')
+                          : subdomainPublishedAt
+                            ? t('publish.republish')
+                            : t('publish.publishNow')}
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                <div className="border-t border-border-subtle" />
+              </>
+            )}
+
+            {/* ── Custom domain section ── */}
             <div className="space-y-1.5">
               <span className="text-[11px] font-medium text-text-secondary">{t('publish.domainLabel')}</span>
               <div className="flex gap-1.5">
@@ -107,8 +226,8 @@ export default function PublishButton() {
                   {savingDomain ? <Loader2 size={12} className="animate-spin" /> : domainSaved ? <Check size={12} className="text-vibe-blue" /> : t('publish.saveDomain')}
                 </button>
               </div>
-              {domainError && (
-                <p className="text-[10px] text-forge-terracotta">{domainError}</p>
+              {domainInputError && (
+                <p className="text-[10px] text-forge-terracotta">{domainInputError}</p>
               )}
               {ownProjectConflict !== null && (
                 <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-2 space-y-2">
@@ -135,6 +254,17 @@ export default function PublishButton() {
                   </div>
                 </div>
               )}
+              {customDomain && (
+                <a
+                  href={`https://${customDomain}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition"
+                >
+                  <ExternalLink size={12} />
+                  {customDomain}
+                </a>
+              )}
               {__SERVER_IP__ ? (
                 <p className="text-[10px] text-text-muted leading-relaxed">
                   <Trans
@@ -153,52 +283,41 @@ export default function PublishButton() {
                   />
                 </p>
               )}
-            </div>
 
-            <div className="border-t border-border-subtle" />
-
-            {/* Publish action */}
-            {error && (
-              <div className="text-xs text-forge-terracotta bg-forge-terracotta/10 border border-forge-terracotta/20 rounded-lg px-3 py-2">
-                {error}
-              </div>
-            )}
-
-            {publishedAt && (
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-medium text-text-secondary">{t('publish.lastPublished')}</span>
-                  <span className="text-[10px] text-text-muted">{formatDate(publishedAt)}</span>
+              {/* Custom domain publish button */}
+              {domainError && (
+                <div className="text-xs text-forge-terracotta bg-forge-terracotta/10 border border-forge-terracotta/20 rounded-lg px-3 py-2">
+                  {domainError}
                 </div>
-                {customDomain && (
-                  <a
-                    href={`https://${customDomain}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20 hover:bg-vibe-blue/20 transition"
+              )}
+              {publishedAt && (
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-text-muted">{t('publish.lastPublished')}</span>
+                    <span className="text-[10px] text-text-muted">{formatDate(publishedAt)}</span>
+                  </div>
+                  <button
+                    onClick={openPublished}
+                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition cursor-pointer"
                   >
                     <ExternalLink size={12} />
-                    {customDomain}
-                  </a>
-                )}
-                <button
-                  onClick={openPublished}
-                  className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition cursor-pointer"
-                >
-                  <ExternalLink size={12} />
-                  {t('publish.openLocal')}
-                </button>
-              </div>
-            )}
-
-            <button
-              onClick={handlePublish}
-              disabled={isPublishing}
-              className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20 hover:bg-vibe-blue/20 disabled:opacity-50 transition cursor-pointer"
-            >
-              {isPublishing ? <Loader2 size={12} className="animate-spin" /> : <Globe size={12} />}
-              {isPublishing ? t('publish.publishing') : publishedAt ? t('publish.republish') : t('publish.publishNow')}
-            </button>
+                    {t('publish.openLocal')}
+                  </button>
+                </div>
+              )}
+              <button
+                onClick={() => void publish()}
+                disabled={isBusy}
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary disabled:opacity-50 transition cursor-pointer"
+              >
+                {isPublishingToDomain ? <Loader2 size={12} className="animate-spin" /> : <Globe size={12} />}
+                {isPublishingToDomain
+                  ? t('publish.publishing')
+                  : publishedAt
+                    ? t('publish.republish')
+                    : t('publish.publishNow')}
+              </button>
+            </div>
 
           </div>
         </div>

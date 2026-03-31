@@ -43,7 +43,7 @@ Acesse o painel admin em `http://<seu-servidor>:8090/_/` e faça login com as cr
 4. Na aba **API Rules**, deixe **todas as regras como `null`** — apenas o servidor acessa esta collection via admin token
 5. Clique em **Save**
 
-> Esta collection armazena o HTML buildado de cada projeto publicado. O PostgreSQL guarda apenas o ID do record do PocketBase.
+> Esta collection armazena os HTMLs publicados. Cada publicação cria um novo record — o Postgres guarda o ID do record mais recente, separando o domínio temporário (subdomain) do custom domain. Não é necessário alterar esta collection ao adicionar essa funcionalidade.
 
 ---
 
