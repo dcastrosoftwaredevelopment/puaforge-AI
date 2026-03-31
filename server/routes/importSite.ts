@@ -3,13 +3,42 @@ import { requireAuth } from '../middleware/auth.js'
 
 const router = Router()
 
+interface ExtractedDataUrl {
+  base64: string
+  mediaType: string
+  index: number
+}
+
+/**
+ * Extracts inline base64 data URLs from img src attributes.
+ * Returns them separately so they can be uploaded as project images,
+ * and replaces them in the HTML with a placeholder to avoid sending
+ * huge base64 blobs to the AI.
+ */
+function extractAndStripDataUrls(html: string): { html: string; dataImages: ExtractedDataUrl[] } {
+  const dataImages: ExtractedDataUrl[] = []
+  let index = 0
+
+  const result = html.replace(
+    /(<img[^>]+src=["'])(data:([^;]+);base64,([^"']+))(["'][^>]*>)/gi,
+    (_match, before, _dataUrl, mediaType, base64, after) => {
+      dataImages.push({ base64, mediaType, index: index++ })
+      return `${before}[data-image-${index - 1}]${after}`
+    },
+  )
+
+  return { html: result, dataImages }
+}
+
 function extractImageUrls(html: string, baseUrl?: string): string[] {
   const urls = new Set<string>()
 
-  // <img src="...">
+  // <img src="..."> (skip data URLs — handled by extractAndStripDataUrls)
   const imgSrcRe = /<img[^>]+src=["']([^"'\s>]+)["']/gi
   let m: RegExpExecArray | null
-  while ((m = imgSrcRe.exec(html)) !== null) urls.add(m[1])
+  while ((m = imgSrcRe.exec(html)) !== null) {
+    if (!m[1].startsWith('data:')) urls.add(m[1])
+  }
 
   // url(...) in <style> tags and style="" attributes
   const cssUrlRe = /url\(["']?([^"')]+)["']?\)/gi
@@ -142,7 +171,12 @@ router.post('/import-site', requireAuth, async (req, res) => {
       return
     }
 
-    const imageUrls = extractImageUrls(html, baseUrl).slice(0, 25)
+    // Extract inline base64 data URLs before everything else — strip them from
+    // the HTML so they don't get sent to the AI as huge blobs, and include them
+    // as proper project images to be uploaded.
+    const { html: htmlWithoutDataUrls, dataImages } = extractAndStripDataUrls(html)
+
+    const imageUrls = extractImageUrls(htmlWithoutDataUrls, baseUrl).slice(0, 25)
 
     const settled = await Promise.allSettled(
       imageUrls.map(async (imgUrl, i) => {
@@ -167,11 +201,23 @@ router.post('/import-site', requireAuth, async (req, res) => {
       }),
     )
 
-    const images = settled
+    const fetchedImages = settled
       .map((r) => (r.status === 'fulfilled' ? r.value : null))
       .filter((x): x is NonNullable<typeof x> => x !== null)
 
-    const { html: cleanedHtml, isSpa } = cleanHtml(html)
+    // Include extracted data URL images (capped to avoid massive payloads)
+    const dataUrlImages = dataImages
+      .filter((d) => Buffer.from(d.base64, 'base64').length <= 4 * 1024 * 1024)
+      .map((d, i) => ({
+        originalUrl: `data:${d.mediaType};base64,...`,
+        base64: d.base64,
+        mediaType: d.mediaType,
+        suggestedName: `image-inline-${i + 1}.${d.mediaType.split('/')[1] ?? 'jpg'}`,
+      }))
+
+    const images = [...fetchedImages, ...dataUrlImages]
+
+    const { html: cleanedHtml, isSpa } = cleanHtml(htmlWithoutDataUrls)
     const warning = isSpa
       ? 'This page appears to be a JavaScript-rendered app (SPA). No static HTML content was found — the AI will have limited information to work with.'
       : undefined
