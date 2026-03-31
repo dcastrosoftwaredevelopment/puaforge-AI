@@ -10,6 +10,7 @@ import { useProjectLoader } from '@/hooks/useProjectLoader'
 import { useDraft } from '@/hooks/useDraft'
 import { useMessageSender } from '@/hooks/useMessageSender'
 import { pendingImportAtom } from '@/atoms'
+import { extractDependencies } from '@/services/fileParser'
 import { TAILWIND_HTML } from '@/utils/defaultFiles'
 import EditorHeader from '@/components/layout/EditorHeader'
 import SandpackContent from '@/components/layout/SandpackContent'
@@ -27,9 +28,17 @@ export default function EditorView() {
   useDraft()
   const { chatWidth, setChatWidth } = usePanelSizes()
 
+  const { setDeps } = useFiles()
+
   const pendingImport = useAtomValue(pendingImportAtom)
   const setPendingImport = useSetAtom(pendingImportAtom)
   const { sendMessage } = useMessageSender()
+
+  // Keep deps in sync when files change (e.g. manual edits adding new imports)
+  useEffect(() => {
+    const newDeps = extractDependencies(files)
+    if (Object.keys(newDeps).length > 0) setDeps((prev) => ({ ...prev, ...newDeps }))
+  }, [files, setDeps])
 
   useEffect(() => {
     if (!projectReady || !pendingImport || pendingImport.projectId !== projectId) return
