@@ -49,6 +49,7 @@ export const en = {
     draftTooltip: 'Changes saved locally. Click **Save** to keep your modifications.',
     draftLabel: 'Local draft',
     discardTooltip: 'Discard draft and revert to saved version',
+    saveDraft: 'Save draft',
     discardTitle: 'Discard draft',
     discardMessage: 'This will delete all unsaved local changes and revert the project to the last saved version. This action cannot be undone.',
     openChat: 'Open chat',

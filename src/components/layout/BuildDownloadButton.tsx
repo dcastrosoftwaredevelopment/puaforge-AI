@@ -6,7 +6,7 @@ import { useApiCall, HttpMethod } from '@/hooks/useApiCall'
 import JSZip from 'jszip'
 import Tooltip from '@/components/ui/Tooltip'
 
-export default function BuildDownloadButton() {
+export default function BuildDownloadButton({ menuItem = false }: { menuItem?: boolean }) {
   const { files } = useFiles()
   const { activeProjectId, activeProject } = useProjects()
   const { t } = useTranslation()
@@ -37,16 +37,24 @@ export default function BuildDownloadButton() {
     URL.revokeObjectURL(url)
   }
 
+  const button = (
+    <button
+      onClick={handleDownload}
+      disabled={loading}
+      className={menuItem
+        ? 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-elevated disabled:opacity-40 transition cursor-pointer'
+        : 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-text-secondary border border-border-subtle hover:text-text-primary hover:border-border-default bg-bg-tertiary transition disabled:opacity-40 cursor-pointer'}
+    >
+      {loading ? <Loader2 size={14} className="animate-spin" /> : <PackageCheck size={14} className={menuItem ? 'text-forge-terracotta/60' : ''} />}
+      {t('editor.build')}
+    </button>
+  )
+
+  if (menuItem) return button
+
   return (
     <Tooltip content={t('editor.buildTooltip')} side="bottom" align="right">
-      <button
-        onClick={handleDownload}
-        disabled={loading}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-text-secondary border border-border-subtle hover:text-text-primary hover:border-border-default bg-bg-tertiary transition disabled:opacity-40 cursor-pointer"
-      >
-        {loading ? <Loader2 size={14} className="animate-spin" /> : <PackageCheck size={14} />}
-        Build
-      </button>
+      {button}
     </Tooltip>
   )
 }
