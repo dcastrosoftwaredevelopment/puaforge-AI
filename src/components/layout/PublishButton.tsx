@@ -301,14 +301,6 @@ export default function PublishButton() {
                 </div>
               )}
               <button
-                onClick={() => void openLocalPreview()}
-                disabled={isGeneratingPreview}
-                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary disabled:opacity-50 transition cursor-pointer"
-              >
-                {isGeneratingPreview ? <Loader2 size={12} className="animate-spin" /> : <ExternalLink size={12} />}
-                {t('publish.openLocal')}
-              </button>
-              <button
                 onClick={() => void publish()}
                 disabled={isBusy}
                 className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary disabled:opacity-50 transition cursor-pointer"
@@ -319,6 +311,20 @@ export default function PublishButton() {
                   : publishedAt
                     ? t('publish.republish')
                     : t('publish.publishNow')}
+              </button>
+            </div>
+
+            {/* ── Local preview section ── */}
+            <div className="border-t border-border-subtle" />
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-medium text-text-secondary">{t('publish.localPreviewLabel')}</span>
+              <button
+                onClick={() => void openLocalPreview()}
+                disabled={isGeneratingPreview}
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary disabled:opacity-50 transition cursor-pointer"
+              >
+                {isGeneratingPreview ? <Loader2 size={12} className="animate-spin" /> : <ExternalLink size={12} />}
+                {t('publish.openLocal')}
               </button>
             </div>
 
