@@ -91,6 +91,22 @@ export default function SandpackContent() {
         style={isSplit ? { width: `${editorFraction * 100}%` } : { flex: 1 }}
       >
         {isDirty && <EditBar onSave={saveEdits} onDiscard={discardEdits} />}
+        <div className="flex items-center justify-end gap-1 px-2 py-1 border-b border-border-subtle shrink-0 bg-bg-secondary">
+          <button
+            onClick={() => setShowExplorer((v) => !v)}
+            className={`p-1.5 rounded-md transition cursor-pointer ${showExplorer ? 'text-text-primary bg-bg-elevated' : 'text-text-muted hover:text-text-primary hover:bg-bg-elevated'}`}
+            title="Arquivos"
+          >
+            <PanelLeft size={13} />
+          </button>
+          <button
+            onClick={() => setFindOpen((v) => !v)}
+            className="p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+            title="Buscar em arquivos (Ctrl+Shift+F)"
+          >
+            <Search size={13} />
+          </button>
+        </div>
         <div className="relative flex flex-1 min-h-0">
           {showExplorer && <SandpackFileExplorer />}
           <SandpackCodeEditor
@@ -99,22 +115,6 @@ export default function SandpackContent() {
             showLineNumbers
             showInlineErrors
           />
-          <div className="absolute top-1.5 right-2 z-10 flex items-center gap-1">
-            <button
-              onClick={() => setShowExplorer((v) => !v)}
-              className={`p-1.5 rounded-md transition cursor-pointer ${showExplorer ? 'text-text-primary bg-bg-elevated' : 'text-text-muted hover:text-text-primary hover:bg-bg-elevated'}`}
-              title="Arquivos"
-            >
-              <PanelLeft size={13} />
-            </button>
-            <button
-              onClick={() => setFindOpen((v) => !v)}
-              className="p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
-              title="Buscar em arquivos (Ctrl+Shift+F)"
-            >
-              <Search size={13} />
-            </button>
-          </div>
           <FindInFiles open={findOpen} onClose={() => setFindOpen(false)} />
         </div>
       </div>
