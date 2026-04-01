@@ -15,7 +15,7 @@ import { TAILWIND_HTML, buildPackageJson } from '@/utils/defaultFiles'
 import EditorHeader from '@/components/layout/EditorHeader'
 import SandpackContent from '@/components/layout/SandpackContent'
 import ResizeHandle from '@/components/layout/ResizeHandle'
-import FloatingChat, { DockedChat } from '@/components/chat/FloatingChat'
+import FloatingChat, { DockedChat, MobileChatPanel } from '@/components/chat/FloatingChat'
 import { useViewMode } from '@/hooks/useViewMode'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
@@ -136,23 +136,27 @@ export default function EditorView() {
       <EditorHeader />
 
       <div className="flex-1 overflow-hidden flex">
-        <main className="flex-1 min-w-0">
-          <SandpackProvider
-            key={sandpackKey}
-            files={{ '/index.html': TAILWIND_HTML, ...files }}
-            theme="dark"
-            template="react-ts"
-            customSetup={{
-              dependencies: deps,
-            }}
-            options={{
-              activeFile: '/App.tsx',
-              externalResources: ['https://cdn.tailwindcss.com'],
-            }}
-          >
-            <SandpackContent />
-          </SandpackProvider>
-        </main>
+        {isMobile && isChatOpen ? (
+          <MobileChatPanel />
+        ) : (
+          <main className="flex-1 min-w-0">
+            <SandpackProvider
+              key={sandpackKey}
+              files={{ '/index.html': TAILWIND_HTML, ...files }}
+              theme="dark"
+              template="react-ts"
+              customSetup={{
+                dependencies: deps,
+              }}
+              options={{
+                activeFile: '/App.tsx',
+                externalResources: ['https://cdn.tailwindcss.com'],
+              }}
+            >
+              <SandpackContent />
+            </SandpackProvider>
+          </main>
+        )}
 
         {!isMobile && isDocked && !isChatOpen && (
           <div className="shrink-0 w-8 relative border-l border-border-subtle bg-bg-secondary">
