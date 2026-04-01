@@ -29,8 +29,8 @@ function MobileTabBar() {
   return (
     <div className="flex md:hidden shrink-0 border-t border-border-subtle bg-bg-secondary">
       {([
-        { tab: 'preview', icon: <Eye size={18} />, label: 'Preview' },
         { tab: 'editor', icon: <Code2 size={18} />, label: 'Code' },
+        { tab: 'preview', icon: <Eye size={18} />, label: 'Preview' },
         { tab: 'chat', icon: <MessageSquare size={18} />, label: 'Chat' },
       ] as const).map(({ tab, icon, label }) => (
         <button
