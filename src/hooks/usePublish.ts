@@ -6,6 +6,7 @@ import { authTokenAtom } from '@/atoms/authAtoms'
 import { useFiles } from '@/hooks/useFiles'
 import { useApiCall, HttpMethod } from '@/hooks/useApiCall'
 import { api } from '@/services/api'
+import { db, dbReady } from '@/services/db'
 import { usePlanLimit } from '@/hooks/usePlanLimit'
 import { track } from '@/lib/analytics'
 
@@ -17,11 +18,12 @@ export function usePublish() {
   const [publishedAt, setPublishedAt] = useState<number | null>(null)
   const [subdomainPublishedAt, setSubdomainPublishedAt] = useState<number | null>(null)
   const [subdomain, setSubdomain] = useState<string | null>(null)
+  const [localPublishedAt, setLocalPublishedAt] = useState<number | null>(null)
   const [domainSaveError, setDomainSaveError] = useState<string | null>(null)
   const [subdomainSaveError, setSubdomainSaveError] = useState<string | null>(null)
   const [isSavingToDomain, setIsSavingToDomain] = useState(false)
   const [isSavingToSubdomain, setIsSavingToSubdomain] = useState(false)
-  const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
+  const [isPublishingLocally, setIsPublishingLocally] = useState(false)
 
   const withPlanLimit = usePlanLimit()
   const { loading: isGenerating, execute: callPublish } = useApiCall<
@@ -38,11 +40,12 @@ export function usePublish() {
   const isPublishingToSubdomain = isSavingToSubdomain
   const isBusy = isGenerating || isSavingToDomain || isSavingToSubdomain
 
-  // Load published state from API on project change
+  // Load remote published state + local IndexedDB state on project change
   useEffect(() => {
     if (!activeProjectId || !authHeaders) return
     setDomainSaveError(null)
     setSubdomainSaveError(null)
+
     api.get<{ publishedAt: number | null; subdomainPublishedAt: number | null; subdomain: string | null }>(
       `/api/projects/${activeProjectId}/published`,
       authHeaders,
@@ -57,6 +60,10 @@ export function usePublish() {
         setSubdomainPublishedAt(null)
         setSubdomain(null)
       })
+
+    dbReady.then(() => db.publishedSites.get(activeProjectId)).then((local) => {
+      setLocalPublishedAt(local?.publishedAt ?? null)
+    }).catch(() => {})
   }, [activeProjectId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   /** Publish to custom domain (production) */
@@ -107,25 +114,36 @@ export function usePublish() {
     }
   }, [activeProjectId, authHeaders, files, isBusy, callPublish, withPlanLimit, t, subdomainPublishedAt])
 
-  /** Generate HTML from current code and open locally — no DB write, no plan limit */
-  const openLocalPreview = useCallback(async () => {
-    if (!activeProjectId || !authHeaders || isGeneratingPreview) return
-    setIsGeneratingPreview(true)
+  /** Generate HTML and save to IndexedDB — no server write, no plan limit */
+  const publishLocally = useCallback(async () => {
+    if (!activeProjectId || !authHeaders || isPublishingLocally) return
+    setIsPublishingLocally(true)
     try {
-      const data = await api.post<{ html: string }>(
+      const data = await api.post<{ html: string; publishedAt: number }>(
         '/api/publish',
         { projectId: activeProjectId, files },
         authHeaders,
       )
-      const blob = new Blob([data.html], { type: 'text/html' })
-      const url = URL.createObjectURL(blob)
-      window.open(url, '_blank')
+      await dbReady
+      await db.publishedSites.put({ projectId: activeProjectId, html: data.html, publishedAt: data.publishedAt })
+      setLocalPublishedAt(data.publishedAt)
     } catch (e) {
-      console.error('[publish] local preview error:', e)
+      console.error('[publish] local save error:', e)
     } finally {
-      setIsGeneratingPreview(false)
+      setIsPublishingLocally(false)
     }
-  }, [activeProjectId, authHeaders, files, isGeneratingPreview])
+  }, [activeProjectId, authHeaders, files, isPublishingLocally])
+
+  /** Open the locally saved HTML as a blob URL */
+  const openLocalPreview = useCallback(async () => {
+    if (!activeProjectId) return
+    await dbReady
+    const local = await db.publishedSites.get(activeProjectId)
+    if (!local?.html) return
+    const blob = new Blob([local.html], { type: 'text/html' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank')
+  }, [activeProjectId])
 
   // Called by useSubdomain after a successful slug save so the UI updates immediately
   const onSubdomainSaved = useCallback((slug: string) => {
@@ -136,14 +154,16 @@ export function usePublish() {
     isBusy,
     isPublishingToDomain,
     isPublishingToSubdomain,
-    isGeneratingPreview,
+    isPublishingLocally,
     publishedAt,
     subdomainPublishedAt,
+    localPublishedAt,
     subdomain,
     domainError: domainSaveError,
     subdomainError: subdomainSaveError,
     publish,
     publishToSubdomain,
+    publishLocally,
     openLocalPreview,
     onSubdomainSaved,
   }

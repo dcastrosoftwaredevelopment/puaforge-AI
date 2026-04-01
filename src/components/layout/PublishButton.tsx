@@ -17,14 +17,16 @@ export default function PublishButton() {
     isBusy,
     isPublishingToDomain,
     isPublishingToSubdomain,
-    isGeneratingPreview,
+    isPublishingLocally,
     publishedAt,
     subdomainPublishedAt,
+    localPublishedAt,
     subdomain,
     domainError,
     subdomainError,
     publish,
     publishToSubdomain,
+    publishLocally,
     openLocalPreview,
     onSubdomainSaved,
   } = usePublish()
@@ -318,14 +320,31 @@ export default function PublishButton() {
             <div className="border-t border-border-subtle" />
             <div className="space-y-1.5">
               <span className="text-[11px] font-medium text-text-secondary">{t('publish.localPreviewLabel')}</span>
-              <button
-                onClick={() => void openLocalPreview()}
-                disabled={isGeneratingPreview}
-                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary disabled:opacity-50 transition cursor-pointer"
-              >
-                {isGeneratingPreview ? <Loader2 size={12} className="animate-spin" /> : <ExternalLink size={12} />}
-                {t('publish.openLocal')}
-              </button>
+              {localPublishedAt && (
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-text-muted">{t('publish.lastPublished')}</span>
+                  <span className="text-[10px] text-text-muted">{formatDate(localPublishedAt)}</span>
+                </div>
+              )}
+              <div className="flex gap-1.5">
+                <button
+                  onClick={() => void publishLocally()}
+                  disabled={isPublishingLocally}
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary disabled:opacity-50 transition cursor-pointer"
+                >
+                  {isPublishingLocally ? <Loader2 size={12} className="animate-spin" /> : <Globe size={12} />}
+                  {isPublishingLocally ? t('publish.publishing') : localPublishedAt ? t('publish.republish') : t('publish.publishNow')}
+                </button>
+                {localPublishedAt && (
+                  <button
+                    onClick={() => void openLocalPreview()}
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition cursor-pointer"
+                    title={t('publish.openLocal')}
+                  >
+                    <ExternalLink size={12} />
+                  </button>
+                )}
+              </div>
             </div>
 
           </div>
