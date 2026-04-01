@@ -55,7 +55,7 @@ export function useProjectActions() {
 
     navigate(`/project/${project.id}`)
     return project
-  }, [authHeaders, navigate, setProjects, setActiveProjectId, setMessages, setFiles, setDeps, setProjectImages, setCheckpoints])
+  }, [authHeaders, navigate, setProjects, setActiveProjectId, setMessages, setFiles, setDeps, setProjectImages, setCheckpoints, withPlanLimit])
 
   const openProject = useCallback((id: string) => {
     navigate(`/project/${id}`)

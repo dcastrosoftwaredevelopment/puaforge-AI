@@ -1,6 +1,6 @@
 import { memo, useCallback, useRef, useState } from 'react'
 import { SandpackLayout, SandpackFileExplorer, SandpackCodeEditor, SandpackPreview } from '@codesandbox/sandpack-react'
-import { Save, Undo2, Search } from 'lucide-react'
+import { Save, Undo2, Search, PanelLeft } from 'lucide-react'
 import FindInFiles from './FindInFiles'
 import { type DevicePreview } from '@/atoms'
 import { useViewMode } from '@/hooks/useViewMode'
@@ -8,6 +8,7 @@ import { useDevicePreview } from '@/hooks/useDevicePreview'
 import { useSandpackSync } from '@/hooks/useSandpackSync'
 import { useEditorState } from '@/hooks/useEditorState'
 import { usePanelSizes } from '@/hooks/usePanelSizes'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import ResizeHandle from '@/components/layout/ResizeHandle'
 
 const DEVICE_WIDTHS: Record<DevicePreview, string> = {
@@ -54,8 +55,10 @@ export default function SandpackContent() {
   const { editorFraction, setEditorFraction } = usePanelSizes()
   const { showEditor, showPreview, isSplit } = useViewMode()
   const { device } = useDevicePreview()
+  const isMobile = useIsMobile()
   const containerRef = useRef<HTMLDivElement>(null)
   const [findOpen, setFindOpen] = useState(false)
+  const [showExplorer, setShowExplorer] = useState(!isMobile)
 
   const isResponsive = device !== 'desktop'
 
@@ -89,20 +92,29 @@ export default function SandpackContent() {
       >
         {isDirty && <EditBar onSave={saveEdits} onDiscard={discardEdits} />}
         <div className="relative flex flex-1 min-h-0">
-          <SandpackFileExplorer />
+          {showExplorer && <SandpackFileExplorer />}
           <SandpackCodeEditor
             showTabs
             closableTabs
             showLineNumbers
             showInlineErrors
           />
-          <button
-            onClick={() => setFindOpen((v) => !v)}
-            className="absolute top-1.5 right-2 z-10 p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
-            title="Buscar em arquivos (Ctrl+Shift+F)"
-          >
-            <Search size={13} />
-          </button>
+          <div className="absolute top-1.5 right-2 z-10 flex items-center gap-1">
+            <button
+              onClick={() => setShowExplorer((v) => !v)}
+              className={`p-1.5 rounded-md transition cursor-pointer ${showExplorer ? 'text-text-primary bg-bg-elevated' : 'text-text-muted hover:text-text-primary hover:bg-bg-elevated'}`}
+              title="Arquivos"
+            >
+              <PanelLeft size={13} />
+            </button>
+            <button
+              onClick={() => setFindOpen((v) => !v)}
+              className="p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+              title="Buscar em arquivos (Ctrl+Shift+F)"
+            >
+              <Search size={13} />
+            </button>
+          </div>
           <FindInFiles open={findOpen} onClose={() => setFindOpen(false)} />
         </div>
       </div>

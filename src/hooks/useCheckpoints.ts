@@ -31,7 +31,7 @@ export function useCheckpoints() {
     const result = await withPlanLimit(() => api.post(`/api/projects/${activeProjectId}/checkpoints`, checkpoint, authHeaders))
     if (!result) return
     setCheckpoints((prev) => [checkpoint, ...prev])
-  }, [activeProjectId, authHeaders, files, checkpoints.length, setCheckpoints])
+  }, [activeProjectId, authHeaders, files, checkpoints.length, setCheckpoints, withPlanLimit])
 
   const restoreCheckpoint = useCallback(async (id: string) => {
     const checkpoint = checkpoints.find((c) => c.id === id)

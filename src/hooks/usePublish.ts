@@ -80,7 +80,7 @@ export function usePublish() {
     } finally {
       setIsSavingToDomain(false)
     }
-  }, [activeProjectId, authHeaders, files, isBusy, callPublish]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeProjectId, authHeaders, files, isBusy, callPublish, withPlanLimit, t, publishedAt])
 
   /** Publish to subdomain (temporary URL) */
   const publishToSubdomain = useCallback(async () => {
@@ -104,7 +104,7 @@ export function usePublish() {
     } finally {
       setIsSavingToSubdomain(false)
     }
-  }, [activeProjectId, authHeaders, files, isBusy, callPublish]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeProjectId, authHeaders, files, isBusy, callPublish, withPlanLimit, t, subdomainPublishedAt])
 
   const openPublished = useCallback(async () => {
     if (!activeProjectId || !authHeaders) return
