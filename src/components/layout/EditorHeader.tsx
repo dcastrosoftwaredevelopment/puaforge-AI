@@ -237,8 +237,8 @@ export default function EditorHeader() {
                   {checkpoints.length > 0 && <span className="ml-auto text-[10px] text-text-muted">{checkpoints.length}</span>}
                 </button>
                 <div className="border-t border-border-subtle my-1" />
-                <ExportButton />
-                <BuildDownloadButton />
+                <ExportButton menuItem />
+                <BuildDownloadButton menuItem />
                 {isDraft && (
                   <>
                     <div className="border-t border-border-subtle my-1" />
