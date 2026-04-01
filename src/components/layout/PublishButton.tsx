@@ -293,12 +293,14 @@ export default function PublishButton() {
                   {domainError}
                 </div>
               )}
-              {publishedAt && (
+              {(publishedAt ?? subdomainPublishedAt) && (
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-text-muted">{t('publish.lastPublished')}</span>
-                    <span className="text-[10px] text-text-muted">{formatDate(publishedAt)}</span>
-                  </div>
+                  {publishedAt && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-text-muted">{t('publish.lastPublished')}</span>
+                      <span className="text-[10px] text-text-muted">{formatDate(publishedAt)}</span>
+                    </div>
+                  )}
                   <button
                     onClick={openPublished}
                     className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition cursor-pointer"

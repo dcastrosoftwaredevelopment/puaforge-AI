@@ -42,7 +42,7 @@ export function usePublish() {
     if (!activeProjectId || !authHeaders) return
     setDomainSaveError(null)
     setSubdomainSaveError(null)
-    api.get<{ html: string | null; publishedAt: number | null; subdomainPublishedAt: number | null; subdomain: string | null }>(
+    api.get<{ html: string | null; subdomainHtml: string | null; publishedAt: number | null; subdomainPublishedAt: number | null; subdomain: string | null }>(
       `/api/projects/${activeProjectId}/published`,
       authHeaders,
     )
@@ -108,13 +108,14 @@ export function usePublish() {
 
   const openPublished = useCallback(async () => {
     if (!activeProjectId || !authHeaders) return
-    const site = await api.get<{ html: string | null; publishedAt: number | null }>(
+    const site = await api.get<{ html: string | null; subdomainHtml: string | null }>(
       `/api/projects/${activeProjectId}/published`,
       authHeaders,
     ).catch(() => null)
-    if (!site?.html) return
+    const html = site?.html ?? site?.subdomainHtml
+    if (!html) return
 
-    const blob = new Blob([site.html], { type: 'text/html' })
+    const blob = new Blob([html], { type: 'text/html' })
     const url = URL.createObjectURL(blob)
     window.open(url, '_blank')
   }, [activeProjectId, authHeaders])
