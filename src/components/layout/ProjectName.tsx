@@ -45,7 +45,7 @@ export default function ProjectName() {
         onChange={(e) => setName(e.target.value)}
         onBlur={save}
         onKeyDown={handleKeyDown}
-        className="bg-bg-tertiary border border-border-default rounded-md px-3 py-1 text-sm text-text-primary outline-none focus:border-accent w-64"
+        className="bg-bg-tertiary border border-border-default rounded-md px-3 py-1 text-sm text-text-primary outline-none focus:border-accent w-full max-w-64"
       />
     )
   }
@@ -56,7 +56,7 @@ export default function ProjectName() {
       className="flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary transition group"
       title="Clique para renomear"
     >
-      <span className="truncate max-w-64">{project.name}</span>
+      <span className="truncate max-w-[8rem] sm:max-w-[14rem] md:max-w-64">{project.name}</span>
       <Pencil size={11} className="text-text-muted opacity-0 group-hover:opacity-100 transition" />
     </button>
   )

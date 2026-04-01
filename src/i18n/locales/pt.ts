@@ -49,6 +49,7 @@ export const pt = {
     draftTooltip: 'Alterações salvas localmente. Clique em **Salvar** para não perder as modificações.',
     draftLabel: 'Rascunho local',
     discardTooltip: 'Descartar rascunho e reverter para a versão salva',
+    saveDraft: 'Salvar rascunho',
     discardTitle: 'Descartar rascunho',
     discardMessage: 'Isso vai apagar todas as alterações locais não salvas e reverter o projeto para a última versão salva. Essa ação não pode ser desfeita.',
     openChat: 'Abrir chat',

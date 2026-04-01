@@ -70,16 +70,16 @@ export default function EditorHeader() {
   return (
     <>
       <header className="h-11 border-b border-border-subtle flex items-center justify-between px-4 shrink-0 bg-bg-secondary">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <Tooltip content={t('editor.backToProjects')} side="bottom" align="left">
             <button
               onClick={goHome}
-              className="p-1.5 rounded-lg text-forge-terracotta/60 hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
+              className="shrink-0 p-1.5 rounded-lg text-forge-terracotta/60 hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
             >
               <Home size={15} />
             </button>
           </Tooltip>
-          <div className="w-px h-4 bg-border-subtle" />
+          <div className="shrink-0 w-px h-4 bg-border-subtle" />
           <ProjectName />
         </div>
 
@@ -195,25 +195,18 @@ export default function EditorHeader() {
         </div>
 
         {/* ── Mobile actions ── */}
-        <div className="flex md:hidden items-center gap-2">
-          {isDraft && (
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-accent/15 text-accent hover:bg-accent/25 disabled:opacity-50 transition cursor-pointer"
-            >
-              <Save size={12} />
-              {saving ? t('common.saving') : t('common.save')}
-            </button>
-          )}
+        <div className="flex md:hidden items-center gap-2 shrink-0">
           <PublishButton />
           {/* More menu */}
           <div className="relative" ref={mobileMenuRef}>
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+              className="relative p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
             >
               <MoreHorizontal size={16} />
+              {isDraft && (
+                <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-forge-terracotta" />
+              )}
             </button>
             {showMobileMenu && (
               <div className="absolute right-0 top-full mt-1 w-52 bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden p-1 space-y-0.5">
@@ -247,13 +240,24 @@ export default function EditorHeader() {
                 <ExportButton />
                 <BuildDownloadButton />
                 {isDraft && (
-                  <button
-                    onClick={() => { setShowMobileMenu(false); setShowDiscardModal(true) }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
-                  >
-                    <Trash2 size={14} />
-                    {t('editor.discardTitle')}
-                  </button>
+                  <>
+                    <div className="border-t border-border-subtle my-1" />
+                    <button
+                      onClick={() => { setShowMobileMenu(false); void handleSave() }}
+                      disabled={saving}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-accent hover:bg-accent/10 disabled:opacity-50 transition cursor-pointer"
+                    >
+                      <Save size={14} />
+                      {saving ? t('common.saving') : t('editor.saveDraft')}
+                    </button>
+                    <button
+                      onClick={() => { setShowMobileMenu(false); setShowDiscardModal(true) }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
+                    >
+                      <Trash2 size={14} />
+                      {t('editor.discardTitle')}
+                    </button>
+                  </>
                 )}
               </div>
             )}
