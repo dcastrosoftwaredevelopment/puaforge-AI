@@ -10,6 +10,7 @@ import { DEFAULT_FILES } from '@/utils/defaultFiles'
 import type { Message } from '@/atoms'
 
 import { useFloatingPanel, type ResizeDirection } from '@/hooks/useFloatingPanel'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import ChatHistory from './ChatHistory'
 import PromptInput from './PromptInput'
 import ChatToggleButton from './ChatToggleButton'
@@ -39,6 +40,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
   const projects = useAtomValue(projectsAtom)
   const activeProjectId = useAtomValue(activeProjectIdAtom)
   const { t } = useTranslation()
+  const isMobile = useIsMobile()
 
   function exportMessages() {
     const projectName = projects.find((p) => p.id === activeProjectId)?.name ?? 'projeto'
@@ -118,7 +120,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
               {t('chat.clearChat')}
             </span>
           </button>
-          {isDocked && (
+          {(isDocked || isMobile) && (
             <button
               onPointerDown={(e) => e.stopPropagation()}
               onClick={() => setIsOpen(false)}
@@ -130,16 +132,18 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
               </span>
             </button>
           )}
-          <button
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={() => setChatMode(chatMode === 'docked' ? 'floating' : 'docked')}
-            className="group relative p-1 rounded text-forge-terracotta/60 hover:text-forge-terracotta transition cursor-pointer"
-          >
-            {chatMode === 'docked' ? <PanelRightOpen size={13} /> : <PanelRightClose size={13} />}
-            <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-md bg-bg-elevated border border-border-subtle text-[10px] text-text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 transition shadow-lg z-50">
-              {chatMode === 'docked' ? t('chat.toFloating') : t('chat.toDocked')}
-            </span>
-          </button>
+          {!isMobile && (
+            <button
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => setChatMode(chatMode === 'docked' ? 'floating' : 'docked')}
+              className="group relative p-1 rounded text-forge-terracotta/60 hover:text-forge-terracotta transition cursor-pointer"
+            >
+              {chatMode === 'docked' ? <PanelRightOpen size={13} /> : <PanelRightClose size={13} />}
+              <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-md bg-bg-elevated border border-border-subtle text-[10px] text-text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 transition shadow-lg z-50">
+                {chatMode === 'docked' ? t('chat.toFloating') : t('chat.toDocked')}
+              </span>
+            </button>
+          )}
           {!isDocked && <GripHorizontal size={14} className="text-text-muted" />}
         </div>
       </div>
@@ -178,6 +182,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
 
 function FloatingMode() {
   const { isOpen: isChatOpen } = useChat()
+  const isMobile = useIsMobile()
   const { position, size, panelRef, onDragStart, onResizeStart } = useFloatingPanel({
     initialPosition: {
       x: window.innerWidth - INITIAL_WIDTH - 30,
@@ -188,29 +193,35 @@ function FloatingMode() {
 
   return (
     <>
-      <ChatToggleButton />
+      {!isMobile && <ChatToggleButton />}
 
       {isChatOpen && (
-        <div
-          ref={panelRef}
-          className="fixed bg-bg-secondary/95 backdrop-blur-2xl rounded-2xl shadow-2xl shadow-black/40 border border-border-default flex flex-col z-50 overflow-hidden"
-          style={{
-            left: position.x,
-            top: position.y,
-            width: size.width,
-            height: size.height,
-          }}
-        >
-          {resizeHandles.map(({ direction, className }) => (
-            <div
-              key={direction}
-              className={`absolute z-10 ${className}`}
-              onPointerDown={(e) => onResizeStart(direction, e)}
-            />
-          ))}
+        isMobile ? (
+          <div className="fixed inset-x-0 top-0 bottom-[55px] z-50 bg-bg-secondary flex flex-col">
+            <ChatPanel isDocked={true} />
+          </div>
+        ) : (
+          <div
+            ref={panelRef}
+            className="fixed bg-bg-secondary/95 backdrop-blur-2xl rounded-2xl shadow-2xl shadow-black/40 border border-border-default flex flex-col z-50 overflow-hidden"
+            style={{
+              left: position.x,
+              top: position.y,
+              width: size.width,
+              height: size.height,
+            }}
+          >
+            {resizeHandles.map(({ direction, className }) => (
+              <div
+                key={direction}
+                className={`absolute z-10 ${className}`}
+                onPointerDown={(e) => onResizeStart(direction, e)}
+              />
+            ))}
 
-          <ChatPanel isDocked={false} onDragStart={onDragStart} />
-        </div>
+            <ChatPanel isDocked={false} onDragStart={onDragStart} />
+          </div>
+        )
       )}
     </>
   )
@@ -226,7 +237,9 @@ export const DockedChat = forwardRef<HTMLDivElement, { width: number }>(function
 
 export default function FloatingChat() {
   const { mode: chatMode } = useChat()
+  const isMobile = useIsMobile()
 
-  if (chatMode === 'docked') return null
+  // On mobile, always use floating mode (docked panel is hidden)
+  if (chatMode === 'docked' && !isMobile) return null
   return <FloatingMode />
 }

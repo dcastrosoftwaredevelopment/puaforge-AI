@@ -29,7 +29,7 @@ export function useCustomDomain() {
     ))
     if (!result) return
     setCustomDomain(normalized)
-  }, [activeProjectId, token, setCustomDomain])
+  }, [activeProjectId, token, setCustomDomain, withPlanLimit])
 
   return { customDomain, setCustomDomain, saveDomain }
 }

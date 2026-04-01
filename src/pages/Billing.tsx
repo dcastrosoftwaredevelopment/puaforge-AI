@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Check, Zap, Rocket, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import Sidebar from '@/components/home/Sidebar'
+import Sidebar, { SidebarMenuButton } from '@/components/home/Sidebar'
 import { useUsage, usePlansConfig, formatBytes, formatLimit } from '@/hooks/useUsage'
 import { track } from '@/lib/analytics'
 
@@ -142,7 +142,12 @@ export default function Billing() {
       <Sidebar />
 
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto px-8 py-10">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-border-subtle md:hidden">
+          <SidebarMenuButton />
+          <img src="/Logo PuaForge.png" alt="PuaForge AI" style={{ height: '20px', width: 'auto' }} />
+        </div>
+
+        <div className="max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-10">
           <div className="mb-8">
             <h1 className="text-xl font-semibold text-text-primary">{t('billing.title')}</h1>
             <p className="text-sm text-text-muted mt-1">{t('billing.subtitle')}</p>
@@ -185,7 +190,7 @@ export default function Billing() {
             </div>
           )}
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {plans.map((plan) => (
               <div
                 key={plan.key}

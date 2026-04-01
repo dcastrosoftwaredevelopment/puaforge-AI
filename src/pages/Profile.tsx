@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useAtomValue } from 'jotai'
 import { authTokenAtom } from '@/atoms/authAtoms'
 import { api, ApiError } from '@/services/api'
-import Sidebar from '@/components/home/Sidebar'
+import Sidebar, { SidebarMenuButton } from '@/components/home/Sidebar'
 
 export default function Profile() {
   const { user } = useAuth()
@@ -103,7 +103,11 @@ export default function Profile() {
     <div className="h-screen flex bg-bg-primary">
       <Sidebar />
       <main className="flex-1 overflow-auto">
-        <div className="max-w-lg mx-auto px-8 py-10">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-border-subtle md:hidden">
+          <SidebarMenuButton />
+          <img src="/Logo PuaForge.png" alt="PuaForge AI" style={{ height: '20px', width: 'auto' }} />
+        </div>
+        <div className="max-w-lg mx-auto px-4 md:px-8 py-6 md:py-10">
           <h1 className="text-2xl font-semibold text-text-primary mb-8">{t('profile.title')}</h1>
 
           {/* Info */}

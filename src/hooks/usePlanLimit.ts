@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { useSetAtom } from 'jotai'
 import { upgradePromptAtom } from '@/atoms'
 import { PlanLimitError } from '@/services/api'
@@ -10,7 +11,7 @@ export class PlanLimitUIError extends Error {
 }
 
 /**
- * Returns a helper that wraps any async call and opens the upgrade modal if
+ * Returns a stable helper that wraps any async call and opens the upgrade modal if
  * the server returns a plan limit error (403 upgradeRequired). Also re-throws
  * a PlanLimitUIError so callers can show an inline error alongside the modal.
  *
@@ -21,7 +22,7 @@ export class PlanLimitUIError extends Error {
 export function usePlanLimit() {
   const setUpgradePrompt = useSetAtom(upgradePromptAtom)
 
-  return async function withPlanLimit<T>(fn: () => Promise<T>): Promise<T | null> {
+  return useCallback(async function withPlanLimit<T>(fn: () => Promise<T>): Promise<T | null> {
     try {
       return await fn()
     } catch (err) {
@@ -35,5 +36,5 @@ export function usePlanLimit() {
       }
       throw err
     }
-  }
+  }, [setUpgradePrompt])
 }

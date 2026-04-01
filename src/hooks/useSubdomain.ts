@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAtomValue } from 'jotai'
 import { activeProjectIdAtom } from '@/atoms'
 import { authTokenAtom } from '@/atoms/authAtoms'
@@ -15,7 +15,7 @@ export type SlugStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid'
 export function useSubdomain(publishedSubdomain: string | null, onSaved?: (slug: string) => void) {
   const activeProjectId = useAtomValue(activeProjectIdAtom)
   const token = useAtomValue(authTokenAtom)
-  const authHeaders = token ? { Authorization: `Bearer ${token}` } : undefined
+  const authHeaders = useMemo(() => token ? { Authorization: `Bearer ${token}` } : undefined, [token])
 
   const { t } = useTranslation()
   const withPlanLimit = usePlanLimit()
@@ -98,7 +98,7 @@ export function useSubdomain(publishedSubdomain: string | null, onSaved?: (slug:
     } finally {
       setSaving(false)
     }
-  }, [activeProjectId, authHeaders, slugInput, status])
+  }, [activeProjectId, authHeaders, slugInput, status, withPlanLimit, t, onSaved])
 
   return {
     slugInput,

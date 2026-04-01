@@ -84,7 +84,7 @@ export function useProjectImages() {
     setImages(updated)
     syncImagesFiles(updated)
     return image
-  }, [activeProjectId, authHeaders, images, setImages, syncImagesFiles])
+  }, [activeProjectId, authHeaders, images, setImages, syncImagesFiles, withPlanLimit])
 
   const renameImage = useCallback(async (id: string, newName: string) => {
     if (!activeProjectId || !authHeaders) return

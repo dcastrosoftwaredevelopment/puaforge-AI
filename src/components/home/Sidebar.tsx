@@ -1,6 +1,9 @@
+import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Layers, Settings, LogOut, CreditCard } from 'lucide-react'
+import { Layers, Settings, LogOut, CreditCard, X, Menu } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useAtom } from 'jotai'
+import { sidebarOpenAtom } from '@/atoms'
 import { useAuth } from '@/hooks/useAuth'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useUsage, formatBytes, formatLimit } from '@/hooks/useUsage'
@@ -41,6 +44,19 @@ function UserAvatar({ name }: { name?: string | null }) {
   )
 }
 
+/** Hamburger button — show on mobile to open the sidebar drawer */
+export function SidebarMenuButton() {
+  const [, setOpen] = useAtom(sidebarOpenAtom)
+  return (
+    <button
+      onClick={() => setOpen(true)}
+      className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer md:hidden"
+    >
+      <Menu size={18} />
+    </button>
+  )
+}
+
 export default function Sidebar() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -48,25 +64,37 @@ export default function Sidebar() {
   const { t } = useTranslation()
   const { toggle } = useLanguage()
   const { data: usage } = useUsage()
+  const [isOpen, setIsOpen] = useAtom(sidebarOpenAtom)
+
   const isSettings = location.pathname === '/settings'
   const isProfile = location.pathname === '/profile'
   const isBilling = location.pathname === '/billing'
 
+  // Close drawer on navigation
+  useEffect(() => { setIsOpen(false) }, [location.pathname, setIsOpen])
+
   const planLabel = usage?.plan === 'indie' ? 'Indie' : usage?.plan === 'pro' ? 'Pro' : t('billing.plans.free')
 
-  return (
-    <aside className="w-56 shrink-0 border-r border-border-subtle bg-bg-secondary flex flex-col">
-      <div className="px-4 py-4 border-b border-border-subtle">
+  const sidebarContent = (
+    <>
+      <div className="px-4 py-4 border-b border-border-subtle flex items-center justify-between">
         <img src="/Logo PuaForge.png" alt="PuaForge AI" style={{ width: '130px', height: 'auto' }} />
+        {/* Close button — only visible in mobile drawer */}
+        <button
+          onClick={() => setIsOpen(false)}
+          className="p-1 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer md:hidden"
+        >
+          <X size={16} />
+        </button>
       </div>
 
       <nav className="flex-1 px-2 py-3 space-y-1">
         <button
           onClick={() => navigate('/')}
-          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition ${!isSettings
+          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition ${!isSettings && !isProfile && !isBilling
             ? 'bg-bg-elevated text-text-primary'
             : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary'
-            }`}
+          }`}
         >
           <Layers size={15} className="text-forge-terracotta/70" />
           {t('sidebar.projects')}
@@ -114,7 +142,7 @@ export default function Sidebar() {
           className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition ${isProfile
             ? 'bg-bg-elevated text-text-primary'
             : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary'
-            }`}
+          }`}
         >
           <UserAvatar name={user?.name} />
           {t('sidebar.profile')}
@@ -124,7 +152,7 @@ export default function Sidebar() {
           className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition ${isBilling
             ? 'bg-bg-elevated text-text-primary'
             : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary'
-            }`}
+          }`}
         >
           <CreditCard size={15} className="text-forge-terracotta/70" />
           {t('sidebar.billing')}
@@ -134,7 +162,7 @@ export default function Sidebar() {
           className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition ${isSettings
             ? 'bg-bg-elevated text-text-primary'
             : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary'
-            }`}
+          }`}
         >
           <Settings size={15} className="text-forge-terracotta/70" />
           {t('sidebar.settings')}
@@ -155,6 +183,30 @@ export default function Sidebar() {
           </span>
         </button>
       </div>
-    </aside>
+    </>
+  )
+
+  return (
+    <>
+      {/* Desktop sidebar — always visible on md+ */}
+      <aside className="hidden md:flex w-56 shrink-0 border-r border-border-subtle bg-bg-secondary flex-col">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile drawer overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 md:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-bg-secondary border-r border-border-subtle flex flex-col transition-transform duration-200 md:hidden ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {sidebarContent}
+      </aside>
+    </>
   )
 }

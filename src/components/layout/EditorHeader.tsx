@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Home, ImageIcon, History, RotateCcw, Save, Trash2, Palette } from 'lucide-react'
+import { Home, ImageIcon, History, RotateCcw, Save, Trash2, Palette, MoreHorizontal } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useProjectActions } from '@/hooks/useProjectActions'
 import { useProjectImages } from '@/hooks/useProjectImages'
@@ -28,11 +28,13 @@ export default function EditorHeader() {
   const [showImages, setShowImages] = useState(false)
   const [showCheckpoints, setShowCheckpoints] = useState(false)
   const [showPalette, setShowPalette] = useState(false)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [showDiscardModal, setShowDiscardModal] = useState(false)
   const [saving, setSaving] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
   const checkpointRef = useRef<HTMLDivElement>(null)
   const paletteRef = useRef<HTMLDivElement>(null)
+  const mobileMenuRef = useRef<HTMLDivElement>(null)
 
   const handleSave = useCallback(async () => {
     setSaving(true)
@@ -46,7 +48,7 @@ export default function EditorHeader() {
   }, [discardDraft])
 
   useEffect(() => {
-    if (!showImages && !showCheckpoints && !showPalette) return
+    if (!showImages && !showCheckpoints && !showPalette && !showMobileMenu) return
     function handleClick(e: MouseEvent) {
       if (showImages && panelRef.current && !panelRef.current.contains(e.target as Node)) {
         setShowImages(false)
@@ -57,10 +59,13 @@ export default function EditorHeader() {
       if (showPalette && paletteRef.current && !paletteRef.current.contains(e.target as Node)) {
         setShowPalette(false)
       }
+      if (showMobileMenu && mobileMenuRef.current && !mobileMenuRef.current.contains(e.target as Node)) {
+        setShowMobileMenu(false)
+      }
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
-  }, [showImages, showCheckpoints, showPalette])
+  }, [showImages, showCheckpoints, showPalette, showMobileMenu])
 
   return (
     <>
@@ -78,7 +83,8 @@ export default function EditorHeader() {
           <ProjectName />
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* ── Desktop actions ── */}
+        <div className="hidden md:flex items-center gap-3">
           {/* Images */}
           <div className="relative" ref={panelRef}>
             <Tooltip content={t('editor.images')} side="bottom" align="right">
@@ -186,6 +192,88 @@ export default function EditorHeader() {
           <ExportButton />
           <BuildDownloadButton />
           <PublishButton />
+        </div>
+
+        {/* ── Mobile actions ── */}
+        <div className="flex md:hidden items-center gap-2">
+          {isDraft && (
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-accent/15 text-accent hover:bg-accent/25 disabled:opacity-50 transition cursor-pointer"
+            >
+              <Save size={12} />
+              {saving ? t('common.saving') : t('common.save')}
+            </button>
+          )}
+          <PublishButton />
+          {/* More menu */}
+          <div className="relative" ref={mobileMenuRef}>
+            <button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+            >
+              <MoreHorizontal size={16} />
+            </button>
+            {showMobileMenu && (
+              <div className="absolute right-0 top-full mt-1 w-52 bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden p-1 space-y-0.5">
+                {/* Images */}
+                <button
+                  onClick={() => { setShowMobileMenu(false); setShowImages(!showImages) }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+                >
+                  <ImageIcon size={14} className="text-forge-terracotta/60" />
+                  {t('editor.images')}
+                  {images.length > 0 && <span className="ml-auto text-[10px] text-text-muted">{images.length}</span>}
+                </button>
+                {/* Palette */}
+                <button
+                  onClick={() => { setShowMobileMenu(false); setShowPalette(!showPalette) }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+                >
+                  <Palette size={14} className="text-forge-terracotta/60" />
+                  {t('editor.palette')}
+                </button>
+                {/* Checkpoints */}
+                <button
+                  onClick={() => { setShowMobileMenu(false); setShowCheckpoints(!showCheckpoints) }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+                >
+                  <History size={14} className="text-forge-terracotta/60" />
+                  {t('editor.checkpoints')}
+                  {checkpoints.length > 0 && <span className="ml-auto text-[10px] text-text-muted">{checkpoints.length}</span>}
+                </button>
+                <div className="border-t border-border-subtle my-1" />
+                <ExportButton />
+                <BuildDownloadButton />
+                {isDraft && (
+                  <button
+                    onClick={() => { setShowMobileMenu(false); setShowDiscardModal(true) }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
+                  >
+                    <Trash2 size={14} />
+                    {t('editor.discardTitle')}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+          {/* Dropdowns rendered outside the menu so they stay accessible */}
+          {showImages && (
+            <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-72 bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden" ref={panelRef}>
+              <ImageAssets />
+            </div>
+          )}
+          {showPalette && (
+            <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-64 bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden" ref={paletteRef}>
+              <ColorPalette />
+            </div>
+          )}
+          {showCheckpoints && (
+            <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-80 bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden" ref={checkpointRef}>
+              <Checkpoints />
+            </div>
+          )}
         </div>
       </header>
 

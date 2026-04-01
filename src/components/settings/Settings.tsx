@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useApiKey } from '@/hooks/useApiKey'
 import { useModels } from '@/hooks/useModels'
 import { useApiCall, HttpMethod } from '@/hooks/useApiCall'
-import Sidebar from '@/components/home/Sidebar'
+import Sidebar, { SidebarMenuButton } from '@/components/home/Sidebar'
 
 export default function Settings() {
   const { apiKey, setApiKey, apiKeyEnabled, setApiKeyEnabled } = useApiKey()
@@ -60,7 +60,11 @@ export default function Settings() {
       <Sidebar />
 
       <main className="flex-1 overflow-auto">
-        <div className="max-w-2xl mx-auto px-8 py-10 space-y-8">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-border-subtle md:hidden">
+          <SidebarMenuButton />
+          <img src="/Logo PuaForge.png" alt="PuaForge AI" style={{ height: '20px', width: 'auto' }} />
+        </div>
+        <div className="max-w-2xl mx-auto px-4 md:px-8 py-6 md:py-10 space-y-8">
           <div>
             <h1 className="text-2xl font-semibold text-text-primary">{t('settings.title')}</h1>
             <p className="text-sm text-text-muted mt-1">{t('settings.subtitle')}</p>
