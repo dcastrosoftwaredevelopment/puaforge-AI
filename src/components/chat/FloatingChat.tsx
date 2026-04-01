@@ -182,7 +182,6 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
 
 function FloatingMode() {
   const { isOpen: isChatOpen } = useChat()
-  const isMobile = useIsMobile()
   const { position, size, panelRef, onDragStart, onResizeStart } = useFloatingPanel({
     initialPosition: {
       x: window.innerWidth - INITIAL_WIDTH - 30,
@@ -193,37 +192,40 @@ function FloatingMode() {
 
   return (
     <>
-      {!isMobile && <ChatToggleButton />}
+      <ChatToggleButton />
 
       {isChatOpen && (
-        isMobile ? (
-          <div className="fixed inset-x-0 top-0 bottom-[55px] z-50 bg-bg-secondary flex flex-col">
-            <ChatPanel isDocked={true} />
-          </div>
-        ) : (
-          <div
-            ref={panelRef}
-            className="fixed bg-bg-secondary/95 backdrop-blur-2xl rounded-2xl shadow-2xl shadow-black/40 border border-border-default flex flex-col z-50 overflow-hidden"
-            style={{
-              left: position.x,
-              top: position.y,
-              width: size.width,
-              height: size.height,
-            }}
-          >
-            {resizeHandles.map(({ direction, className }) => (
-              <div
-                key={direction}
-                className={`absolute z-10 ${className}`}
-                onPointerDown={(e) => onResizeStart(direction, e)}
-              />
-            ))}
+        <div
+          ref={panelRef}
+          className="fixed bg-bg-secondary/95 backdrop-blur-2xl rounded-2xl shadow-2xl shadow-black/40 border border-border-default flex flex-col z-50 overflow-hidden"
+          style={{
+            left: position.x,
+            top: position.y,
+            width: size.width,
+            height: size.height,
+          }}
+        >
+          {resizeHandles.map(({ direction, className }) => (
+            <div
+              key={direction}
+              className={`absolute z-10 ${className}`}
+              onPointerDown={(e) => onResizeStart(direction, e)}
+            />
+          ))}
 
-            <ChatPanel isDocked={false} onDragStart={onDragStart} />
-          </div>
-        )
+          <ChatPanel isDocked={false} onDragStart={onDragStart} />
+        </div>
       )}
     </>
+  )
+}
+
+/** Inline chat panel for mobile — no fixed positioning, fits inside the flex layout */
+export function MobileChatPanel() {
+  return (
+    <div className="flex-1 flex flex-col bg-bg-secondary overflow-hidden">
+      <ChatPanel isDocked={true} />
+    </div>
   )
 }
 
@@ -239,7 +241,7 @@ export default function FloatingChat() {
   const { mode: chatMode } = useChat()
   const isMobile = useIsMobile()
 
-  // On mobile, always use floating mode (docked panel is hidden)
-  if (chatMode === 'docked' && !isMobile) return null
+  // On mobile the chat is rendered inline in EditorView — nothing to do here
+  if (isMobile || chatMode === 'docked') return null
   return <FloatingMode />
 }
