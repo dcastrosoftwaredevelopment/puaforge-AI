@@ -132,7 +132,7 @@ export default function EditorView() {
   }
 
   return (
-    <div className="h-screen w-screen bg-bg-primary flex flex-col">
+    <div className="h-full w-full bg-bg-primary flex flex-col">
       <EditorHeader />
 
       <div className="flex-1 overflow-hidden flex">

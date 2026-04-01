@@ -260,17 +260,17 @@ export default function EditorHeader() {
           </div>
           {/* Dropdowns rendered outside the menu so they stay accessible */}
           {showImages && (
-            <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-72 bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden" ref={panelRef}>
+            <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-72 max-h-[calc(100svh-5rem)] bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-y-auto overflow-x-hidden" ref={panelRef}>
               <ImageAssets />
             </div>
           )}
           {showPalette && (
-            <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-64 bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden" ref={paletteRef}>
+            <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-64 max-h-[calc(100svh-5rem)] bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-y-auto overflow-x-hidden" ref={paletteRef}>
               <ColorPalette />
             </div>
           )}
           {showCheckpoints && (
-            <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-80 bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden" ref={checkpointRef}>
+            <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-80 max-h-[calc(100svh-5rem)] bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-y-auto overflow-x-hidden" ref={checkpointRef}>
               <Checkpoints />
             </div>
           )}
