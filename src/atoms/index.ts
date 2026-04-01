@@ -140,3 +140,6 @@ export interface UpgradePrompt {
   message: string
 }
 export const upgradePromptAtom = atom<UpgradePrompt | null>(null)
+
+// Mobile sidebar drawer
+export const sidebarOpenAtom = atom(false)

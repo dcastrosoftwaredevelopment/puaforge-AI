@@ -13,7 +13,7 @@ export default function DeviceToggle() {
   const { device, setDevice } = useDevicePreview()
 
   return (
-    <div className="flex items-center gap-0.5 bg-bg-tertiary rounded-lg p-0.5 border border-border-subtle">
+    <div className="hidden md:flex items-center gap-0.5 bg-bg-tertiary rounded-lg p-0.5 border border-border-subtle">
       {devices.map(({ device: d, icon, label }) => (
         <Tooltip key={d} content={label} side="bottom" align="center">
           <button
