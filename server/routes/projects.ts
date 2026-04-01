@@ -442,15 +442,11 @@ router.get('/projects/:id/published', requireAuth, async (req: Request, res: Res
     return
   }
 
-  // Fetch both HTMLs in parallel — each only if the respective record exists
-  const [html, subdomainHtml] = await Promise.all([
-    site.pbRecordId ? fetchPublishedSite(site.pbRecordId) : Promise.resolve(null),
-    site.subdomainPbRecordId ? fetchPublishedSite(site.subdomainPbRecordId) : Promise.resolve(null),
-  ])
+  // Fetch custom-domain HTML only if it has been published (pbRecordId non-empty)
+  const html = site.pbRecordId ? await fetchPublishedSite(site.pbRecordId) : null
 
   res.json({
     html: html ?? null,
-    subdomainHtml: subdomainHtml ?? null,
     publishedAt: site.pbRecordId ? toMs(site.publishedAt) : null,
     subdomainPublishedAt: site.subdomainPublishedAt ? toMs(site.subdomainPublishedAt) : null,
     subdomain: site.subdomain ?? null,

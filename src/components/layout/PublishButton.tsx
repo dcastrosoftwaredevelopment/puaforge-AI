@@ -17,6 +17,7 @@ export default function PublishButton() {
     isBusy,
     isPublishingToDomain,
     isPublishingToSubdomain,
+    isGeneratingPreview,
     publishedAt,
     subdomainPublishedAt,
     subdomain,
@@ -24,7 +25,7 @@ export default function PublishButton() {
     subdomainError,
     publish,
     publishToSubdomain,
-    openPublished,
+    openLocalPreview,
     onSubdomainSaved,
   } = usePublish()
   const { customDomain, saveDomain } = useCustomDomain()
@@ -293,23 +294,20 @@ export default function PublishButton() {
                   {domainError}
                 </div>
               )}
-              {(publishedAt ?? subdomainPublishedAt) && (
-                <div className="space-y-1.5">
-                  {publishedAt && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-text-muted">{t('publish.lastPublished')}</span>
-                      <span className="text-[10px] text-text-muted">{formatDate(publishedAt)}</span>
-                    </div>
-                  )}
-                  <button
-                    onClick={openPublished}
-                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition cursor-pointer"
-                  >
-                    <ExternalLink size={12} />
-                    {t('publish.openLocal')}
-                  </button>
+              {publishedAt && (
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-text-muted">{t('publish.lastPublished')}</span>
+                  <span className="text-[10px] text-text-muted">{formatDate(publishedAt)}</span>
                 </div>
               )}
+              <button
+                onClick={() => void openLocalPreview()}
+                disabled={isGeneratingPreview}
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary disabled:opacity-50 transition cursor-pointer"
+              >
+                {isGeneratingPreview ? <Loader2 size={12} className="animate-spin" /> : <ExternalLink size={12} />}
+                {t('publish.openLocal')}
+              </button>
               <button
                 onClick={() => void publish()}
                 disabled={isBusy}

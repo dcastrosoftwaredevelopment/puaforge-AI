@@ -21,6 +21,7 @@ export function usePublish() {
   const [subdomainSaveError, setSubdomainSaveError] = useState<string | null>(null)
   const [isSavingToDomain, setIsSavingToDomain] = useState(false)
   const [isSavingToSubdomain, setIsSavingToSubdomain] = useState(false)
+  const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
 
   const withPlanLimit = usePlanLimit()
   const { loading: isGenerating, execute: callPublish } = useApiCall<
@@ -42,7 +43,7 @@ export function usePublish() {
     if (!activeProjectId || !authHeaders) return
     setDomainSaveError(null)
     setSubdomainSaveError(null)
-    api.get<{ html: string | null; subdomainHtml: string | null; publishedAt: number | null; subdomainPublishedAt: number | null; subdomain: string | null }>(
+    api.get<{ publishedAt: number | null; subdomainPublishedAt: number | null; subdomain: string | null }>(
       `/api/projects/${activeProjectId}/published`,
       authHeaders,
     )
@@ -106,19 +107,25 @@ export function usePublish() {
     }
   }, [activeProjectId, authHeaders, files, isBusy, callPublish, withPlanLimit, t, subdomainPublishedAt])
 
-  const openPublished = useCallback(async () => {
-    if (!activeProjectId || !authHeaders) return
-    const site = await api.get<{ html: string | null; subdomainHtml: string | null }>(
-      `/api/projects/${activeProjectId}/published`,
-      authHeaders,
-    ).catch(() => null)
-    const html = site?.html ?? site?.subdomainHtml
-    if (!html) return
-
-    const blob = new Blob([html], { type: 'text/html' })
-    const url = URL.createObjectURL(blob)
-    window.open(url, '_blank')
-  }, [activeProjectId, authHeaders])
+  /** Generate HTML from current code and open locally — no DB write, no plan limit */
+  const openLocalPreview = useCallback(async () => {
+    if (!activeProjectId || !authHeaders || isGeneratingPreview) return
+    setIsGeneratingPreview(true)
+    try {
+      const data = await api.post<{ html: string }>(
+        '/api/publish',
+        { projectId: activeProjectId, files },
+        authHeaders,
+      )
+      const blob = new Blob([data.html], { type: 'text/html' })
+      const url = URL.createObjectURL(blob)
+      window.open(url, '_blank')
+    } catch (e) {
+      console.error('[publish] local preview error:', e)
+    } finally {
+      setIsGeneratingPreview(false)
+    }
+  }, [activeProjectId, authHeaders, files, isGeneratingPreview])
 
   // Called by useSubdomain after a successful slug save so the UI updates immediately
   const onSubdomainSaved = useCallback((slug: string) => {
@@ -129,6 +136,7 @@ export function usePublish() {
     isBusy,
     isPublishingToDomain,
     isPublishingToSubdomain,
+    isGeneratingPreview,
     publishedAt,
     subdomainPublishedAt,
     subdomain,
@@ -136,7 +144,7 @@ export function usePublish() {
     subdomainError: subdomainSaveError,
     publish,
     publishToSubdomain,
-    openPublished,
+    openLocalPreview,
     onSubdomainSaved,
   }
 }
