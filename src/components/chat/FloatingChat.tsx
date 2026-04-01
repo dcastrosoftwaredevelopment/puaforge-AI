@@ -120,7 +120,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
               {t('chat.clearChat')}
             </span>
           </button>
-          {(isDocked || isMobile) && (
+          {isDocked && !isMobile && (
             <button
               onPointerDown={(e) => e.stopPropagation()}
               onClick={() => setIsOpen(false)}
