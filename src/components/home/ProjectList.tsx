@@ -1,4 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
+
+declare const __APP_DOMAIN__: string
 import { Plus } from 'lucide-react'
 import { useAtomValue } from 'jotai'
 import { useTranslation } from 'react-i18next'
@@ -15,30 +17,26 @@ export default function ProjectList() {
   const { createProject, openProject, deleteProject } = useProjectActions()
   const token = useAtomValue(authTokenAtom)
   const { t } = useTranslation()
-  const [publishedIds, setPublishedIds] = useState<Set<string>>(new Set())
-  useEffect(() => {
-    if (!token || projects.length === 0) return
-    const headers = { Authorization: `Bearer ${token}` }
-    Promise.all(
-      projects.map((p) =>
-        api.get<{ publishedAt: number }>(`/api/projects/${p.id}/published`, headers)
-          .then(() => p.id)
-          .catch(() => null),
-      ),
-    ).then((ids) => setPublishedIds(new Set(ids.filter(Boolean) as string[])))
-  }, [projects, token])
+  interface PublishedInfo { projectId: string; subdomain: string | null; customDomain: string | null }
+  const [publishedMap, setPublishedMap] = useState<Map<string, PublishedInfo>>(new Map())
 
-  const openPreview = useCallback(async (projectId: string) => {
+  useEffect(() => {
     if (!token) return
-    const site = await api.get<{ html: string; publishedAt: number }>(
-      `/api/projects/${projectId}/published`,
-      { Authorization: `Bearer ${token}` },
-    ).catch(() => null)
-    if (!site) return
-    const blob = new Blob([site.html], { type: 'text/html' })
-    const url = URL.createObjectURL(blob)
-    window.open(url, '_blank')
+    api.get<PublishedInfo[]>('/api/projects/published-ids', { Authorization: `Bearer ${token}` })
+      .then((rows) => setPublishedMap(new Map(rows.map((r) => [r.projectId, r]))))
+      .catch(() => {})
   }, [token])
+
+  const openPreview = useCallback((projectId: string) => {
+    const info = publishedMap.get(projectId)
+    if (!info) return
+    const url = info.customDomain
+      ? `https://${info.customDomain}`
+      : info.subdomain
+        ? `https://${info.subdomain}.${__APP_DOMAIN__}`
+        : null
+    if (url) window.open(url, '_blank')
+  }, [publishedMap])
 
   return (
     <div className="h-screen flex bg-bg-primary">
@@ -80,7 +78,7 @@ export default function ProjectList() {
                 <ProjectCard
                   key={project.id}
                   project={project}
-                  hasPreview={publishedIds.has(project.id)}
+                  hasPreview={publishedMap.has(project.id)}
                   onOpen={() => openProject(project.id)}
                   onDelete={() => deleteProject(project.id)}
                   onPreview={() => openPreview(project.id)}

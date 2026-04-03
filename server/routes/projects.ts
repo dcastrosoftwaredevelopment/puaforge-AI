@@ -428,6 +428,20 @@ router.delete('/projects/:id/checkpoints/:checkpointId', requireAuth, async (req
 
 // ─── Published site ────────────────────────────────────────────────────────────
 
+router.get('/projects/published-ids', requireAuth, async (req: Request, res: Response) => {
+  const rows = await db
+    .select({
+      projectId: publishedSites.projectId,
+      subdomain: publishedSites.subdomain,
+      customDomain: projects.customDomain,
+    })
+    .from(publishedSites)
+    .innerJoin(projects, eq(publishedSites.projectId, projects.id))
+    .where(eq(projects.userId, req.user!.userId))
+
+  res.json(rows)
+})
+
 router.get('/projects/:id/published', requireAuth, async (req: Request, res: Response) => {
   if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return
 
