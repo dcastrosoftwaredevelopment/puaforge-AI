@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Layers, Settings, LogOut, CreditCard, X, Menu } from 'lucide-react'
+import { Layers, Settings, LogOut, CreditCard, HelpCircle, X, Menu } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAtom } from 'jotai'
 import { sidebarOpenAtom } from '@/atoms'
@@ -69,6 +69,7 @@ export default function Sidebar() {
   const isSettings = location.pathname === '/settings'
   const isProfile = location.pathname === '/profile'
   const isBilling = location.pathname === '/billing'
+  const isHelp = location.pathname === '/help'
 
   // Close drawer on navigation
   useEffect(() => { setIsOpen(false) }, [location.pathname, setIsOpen])
@@ -91,7 +92,7 @@ export default function Sidebar() {
       <nav className="flex-1 px-2 py-3 space-y-1">
         <button
           onClick={() => navigate('/')}
-          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition ${!isSettings && !isProfile && !isBilling
+          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition ${!isSettings && !isProfile && !isBilling && !isHelp
             ? 'bg-bg-elevated text-text-primary'
             : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary'
           }`}
@@ -166,6 +167,16 @@ export default function Sidebar() {
         >
           <Settings size={15} className="text-forge-terracotta/70" />
           {t('sidebar.settings')}
+        </button>
+        <button
+          onClick={() => navigate('/help')}
+          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition ${isHelp
+            ? 'bg-bg-elevated text-text-primary'
+            : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary'
+          }`}
+        >
+          <HelpCircle size={15} className="text-forge-terracotta/70" />
+          {t('sidebar.help')}
         </button>
         <button
           onClick={logout}

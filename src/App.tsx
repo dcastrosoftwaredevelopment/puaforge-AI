@@ -10,6 +10,7 @@ import VerifyEmail from '@/pages/VerifyEmail'
 import EmailConfirmed from '@/pages/EmailConfirmed'
 import Profile from '@/pages/Profile'
 import Billing from '@/pages/Billing'
+import Help from '@/pages/Help'
 import SplashScreen from '@/components/auth/SplashScreen'
 import UpgradeModal from '@/components/billing/UpgradeModal'
 
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/billing" element={<Billing />} />
+          <Route path="/help" element={<Help />} />
         </Routes>
       )}
     </>

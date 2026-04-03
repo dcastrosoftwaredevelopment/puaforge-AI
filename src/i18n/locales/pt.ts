@@ -1,3 +1,6 @@
+import { gettingStarted } from '../../docs/pt/getting-started'
+import { features } from '../../docs/pt/features'
+
 export const pt = {
   common: {
     save: 'Salvar',
@@ -20,6 +23,7 @@ export const pt = {
     billing: 'Planos',
     settings: 'Configurações',
     logout: 'Sair',
+    help: 'Ajuda',
     language: 'EN',
     plan: 'Plano',
     usageProjects: 'Projetos',
@@ -305,6 +309,11 @@ export const pt = {
       checkpoints: 'Você atingiu o limite de checkpoints deste projeto.',
       unknown: 'Este recurso não está disponível no seu plano atual.',
     },
+  },
+
+  help: {
+    ...gettingStarted,
+    ...features,
   },
 
   billing: {

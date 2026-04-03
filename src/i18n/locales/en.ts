@@ -1,3 +1,6 @@
+import { gettingStarted } from '../../docs/en/getting-started'
+import { features } from '../../docs/en/features'
+
 export const en = {
   common: {
     save: 'Save',
@@ -20,6 +23,7 @@ export const en = {
     billing: 'Plans',
     settings: 'Settings',
     logout: 'Logout',
+    help: 'Help',
     language: 'PT',
     plan: 'Plan',
     usageProjects: 'Projects',
@@ -305,6 +309,11 @@ export const en = {
       checkpoints: 'You have reached the checkpoint limit for this project.',
       unknown: 'This feature is not available on your current plan.',
     },
+  },
+
+  help: {
+    ...gettingStarted,
+    ...features,
   },
 
   billing: {
