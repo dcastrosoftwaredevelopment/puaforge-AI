@@ -2,14 +2,11 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { SandpackProvider } from '@codesandbox/sandpack-react'
 import { Loader2, MessageCircle, Eye, Code2, MessageSquare } from 'lucide-react'
-import { useAtomValue, useSetAtom } from 'jotai'
 import { useFiles } from '@/hooks/useFiles'
 import { useChat } from '@/hooks/useChat'
 import { usePanelSizes } from '@/hooks/usePanelSizes'
 import { useProjectLoader } from '@/hooks/useProjectLoader'
 import { useDraft } from '@/hooks/useDraft'
-import { useMessageSender } from '@/hooks/useMessageSender'
-import { pendingImportAtom } from '@/atoms'
 import { extractDependencies } from '@/services/fileParser'
 import { TAILWIND_HTML, buildPackageJson } from '@/utils/defaultFiles'
 import EditorHeader from '@/components/layout/EditorHeader'
@@ -67,9 +64,6 @@ export default function EditorView() {
   useDraft()
   const { chatWidth, setChatWidth } = usePanelSizes()
 
-  const pendingImport = useAtomValue(pendingImportAtom)
-  const setPendingImport = useSetAtom(pendingImportAtom)
-  const { sendMessage } = useMessageSender()
 
   // When files change: extract new deps from imports (skip package.json to avoid circular update)
   useEffect(() => {
@@ -88,12 +82,6 @@ export default function EditorView() {
     const next = buildPackageJson(deps)
     setFiles((prev) => prev['/package.json'] === next ? prev : { ...prev, '/package.json': next })
   }, [deps, setFiles])
-
-  useEffect(() => {
-    if (!projectReady || !pendingImport || pendingImport.projectId !== projectId) return
-    setPendingImport(null)
-    void sendMessage(pendingImport.prompt)
-  }, [projectReady, pendingImport, projectId, setPendingImport, sendMessage])
 
   const isDocked = chatMode === 'docked'
   const showDockedChat = isDocked && isChatOpen

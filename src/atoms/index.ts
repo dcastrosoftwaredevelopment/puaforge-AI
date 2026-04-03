@@ -125,14 +125,6 @@ export const customDomainAtom = atom<string | null>(null)
 // useDraft watches this to avoid treating the initial load as a user change.
 export const projectLoadedAtom = atom(false)
 
-// Pending import: set by ImportSiteModal after project creation + image upload.
-// EditorView reads this and auto-sends the AI prompt once the project is ready.
-export interface PendingImport {
-  projectId: string
-  prompt: string
-}
-export const pendingImportAtom = atom<PendingImport | null>(null)
-
 // Plan upgrade modal
 export interface UpgradePrompt {
   requiredPlan: 'indie' | 'pro'

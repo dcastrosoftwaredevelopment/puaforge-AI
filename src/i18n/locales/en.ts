@@ -1,3 +1,6 @@
+import { gettingStarted } from '../../docs/en/getting-started'
+import { features } from '../../docs/en/features'
+
 export const en = {
   common: {
     save: 'Save',
@@ -20,11 +23,11 @@ export const en = {
     billing: 'Plans',
     settings: 'Settings',
     logout: 'Logout',
+    help: 'Help',
     language: 'PT',
     plan: 'Plan',
     usageProjects: 'Projects',
     usageStorage: 'Storage',
-    usageImports: 'Imports/month',
     upgrade: 'Upgrade plan',
   },
 
@@ -271,25 +274,6 @@ export const en = {
     noResults: 'No results for "{{query}}"',
   },
 
-  import: {
-    tooltip: 'Import existing site',
-    title: 'Import site',
-    urlTab: 'URL',
-    fileTab: 'HTML file',
-    urlLabel: 'Site URL',
-    urlPlaceholder: 'https://my-site.com',
-    fileHint: 'Drag or click to select an HTML file',
-    fetching: 'Fetching site content...',
-    uploadingImages: 'Uploading images ({{current}}/{{total}})...',
-    done: 'Site imported successfully!',
-    errorFileType: 'Please select an .html file',
-    errorGeneric: 'Failed to import site. Please try again.',
-    hint: 'The site content will be converted into a React + Tailwind CSS project by the AI.',
-    button: 'Import',
-    beta: 'Beta',
-    betaHint: 'This feature is in beta. Results may vary depending on the complexity of the site.',
-  },
-
   upgrade: {
     title: 'Paid plan feature',
     seePlans: 'See plans',
@@ -300,11 +284,15 @@ export const en = {
       projects: 'You have reached the project limit for your current plan.',
       publish: 'You\'ve reached the temporary URL limit for your plan.',
       customDomain: 'You\'ve reached the custom domain limit for your plan.',
-      imports: 'You have reached your monthly import limit.',
       storage: 'You have reached the storage limit for your current plan.',
       checkpoints: 'You have reached the checkpoint limit for this project.',
       unknown: 'This feature is not available on your current plan.',
     },
+  },
+
+  help: {
+    ...gettingStarted,
+    ...features,
   },
 
   billing: {
@@ -333,7 +321,6 @@ export const en = {
       publish: 'Publishing — {{count}} site(s)',
       domain: '{{count}} custom domain(s)',
       domains: '{{count}} custom domains',
-      import: 'Import site — {{count}}×/month',
       storage: 'Images — {{size}}',
       checkpoints: 'Checkpoints — {{count}} per project',
     },

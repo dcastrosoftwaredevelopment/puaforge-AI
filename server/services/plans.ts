@@ -1,4 +1,4 @@
-import { eq, and, count, sql, isNotNull } from 'drizzle-orm'
+import { eq, and, count, isNotNull } from 'drizzle-orm'
 import { db } from '../db.js'
 import { subscriptions, projects, projectImages, checkpoints, users, publishedSites } from '../schema.js'
 
@@ -8,7 +8,6 @@ export const PLAN_LIMITS = {
   free: {
     maxProjects: 1,
     maxCustomDomains: 0,
-    maxImportsPerMonth: 0,
     maxStorageBytes: 5 * 1024 * 1024, // 5MB
     maxCheckpointsPerProject: 0,
     maxPublishedSites: 1,
@@ -16,7 +15,6 @@ export const PLAN_LIMITS = {
   indie: {
     maxProjects: 3,
     maxCustomDomains: 1,
-    maxImportsPerMonth: 3,
     maxStorageBytes: 100 * 1024 * 1024, // 100MB
     maxCheckpointsPerProject: 10,
     maxPublishedSites: 1,
@@ -24,7 +22,6 @@ export const PLAN_LIMITS = {
   pro: {
     maxProjects: Infinity,
     maxCustomDomains: 5,
-    maxImportsPerMonth: Infinity,
     maxStorageBytes: 1024 * 1024 * 1024, // 1GB
     maxCheckpointsPerProject: Infinity,
     maxPublishedSites: 5,
@@ -32,7 +29,6 @@ export const PLAN_LIMITS = {
 } as const satisfies Record<Plan, {
   maxProjects: number
   maxCustomDomains: number
-  maxImportsPerMonth: number
   maxStorageBytes: number
   maxCheckpointsPerProject: number
   maxPublishedSites: number
@@ -166,55 +162,6 @@ export async function checkDomainLimit(userId: string): Promise<void> {
       'customDomain',
     )
   }
-}
-
-export async function checkImportLimit(userId: string): Promise<void> {
-  if (await isSuperUser(userId)) return
-  const plan = await getUserPlan(userId)
-  const limits = PLAN_LIMITS[plan]
-
-  if (limits.maxImportsPerMonth === 0) {
-    throw new PlanLimitError(
-      'Site import is not available on the Free plan.',
-      'indie',
-      'imports',
-    )
-  }
-  if (limits.maxImportsPerMonth === Infinity) return
-
-  const sub = await getOrCreateSubscription(userId)
-
-  // Reset counter if we're in a new calendar month
-  const now = new Date()
-  const resetAt = new Date(sub.importsResetAt)
-  const isNewMonth = now.getMonth() !== resetAt.getMonth() || now.getFullYear() !== resetAt.getFullYear()
-
-  if (isNewMonth) {
-    await db
-      .update(subscriptions)
-      .set({ importsThisMonth: 0, importsResetAt: now, updatedAt: now })
-      .where(eq(subscriptions.userId, userId))
-    return // counter was reset, allow this import
-  }
-
-  if (sub.importsThisMonth >= limits.maxImportsPerMonth) {
-    throw new PlanLimitError(
-      `Monthly import limit of ${limits.maxImportsPerMonth} reached for the ${planLabel(plan)} plan.`,
-      'pro',
-      'imports',
-    )
-  }
-}
-
-/** Call after a successful import to increment the counter. */
-export async function incrementImportCount(userId: string): Promise<void> {
-  await db
-    .update(subscriptions)
-    .set({
-      importsThisMonth: sql`${subscriptions.importsThisMonth} + 1`,
-      updatedAt: new Date(),
-    })
-    .where(eq(subscriptions.userId, userId))
 }
 
 export async function checkStorageLimit(userId: string, newFileBytes: number): Promise<void> {

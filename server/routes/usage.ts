@@ -10,7 +10,7 @@ const router = Router()
 router.get('/user/usage', requireAuth, async (req, res) => {
   const userId = req.user!.userId
 
-  const [sub, plan] = await Promise.all([
+  const [, plan] = await Promise.all([
     getOrCreateSubscription(userId),
     getUserPlan(userId),
   ])
@@ -43,12 +43,6 @@ router.get('/user/usage', requireAuth, async (req, res) => {
     .innerJoin(projects, eq(projectImages.projectId, projects.id))
     .where(eq(projects.userId, userId))
 
-  // Reset import counter if new month
-  const now = new Date()
-  const resetAt = new Date(sub.importsResetAt)
-  const isNewMonth = now.getMonth() !== resetAt.getMonth() || now.getFullYear() !== resetAt.getFullYear()
-  const importsThisMonth = isNewMonth ? 0 : sub.importsThisMonth
-
   // Infinity cannot be serialized to JSON — use -1 as sentinel for "unlimited"
   function serializeLimit(n: number) { return n === Infinity ? -1 : n }
 
@@ -57,7 +51,6 @@ router.get('/user/usage', requireAuth, async (req, res) => {
     usage: {
       projects: { used: projectCount, limit: serializeLimit(limits.maxProjects) },
       customDomains: { used: domainCount, limit: serializeLimit(limits.maxCustomDomains) },
-      importsThisMonth: { used: importsThisMonth, limit: serializeLimit(limits.maxImportsPerMonth) },
       storageBytes: { used: Number(storageBytes), limit: serializeLimit(limits.maxStorageBytes) },
       publishedSites: { used: subdomainCount, limit: serializeLimit(limits.maxPublishedSites) },
     },
@@ -89,7 +82,6 @@ router.get('/plans', (_req, res) => {
       {
         maxProjects: serializeLimit(limits.maxProjects),
         maxCustomDomains: serializeLimit(limits.maxCustomDomains),
-        maxImportsPerMonth: serializeLimit(limits.maxImportsPerMonth),
         maxStorageBytes: serializeLimit(limits.maxStorageBytes),
         maxCheckpointsPerProject: serializeLimit(limits.maxCheckpointsPerProject),
         maxPublishedSites: serializeLimit(limits.maxPublishedSites),
