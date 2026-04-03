@@ -3,9 +3,11 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { useAuth, useAuthLoader } from '@/hooks/useAuth'
 
+const PUBLIC_PATHS = ['/login', '/verify-email', '/email-confirmed']
+
 export default function SplashScreen() {
   const { validate } = useAuthLoader()
-  const { isLoading, isAuthenticated } = useAuth()
+  const { isLoading, isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -15,12 +17,24 @@ export default function SplashScreen() {
 
   useEffect(() => {
     if (isLoading) return
-    if (!isAuthenticated && location.pathname !== '/login') {
+
+    const isPublic = PUBLIC_PATHS.some((p) => location.pathname.startsWith(p))
+
+    if (!isAuthenticated && !isPublic) {
       navigate('/login', { replace: true })
-    } else if (isAuthenticated && location.pathname === '/login') {
-      navigate('/', { replace: true })
+      return
     }
-  }, [isLoading, isAuthenticated, location.pathname, navigate])
+
+    if (isAuthenticated) {
+      if (!user?.emailVerified && !isPublic) {
+        navigate('/verify-email', { replace: true })
+        return
+      }
+      if (location.pathname === '/login') {
+        navigate('/', { replace: true })
+      }
+    }
+  }, [isLoading, isAuthenticated, user, location.pathname, navigate])
 
   if (isLoading) {
     return (

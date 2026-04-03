@@ -10,6 +10,10 @@ interface AuthResponse {
   user: AuthUser
 }
 
+interface NeedsVerificationResponse {
+  status: 'needs_verification'
+}
+
 export function useAuth() {
   const [token, setToken] = useAtom(authTokenAtom)
   const [user, setUser] = useAtom(authUserAtom)
@@ -38,8 +42,8 @@ export function useAuth() {
 
   const register = useCallback(
     (email: string, password: string, name: string) =>
-      api.post<AuthResponse>('/api/auth/register', { email, password, name }).then(saveSession),
-    [saveSession],
+      api.post<NeedsVerificationResponse>('/api/auth/register', { email, password, name }),
+    [],
   )
 
   const login = useCallback(
@@ -54,6 +58,18 @@ export function useAuth() {
     [saveSession],
   )
 
+  const verifyEmail = useCallback(
+    (token: string) =>
+      api.get<AuthResponse>(`/api/auth/verify-email?token=${token}`).then(saveSession),
+    [saveSession],
+  )
+
+  const resendVerification = useCallback(
+    (email: string) =>
+      api.post<{ status: string }>('/api/auth/resend-verification', { email }),
+    [],
+  )
+
   return {
     token,
     user,
@@ -62,6 +78,8 @@ export function useAuth() {
     login,
     register,
     loginWithGoogle,
+    verifyEmail,
+    resendVerification,
     logout,
   }
 }

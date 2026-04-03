@@ -237,7 +237,31 @@ export const en = {
       userNotFound: 'User not found.',
       genericError: 'Authentication error. Please try again.',
       googleGenericError: 'Google authentication error. Please try again.',
+      emailNotVerified: 'Email not verified. We resent the confirmation link.',
     },
+  },
+
+  verifyEmail: {
+    title: 'Check your email',
+    subtitle: 'We sent a confirmation link to',
+    instruction: 'Click the link in the email to activate your account. The link expires in 24 hours.',
+    resend: 'Resend email',
+    resending: 'Sending…',
+    resendCooldown: 'Resend in {{seconds}}s',
+    resendSuccess: 'Email resent successfully!',
+    resendError: 'Error resending. Please try again.',
+    backToLogin: 'Back to login',
+    spamHint: "Can't find it? Check your spam or junk folder.",
+  },
+
+  emailConfirmed: {
+    verifying: 'Verifying your email…',
+    success: 'Email confirmed!',
+    successMessage: 'Your account is active. Redirecting…',
+    invalidToken: 'Invalid or expired link.',
+    invalidTokenMessage: 'Please request a new verification link.',
+    requestNew: 'Request new link',
+    backToLogin: 'Back to login',
   },
 
   findInFiles: {

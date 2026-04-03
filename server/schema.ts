@@ -6,6 +6,9 @@ export const users = pgTable('users', {
   name: varchar('name', { length: 255 }),
   passwordHash: varchar('password_hash', { length: 255 }),
   googleId: varchar('google_id', { length: 255 }).unique(),
+  emailVerified: boolean('email_verified').default(false).notNull(),
+  emailVerificationToken: varchar('email_verification_token', { length: 255 }).unique(),
+  emailVerificationExpiry: timestamp('email_verification_expiry'),
   createdAt: timestamp('created_at').defaultNow(),
 })
 

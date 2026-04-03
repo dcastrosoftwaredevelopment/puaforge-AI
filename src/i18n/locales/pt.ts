@@ -237,7 +237,31 @@ export const pt = {
       userNotFound: 'Usuário não encontrado.',
       genericError: 'Erro ao autenticar. Tente novamente.',
       googleGenericError: 'Erro ao autenticar com Google. Tente novamente.',
+      emailNotVerified: 'E-mail não verificado. Reenviamos o link de confirmação.',
     },
+  },
+
+  verifyEmail: {
+    title: 'Verifique seu e-mail',
+    subtitle: 'Enviamos um link de confirmação para',
+    instruction: 'Clique no link do e-mail para ativar sua conta. O link expira em 24 horas.',
+    resend: 'Reenviar e-mail',
+    resending: 'Enviando…',
+    resendCooldown: 'Reenviar em {{seconds}}s',
+    resendSuccess: 'E-mail reenviado com sucesso!',
+    resendError: 'Erro ao reenviar. Tente novamente.',
+    backToLogin: 'Voltar ao login',
+    spamHint: 'Não encontrou? Verifique a pasta de spam ou lixo eletrônico.',
+  },
+
+  emailConfirmed: {
+    verifying: 'Verificando seu e-mail…',
+    success: 'E-mail confirmado!',
+    successMessage: 'Sua conta está ativa. Redirecionando…',
+    invalidToken: 'Link inválido ou expirado.',
+    invalidTokenMessage: 'Solicite um novo link de verificação.',
+    requestNew: 'Solicitar novo link',
+    backToLogin: 'Voltar ao login',
   },
 
   findInFiles: {

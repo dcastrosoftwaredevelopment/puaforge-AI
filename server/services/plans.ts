@@ -76,9 +76,18 @@ export async function getOrCreateSubscription(userId: string) {
   const [created] = await db
     .insert(subscriptions)
     .values({ userId, plan: 'free', status: 'active' })
+    .onConflictDoNothing()
     .returning()
 
-  return created
+  if (created) return created
+
+  const [row] = await db
+    .select()
+    .from(subscriptions)
+    .where(eq(subscriptions.userId, userId))
+    .limit(1)
+
+  return row
 }
 
 export async function getUserPlan(userId: string): Promise<Plan> {
