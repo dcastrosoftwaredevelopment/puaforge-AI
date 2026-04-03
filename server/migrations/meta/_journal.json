@@ -64,6 +64,13 @@
       "when": 1775440000000,
       "tag": "0008_subdomain_separate_publish",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1775530000000,
+      "tag": "0009_email_verification",
+      "breakpoints": true
     }
   ]
 }

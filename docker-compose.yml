@@ -37,6 +37,13 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-puaforge}
       DB_NAME: ${DB_NAME:-puaforge}
       JWT_SECRET: ${JWT_SECRET:-dev-secret-local}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      FROM_EMAIL: ${FROM_EMAIL:-}
+      APP_URL: ${APP_URL:-http://localhost:5173}
     depends_on:
       db:
         condition: service_healthy
