@@ -13,11 +13,7 @@ export const features = {
   features_3_desc:
     'Open the Checkpoints panel in the editor and click Save checkpoint. Give it a name to identify the version — e.g. "before changing the header". To roll back, click Restore on any saved checkpoint.',
 
-  features_4_title: 'Import an existing site',
+  features_4_title: 'Images and color palette',
   features_4_desc:
-    'In the editor, click the Import icon and paste the site URL. PuaForgeAI will reproduce the layout so you can keep editing it with AI. Available on Indie and Pro plans.',
-
-  features_5_title: 'Images and color palette',
-  features_5_desc:
     'Open the Images panel in the editor to upload photos for your project. They become available for the AI to use when you ask. Use the Palette panel to set your main colors — the AI will follow them when generating content.',
 }

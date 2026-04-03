@@ -119,12 +119,6 @@ export default function Sidebar() {
                 <UsageBar used={usage.usage.storageBytes.used} limit={usage.usage.storageBytes.limit} unit="bytes" />
               </div>
             )}
-            {usage.usage.importsThisMonth.limit > 0 && (
-              <div>
-                <span className="text-[10px] text-text-muted">{t('sidebar.usageImports')}</span>
-                <UsageBar used={usage.usage.importsThisMonth.used} limit={usage.usage.importsThisMonth.limit} />
-              </div>
-            )}
           </div>
           {usage.plan === 'free' && (
             <button

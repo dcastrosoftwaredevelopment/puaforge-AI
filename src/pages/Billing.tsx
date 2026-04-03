@@ -83,8 +83,7 @@ export default function Billing() {
         { text: t('billing.features.export'), available: true },
         { text: t('billing.features.publish', { count: lim(f?.free.maxPublishedSites ?? 1) }), available: true },
         { text: t('billing.features.domain', { count: lim(f?.free.maxCustomDomains ?? 0) }), available: (f?.free.maxCustomDomains ?? 0) > 0 },
-        { text: t('billing.features.import', { count: lim(f?.free.maxImportsPerMonth ?? 0) }), available: (f?.free.maxImportsPerMonth ?? 0) > 0 },
-        { text: t('billing.features.storage', { size: lim(f?.free.maxStorageBytes ?? 0, 'bytes') }), available: (f?.free.maxStorageBytes ?? 0) > 0 },
+{ text: t('billing.features.storage', { size: lim(f?.free.maxStorageBytes ?? 0, 'bytes') }), available: (f?.free.maxStorageBytes ?? 0) > 0 },
         { text: t('billing.features.checkpoints', { count: lim(f?.free.maxCheckpointsPerProject ?? 0) }), available: (f?.free.maxCheckpointsPerProject ?? 0) > 0 },
       ],
     },
@@ -104,8 +103,7 @@ export default function Billing() {
         { text: t('billing.features.export'), available: true },
         { text: t('billing.features.publish', { count: lim(f?.indie.maxPublishedSites ?? 1) }), available: true },
         { text: t('billing.features.domain', { count: lim(f?.indie.maxCustomDomains ?? 1) }), available: true },
-        { text: t('billing.features.import', { count: lim(f?.indie.maxImportsPerMonth ?? 3) }), available: true },
-        { text: t('billing.features.storage', { size: lim(f?.indie.maxStorageBytes ?? 0, 'bytes') }), available: true },
+{ text: t('billing.features.storage', { size: lim(f?.indie.maxStorageBytes ?? 0, 'bytes') }), available: true },
         { text: t('billing.features.checkpoints', { count: lim(f?.indie.maxCheckpointsPerProject ?? 10) }), available: true },
       ],
     },
@@ -125,8 +123,7 @@ export default function Billing() {
         { text: t('billing.features.export'), available: true },
         { text: t('billing.features.publish', { count: lim(f?.pro.maxPublishedSites ?? 5) }), available: true },
         { text: t('billing.features.domains', { count: lim(f?.pro.maxCustomDomains ?? 5) }), available: true },
-        { text: t('billing.features.import', { count: lim(f?.pro.maxImportsPerMonth ?? Infinity) }), available: true },
-        { text: t('billing.features.storage', { size: lim(f?.pro.maxStorageBytes ?? 0, 'bytes') }), available: true },
+{ text: t('billing.features.storage', { size: lim(f?.pro.maxStorageBytes ?? 0, 'bytes') }), available: true },
         { text: t('billing.features.checkpoints', { count: lim(f?.pro.maxCheckpointsPerProject ?? Infinity) }), available: true },
       ],
     },
@@ -171,11 +168,6 @@ export default function Billing() {
                 used={usage.usage.storageBytes.used}
                 limit={usage.usage.storageBytes.limit}
                 unit="bytes"
-              />
-              <UsageRow
-                label={t('sidebar.usageImports')}
-                used={usage.usage.importsThisMonth.used}
-                limit={usage.usage.importsThisMonth.limit}
               />
               <UsageRow
                 label={t('billing.usageDomains')}

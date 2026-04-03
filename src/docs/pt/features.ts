@@ -13,11 +13,7 @@ export const features = {
   features_3_desc:
     'Abra o painel de Checkpoints no editor e clique em Salvar checkpoint. Dê um nome para identificar a versão — ex: "antes de mudar o header". Para voltar a uma versão anterior, clique em Restaurar.',
 
-  features_4_title: 'Importar um site existente',
+  features_4_title: 'Imagens e paleta de cores',
   features_4_desc:
-    'No editor, clique no ícone de Import e cole a URL do site. O PuaForgeAI vai tentar reproduzir o layout para que você continue editando com IA. Disponível nos planos Indie e Pro.',
-
-  features_5_title: 'Imagens e paleta de cores',
-  features_5_desc:
     'No editor, abra o painel de Imagens para fazer upload de fotos do seu projeto. As imagens ficam disponíveis para a IA usar quando você pedir. Use o painel de Paleta para definir as cores principais — a IA vai respeitá-las ao gerar o conteúdo.',
 }

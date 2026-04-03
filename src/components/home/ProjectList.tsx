@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Plus, Import } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useAtomValue } from 'jotai'
 import { useTranslation } from 'react-i18next'
 import { authTokenAtom } from '@/atoms/authAtoms'
@@ -9,7 +9,6 @@ import { api } from '@/services/api'
 import Sidebar, { SidebarMenuButton } from '@/components/home/Sidebar'
 import EmptyState from '@/components/home/EmptyState'
 import ProjectCard from '@/components/home/ProjectCard'
-import ImportSiteModal from '@/components/home/ImportSiteModal'
 
 export default function ProjectList() {
   const { projects } = useProjects()
@@ -17,8 +16,6 @@ export default function ProjectList() {
   const token = useAtomValue(authTokenAtom)
   const { t } = useTranslation()
   const [publishedIds, setPublishedIds] = useState<Set<string>>(new Set())
-  const [showImportModal, setShowImportModal] = useState(false)
-
   useEffect(() => {
     if (!token || projects.length === 0) return
     const headers = { Authorization: `Bearer ${token}` }
@@ -66,15 +63,6 @@ export default function ProjectList() {
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setShowImportModal(true)}
-                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-bg-secondary border border-border-subtle hover:bg-bg-elevated text-text-secondary text-sm font-medium rounded-lg transition cursor-pointer"
-                title={t('import.tooltip')}
-              >
-                <Import size={16} />
-                <span className="hidden sm:inline">{t('import.button')}</span>
-                <span className="px-1 py-0.5 rounded text-[9px] font-semibold tracking-wide uppercase bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20">{t('import.beta')}</span>
-              </button>
-              <button
                 onClick={createProject}
                 className="flex items-center gap-2 px-3 md:px-4 py-2 bg-forge-terracotta/10 border border-forge-terracotta/30 hover:bg-forge-terracotta/20 text-forge-terracotta text-sm font-medium rounded-lg transition cursor-pointer"
               >
@@ -102,7 +90,6 @@ export default function ProjectList() {
           )}
         </div>
       </main>
-      {showImportModal && <ImportSiteModal onClose={() => setShowImportModal(false)} />}
     </div>
   )
 }

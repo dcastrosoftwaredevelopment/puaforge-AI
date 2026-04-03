@@ -40,7 +40,7 @@ function Step({ number, title, desc, link, linkLabel }: {
 export default function Help() {
   const { t } = useTranslation()
 
-  const featureKeys = [1, 2, 3, 4, 5] as const
+  const featureKeys = [1, 2, 3, 4] as const
 
   return (
     <div className="flex h-screen bg-bg-primary overflow-hidden">

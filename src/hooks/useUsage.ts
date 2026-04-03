@@ -13,7 +13,6 @@ export interface UsageMetric {
 export interface Usage {
   projects: UsageMetric
   customDomains: UsageMetric
-  importsThisMonth: UsageMetric
   storageBytes: UsageMetric
   publishedSites: UsageMetric
 }
@@ -40,7 +39,6 @@ export function useUsage() {
         usage: {
           projects: deserialize(raw.usage.projects),
           customDomains: deserialize(raw.usage.customDomains),
-          importsThisMonth: deserialize(raw.usage.importsThisMonth),
           storageBytes: deserialize(raw.usage.storageBytes),
           publishedSites: deserialize(raw.usage.publishedSites),
         },
@@ -61,7 +59,6 @@ export function useUsage() {
 export interface PlanLimits {
   maxProjects: number
   maxCustomDomains: number
-  maxImportsPerMonth: number
   maxStorageBytes: number
   maxCheckpointsPerProject: number
   maxPublishedSites: number
@@ -75,7 +72,6 @@ function deserializeLimits(raw: PlanLimits): PlanLimits {
     ...raw,
     maxProjects: inf(raw.maxProjects),
     maxCustomDomains: inf(raw.maxCustomDomains),
-    maxImportsPerMonth: inf(raw.maxImportsPerMonth),
     maxStorageBytes: inf(raw.maxStorageBytes),
     maxCheckpointsPerProject: inf(raw.maxCheckpointsPerProject),
     maxPublishedSites: inf(raw.maxPublishedSites),
