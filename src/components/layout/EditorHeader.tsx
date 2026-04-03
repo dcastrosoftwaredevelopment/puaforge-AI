@@ -32,8 +32,11 @@ export default function EditorHeader() {
   const [showDiscardModal, setShowDiscardModal] = useState(false)
   const [saving, setSaving] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
+  const mobilePanelRef = useRef<HTMLDivElement>(null)
   const checkpointRef = useRef<HTMLDivElement>(null)
+  const mobileCheckpointRef = useRef<HTMLDivElement>(null)
   const paletteRef = useRef<HTMLDivElement>(null)
+  const mobilePaletteRef = useRef<HTMLDivElement>(null)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
 
   const handleSave = useCallback(async () => {
@@ -50,14 +53,17 @@ export default function EditorHeader() {
   useEffect(() => {
     if (!showImages && !showCheckpoints && !showPalette && !showMobileMenu) return
     function handleClick(e: MouseEvent) {
-      if (showImages && panelRef.current && !panelRef.current.contains(e.target as Node)) {
-        setShowImages(false)
+      if (showImages) {
+        const inside = panelRef.current?.contains(e.target as Node) || mobilePanelRef.current?.contains(e.target as Node)
+        if (!inside) setShowImages(false)
       }
-      if (showCheckpoints && checkpointRef.current && !checkpointRef.current.contains(e.target as Node)) {
-        setShowCheckpoints(false)
+      if (showCheckpoints) {
+        const inside = checkpointRef.current?.contains(e.target as Node) || mobileCheckpointRef.current?.contains(e.target as Node)
+        if (!inside) setShowCheckpoints(false)
       }
-      if (showPalette && paletteRef.current && !paletteRef.current.contains(e.target as Node)) {
-        setShowPalette(false)
+      if (showPalette) {
+        const inside = paletteRef.current?.contains(e.target as Node) || mobilePaletteRef.current?.contains(e.target as Node)
+        if (!inside) setShowPalette(false)
       }
       if (showMobileMenu && mobileMenuRef.current && !mobileMenuRef.current.contains(e.target as Node)) {
         setShowMobileMenu(false)
@@ -264,17 +270,17 @@ export default function EditorHeader() {
           </div>
           {/* Dropdowns rendered outside the menu so they stay accessible */}
           {showImages && (
-            <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-72 max-h-[calc(100svh-5rem)] bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-y-auto overflow-x-hidden" ref={panelRef}>
+            <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-72 max-h-[calc(100svh-5rem)] bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-y-auto overflow-x-hidden" ref={mobilePanelRef}>
               <ImageAssets />
             </div>
           )}
           {showPalette && (
-            <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-64 max-h-[calc(100svh-5rem)] bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-y-auto overflow-x-hidden" ref={paletteRef}>
+            <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-64 max-h-[calc(100svh-5rem)] bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-y-auto overflow-x-hidden" ref={mobilePaletteRef}>
               <ColorPalette />
             </div>
           )}
           {showCheckpoints && (
-            <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-80 max-h-[calc(100svh-5rem)] bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-y-auto overflow-x-hidden" ref={checkpointRef}>
+            <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-80 max-h-[calc(100svh-5rem)] bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-y-auto overflow-x-hidden" ref={mobileCheckpointRef}>
               <Checkpoints />
             </div>
           )}
