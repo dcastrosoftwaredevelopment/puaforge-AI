@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import { Loader2, Mail, Lock, User } from 'lucide-react'
 import * as yup from 'yup'
@@ -12,6 +13,7 @@ type FieldErrors = Record<string, string>
 export default function Login() {
   const { login, register, loginWithGoogle } = useAuth()
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [tab, setTab] = useState<Tab>('login')
 
   const ERROR_MESSAGES: Record<string, string> = {
@@ -20,6 +22,12 @@ export default function Login() {
     ERROR_MISSING_FIELDS: t('login.errors.missingFields'),
     ERROR_INVALID_GOOGLE_TOKEN: t('login.errors.googleFailed'),
     ERROR_USER_NOT_FOUND: t('login.errors.userNotFound'),
+    ERROR_EMAIL_NOT_VERIFIED: t('login.errors.emailNotVerified'),
+  }
+
+  const goToVerify = (userEmail: string) => {
+    sessionStorage.setItem('verify_email', userEmail)
+    navigate('/verify-email')
   }
 
   const loginSchema = yup.object({
@@ -73,9 +81,14 @@ export default function Login() {
         await login(email, password)
       } else {
         await register(email, password, name)
+        goToVerify(email)
       }
     } catch (err) {
       const code = err instanceof ApiError ? err.code : 'UNKNOWN'
+      if (code === 'ERROR_EMAIL_NOT_VERIFIED') {
+        goToVerify(email)
+        return
+      }
       setError(ERROR_MESSAGES[code] ?? t('login.errors.genericError'))
     } finally {
       setLoading(false)

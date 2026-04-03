@@ -6,6 +6,8 @@ import ProjectList from '@/components/home/ProjectList'
 import EditorView from '@/components/layout/EditorView'
 import Settings from '@/components/settings/Settings'
 import Login from '@/pages/Login'
+import VerifyEmail from '@/pages/VerifyEmail'
+import EmailConfirmed from '@/pages/EmailConfirmed'
 import Profile from '@/pages/Profile'
 import Billing from '@/pages/Billing'
 import SplashScreen from '@/components/auth/SplashScreen'
@@ -26,6 +28,8 @@ export default function App() {
       {isHydrated && (
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/email-confirmed" element={<EmailConfirmed />} />
           <Route path="/" element={<ProjectList />} />
           <Route path="/project/:projectId" element={<EditorView />} />
           <Route path="/settings" element={<Settings />} />
