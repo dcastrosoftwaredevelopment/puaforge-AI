@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Key, Eye, EyeOff, Loader2, CheckCircle2, XCircle } from 'lucide-react'
+import { Key, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useApiKey } from '@/hooks/useApiKey'
 import { useModels } from '@/hooks/useModels'
 import { useApiCall, HttpMethod } from '@/hooks/useApiCall'
 import Sidebar, { SidebarMenuButton } from '@/components/home/Sidebar'
+import Button from '@/components/ui/Button'
 
 export default function Settings() {
   const { apiKey, setApiKey, apiKeyEnabled, setApiKeyEnabled } = useApiKey()
@@ -137,28 +138,28 @@ export default function Settings() {
               )}
 
               <div className="flex items-center gap-2">
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  isLoading={validating}
                   onClick={handleValidate}
-                  disabled={!draft.trim() || validating}
-                  className="px-3 py-1.5 rounded-lg bg-bg-elevated border border-border-subtle text-sm text-text-secondary hover:text-text-primary hover:bg-border-default disabled:opacity-30 transition cursor-pointer flex items-center gap-2"
+                  disabled={!draft.trim()}
                 >
-                  {validating && <Loader2 size={13} className="animate-spin" />}
                   {t('settings.validate')}
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="blue"
+                  size="sm"
+                  isLoading={validating}
                   onClick={handleSave}
-                  disabled={!hasChanges || validating}
-                  className="px-3 py-1.5 rounded-lg bg-accent/20 border border-accent/30 text-sm text-accent hover:bg-accent/30 disabled:opacity-30 transition cursor-pointer"
+                  disabled={!hasChanges}
                 >
                   {t('settings.save')}
-                </button>
+                </Button>
                 {apiKey && (
-                  <button
-                    onClick={handleClear}
-                    className="px-3 py-1.5 rounded-lg bg-bg-elevated border border-border-subtle text-sm text-forge-terracotta hover:bg-forge-terracotta/10 hover:border-forge-terracotta/30 transition cursor-pointer"
-                  >
+                  <Button variant="terracotta" size="sm" onClick={handleClear}>
                     {t('settings.remove')}
-                  </button>
+                  </Button>
                 )}
               </div>
 

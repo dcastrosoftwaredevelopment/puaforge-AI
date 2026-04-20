@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Home, ImageIcon, History, RotateCcw, Save, Trash2, Palette, MoreHorizontal } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import Button from '@/components/ui/Button'
 import { useProjectActions } from '@/hooks/useProjectActions'
 import { useProjectImages } from '@/hooks/useProjectImages'
 import { useCheckpoints } from '@/hooks/useCheckpoints'
@@ -184,14 +185,10 @@ export default function EditorHeader() {
                   <Trash2 size={14} />
                 </button>
               </Tooltip>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-accent/15 text-accent hover:bg-accent/25 disabled:opacity-50 transition cursor-pointer"
-              >
+              <Button variant="terracotta" size="xs" isLoading={saving} onClick={handleSave} className="gap-1.5">
                 <Save size={13} />
                 {saving ? t('common.saving') : t('common.save')}
-              </button>
+              </Button>
             </>
           )}
 

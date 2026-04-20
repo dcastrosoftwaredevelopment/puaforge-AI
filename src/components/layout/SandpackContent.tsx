@@ -1,4 +1,4 @@
-import { memo, useCallback, useRef, useState } from 'react'
+import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { SandpackLayout, SandpackFileExplorer, SandpackCodeEditor, SandpackPreview } from '@codesandbox/sandpack-react'
 import { Save, Undo2, Search, PanelLeft } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -66,7 +66,7 @@ export default function SandpackContent() {
   const isResponsive = device !== 'desktop'
 
   const editorFractionRef = useRef(editorFraction)
-  editorFractionRef.current = editorFraction
+  useLayoutEffect(() => { editorFractionRef.current = editorFraction }, [editorFraction])
   const editorPanelRef = useRef<HTMLDivElement>(null)
   const previewPanelRef = useRef<HTMLDivElement>(null)
 
@@ -118,7 +118,7 @@ export default function SandpackContent() {
             showLineNumbers
             showInlineErrors
           />
-          <FindInFiles open={findOpen} onClose={() => setFindOpen(false)} />
+          <FindInFiles key={String(findOpen)} open={findOpen} onClose={() => setFindOpen(false)} />
         </div>
       </div>
       {isSplit && <ResizeHandle onResize={onSplitResize} onCommit={onSplitCommit} />}

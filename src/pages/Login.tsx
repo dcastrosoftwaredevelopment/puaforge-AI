@@ -4,8 +4,10 @@ import { GoogleLogin } from '@react-oauth/google'
 import { Loader2, Mail, Lock, User } from 'lucide-react'
 import * as yup from 'yup'
 import { useTranslation } from 'react-i18next'
+import { TextInput } from 'flowbite-react'
 import { useAuth } from '@/hooks/useAuth'
 import { ApiError } from '@/services/api'
+import Button from '@/components/ui/Button'
 
 type Tab = 'login' | 'register'
 type FieldErrors = Record<string, string>
@@ -108,13 +110,6 @@ export default function Login() {
     }
   }
 
-  const inputClass = (field: string) =>
-    `w-full bg-bg-primary border rounded-lg pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none transition ${
-      fieldErrors[field]
-        ? 'border-red-500 focus:border-red-500'
-        : 'border-border-subtle focus:border-forge-terracotta'
-    }`
-
   return (
     <div className="h-screen w-screen bg-bg-primary flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
@@ -143,58 +138,48 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
             {tab === 'register' && (
               <div>
-                <div className="relative">
-                  <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-                  <input
-                    type="text"
-                    placeholder={t('login.namePlaceholder')}
-                    value={name}
-                    onChange={(e) => { setName(e.target.value); setFieldErrors((p) => ({ ...p, name: '' })) }}
-                    className={inputClass('name')}
-                  />
-                </div>
+                <TextInput
+                  type="text"
+                  icon={User}
+                  placeholder={t('login.namePlaceholder')}
+                  value={name}
+                  color={fieldErrors.name ? 'failure' : 'gray'}
+                  onChange={(e) => { setName(e.target.value); setFieldErrors((p) => ({ ...p, name: '' })) }}
+                />
                 {fieldErrors.name && <p className="text-xs text-red-400 mt-1 ml-1">{fieldErrors.name}</p>}
               </div>
             )}
 
             <div>
-              <div className="relative">
-                <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-                <input
-                  type="email"
-                  placeholder={t('login.emailPlaceholder')}
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); setFieldErrors((p) => ({ ...p, email: '' })) }}
-                  className={inputClass('email')}
-                />
-              </div>
+              <TextInput
+                type="email"
+                icon={Mail}
+                placeholder={t('login.emailPlaceholder')}
+                value={email}
+                color={fieldErrors.email ? 'failure' : 'gray'}
+                onChange={(e) => { setEmail(e.target.value); setFieldErrors((p) => ({ ...p, email: '' })) }}
+              />
               {fieldErrors.email && <p className="text-xs text-red-400 mt-1 ml-1">{fieldErrors.email}</p>}
             </div>
 
             <div>
-              <div className="relative">
-                <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-                <input
-                  type="password"
-                  placeholder={t('login.passwordPlaceholder')}
-                  value={password}
-                  onChange={(e) => { setPassword(e.target.value); setFieldErrors((p) => ({ ...p, password: '' })) }}
-                  className={inputClass('password')}
-                />
-              </div>
+              <TextInput
+                type="password"
+                icon={Lock}
+                placeholder={t('login.passwordPlaceholder')}
+                value={password}
+                color={fieldErrors.password ? 'failure' : 'gray'}
+                onChange={(e) => { setPassword(e.target.value); setFieldErrors((p) => ({ ...p, password: '' })) }}
+              />
               {fieldErrors.password && <p className="text-xs text-red-400 mt-1 ml-1">{fieldErrors.password}</p>}
             </div>
 
             {error && <p className="text-xs text-red-400 text-center">{error}</p>}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2 rounded-lg bg-forge-terracotta text-white text-sm font-medium hover:bg-forge-terracotta/90 transition disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2 mt-1"
-            >
+            <Button type="submit" variant="primary" size="md" isLoading={loading} fullWidth className="mt-1 gap-2">
               {loading && <Loader2 size={14} className="animate-spin" />}
               {tab === 'login' ? t('login.loginTab') : t('login.registerButton')}
-            </button>
+            </Button>
           </form>
 
           <div className="relative my-4">

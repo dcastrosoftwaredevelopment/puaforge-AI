@@ -22,3 +22,16 @@ Jotai atoms must never be imported directly in components or pages. Always wrap 
 ## HTTP requests
 
 HTTP calls must never occur directly in components or pages. Always use or create a hook in `src/hooks/` that delegates to `src/services/api.ts`.
+
+## UI components
+
+Prioritize Flowbite React components for all new frontend work. Before writing custom JSX for buttons, modals, drawers, tooltips, inputs, progress bars, dropdowns, or any other UI primitive, check if Flowbite React has a suitable component.
+
+- Buttons with text or a loading state → always use `<Button>` from `src/components/ui/Button.tsx` (variants: `primary`, `secondary`, `blue`, `ghost`, `danger`, `terracotta`)
+- Modals → `Modal` + `ModalBody` from `flowbite-react`
+- Tooltips → `src/components/ui/Tooltip.tsx` (wraps Flowbite, keeps `side`/`align` API)
+- Inputs → Flowbite `TextInput` with `color="failure"` for error states
+- Progress bars → Flowbite `Progress`
+- Drawers → Flowbite `Drawer`
+- Raw `<button>` is acceptable only for: icon-only tight-layout buttons, tab-style groups with active state that doesn't map to existing variants, or elements with unique hover colors with no matching variant
+- Never hardcode button styles inline when a variant already covers the case

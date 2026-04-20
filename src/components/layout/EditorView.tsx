@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { SandpackProvider } from '@codesandbox/sandpack-react'
 import { Loader2, MessageCircle, Eye, Code2, MessageSquare } from 'lucide-react'
@@ -92,7 +92,7 @@ export default function EditorView() {
 
   // Live width during drag — mutate DOM directly, no setState per frame
   const chatWidthRef = useRef(chatWidth)
-  chatWidthRef.current = chatWidth
+  useLayoutEffect(() => { chatWidthRef.current = chatWidth }, [chatWidth])
   const chatPanelRef = useRef<HTMLDivElement>(null)
 
   const onChatResize = useCallback((delta: number) => {
