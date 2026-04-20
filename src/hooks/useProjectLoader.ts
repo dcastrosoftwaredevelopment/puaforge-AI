@@ -4,7 +4,7 @@ import { useSetAtom, useAtomValue } from 'jotai'
 import { activeProjectIdAtom, messagesAtom, filesAtom, projectImagesAtom, checkpointsAtom, colorPaletteAtom, customDomainAtom, projectLoadedAtom, DEFAULT_PALETTE, type ProjectImage, type Checkpoint } from '@/atoms'
 import { authTokenAtom } from '@/atoms/authAtoms'
 import { depsAtom } from '@/atoms'
-import { DEFAULT_FILES } from '@/utils/defaultFiles'
+import { DEFAULT_FILES, buildPackageJson } from '@/utils/defaultFiles'
 import { extractDependencies } from '@/services/fileParser'
 import { api } from '@/services/api'
 import { waitForPersist } from '@/hooks/usePersistence'
@@ -99,9 +99,12 @@ export function useProjectLoader(projectId: string | undefined) {
         if (cancelled) return
 
         const detectedDeps = extractDependencies(files)
+        // Pre-build the correct package.json so EditorView's deps effect finds no change
+        // and avoids a second setFiles call that would falsely trigger the draft guard.
+        const syncedFiles = { ...files, '/package.json': buildPackageJson(detectedDeps) }
         const filesWithImages = savedImages.length > 0
-          ? { ...files, ...generateImagesFiles(savedImages) }
-          : files
+          ? { ...syncedFiles, ...generateImagesFiles(savedImages) }
+          : syncedFiles
 
         setColorPalette(savedPalette ?? DEFAULT_PALETTE)
         setCustomDomain(domainData.customDomain)
