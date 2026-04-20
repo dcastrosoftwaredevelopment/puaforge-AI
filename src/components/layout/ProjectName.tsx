@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from 'react'
 import { Pencil } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useProjects } from '@/hooks/useProjects'
 import { useProjectActions } from '@/hooks/useProjectActions'
 
 export default function ProjectName() {
   const { activeProject: project } = useProjects()
   const { renameProject } = useProjectActions()
+  const { t } = useTranslation()
   const [isEditing, setIsEditing] = useState(false)
   const [name, setName] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
@@ -54,7 +56,7 @@ export default function ProjectName() {
     <button
       onClick={startEditing}
       className="flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary transition group"
-      title="Clique para renomear"
+      title={t('common.clickToRename')}
     >
       <span className="truncate max-w-[8rem] sm:max-w-[14rem] md:max-w-64">{project.name}</span>
       <Pencil size={11} className="text-text-muted opacity-0 group-hover:opacity-100 transition" />

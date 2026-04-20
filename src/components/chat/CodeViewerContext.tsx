@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface CodeEntry { language: string; filePath?: string; code: string }
 
@@ -14,6 +15,7 @@ export function useCodeViewer() {
 
 export function CodeViewerProvider({ children }: { children: React.ReactNode }) {
   const [entry, setEntry] = useState<CodeEntry | null>(null)
+  const { t } = useTranslation()
 
   return (
     <CodeViewerContext.Provider value={{ open: setEntry }}>
@@ -37,7 +39,7 @@ export function CodeViewerProvider({ children }: { children: React.ReactNode }) 
               <button
                 onClick={() => setEntry(null)}
                 className="p-1 rounded text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer text-xs"
-                title="Fechar"
+                title={t('common.close')}
               >
                 ✕
               </button>

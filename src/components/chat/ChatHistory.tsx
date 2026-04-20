@@ -1,10 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { Loader2, RefreshCw } from 'lucide-react'
-import { useAtomValue } from 'jotai'
 import { useTranslation } from 'react-i18next'
-import { projectImagesAtom } from '@/atoms'
 import { useMessagesValue } from '@/hooks/useMessages'
 import { useFiles } from '@/hooks/useFiles'
+import { useProjectImages } from '@/hooks/useProjectImages'
 import { parseFilesFromResponse, mergeFiles, extractDependencies } from '@/services/fileParser'
 import { generateImagesFiles } from '@/hooks/useProjectImages'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
@@ -17,7 +16,7 @@ const FILE_BLOCK_RE = /```[\w]*\s+file="[^"]+"/
 export default function ChatHistory() {
   const { messages, isGenerating } = useMessagesValue()
   const { setFiles, setDeps } = useFiles()
-  const images = useAtomValue(projectImagesAtom)
+  const { images } = useProjectImages()
   const bottomRef = useRef<HTMLDivElement>(null)
   const { t } = useTranslation()
 

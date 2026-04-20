@@ -135,3 +135,6 @@ export const upgradePromptAtom = atom<UpgradePrompt | null>(null)
 
 // Mobile sidebar drawer
 export const sidebarOpenAtom = atom(false)
+
+// External npm dependencies detected from AI-generated code
+export const depsAtom = atom<Record<string, string>>({})

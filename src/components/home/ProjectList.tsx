@@ -2,30 +2,26 @@ import { useEffect, useState, useCallback } from 'react'
 
 declare const __APP_DOMAIN__: string
 import { Plus } from 'lucide-react'
-import { useAtomValue } from 'jotai'
 import { useTranslation } from 'react-i18next'
-import { authTokenAtom } from '@/atoms/authAtoms'
+import { useAuth } from '@/hooks/useAuth'
 import { useProjects } from '@/hooks/useProjects'
 import { useProjectActions } from '@/hooks/useProjectActions'
-import { api } from '@/services/api'
 import Sidebar, { SidebarMenuButton } from '@/components/home/Sidebar'
 import EmptyState from '@/components/home/EmptyState'
 import ProjectCard from '@/components/home/ProjectCard'
 
 export default function ProjectList() {
   const { projects } = useProjects()
-  const { createProject, openProject, deleteProject } = useProjectActions()
-  const token = useAtomValue(authTokenAtom)
+  const { createProject, openProject, deleteProject, fetchPublishedIds } = useProjectActions()
+  const { token } = useAuth()
   const { t } = useTranslation()
   interface PublishedInfo { projectId: string; subdomain: string | null; customDomain: string | null }
   const [publishedMap, setPublishedMap] = useState<Map<string, PublishedInfo>>(new Map())
 
   useEffect(() => {
     if (!token) return
-    api.get<PublishedInfo[]>('/api/projects/published-ids', { Authorization: `Bearer ${token}` })
-      .then((rows) => setPublishedMap(new Map(rows.map((r) => [r.projectId, r]))))
-      .catch(() => {})
-  }, [token])
+    fetchPublishedIds().then(setPublishedMap)
+  }, [token, fetchPublishedIds])
 
   const openPreview = useCallback((projectId: string) => {
     const info = publishedMap.get(projectId)

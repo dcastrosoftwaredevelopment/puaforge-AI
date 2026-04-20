@@ -44,11 +44,11 @@ function compressImage(file: File): Promise<{ base64: string; mediaType: Message
         }
         quality -= 0.1
       }
-      reject(new Error('Imagem muito grande, mesmo após compressão'))
+      reject(new Error('chat.imageErrors.tooLarge'))
     }
     img.onerror = () => {
       URL.revokeObjectURL(url)
-      reject(new Error('Erro ao carregar imagem'))
+      reject(new Error('chat.imageErrors.loadError'))
     }
     img.src = url
   })
@@ -57,7 +57,7 @@ function compressImage(file: File): Promise<{ base64: string; mediaType: Message
 function fileToMessageImage(file: File): Promise<MessageImage> {
   return new Promise((resolve, reject) => {
     if (!ACCEPTED_TYPES.includes(file.type)) {
-      reject(new Error('Tipo de imagem não suportado'))
+      reject(new Error('chat.imageErrors.unsupportedType'))
       return
     }
     const reader = new FileReader()
@@ -77,7 +77,7 @@ function fileToMessageImage(file: File): Promise<MessageImage> {
         reject(err)
       }
     }
-    reader.onerror = () => reject(new Error('Erro ao ler imagem'))
+    reader.onerror = () => reject(new Error('chat.imageErrors.readError'))
     reader.readAsDataURL(file)
   })
 }
@@ -99,8 +99,8 @@ export default function PromptInput() {
       const newImages = await Promise.all(selectedFiles.map(fileToMessageImage))
       setPendingImages((prev) => [...prev, ...newImages])
     } catch (err) {
-      const msg = err instanceof Error ? err.message : t('chat.imageErrors.readError')
-      setImageError(msg)
+      const key = err instanceof Error ? err.message : 'chat.imageErrors.readError'
+      setImageError(t(key))
       setTimeout(() => setImageError(null), 4000)
     }
     e.target.value = ''

@@ -2,8 +2,7 @@ import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Layers, Settings, LogOut, CreditCard, HelpCircle, X, Menu } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useAtom } from 'jotai'
-import { sidebarOpenAtom } from '@/atoms'
+import { useSidebar } from '@/hooks/useSidebar'
 import { useAuth } from '@/hooks/useAuth'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useUsage, formatBytes, formatLimit } from '@/hooks/useUsage'
@@ -46,10 +45,10 @@ function UserAvatar({ name }: { name?: string | null }) {
 
 /** Hamburger button — show on mobile to open the sidebar drawer */
 export function SidebarMenuButton() {
-  const [, setOpen] = useAtom(sidebarOpenAtom)
+  const { open } = useSidebar()
   return (
     <button
-      onClick={() => setOpen(true)}
+      onClick={open}
       className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer md:hidden"
     >
       <Menu size={18} />
@@ -64,7 +63,7 @@ export default function Sidebar() {
   const { t } = useTranslation()
   const { toggle } = useLanguage()
   const { data: usage } = useUsage()
-  const [isOpen, setIsOpen] = useAtom(sidebarOpenAtom)
+  const { isOpen, setIsOpen } = useSidebar()
 
   const isSettings = location.pathname === '/settings'
   const isProfile = location.pathname === '/profile'
@@ -74,7 +73,7 @@ export default function Sidebar() {
   // Close drawer on navigation
   useEffect(() => { setIsOpen(false) }, [location.pathname, setIsOpen])
 
-  const planLabel = usage?.plan === 'indie' ? 'Indie' : usage?.plan === 'pro' ? 'Pro' : t('billing.plans.free')
+  const planLabel = usage?.plan === 'indie' ? t('billing.plans.indie') : usage?.plan === 'pro' ? t('billing.plans.pro') : t('billing.plans.free')
 
   const sidebarContent = (
     <>

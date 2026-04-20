@@ -1,9 +1,8 @@
-import { useAtom } from 'jotai'
 import { useEffect } from 'react'
 import { X, ArrowRight, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { upgradePromptAtom } from '@/atoms'
+import { useUpgradeModal } from '@/hooks/useUpgradeModal'
 import { track } from '@/lib/analytics'
 
 const LIMIT_TYPE_MAP: Record<string, string> = {
@@ -16,7 +15,7 @@ const LIMIT_TYPE_MAP: Record<string, string> = {
 }
 
 export default function UpgradeModal() {
-  const [prompt, setPrompt] = useAtom(upgradePromptAtom)
+  const { prompt, setPrompt } = useUpgradeModal()
   const navigate = useNavigate()
   const { t } = useTranslation()
 

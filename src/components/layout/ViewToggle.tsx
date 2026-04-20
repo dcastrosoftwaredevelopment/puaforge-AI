@@ -1,15 +1,17 @@
 import { Code, Eye, Columns } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { type ViewMode } from '@/atoms'
 import { useViewMode } from '@/hooks/useViewMode'
 
-const modes: { mode: ViewMode; icon: React.ReactNode; label: string }[] = [
-  { mode: 'preview', icon: <Eye size={14} />, label: 'Preview' },
-  { mode: 'split', icon: <Columns size={14} />, label: 'Split' },
-  { mode: 'editor', icon: <Code size={14} />, label: 'Code' },
-]
-
 export default function ViewToggle() {
   const { viewMode, setViewMode } = useViewMode()
+  const { t } = useTranslation()
+
+  const modes: { mode: ViewMode; icon: React.ReactNode; label: string }[] = [
+    { mode: 'preview', icon: <Eye size={14} />, label: t('viewToggle.preview') },
+    { mode: 'split', icon: <Columns size={14} />, label: t('viewToggle.split') },
+    { mode: 'editor', icon: <Code size={14} />, label: t('viewToggle.code') },
+  ]
 
   return (
     <div className="flex items-center gap-0.5 bg-bg-tertiary rounded-lg p-0.5 border border-border-subtle">

@@ -1,8 +1,7 @@
 import { useRef, useState, forwardRef } from 'react'
 import { GripHorizontal, Trash2, PanelRightClose, PanelRightOpen, Minus, Download, Upload } from 'lucide-react'
-import { useAtomValue } from 'jotai'
 import { useTranslation } from 'react-i18next'
-import { projectsAtom, activeProjectIdAtom } from '@/atoms'
+import { useProjects } from '@/hooks/useProjects'
 import { useFiles } from '@/hooks/useFiles'
 import { useChat } from '@/hooks/useChat'
 import { useMessages } from '@/hooks/useMessages'
@@ -37,8 +36,7 @@ function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?:
   const { mode: chatMode, setMode: setChatMode, setIsOpen } = useChat()
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const importRef = useRef<HTMLInputElement>(null)
-  const projects = useAtomValue(projectsAtom)
-  const activeProjectId = useAtomValue(activeProjectIdAtom)
+  const { projects, activeProjectId } = useProjects()
   const { t } = useTranslation()
   const isMobile = useIsMobile()
 

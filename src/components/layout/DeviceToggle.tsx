@@ -1,16 +1,18 @@
 import { Monitor, Tablet, Smartphone } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { type DevicePreview } from '@/atoms'
 import { useDevicePreview } from '@/hooks/useDevicePreview'
 import Tooltip from '@/components/ui/Tooltip'
 
-const devices: { device: DevicePreview; icon: React.ReactNode; label: string }[] = [
-  { device: 'desktop', icon: <Monitor size={14} />, label: 'Desktop' },
-  { device: 'tablet', icon: <Tablet size={14} />, label: 'Tablet' },
-  { device: 'mobile', icon: <Smartphone size={14} />, label: 'Mobile' },
-]
-
 export default function DeviceToggle() {
   const { device, setDevice } = useDevicePreview()
+  const { t } = useTranslation()
+
+  const devices: { device: DevicePreview; icon: React.ReactNode; label: string }[] = [
+    { device: 'desktop', icon: <Monitor size={14} />, label: t('deviceToggle.desktop') },
+    { device: 'tablet', icon: <Tablet size={14} />, label: t('deviceToggle.tablet') },
+    { device: 'mobile', icon: <Smartphone size={14} />, label: t('deviceToggle.mobile') },
+  ]
 
   return (
     <div className="hidden md:flex items-center gap-0.5 bg-bg-tertiary rounded-lg p-0.5 border border-border-subtle">

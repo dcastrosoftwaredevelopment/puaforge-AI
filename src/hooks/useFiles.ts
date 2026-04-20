@@ -1,8 +1,5 @@
-import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { filesAtom } from '@/atoms'
-
-// External npm dependencies detected from AI-generated code
-export const depsAtom = atom<Record<string, string>>({})
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { filesAtom, depsAtom } from '@/atoms'
 
 export function useFiles() {
   const [files, setFiles] = useAtom(filesAtom)

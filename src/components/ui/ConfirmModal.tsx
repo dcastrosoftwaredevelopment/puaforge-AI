@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { AlertTriangle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface ConfirmModalProps {
   open: boolean
@@ -15,11 +16,14 @@ export default function ConfirmModal({
   open,
   title,
   message,
-  confirmLabel = 'Confirmar',
-  cancelLabel = 'Cancelar',
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
+  const { t } = useTranslation()
+  const resolvedConfirm = confirmLabel ?? t('common.confirm')
+  const resolvedCancel = cancelLabel ?? t('common.cancel')
   const cancelRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -56,13 +60,13 @@ export default function ConfirmModal({
             onClick={onCancel}
             className="px-3 py-1.5 rounded-lg text-xs font-medium text-text-secondary hover:text-text-primary bg-bg-elevated border border-border-subtle hover:bg-bg-tertiary transition cursor-pointer"
           >
-            {cancelLabel}
+            {resolvedCancel}
           </button>
           <button
             onClick={onConfirm}
             className="px-3 py-1.5 rounded-lg text-xs font-medium text-forge-terracotta bg-forge-terracotta/10 border border-forge-terracotta/20 hover:bg-forge-terracotta/20 transition cursor-pointer"
           >
-            {confirmLabel}
+            {resolvedConfirm}
           </button>
         </div>
       </div>

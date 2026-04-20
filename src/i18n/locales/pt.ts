@@ -15,6 +15,8 @@ export const pt = {
     or: 'ou',
     copied: 'Copiado!',
     discard: 'Descartar',
+    close: 'Fechar',
+    clickToRename: 'Clique para renomear',
   },
 
   sidebar: {
@@ -60,12 +62,16 @@ export const pt = {
     exportTooltip: 'Baixar arquivos do projeto como .zip',
     build: 'Build',
     buildTooltip: 'Gerar e baixar o build pronto para deploy',
+    manualEdit: 'Editando manualmente',
+    files: 'Arquivos',
+    findInFilesTooltip: 'Buscar em arquivos (Ctrl+Shift+F)',
   },
 
   viewToggle: {
     preview: 'Preview',
     split: 'Split',
     code: 'Code',
+    chat: 'Chat',
   },
 
   deviceToggle: {

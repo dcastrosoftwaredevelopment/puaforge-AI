@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { SandpackProvider } from '@codesandbox/sandpack-react'
 import { Loader2, MessageCircle, Eye, Code2, MessageSquare } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useFiles } from '@/hooks/useFiles'
 import { useChat } from '@/hooks/useChat'
 import { usePanelSizes } from '@/hooks/usePanelSizes'
@@ -20,15 +21,16 @@ function MobileTabBar() {
   const { viewMode, setViewMode } = useViewMode()
   const { isOpen: isChatOpen, setIsOpen: setIsChatOpen } = useChat()
   const isMobile = useIsMobile()
+  const { t } = useTranslation()
 
   const mobileTab = isChatOpen && isMobile ? 'chat' : viewMode === 'split' ? 'preview' : viewMode
 
   return (
     <div className="flex md:hidden shrink-0 border-t border-border-subtle bg-bg-secondary">
       {([
-        { tab: 'editor', icon: <Code2 size={18} />, label: 'Code' },
-        { tab: 'preview', icon: <Eye size={18} />, label: 'Preview' },
-        { tab: 'chat', icon: <MessageSquare size={18} />, label: 'Chat' },
+        { tab: 'editor', icon: <Code2 size={18} />, label: t('viewToggle.code') },
+        { tab: 'preview', icon: <Eye size={18} />, label: t('viewToggle.preview') },
+        { tab: 'chat', icon: <MessageSquare size={18} />, label: t('viewToggle.chat') },
       ] as const).map(({ tab, icon, label }) => (
         <button
           key={tab}
@@ -61,6 +63,7 @@ export default function EditorView() {
   const projectReady = useProjectLoader(projectId)
   const { files, setFiles, deps, setDeps } = useFiles()
   const { mode: chatMode, isOpen: isChatOpen, setIsOpen: setIsChatOpen } = useChat()
+  const { t } = useTranslation()
   useDraft()
   const { chatWidth, setChatWidth } = usePanelSizes()
 
@@ -151,7 +154,7 @@ export default function EditorView() {
             <button
               onClick={() => setIsChatOpen(true)}
               className="absolute bottom-4 left-0 right-0 mx-auto w-7 h-7 flex items-center justify-center rounded-lg bg-forge-terracotta/10 hover:bg-forge-terracotta/20 text-forge-terracotta border border-forge-terracotta/20 transition cursor-pointer"
-              title="Abrir chat"
+              title={t('editor.openChat')}
             >
               <MessageCircle size={13} />
             </button>

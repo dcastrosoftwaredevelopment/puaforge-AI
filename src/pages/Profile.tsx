@@ -3,14 +3,11 @@ import { Loader2 } from 'lucide-react'
 import * as yup from 'yup'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/useAuth'
-import { useAtomValue } from 'jotai'
-import { authTokenAtom } from '@/atoms/authAtoms'
 import { api, ApiError } from '@/services/api'
 import Sidebar, { SidebarMenuButton } from '@/components/home/Sidebar'
 
 export default function Profile() {
-  const { user } = useAuth()
-  const token = useAtomValue(authTokenAtom)
+  const { user, token } = useAuth()
   const authHeaders = { Authorization: `Bearer ${token}` }
   const { t } = useTranslation()
 

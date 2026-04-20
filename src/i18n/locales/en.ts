@@ -15,6 +15,8 @@ export const en = {
     or: 'or',
     copied: 'Copied!',
     discard: 'Discard',
+    close: 'Close',
+    clickToRename: 'Click to rename',
   },
 
   sidebar: {
@@ -60,12 +62,16 @@ export const en = {
     exportTooltip: 'Download project files as .zip',
     build: 'Build',
     buildTooltip: 'Generate and download the deploy-ready build',
+    manualEdit: 'Manually editing',
+    files: 'Files',
+    findInFilesTooltip: 'Find in files (Ctrl+Shift+F)',
   },
 
   viewToggle: {
     preview: 'Preview',
     split: 'Split',
     code: 'Code',
+    chat: 'Chat',
   },
 
   deviceToggle: {

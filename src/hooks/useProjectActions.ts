@@ -11,7 +11,7 @@ import {
   checkpointsAtom,
   type Project,
 } from '@/atoms'
-import { depsAtom } from '@/hooks/useFiles'
+import { depsAtom } from '@/atoms'
 import { DEFAULT_FILES } from '@/utils/defaultFiles'
 import { generateProjectName } from '@/utils/projectNames'
 import { api } from '@/services/api'
@@ -78,5 +78,17 @@ export function useProjectActions() {
     navigate('/')
   }, [navigate, setActiveProjectId])
 
-  return { createProject, openProject, deleteProject, renameProject, goHome }
+  interface PublishedInfo { projectId: string; subdomain: string | null; customDomain: string | null }
+
+  const fetchPublishedIds = useCallback(async (): Promise<Map<string, PublishedInfo>> => {
+    if (!authHeaders) return new Map()
+    try {
+      const rows = await api.get<PublishedInfo[]>('/api/projects/published-ids', authHeaders)
+      return new Map(rows.map((r) => [r.projectId, r]))
+    } catch {
+      return new Map()
+    }
+  }, [authHeaders])
+
+  return { createProject, openProject, deleteProject, renameProject, goHome, fetchPublishedIds }
 }
