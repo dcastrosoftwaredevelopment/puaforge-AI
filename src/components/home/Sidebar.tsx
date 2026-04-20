@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Layers, Settings, LogOut, CreditCard, HelpCircle, X, Menu } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Drawer, Progress } from 'flowbite-react'
+import Button from '@/components/ui/Button'
 import { useSidebar } from '@/hooks/useSidebar'
 import { useAuth } from '@/hooks/useAuth'
 import { useLanguage } from '@/hooks/useLanguage'
@@ -114,12 +115,9 @@ export default function Sidebar() {
             )}
           </div>
           {usage.plan === 'free' && (
-            <button
-              onClick={() => navigate('/billing')}
-              className="w-full py-1.5 rounded-lg text-[10px] font-medium bg-forge-terracotta/10 text-forge-terracotta border border-forge-terracotta/20 hover:bg-forge-terracotta/20 transition cursor-pointer"
-            >
+            <Button variant="terracotta" size="xs" fullWidth onClick={() => navigate('/billing')}>
               {t('sidebar.upgrade')}
-            </button>
+            </Button>
           )}
         </div>
       )}

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Loader2, RefreshCw } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import Button from '@/components/ui/Button'
 import { useMessagesValue } from '@/hooks/useMessages'
 import { useFiles } from '@/hooks/useFiles'
 import { useProjectImages } from '@/hooks/useProjectImages'
@@ -68,13 +69,15 @@ export default function ChatHistory() {
       {hasAnyCode && !isGenerating && (
         <div className="pt-2 pb-1 flex justify-center">
           <Tooltip content={t('chat.reapplyTooltip')} side="top">
-            <button
+            <Button
+              variant="ghost"
+              size="xs"
               onClick={reapplyAll}
-              className="flex items-center gap-1.5 text-xs text-text-muted hover:text-vibe-blue border border-border-subtle hover:border-vibe-blue/30 rounded-lg px-3 py-1.5 transition-colors cursor-pointer"
+              className="gap-1.5 hover:text-vibe-blue hover:border-vibe-blue/30"
             >
               <RefreshCw size={11} />
               {t('chat.reapplyButton')}
-            </button>
+            </Button>
           </Tooltip>
         </div>
       )}
