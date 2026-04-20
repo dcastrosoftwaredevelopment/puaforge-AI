@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Layers, Settings, LogOut, CreditCard, HelpCircle, X, Menu } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { Drawer, Progress } from 'flowbite-react'
 import { useSidebar } from '@/hooks/useSidebar'
 import { useAuth } from '@/hooks/useAuth'
 import { useLanguage } from '@/hooks/useLanguage'
@@ -21,12 +22,7 @@ function UsageBar({ used, limit, unit }: { used: number; limit: number; unit?: s
         <span className="text-text-muted">{limitLabel}</span>
       </div>
       {!isUnlimited && (
-        <div className="h-0.5 bg-bg-elevated rounded-full overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all ${isWarning ? 'bg-yellow-400' : 'bg-forge-terracotta/50'}`}
-            style={{ width: `${pct}%` }}
-          />
-        </div>
+        <Progress progress={pct} size="xs" color={isWarning ? 'yellow' : 'primary'} />
       )}
     </div>
   )
@@ -70,7 +66,6 @@ export default function Sidebar() {
   const isBilling = location.pathname === '/billing'
   const isHelp = location.pathname === '/help'
 
-  // Close drawer on navigation
   useEffect(() => { setIsOpen(false) }, [location.pathname, setIsOpen])
 
   const planLabel = usage?.plan === 'indie' ? t('billing.plans.indie') : usage?.plan === 'pro' ? t('billing.plans.pro') : t('billing.plans.free')
@@ -79,7 +74,6 @@ export default function Sidebar() {
     <>
       <div className="px-4 py-4 border-b border-border-subtle flex items-center justify-between">
         <img src="/Logo PuaForge.png" alt="PuaForge AI" style={{ width: '130px', height: 'auto' }} />
-        {/* Close button — only visible in mobile drawer */}
         <button
           onClick={() => setIsOpen(false)}
           className="p-1 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer md:hidden"
@@ -197,20 +191,15 @@ export default function Sidebar() {
         {sidebarContent}
       </aside>
 
-      {/* Mobile drawer overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/60 md:hidden"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-bg-secondary border-r border-border-subtle flex flex-col transition-transform duration-200 md:hidden ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+      {/* Mobile drawer */}
+      <Drawer
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        position="left"
+        className="md:hidden w-64 bg-bg-secondary border-r border-border-subtle flex flex-col p-0"
       >
         {sidebarContent}
-      </aside>
+      </Drawer>
     </>
   )
 }

@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import * as yup from 'yup'
 import { useTranslation } from 'react-i18next'
+import { TextInput } from 'flowbite-react'
 import { useAuth } from '@/hooks/useAuth'
 import { api, ApiError } from '@/services/api'
 import Sidebar, { SidebarMenuButton } from '@/components/home/Sidebar'
+import Button from '@/components/ui/Button'
 
 export default function Profile() {
   const { user, token } = useAuth()
@@ -91,11 +93,6 @@ export default function Profile() {
     }
   }
 
-  const inputClass = (error?: string) =>
-    `w-full bg-bg-primary border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none transition ${
-      error ? 'border-red-500' : 'border-border-subtle focus:border-forge-terracotta'
-    }`
-
   return (
     <div className="h-screen flex bg-bg-primary">
       <Sidebar />
@@ -119,24 +116,20 @@ export default function Profile() {
             <h2 className="text-sm font-medium text-text-primary mb-4">{t('profile.nameSection')}</h2>
             <form onSubmit={handleSaveName} className="flex flex-col gap-3">
               <div>
-                <input
+                <TextInput
                   type="text"
                   value={name}
+                  color={nameError ? 'failure' : 'gray'}
                   onChange={(e) => { setName(e.target.value); setNameError(''); setNameSuccess(false) }}
-                  className={inputClass(nameError)}
                   placeholder={t('profile.namePlaceholder')}
                 />
                 {nameError && <p className="text-xs text-red-400 mt-1">{nameError}</p>}
                 {nameSuccess && <p className="text-xs text-vibe-blue mt-1">{t('profile.nameSuccess')}</p>}
               </div>
-              <button
-                type="submit"
-                disabled={nameSaving}
-                className="self-end flex items-center gap-2 px-4 py-2 bg-forge-terracotta text-white text-sm font-medium rounded-lg hover:bg-forge-terracotta/90 transition disabled:opacity-50 cursor-pointer"
-              >
+              <Button type="submit" variant="primary" size="md" isLoading={nameSaving} className="self-end gap-2">
                 {nameSaving && <Loader2 size={13} className="animate-spin" />}
                 {t('common.save')}
-              </button>
+              </Button>
             </form>
           </div>
 
@@ -145,45 +138,41 @@ export default function Profile() {
             <h2 className="text-sm font-medium text-text-primary mb-4">{t('profile.passwordSection')}</h2>
             <form onSubmit={handleSavePassword} className="flex flex-col gap-3">
               <div>
-                <input
+                <TextInput
                   type="password"
                   value={currentPassword}
+                  color={passwordErrors.currentPassword ? 'failure' : 'gray'}
                   onChange={(e) => { setCurrentPassword(e.target.value); setPasswordErrors((p) => ({ ...p, currentPassword: '' })) }}
-                  className={inputClass(passwordErrors.currentPassword)}
                   placeholder={t('profile.currentPassword')}
                 />
                 {passwordErrors.currentPassword && <p className="text-xs text-red-400 mt-1">{passwordErrors.currentPassword}</p>}
               </div>
               <div>
-                <input
+                <TextInput
                   type="password"
                   value={newPassword}
+                  color={passwordErrors.newPassword ? 'failure' : 'gray'}
                   onChange={(e) => { setNewPassword(e.target.value); setPasswordErrors((p) => ({ ...p, newPassword: '' })) }}
-                  className={inputClass(passwordErrors.newPassword)}
                   placeholder={t('profile.newPassword')}
                 />
                 {passwordErrors.newPassword && <p className="text-xs text-red-400 mt-1">{passwordErrors.newPassword}</p>}
               </div>
               <div>
-                <input
+                <TextInput
                   type="password"
                   value={confirmPassword}
+                  color={passwordErrors.confirmPassword ? 'failure' : 'gray'}
                   onChange={(e) => { setConfirmPassword(e.target.value); setPasswordErrors((p) => ({ ...p, confirmPassword: '' })) }}
-                  className={inputClass(passwordErrors.confirmPassword)}
                   placeholder={t('profile.confirmPassword')}
                 />
                 {passwordErrors.confirmPassword && <p className="text-xs text-red-400 mt-1">{passwordErrors.confirmPassword}</p>}
               </div>
               {passwordError && <p className="text-xs text-red-400">{passwordError}</p>}
               {passwordSuccess && <p className="text-xs text-vibe-blue">{t('profile.passwordSuccess')}</p>}
-              <button
-                type="submit"
-                disabled={passwordSaving}
-                className="self-end flex items-center gap-2 px-4 py-2 bg-forge-terracotta text-white text-sm font-medium rounded-lg hover:bg-forge-terracotta/90 transition disabled:opacity-50 cursor-pointer"
-              >
+              <Button type="submit" variant="primary" size="md" isLoading={passwordSaving} className="self-end gap-2">
                 {passwordSaving && <Loader2 size={13} className="animate-spin" />}
                 {t('profile.changePassword')}
-              </button>
+              </Button>
             </form>
           </div>
         </div>
