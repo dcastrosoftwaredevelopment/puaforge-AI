@@ -195,6 +195,29 @@ export const flowbiteTheme = createTheme({
       base: '',
     },
   },
+  sidebar: {
+    root: {
+      base: 'h-full',
+      collapsed: { on: '', off: 'w-full' },
+      inner: 'h-full flex flex-col overflow-y-auto bg-bg-primary',
+    },
+    item: {
+      base: 'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium cursor-pointer transition text-text-secondary hover:bg-bg-elevated hover:text-text-primary w-full',
+      active: 'bg-bg-elevated text-text-primary',
+      collapsed: { insideCollapse: '', noIcon: '' },
+      content: { base: 'flex-1 whitespace-nowrap' },
+      icon: {
+        base: 'shrink-0 h-[15px] w-[15px] text-forge-terracotta/70',
+        active: 'text-forge-terracotta/70',
+      },
+      label: '',
+      listItem: '',
+    },
+    items: { base: '' },
+    itemGroup: {
+      base: 'space-y-1 list-none border-t border-border-subtle pt-3 first:border-t-0 first:pt-0',
+    },
+  },
   dropdown: {
     floating: {
       animation: 'transition-opacity',

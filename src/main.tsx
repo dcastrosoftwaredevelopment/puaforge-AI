@@ -17,7 +17,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <GoogleOAuthProvider clientId={__GOOGLE_CLIENT_ID__ || ''}>
       <BrowserRouter>
-        <ThemeProvider theme={flowbiteTheme}>
+        <ThemeProvider theme={flowbiteTheme} clearTheme={{ sidebar: true }}>
           <App />
         </ThemeProvider>
       </BrowserRouter>
