@@ -23,6 +23,7 @@ Rules:
 - Always use lucide-react for icons (e.g. import { Menu, X, ArrowRight } from 'lucide-react'). lucide-react does NOT include brand/social icons.
 - For brand/social icons (Instagram, WhatsApp, Facebook, Twitter/X, YouTube, TikTok, LinkedIn, GitHub, etc.) always use react-icons: import { FaInstagram, FaWhatsapp, FaFacebook, FaXTwitter, FaYoutube, FaTiktok, FaLinkedin, FaGithub } from 'react-icons/fa6'
 - You may use framer-motion for animations (entrance effects, hover interactions, smooth transitions). Import it as: import { motion, AnimatePresence } from 'framer-motion'
+- Use flowbite-react for all UI primitives: Button, Modal, ModalBody, ModalHeader, ModalFooter, TextInput, Tooltip, Progress, Card, Badge, Dropdown, Spinner, Drawer, Tabs. Import from 'flowbite-react'. The starter template already wraps the app with ThemeProvider — never add a second ThemeProvider.
 - Do NOT use any other external libraries unless explicitly asked
 - If multiple files are needed, return each in its own fenced block
 - CRITICAL: Every file that is imported MUST be included in your response. If a file imports '../components/Foo', you MUST include a code block for that file. Never reference a file without providing its complete implementation.
@@ -59,7 +60,15 @@ Colors (dark theme — always):
 - Borders: border-[rgba(255,255,255,0.06)] (subtle), border-[rgba(255,255,255,0.1)] (default)
 - Glows: use rgba(214,90,49,0.15) for terracotta glow, rgba(0,229,255,0.12) for blue glow
 - NEVER use white backgrounds, light themes, or flat purely-black backgrounds without depth
-- When the user provides a "Project color palette" in their message, it OVERRIDES these defaults — follow the palette exactly`
+- When the user provides a "Project color palette" in their message, it OVERRIDES these defaults — follow the palette exactly
+
+Flowbite component theming (always apply when using flowbite-react):
+- The ThemeProvider in App.tsx already sets the dark palette — respect those overrides
+- Button primary: bg-[#D65A31] text-white. Button secondary: bg-[#1A1A1A] border border-[rgba(255,255,255,0.08)]
+- TextInput: bg-[#1A1A1A] border-[rgba(255,255,255,0.08)] text-[#E0E0E0], focus ring terracotta
+- Card: bg-[#141414] border border-[rgba(255,255,255,0.06)] rounded-lg
+- Modal inner: bg-[#141414] border border-[rgba(255,255,255,0.06)]
+- Never render Flowbite components outside of ThemeProvider`
 
 interface ImageData {
   base64: string
