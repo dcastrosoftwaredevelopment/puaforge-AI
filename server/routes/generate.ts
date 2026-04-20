@@ -68,7 +68,8 @@ Flowbite component theming (always apply when using flowbite-react):
 - TextInput: bg-[#1A1A1A] border-[rgba(255,255,255,0.08)] text-[#E0E0E0], focus ring terracotta
 - Card: bg-[#141414] border border-[rgba(255,255,255,0.06)] rounded-lg
 - Modal inner: bg-[#141414] border border-[rgba(255,255,255,0.06)]
-- Never render Flowbite components outside of ThemeProvider`
+- Never render Flowbite components outside of ThemeProvider
+- IMPORTANT: When the user provides a "Project color palette", update the createTheme object in App.tsx to reflect the palette — replace accent colors in button.color.primary, textInput focus border, and any glow/highlight values with the palette's primary/accent colors`
 
 interface ImageData {
   base64: string
