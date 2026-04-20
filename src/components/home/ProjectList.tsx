@@ -9,6 +9,7 @@ import { useProjectActions } from '@/hooks/useProjectActions'
 import Sidebar, { SidebarMenuButton } from '@/components/home/Sidebar'
 import EmptyState from '@/components/home/EmptyState'
 import ProjectCard from '@/components/home/ProjectCard'
+import Button from '@/components/ui/Button'
 
 export default function ProjectList() {
   const { projects } = useProjects()
@@ -56,13 +57,10 @@ export default function ProjectList() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <button
-                onClick={createProject}
-                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-forge-terracotta/10 border border-forge-terracotta/30 hover:bg-forge-terracotta/20 text-forge-terracotta text-sm font-medium rounded-lg transition cursor-pointer"
-              >
+              <Button variant="terracotta" size="md" onClick={createProject} className="gap-2">
                 <Plus size={16} />
                 <span className="hidden sm:inline">{t('projects.newProject')}</span>
-              </button>
+              </Button>
             </div>
           </div>
 

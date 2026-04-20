@@ -1,5 +1,6 @@
 import { Plus, FolderOpen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import Button from '@/components/ui/Button'
 
 interface EmptyStateProps {
   onCreate: () => void
@@ -14,13 +15,10 @@ export default function EmptyState({ onCreate }: EmptyStateProps) {
         <FolderOpen size={28} className="text-forge-terracotta" />
       </div>
       <p className="text-text-secondary text-sm mb-4">{t('projects.emptyTitle')}</p>
-      <button
-        onClick={onCreate}
-        className="flex items-center gap-2 px-4 py-2 bg-forge-terracotta/10 border border-forge-terracotta/30 hover:bg-forge-terracotta/20 text-forge-terracotta text-sm font-medium rounded-lg transition cursor-pointer"
-      >
+      <Button variant="terracotta" size="md" onClick={onCreate} className="gap-2">
         <Plus size={16} />
         {t('projects.emptyCreate')}
-      </button>
+      </Button>
     </div>
   )
 }

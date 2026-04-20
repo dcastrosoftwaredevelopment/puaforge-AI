@@ -11,6 +11,7 @@ import { useSubdomain } from '@/hooks/useSubdomain'
 import { ApiError } from '@/services/api'
 import { PlanLimitUIError } from '@/hooks/usePlanLimit'
 import Tooltip from '@/components/ui/Tooltip'
+import Button from '@/components/ui/Button'
 
 export default function PublishButton() {
   const {
@@ -111,14 +112,10 @@ export default function PublishButton() {
   return (
     <div className="relative" ref={panelRef}>
       <Tooltip content={t('publish.tooltip')} side="bottom" align="right">
-        <button
-          onClick={() => setShowPanel(!showPanel)}
-          disabled={isBusy}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20 hover:bg-vibe-blue/20 disabled:opacity-50 transition cursor-pointer"
-        >
+        <Button variant="blue" size="xs" isLoading={isBusy} onClick={() => setShowPanel(!showPanel)} className="gap-1.5">
           {isBusy ? <Loader2 size={13} className="animate-spin" /> : <Globe size={13} />}
           {t('publish.publish')}
-        </button>
+        </Button>
       </Tooltip>
 
       {showPanel && (
@@ -192,18 +189,10 @@ export default function PublishButton() {
                           <span className="text-[10px] text-text-muted">{formatDate(subdomainPublishedAt)}</span>
                         </div>
                       )}
-                      <button
-                        onClick={() => void publishToSubdomain()}
-                        disabled={isBusy}
-                        className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20 hover:bg-vibe-blue/20 disabled:opacity-50 transition cursor-pointer"
-                      >
+                      <Button variant="blue" size="xs" isLoading={isBusy} fullWidth onClick={() => void publishToSubdomain()} className="gap-1.5 justify-center">
                         {isPublishingToSubdomain ? <Loader2 size={12} className="animate-spin" /> : <Globe size={12} />}
-                        {isPublishingToSubdomain
-                          ? t('publish.publishing')
-                          : subdomainPublishedAt
-                            ? t('publish.republish')
-                            : t('publish.publishNow')}
-                      </button>
+                        {isPublishingToSubdomain ? t('publish.publishing') : subdomainPublishedAt ? t('publish.republish') : t('publish.publishNow')}
+                      </Button>
                     </>
                   )}
                 </div>
@@ -224,13 +213,9 @@ export default function PublishButton() {
                   placeholder={t('publish.domainPlaceholder')}
                   className="flex-1 bg-bg-elevated border border-border-subtle rounded-lg px-2.5 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-vibe-blue/40 font-mono"
                 />
-                <button
-                  onClick={() => handleSaveDomain()}
-                  disabled={savingDomain}
-                  className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary disabled:opacity-50 transition cursor-pointer"
-                >
+                <Button variant="secondary" size="xs" isLoading={savingDomain} onClick={() => handleSaveDomain()}>
                   {savingDomain ? <Loader2 size={12} className="animate-spin" /> : domainSaved ? <Check size={12} className="text-vibe-blue" /> : t('publish.saveDomain')}
-                </button>
+                </Button>
               </div>
               {domainInputError && (
                 <p className="text-[10px] text-forge-terracotta">{domainInputError}</p>
@@ -251,12 +236,9 @@ export default function PublishButton() {
                     >
                       {t('publish.confirmOverride')}
                     </button>
-                    <button
-                      onClick={() => setOwnProjectConflict(null)}
-                      className="flex-1 px-2 py-1 rounded-md text-[10px] font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition cursor-pointer"
-                    >
+                    <Button variant="secondary" size="xs" onClick={() => setOwnProjectConflict(null)} className="flex-1 text-[10px]">
                       {t('publish.cancelOverride')}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -302,18 +284,10 @@ export default function PublishButton() {
                   <span className="text-[10px] text-text-muted">{formatDate(publishedAt)}</span>
                 </div>
               )}
-              <button
-                onClick={() => void publish()}
-                disabled={isBusy}
-                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary disabled:opacity-50 transition cursor-pointer"
-              >
+              <Button variant="secondary" size="xs" isLoading={isBusy} fullWidth onClick={() => void publish()} className="gap-1.5 justify-center">
                 {isPublishingToDomain ? <Loader2 size={12} className="animate-spin" /> : <Globe size={12} />}
-                {isPublishingToDomain
-                  ? t('publish.publishing')
-                  : publishedAt
-                    ? t('publish.republish')
-                    : t('publish.publishNow')}
-              </button>
+                {isPublishingToDomain ? t('publish.publishing') : publishedAt ? t('publish.republish') : t('publish.publishNow')}
+              </Button>
             </div>
 
             {/* ── Local preview section ── */}
@@ -327,14 +301,10 @@ export default function PublishButton() {
                 </div>
               )}
               <div className="flex gap-1.5">
-                <button
-                  onClick={() => void publishLocally()}
-                  disabled={isPublishingLocally}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary disabled:opacity-50 transition cursor-pointer"
-                >
+                <Button variant="secondary" size="xs" isLoading={isPublishingLocally} fullWidth onClick={() => void publishLocally()} className="gap-1.5 justify-center">
                   {isPublishingLocally ? <Loader2 size={12} className="animate-spin" /> : <Globe size={12} />}
                   {isPublishingLocally ? t('publish.publishing') : localPublishedAt ? t('publish.republish') : t('publish.publishNow')}
-                </button>
+                </Button>
                 {localPublishedAt && (
                   <button
                     onClick={() => void openLocalPreview()}

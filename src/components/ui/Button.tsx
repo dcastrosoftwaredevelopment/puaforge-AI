@@ -2,7 +2,7 @@ import { type ComponentProps } from 'react'
 import { Button as FlowbiteButton } from 'flowbite-react'
 import type { ButtonProps } from 'flowbite-react'
 
-type Variant = 'primary' | 'secondary' | 'blue' | 'ghost' | 'danger'
+type Variant = 'primary' | 'secondary' | 'blue' | 'ghost' | 'danger' | 'terracotta'
 type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 interface UiButtonProps extends Omit<ComponentProps<'button'>, 'color'> {

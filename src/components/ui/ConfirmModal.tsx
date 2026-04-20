@@ -1,6 +1,7 @@
 import { AlertTriangle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Modal, ModalBody } from 'flowbite-react'
+import Button from '@/components/ui/Button'
 
 interface ConfirmModalProps {
   open: boolean
@@ -38,18 +39,12 @@ export default function ConfirmModal({
           </div>
         </div>
         <div className="flex items-center justify-end gap-2 mt-4">
-          <button
-            onClick={onCancel}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium text-text-secondary hover:text-text-primary bg-bg-elevated border border-border-subtle hover:bg-bg-tertiary transition cursor-pointer"
-          >
+          <Button variant="secondary" size="xs" onClick={onCancel} className="text-xs">
             {resolvedCancel}
-          </button>
-          <button
-            onClick={onConfirm}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium text-forge-terracotta bg-forge-terracotta/10 border border-forge-terracotta/20 hover:bg-forge-terracotta/20 transition cursor-pointer"
-          >
+          </Button>
+          <Button variant="terracotta" size="xs" onClick={onConfirm} className="text-xs">
             {resolvedConfirm}
-          </button>
+          </Button>
         </div>
       </ModalBody>
     </Modal>

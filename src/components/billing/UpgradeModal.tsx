@@ -1,10 +1,11 @@
 import { useEffect } from 'react'
-import { X, ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowRight, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Modal } from 'flowbite-react'
 import { useUpgradeModal } from '@/hooks/useUpgradeModal'
 import { track } from '@/lib/analytics'
+import Button from '@/components/ui/Button'
 
 const LIMIT_TYPE_MAP: Record<string, string> = {
   projects: 'projects',
@@ -47,12 +48,6 @@ export default function UpgradeModal() {
             </p>
           </div>
         </div>
-        <button
-          onClick={() => setPrompt(null)}
-          className="p-1 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer mt-0.5"
-        >
-          <X size={14} />
-        </button>
       </div>
 
       <div className="px-5 pb-5 space-y-4">
@@ -66,19 +61,25 @@ export default function UpgradeModal() {
           </p>
         </div>
         <div className="flex gap-2">
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
+            fullWidth
             onClick={() => { track('upgrade_modal_dismiss', { limit_type: prompt?.limitType ?? '' }); setPrompt(null) }}
-            className="flex-1 py-2 rounded-lg text-xs text-text-muted border border-border-subtle hover:bg-bg-elevated hover:text-text-secondary transition cursor-pointer"
+            className="text-xs"
           >
             {t('upgrade.maybeLater')}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="blue"
+            size="sm"
+            fullWidth
             onClick={() => { track('upgrade_modal_see_plans', { limit_type: prompt?.limitType ?? '' }); setPrompt(null); navigate('/billing') }}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20 hover:bg-vibe-blue/15 transition cursor-pointer"
+            className="gap-1.5 text-xs"
           >
             {t('upgrade.seePlans')}
             <ArrowRight size={12} />
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

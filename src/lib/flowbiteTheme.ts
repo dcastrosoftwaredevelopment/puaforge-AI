@@ -9,6 +9,7 @@ export const flowbiteTheme = createTheme({
       blue: 'bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20 hover:bg-vibe-blue/15',
       ghost: 'bg-transparent text-text-secondary border border-transparent hover:text-text-primary hover:bg-bg-elevated',
       danger: 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20',
+      terracotta: 'bg-forge-terracotta/10 text-forge-terracotta border border-forge-terracotta/20 hover:bg-forge-terracotta/20',
     },
     size: {
       xs: 'px-2 py-1 text-xs',
