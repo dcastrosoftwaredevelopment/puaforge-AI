@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { User, Bot, FileCode } from 'lucide-react'
 import type { Message } from '@/atoms'
-import { useCodeViewer } from './CodeViewerContext'
+import { useCodeViewer } from '@/hooks/useCodeViewer'
 import { useTranslation } from 'react-i18next'
 
 // ─── Message parser ────────────────────────────────────────────────────────────

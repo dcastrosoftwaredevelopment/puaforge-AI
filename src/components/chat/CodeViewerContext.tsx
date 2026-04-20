@@ -1,17 +1,9 @@
-import { createContext, useContext, useState } from 'react'
+import { useState } from 'react'
+import { lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
+import { CodeViewerContext, type CodeEntry } from '@/contexts/codeViewerContext'
 
-interface CodeEntry { language: string; filePath?: string; code: string }
-
-interface CodeViewerContextValue {
-  open: (entry: CodeEntry) => void
-}
-
-const CodeViewerContext = createContext<CodeViewerContextValue>({ open: () => {} })
-
-export function useCodeViewer() {
-  return useContext(CodeViewerContext)
-}
+export { CodeViewerContext }
 
 export function CodeViewerProvider({ children }: { children: React.ReactNode }) {
   const [entry, setEntry] = useState<CodeEntry | null>(null)
@@ -24,7 +16,6 @@ export function CodeViewerProvider({ children }: { children: React.ReactNode }) 
 
         {entry && (
           <div className="absolute inset-0 z-20 flex flex-col bg-bg-secondary">
-            {/* Header */}
             <div className="flex items-center justify-between px-3 py-2 bg-bg-secondary border-b border-border-subtle shrink-0">
               <div className="flex items-center gap-2">
                 <div className="flex gap-1.5">
@@ -45,7 +36,6 @@ export function CodeViewerProvider({ children }: { children: React.ReactNode }) 
               </button>
             </div>
 
-            {/* Scrollable code */}
             <div className="flex-1 overflow-auto">
               <CodeContent entry={entry} />
             </div>
@@ -55,9 +45,6 @@ export function CodeViewerProvider({ children }: { children: React.ReactNode }) 
     </CodeViewerContext.Provider>
   )
 }
-
-// Lazy-loaded highlighter — only paid when viewer opens
-import { lazy, Suspense } from 'react'
 
 const SyntaxHighlighter = lazy(() =>
   import('react-syntax-highlighter').then((m) => ({ default: m.Prism }))

@@ -56,10 +56,6 @@ export default function FindInFiles({ open, onClose }: Props) {
     }
   }, [open])
 
-  useEffect(() => {
-    if (!open) setQuery('')
-  }, [open])
-
   const results = search(files, query)
 
   function goTo(file: string) {

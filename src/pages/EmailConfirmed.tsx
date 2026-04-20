@@ -12,18 +12,13 @@ export default function EmailConfirmed() {
   const { verifyEmail } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const [state, setState] = useState<State>('verifying')
+  const token = searchParams.get('token')
+  const [state, setState] = useState<State>(() => token ? 'verifying' : 'error')
   const ran = useRef(false)
 
   useEffect(() => {
-    if (ran.current) return
+    if (ran.current || !token) return
     ran.current = true
-
-    const token = searchParams.get('token')
-    if (!token) {
-      setState('error')
-      return
-    }
 
     verifyEmail(token)
       .then(() => {
@@ -39,7 +34,7 @@ export default function EmailConfirmed() {
         // Already verified — just redirect to login
         navigate('/login', { replace: true })
       })
-  }, [searchParams, verifyEmail, navigate])
+  }, [token, verifyEmail, navigate])
 
   const email = sessionStorage.getItem('verify_email') ?? ''
 
