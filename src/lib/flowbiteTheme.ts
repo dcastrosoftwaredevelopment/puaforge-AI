@@ -91,7 +91,7 @@ export const flowbiteTheme = createTheme({
         svg: 'h-4 w-4 text-text-muted',
       },
       input: {
-        base: 'block w-full rounded-lg border bg-bg-primary text-sm text-text-primary placeholder:text-text-muted focus:outline-none transition',
+        base: 'block w-full rounded-lg border bg-bg-tertiary text-sm text-text-primary placeholder:text-text-muted focus:outline-none transition',
         sizes: {
           sm: 'px-3 py-2 text-xs',
           md: 'px-3 py-2 text-sm',
