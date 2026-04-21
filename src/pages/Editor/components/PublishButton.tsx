@@ -86,7 +86,9 @@ export default function PublishButton() {
           onClick={() => setShowPanel(!showPanel)}
           className="gap-1.5"
         >
-          {isBusy ? <Loader2 size={13} className="animate-spin" /> : <Globe size={13} />}
+          {isBusy ?
+            <Loader2 size={13} className="animate-spin" />
+          : <Globe size={13} />}
           {t('publish.publish')}
         </Button>
       </Tooltip>
@@ -132,7 +134,9 @@ export default function PublishButton() {
                       disabled={saving || status !== 'available'}
                       className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-bg-elevated border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-bg-tertiary disabled:opacity-40 transition cursor-pointer"
                     >
-                      {saving ? <Loader2 size={12} className="animate-spin" /> : <Link size={12} />}
+                      {saving ?
+                        <Loader2 size={12} className="animate-spin" />
+                      : <Link size={12} />}
                     </button>
                   </div>
                   {slugStatusLabel && <p className={`text-[10px] ${slugStatusColor}`}>{slugStatusLabel}</p>}
@@ -159,12 +163,14 @@ export default function PublishButton() {
                         onClick={() => void publishToSubdomain()}
                         className="gap-1.5 justify-center"
                       >
-                        {isPublishingToSubdomain ? <Loader2 size={12} className="animate-spin" /> : <Globe size={12} />}
-                        {isPublishingToSubdomain
-                          ? t('publish.publishing')
-                          : subdomainPublishedAt
-                            ? t('publish.republish')
-                            : t('publish.publishNow')}
+                        {isPublishingToSubdomain ?
+                          <Loader2 size={12} className="animate-spin" />
+                        : <Globe size={12} />}
+                        {isPublishingToSubdomain ?
+                          t('publish.publishing')
+                        : subdomainPublishedAt ?
+                          t('publish.republish')
+                        : t('publish.publishNow')}
                       </Button>
                     </>
                   )}
@@ -188,13 +194,11 @@ export default function PublishButton() {
                   className="flex-1 bg-bg-elevated border border-border-subtle rounded-lg px-2.5 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-vibe-blue/40 font-mono"
                 />
                 <Button variant="secondary" size="xs" isLoading={savingDomain} onClick={() => handleSaveDomain()}>
-                  {savingDomain ? (
+                  {savingDomain ?
                     <Loader2 size={12} className="animate-spin" />
-                  ) : domainSaved ? (
+                  : domainSaved ?
                     <Check size={12} className="text-vibe-blue" />
-                  ) : (
-                    t('publish.saveDomain')
-                  )}
+                  : t('publish.saveDomain')}
                 </Button>
               </div>
               {domainInputError && <p className="text-[10px] text-forge-terracotta">{domainInputError}</p>}
@@ -236,7 +240,7 @@ export default function PublishButton() {
                   {customDomain}
                 </a>
               )}
-              {__SERVER_IP__ ? (
+              {__SERVER_IP__ ?
                 <p className="text-[10px] text-text-muted leading-relaxed">
                   <Trans
                     i18nKey="publish.dnsWithIp"
@@ -246,14 +250,13 @@ export default function PublishButton() {
                     }}
                   />
                 </p>
-              ) : (
-                <p className="text-[10px] text-text-muted leading-relaxed">
+              : <p className="text-[10px] text-text-muted leading-relaxed">
                   <Trans
                     i18nKey="publish.dnsWithoutIp"
                     components={{ A: <span className="font-mono text-text-secondary">A</span> }}
                   />
                 </p>
-              )}
+              }
               {domainError && (
                 <div className="text-xs text-forge-terracotta bg-forge-terracotta/10 border border-forge-terracotta/20 rounded-lg px-3 py-2">
                   {domainError}
@@ -273,12 +276,14 @@ export default function PublishButton() {
                 onClick={() => void publish()}
                 className="gap-1.5 justify-center"
               >
-                {isPublishingToDomain ? <Loader2 size={12} className="animate-spin" /> : <Globe size={12} />}
-                {isPublishingToDomain
-                  ? t('publish.publishing')
-                  : publishedAt
-                    ? t('publish.republish')
-                    : t('publish.publishNow')}
+                {isPublishingToDomain ?
+                  <Loader2 size={12} className="animate-spin" />
+                : <Globe size={12} />}
+                {isPublishingToDomain ?
+                  t('publish.publishing')
+                : publishedAt ?
+                  t('publish.republish')
+                : t('publish.publishNow')}
               </Button>
             </div>
 
@@ -301,12 +306,14 @@ export default function PublishButton() {
                   onClick={() => void publishLocally()}
                   className="gap-1.5 justify-center"
                 >
-                  {isPublishingLocally ? <Loader2 size={12} className="animate-spin" /> : <Globe size={12} />}
-                  {isPublishingLocally
-                    ? t('publish.publishing')
-                    : localPublishedAt
-                      ? t('publish.republish')
-                      : t('publish.publishNow')}
+                  {isPublishingLocally ?
+                    <Loader2 size={12} className="animate-spin" />
+                  : <Globe size={12} />}
+                  {isPublishingLocally ?
+                    t('publish.publishing')
+                  : localPublishedAt ?
+                    t('publish.republish')
+                  : t('publish.publishNow')}
                 </Button>
                 {localPublishedAt && (
                   <button

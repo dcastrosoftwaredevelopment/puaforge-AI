@@ -43,11 +43,11 @@ export default function VerifyEmailCard({ maskedEmail, email, cooldown, resendSt
         className="w-full py-2 rounded-lg bg-bg-elevated border border-border-subtle text-xs text-text-secondary hover:text-text-primary hover:border-border-default transition disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
       >
         {resendState === 'loading' && <Loader2 size={13} className="animate-spin" />}
-        {cooldown > 0
-          ? t('verifyEmail.resendCooldown', { seconds: cooldown })
-          : resendState === 'loading'
-            ? t('verifyEmail.resending')
-            : t('verifyEmail.resend')}
+        {cooldown > 0 ?
+          t('verifyEmail.resendCooldown', { seconds: cooldown })
+        : resendState === 'loading' ?
+          t('verifyEmail.resending')
+        : t('verifyEmail.resend')}
       </button>
 
       <button

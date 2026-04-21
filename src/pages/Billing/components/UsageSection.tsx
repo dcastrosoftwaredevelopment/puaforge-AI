@@ -9,7 +9,11 @@ export default function UsageSection({ usage }: { usage: UserUsage }) {
       <div className="flex items-center justify-between mb-1">
         <span className="text-xs font-semibold text-text-primary">{t('billing.currentUsage')}</span>
         <span className="text-[10px] px-2 py-0.5 rounded border font-semibold uppercase tracking-wide bg-forge-terracotta/10 text-forge-terracotta border-forge-terracotta/20">
-          {usage.plan === 'free' ? t('billing.plans.free') : usage.plan === 'indie' ? 'Indie' : 'Pro'}
+          {usage.plan === 'free' ?
+            t('billing.plans.free')
+          : usage.plan === 'indie' ?
+            'Indie'
+          : 'Pro'}
         </span>
       </div>
       <UsageRow

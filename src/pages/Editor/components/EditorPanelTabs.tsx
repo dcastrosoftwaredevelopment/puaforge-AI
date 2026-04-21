@@ -36,11 +36,9 @@ export default function EditorPanelTabs() {
             onClick={() => enabled && setEditorPanelMode(mode)}
             disabled={!enabled}
             className={`flex items-center gap-1.5 px-3 py-2 text-xs transition border-b-2 cursor-pointer ${
-              isActive
-                ? 'text-text-primary border-forge-terracotta'
-                : enabled
-                  ? 'text-text-muted border-transparent hover:text-text-secondary'
-                  : 'text-text-muted/40 border-transparent cursor-not-allowed'
+              isActive ? 'text-text-primary border-forge-terracotta'
+              : enabled ? 'text-text-muted border-transparent hover:text-text-secondary'
+              : 'text-text-muted/40 border-transparent cursor-not-allowed'
             }`}
           >
             {icon}

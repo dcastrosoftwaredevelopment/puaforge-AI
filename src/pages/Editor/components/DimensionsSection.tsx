@@ -72,9 +72,9 @@ const DimensionsSection = memo(() => {
           defaultValue={fromTailwindValue(maxWidth)}
           onChange={(e) =>
             withDebounce('mw', () =>
-              e.target.value
-                ? applyLiveClass(`max-w-${toTailwindValue(e.target.value)}`)
-                : removeLiveCategory('max-w-sm'),
+              e.target.value ?
+                applyLiveClass(`max-w-${toTailwindValue(e.target.value)}`)
+              : removeLiveCategory('max-w-sm'),
             )
           }
           onBlur={() => {

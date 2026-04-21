@@ -86,8 +86,9 @@ export async function savePublishedSite(projectId: string, html: string): Promis
   formData.append('html', new Blob([html], { type: 'text/html' }), `${projectId}.html`);
   formData.append('projectId', projectId);
 
-  const url = existingId
-    ? `${PB_URL}/api/collections/${PB_SITES_COLLECTION}/records/${existingId}`
+  const url =
+    existingId ?
+      `${PB_URL}/api/collections/${PB_SITES_COLLECTION}/records/${existingId}`
     : `${PB_URL}/api/collections/${PB_SITES_COLLECTION}/records`;
   const method = existingId ? 'PATCH' : 'POST';
 

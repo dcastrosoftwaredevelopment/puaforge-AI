@@ -24,9 +24,9 @@ export function useApiCall<TBody, TResult>(method: HttpMethod, path: string) {
       setState({ loading: true, error: null, data: null });
       try {
         const data =
-          method === HttpMethod.POST
-            ? await api.post<TResult>(path, body, headers)
-            : await api.get<TResult>(path, headers);
+          method === HttpMethod.POST ?
+            await api.post<TResult>(path, body, headers)
+          : await api.get<TResult>(path, headers);
         setState({ loading: false, error: null, data });
         return data;
       } catch (err) {

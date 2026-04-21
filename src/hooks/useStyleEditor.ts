@@ -140,8 +140,9 @@ export function useStyleEditor() {
     (prop: string, value: string) => {
       if (!store.get(selectedElementAtom)) return;
       const current = parseInlineStyle(liveInlineStyleRef.current);
-      const updated = value
-        ? { ...current, [prop]: value }
+      const updated =
+        value ?
+          { ...current, [prop]: value }
         : (() => {
             const c = { ...current };
             delete c[prop];

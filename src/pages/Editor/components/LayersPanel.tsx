@@ -39,9 +39,9 @@ function LayerNode({
     <div>
       <div
         className={`flex items-center gap-1 py-0.5 px-2 cursor-pointer rounded text-xs select-none group transition ${
-          isSelected
-            ? 'bg-forge-terracotta/10 text-forge-terracotta'
-            : 'text-text-muted hover:bg-bg-elevated hover:text-text-secondary'
+          isSelected ?
+            'bg-forge-terracotta/10 text-forge-terracotta'
+          : 'text-text-muted hover:bg-bg-elevated hover:text-text-secondary'
         }`}
         style={{ paddingLeft: `${8 + depth * 12}px` }}
         onMouseEnter={() => onHover(node.id)}
@@ -49,7 +49,7 @@ function LayerNode({
         onClick={() => onSelect(node.id)}
         onDoubleClick={() => onDoubleSelect(node.id)}
       >
-        {hasChildren ? (
+        {hasChildren ?
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -57,11 +57,11 @@ function LayerNode({
             }}
             className="shrink-0 text-text-muted/60 hover:text-text-muted cursor-pointer"
           >
-            {isCollapsed ? <ChevronRight size={11} /> : <ChevronDown size={11} />}
+            {isCollapsed ?
+              <ChevronRight size={11} />
+            : <ChevronDown size={11} />}
           </button>
-        ) : (
-          <span className="shrink-0 w-[11px]" />
-        )}
+        : <span className="shrink-0 w-[11px]" />}
         <span className="truncate text-[11px] font-mono">{label}</span>
       </div>
       {!isCollapsed && hasChildren && (
@@ -124,10 +124,9 @@ export default function LayersPanel() {
       </div>
 
       <div className="flex-1 overflow-y-auto py-1">
-        {domTree.length === 0 ? (
+        {domTree.length === 0 ?
           <p className="text-xs text-text-muted/50 text-center mt-6 px-4">{t('inspect.layersEmpty')}</p>
-        ) : (
-          domTree.map((node) => (
+        : domTree.map((node) => (
             <LayerNode
               key={node.id}
               node={node}
@@ -142,7 +141,7 @@ export default function LayersPanel() {
               search={search}
             />
           ))
-        )}
+        }
       </div>
     </div>
   );

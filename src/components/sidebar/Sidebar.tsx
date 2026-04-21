@@ -33,11 +33,9 @@ export default function Sidebar() {
   }, [location.pathname, setIsOpen]);
 
   const planLabel =
-    usage?.plan === 'indie'
-      ? t('billing.plans.indie')
-      : usage?.plan === 'pro'
-        ? t('billing.plans.pro')
-        : t('billing.plans.free');
+    usage?.plan === 'indie' ? t('billing.plans.indie')
+    : usage?.plan === 'pro' ? t('billing.plans.pro')
+    : t('billing.plans.free');
 
   // Renders UserAvatar in place of the standard SVG icon slot
   const ProfileIcon: React.FC<ComponentProps<'svg'>> = () => <UserAvatar name={user?.name} />;

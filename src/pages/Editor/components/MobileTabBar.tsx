@@ -10,7 +10,10 @@ export default function MobileTabBar() {
   const isMobile = useIsMobile();
   const { t } = useTranslation();
 
-  const mobileTab = isChatOpen && isMobile ? 'chat' : viewMode === 'split' ? 'preview' : viewMode;
+  const mobileTab =
+    isChatOpen && isMobile ? 'chat'
+    : viewMode === 'split' ? 'preview'
+    : viewMode;
 
   return (
     <div className="flex md:hidden shrink-0 border-t border-border-subtle bg-bg-secondary">

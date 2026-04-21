@@ -40,7 +40,7 @@ export default function ImageRow({
     <div className="flex items-center gap-2 p-2 rounded-lg bg-bg-tertiary border border-border-subtle group">
       <img src={img.url} alt={img.name} className="w-10 h-10 rounded object-cover shrink-0" />
       <div className="flex-1 min-w-0">
-        {editing ? (
+        {editing ?
           <div className="flex items-center gap-1">
             <input
               ref={inputRef}
@@ -66,15 +66,14 @@ export default function ImageRow({
               <X size={11} />
             </button>
           </div>
-        ) : (
-          <p
+        : <p
             className="text-xs text-text-primary truncate cursor-pointer hover:text-accent transition"
             onDoubleClick={startEditing}
             title={t('images.doubleClickRename')}
           >
             {img.name}
           </p>
-        )}
+        }
         <p className="text-[10px] text-text-muted">{formatSize(img.size)}</p>
       </div>
       {!editing && (

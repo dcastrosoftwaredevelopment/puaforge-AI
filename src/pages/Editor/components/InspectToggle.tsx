@@ -14,9 +14,9 @@ export default function InspectToggle() {
       <button
         onClick={toggleInspect}
         className={`p-1.5 rounded-lg transition cursor-pointer ${
-          inspectMode
-            ? 'text-forge-terracotta bg-forge-terracotta/10'
-            : 'text-forge-terracotta/60 hover:text-forge-terracotta hover:bg-forge-terracotta/10'
+          inspectMode ?
+            'text-forge-terracotta bg-forge-terracotta/10'
+          : 'text-forge-terracotta/60 hover:text-forge-terracotta hover:bg-forge-terracotta/10'
         }`}
       >
         <MousePointer2 size={15} />

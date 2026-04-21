@@ -77,7 +77,9 @@ export default function StyleEditorColorInput({
         className="shrink-0 text-text-muted/50 hover:text-text-secondary transition cursor-pointer"
         title={hex}
       >
-        {copied ? <Check size={11} className="text-green-400" /> : <Copy size={11} />}
+        {copied ?
+          <Check size={11} className="text-green-400" />
+        : <Copy size={11} />}
       </button>
     </div>
   );

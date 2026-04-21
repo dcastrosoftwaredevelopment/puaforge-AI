@@ -184,9 +184,9 @@ function buildConversation(
       const fileNames = [...h.content.matchAll(/file="([^"]+)"/g)].map((m) => m[1]);
       const text = h.content.replace(CODE_BLOCK_RE, '').trim();
       const summary =
-        fileNames.length > 0
-          ? `${text}\n[Generated/updated files: ${fileNames.join(', ')}]`
-          : text || '[code response]';
+        fileNames.length > 0 ?
+          `${text}\n[Generated/updated files: ${fileNames.join(', ')}]`
+        : text || '[code response]';
       messages.push({ role, content: summary });
     } else if (role === 'user' && h.images && h.images.length > 0) {
       // User messages with images use multimodal content blocks

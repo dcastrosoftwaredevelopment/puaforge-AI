@@ -85,10 +85,9 @@ export default function Editor() {
       <EditorHeader />
 
       <div className="flex-1 overflow-hidden flex">
-        {isMobile && isChatOpen ? (
+        {isMobile && isChatOpen ?
           <MobileChatPanel />
-        ) : (
-          <main className="flex-1 min-w-0">
+        : <main className="flex-1 min-w-0">
             <SandpackProvider
               key={sandpackKey}
               files={{
@@ -110,7 +109,7 @@ export default function Editor() {
               <SandpackContent />
             </SandpackProvider>
           </main>
-        )}
+        }
 
         {!isMobile && isDocked && !isChatOpen && (
           <div className="shrink-0 w-8 relative border-l border-border-subtle bg-bg-secondary">

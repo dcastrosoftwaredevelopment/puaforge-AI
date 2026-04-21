@@ -20,9 +20,9 @@ export default function ViewToggle() {
           key={mode}
           onClick={() => setViewMode(mode)}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-            viewMode === mode
-              ? 'bg-bg-elevated text-text-primary shadow-sm'
-              : 'text-text-muted hover:text-text-secondary'
+            viewMode === mode ?
+              'bg-bg-elevated text-text-primary shadow-sm'
+            : 'text-text-muted hover:text-text-secondary'
           }`}
         >
           {icon}

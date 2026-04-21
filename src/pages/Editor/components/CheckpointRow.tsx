@@ -38,7 +38,7 @@ export default function CheckpointRow({
   return (
     <div className="flex items-center gap-2 p-2 rounded-lg bg-bg-tertiary border border-border-subtle group">
       <div className="flex-1 min-w-0">
-        {editing ? (
+        {editing ?
           <div className="flex items-center gap-1">
             <input
               ref={inputRef}
@@ -64,15 +64,14 @@ export default function CheckpointRow({
               <X size={11} />
             </button>
           </div>
-        ) : (
-          <p
+        : <p
             className="text-xs text-text-primary truncate cursor-pointer hover:text-accent transition"
             onDoubleClick={startEditing}
             title={t('checkpoints.doubleClickRename')}
           >
             {checkpoint.name}
           </p>
-        )}
+        }
         <p className="text-[10px] text-text-muted">
           {formatDate(checkpoint.createdAt, i18n.language)} &middot; {t('checkpoints.files', { count: fileCount })}
         </p>

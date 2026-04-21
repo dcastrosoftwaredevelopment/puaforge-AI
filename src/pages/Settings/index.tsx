@@ -85,7 +85,9 @@ export default function Settings() {
                   onClick={() => setShowKey(!showKey)}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary transition cursor-pointer"
                 >
-                  {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
+                  {showKey ?
+                    <EyeOff size={14} />
+                  : <Eye size={14} />}
                 </button>
               </div>
 

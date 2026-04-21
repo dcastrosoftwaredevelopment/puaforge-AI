@@ -122,17 +122,22 @@ export default function SandpackContent() {
       <div
         ref={previewPanelRef}
         className={
-          showPreview
-            ? `relative min-w-0 h-full flex items-start justify-center overflow-auto${inspectMode ? ' cursor-crosshair ring-1 ring-inset ring-forge-terracotta/20' : ''}`
-            : 'absolute w-0 h-0 overflow-hidden opacity-0 pointer-events-none'
+          showPreview ?
+            `relative min-w-0 h-full flex items-start justify-center overflow-auto${inspectMode ? ' cursor-crosshair ring-1 ring-inset ring-forge-terracotta/20' : ''}`
+          : 'absolute w-0 h-0 overflow-hidden opacity-0 pointer-events-none'
         }
-        style={isSplit ? { width: `${(1 - editorFraction) * 100}%` } : showPreview ? { flex: 1 } : undefined}
+        style={
+          isSplit ? { width: `${(1 - editorFraction) * 100}%` }
+          : showPreview ?
+            { flex: 1 }
+          : undefined
+        }
       >
         <div
           className={`relative ${
-            isResponsive
-              ? 'h-full border-x border-border-subtle transition-all duration-300 shrink-0 my-0 mx-auto'
-              : 'w-full h-full'
+            isResponsive ?
+              'h-full border-x border-border-subtle transition-all duration-300 shrink-0 my-0 mx-auto'
+            : 'w-full h-full'
           }`}
           style={isResponsive ? { width: DEVICE_WIDTHS[device] } : undefined}
         >

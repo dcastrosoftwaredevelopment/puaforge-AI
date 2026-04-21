@@ -22,7 +22,9 @@ function ChatMessage({ message }: Props) {
           isUser ? 'bg-forge-terracotta/15 text-forge-terracotta' : 'bg-vibe-blue/10 text-vibe-blue'
         }`}
       >
-        {isUser ? <User size={14} /> : <Bot size={14} />}
+        {isUser ?
+          <User size={14} />
+        : <Bot size={14} />}
       </div>
       <div
         className={`max-w-[85%] min-w-0 rounded-xl px-3 py-2.5 text-sm leading-relaxed break-words overflow-hidden ${
@@ -42,29 +44,26 @@ function ChatMessage({ message }: Props) {
           </div>
         )}
 
-        {isUser ? (
+        {isUser ?
           <CollapsibleText content={message.content} fadeColor="var(--color-bg-tertiary)">
             <p className="whitespace-pre-wrap break-words">{message.content}</p>
           </CollapsibleText>
-        ) : (
-          <>
+        : <>
             {segments!.map((seg, i) =>
-              seg.type === 'text' ? (
+              seg.type === 'text' ?
                 <CollapsibleText key={i} content={seg.content} fadeColor="var(--color-bg-secondary)">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     components={{
                       code: ({ children, className }) => {
                         const isBlock = !!className?.includes('language-');
-                        return isBlock ? (
-                          <pre className="bg-bg-primary rounded p-2 my-1 text-[11px] font-mono text-code-muted overflow-x-auto whitespace-pre">
-                            {children}
-                          </pre>
-                        ) : (
-                          <code className="bg-bg-primary px-1.5 py-0.5 rounded text-xs text-text-primary font-mono">
-                            {children}
-                          </code>
-                        );
+                        return isBlock ?
+                            <pre className="bg-bg-primary rounded p-2 my-1 text-[11px] font-mono text-code-muted overflow-x-auto whitespace-pre">
+                              {children}
+                            </pre>
+                          : <code className="bg-bg-primary px-1.5 py-0.5 rounded text-xs text-text-primary font-mono">
+                              {children}
+                            </code>;
                       },
                       pre: ({ children }) => <>{children}</>,
                     }}
@@ -72,12 +71,10 @@ function ChatMessage({ message }: Props) {
                     {seg.content}
                   </ReactMarkdown>
                 </CollapsibleText>
-              ) : (
-                <CodeBlock key={i} {...seg} />
-              ),
+              : <CodeBlock key={i} {...seg} />,
             )}
           </>
-        )}
+        }
       </div>
     </div>
   );

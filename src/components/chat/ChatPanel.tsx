@@ -128,7 +128,9 @@ export default function ChatPanel({
               onClick={() => setChatMode(chatMode === 'docked' ? 'floating' : 'docked')}
               className="group relative p-1 rounded text-forge-terracotta/60 hover:text-forge-terracotta transition cursor-pointer"
             >
-              {chatMode === 'docked' ? <PanelRightOpen size={13} /> : <PanelRightClose size={13} />}
+              {chatMode === 'docked' ?
+                <PanelRightOpen size={13} />
+              : <PanelRightClose size={13} />}
               <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-md bg-bg-elevated border border-border-subtle text-[10px] text-text-secondary whitespace-nowrap opacity-0 group-hover:opacity-100 transition shadow-lg z-50">
                 {chatMode === 'docked' ? t('chat.toFloating') : t('chat.toDocked')}
               </span>

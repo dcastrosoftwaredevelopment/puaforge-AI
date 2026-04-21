@@ -32,11 +32,10 @@ export default function Home() {
     (projectId: string) => {
       const info = publishedMap.get(projectId);
       if (!info) return;
-      const url = info.customDomain
-        ? `https://${info.customDomain}`
-        : info.subdomain
-          ? `https://${info.subdomain}.${__APP_DOMAIN__}`
-          : null;
+      const url =
+        info.customDomain ? `https://${info.customDomain}`
+        : info.subdomain ? `https://${info.subdomain}.${__APP_DOMAIN__}`
+        : null;
       if (url) window.open(url, '_blank');
     },
     [publishedMap],
@@ -69,10 +68,9 @@ export default function Home() {
             </div>
           </div>
 
-          {projects.length === 0 ? (
+          {projects.length === 0 ?
             <EmptyState onCreate={createProject} />
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {projects.map((project) => (
                 <ProjectCard
                   key={project.id}
@@ -84,7 +82,7 @@ export default function Home() {
                 />
               ))}
             </div>
-          )}
+          }
         </div>
       </main>
     </div>

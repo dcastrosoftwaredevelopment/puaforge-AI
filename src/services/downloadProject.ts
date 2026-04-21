@@ -133,8 +133,9 @@ export async function downloadProject(files: Record<string, string>, projectName
     zip.file(`src/${cleanPath}`, code);
   }
 
-  const safeName = projectName
-    ? projectName
+  const safeName =
+    projectName ?
+      projectName
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/-+$/, '')

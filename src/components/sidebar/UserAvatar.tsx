@@ -1,6 +1,7 @@
 export default function UserAvatar({ name }: { name?: string | null }) {
-  const initials = name
-    ? name
+  const initials =
+    name ?
+      name
         .split(' ')
         .map((n) => n[0])
         .slice(0, 2)

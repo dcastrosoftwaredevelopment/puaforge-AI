@@ -196,5 +196,9 @@ export async function checkCheckpointLimit(userId: string, projectId: string): P
 }
 
 function planLabel(plan: Plan): string {
-  return plan === 'free' ? 'Free' : plan === 'indie' ? 'Indie' : 'Pro';
+  return (
+    plan === 'free' ? 'Free'
+    : plan === 'indie' ? 'Indie'
+    : 'Pro'
+  );
 }

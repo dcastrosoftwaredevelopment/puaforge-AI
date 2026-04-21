@@ -61,7 +61,9 @@ export default function PlanCard({ plan, interested, onInterestClick }: Props) {
         {plan.features.map((feature, i) => (
           <li key={i} className="flex items-start gap-2.5">
             <span className={`mt-0.5 shrink-0 ${feature.available ? plan.color : 'text-text-muted'}`}>
-              {feature.available ? <Check size={13} /> : <span className="block w-3 h-[1px] bg-current mt-2" />}
+              {feature.available ?
+                <Check size={13} />
+              : <span className="block w-3 h-[1px] bg-current mt-2" />}
             </span>
             <span
               className={`text-xs leading-relaxed ${feature.available ? 'text-text-secondary' : 'text-text-muted line-through'}`}
@@ -72,22 +74,21 @@ export default function PlanCard({ plan, interested, onInterestClick }: Props) {
         ))}
       </ul>
 
-      {plan.current ? (
+      {plan.current ?
         <div className="py-2 text-center text-xs text-text-muted border border-border-subtle rounded-lg">
           {t('billing.activePlan')}
         </div>
-      ) : interested ? (
+      : interested ?
         <div className={`py-2 text-center text-xs rounded-lg border ${plan.badgeColor}`}>
           {t('billing.interestConfirmed')}
         </div>
-      ) : (
-        <button
+      : <button
           onClick={onInterestClick}
           className={`py-2 text-sm font-medium rounded-lg border transition cursor-pointer ${plan.badgeColor} hover:opacity-80`}
         >
           {t('billing.notifyMe')}
         </button>
-      )}
+      }
     </div>
   );
 }

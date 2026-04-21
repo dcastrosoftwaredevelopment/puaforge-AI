@@ -252,8 +252,9 @@ router.post('/import-site', requireAuth, async (req, res) => {
     const images = [...fetchedImages, ...dataUrlImages];
 
     const { html: cleanedHtml, isSpa } = cleanHtml(htmlWithoutDataUrls);
-    const warning = isSpa
-      ? 'This page appears to be a JavaScript-rendered app (SPA). No static HTML content was found — the AI will have limited information to work with.'
+    const warning =
+      isSpa ?
+        'This page appears to be a JavaScript-rendered app (SPA). No static HTML content was found — the AI will have limited information to work with.'
       : undefined;
 
     console.log(`[import-site] cleaned html: ${cleanedHtml.length} chars${isSpa ? ' (SPA detected)' : ''}`);

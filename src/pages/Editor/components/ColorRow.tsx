@@ -44,7 +44,7 @@ export default function ColorRow({
         onChange={(e) => onUpdate({ value: e.target.value })}
       />
 
-      {editingName ? (
+      {editingName ?
         <input
           autoFocus
           value={nameVal}
@@ -59,29 +59,27 @@ export default function ColorRow({
           }}
           className="flex-1 bg-bg-elevated border border-border-default rounded px-1.5 py-0.5 text-xs text-text-primary focus:outline-none focus:border-accent/50"
         />
-      ) : (
-        <span
+      : <span
           className="flex-1 text-xs text-text-secondary truncate cursor-pointer hover:text-text-primary transition"
           onClick={() => setEditingName(true)}
           title={t('palette.editName')}
         >
           {name}
         </span>
-      )}
+      }
 
       <span className="text-[10px] font-mono text-text-muted tracking-wide shrink-0">{value.toUpperCase()}</span>
 
-      {locked ? (
+      {locked ?
         <Lock size={10} className="text-text-muted/40 shrink-0" />
-      ) : (
-        <button
+      : <button
           onClick={onRemove}
           className="p-0.5 rounded text-text-muted/40 hover:text-forge-terracotta opacity-0 group-hover:opacity-100 transition cursor-pointer shrink-0"
           title={t('palette.removeColor')}
         >
           <X size={11} />
         </button>
-      )}
+      }
     </div>
   );
 }

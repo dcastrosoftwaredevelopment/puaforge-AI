@@ -20,7 +20,7 @@ export default function Checkpoints() {
     <div className="p-3 space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-text-secondary">{t('checkpoints.title')}</span>
-        {showInput ? (
+        {showInput ?
           <div className="flex items-center gap-1">
             <input
               value={newName}
@@ -46,21 +46,19 @@ export default function Checkpoints() {
               <X size={12} />
             </button>
           </div>
-        ) : (
-          <button
+        : <button
             onClick={() => setShowInput(true)}
             className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary bg-bg-elevated border border-border-subtle rounded-md transition cursor-pointer"
           >
             <Save size={12} />
             {t('checkpoints.save')}
           </button>
-        )}
+        }
       </div>
 
-      {checkpoints.length === 0 ? (
+      {checkpoints.length === 0 ?
         <p className="text-xs text-text-muted text-center py-4">{t('checkpoints.empty')}</p>
-      ) : (
-        <div className="space-y-2 max-h-64 overflow-y-auto">
+      : <div className="space-y-2 max-h-64 overflow-y-auto">
           {checkpoints.map((cp) => (
             <CheckpointRow
               key={cp.id}
@@ -71,7 +69,7 @@ export default function Checkpoints() {
             />
           ))}
         </div>
-      )}
+      }
     </div>
   );
 }
