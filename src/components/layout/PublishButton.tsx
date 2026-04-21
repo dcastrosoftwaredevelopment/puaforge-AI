@@ -1,5 +1,3 @@
-import { useState, useRef, useEffect } from 'react'
-
 declare const __APP_DOMAIN__: string
 declare const __SERVER_IP__: string
 
@@ -8,8 +6,7 @@ import { useTranslation, Trans } from 'react-i18next'
 import { usePublish } from '@/hooks/usePublish'
 import { useCustomDomain } from '@/hooks/useCustomDomain'
 import { useSubdomain } from '@/hooks/useSubdomain'
-import { ApiError } from '@/services/api'
-import { PlanLimitUIError } from '@/hooks/usePlanLimit'
+import { usePublishPanel } from '@/hooks/usePublishPanel'
 import Tooltip from '@/components/ui/Tooltip'
 import Button from '@/components/ui/Button'
 
@@ -34,79 +31,32 @@ export default function PublishButton() {
   const { customDomain, saveDomain } = useCustomDomain()
   const { slugInput, status, saving, saveError, handleSlugChange, saveSubdomain } = useSubdomain(subdomain, onSubdomainSaved)
   const { t, i18n } = useTranslation()
-  const [showPanel, setShowPanel] = useState(false)
-  const [domainInput, setDomainInput] = useState('')
-  const [savingDomain, setSavingDomain] = useState(false)
-  const [domainInputError, setDomainInputError] = useState<string | null>(null)
-  const [domainSaved, setDomainSaved] = useState(false)
-  const [ownProjectConflict, setOwnProjectConflict] = useState<string | null>(null)
-  const panelRef = useRef<HTMLDivElement>(null)
+  const {
+    showPanel, setShowPanel,
+    domainInput, setDomainInput,
+    savingDomain,
+    domainInputError,
+    domainSaved,
+    ownProjectConflict, setOwnProjectConflict,
+    panelRef,
+    handleSaveDomain,
+  } = usePublishPanel(customDomain, saveDomain)
 
   const appDomain = __APP_DOMAIN__
 
-  // Sync input with current domain when panel opens
-  useEffect(() => {
-    if (showPanel) setDomainInput(customDomain ?? '')
-  }, [showPanel, customDomain])
-
-  useEffect(() => {
-    if (!showPanel) return
-    function handleClick(e: MouseEvent) {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
-        setShowPanel(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [showPanel])
-
-  const handleSaveDomain = async (force = false) => {
-    setSavingDomain(true)
-    setDomainInputError(null)
-    setOwnProjectConflict(null)
-    try {
-      await saveDomain(domainInput || null, force)
-      setDomainSaved(true)
-      setTimeout(() => setDomainSaved(false), 2000)
-    } catch (e) {
-      if (e instanceof PlanLimitUIError) {
-        setDomainInputError(t('publish.domainLimitReached'))
-      } else if (e instanceof ApiError && e.code === 'DOMAIN_OWN_PROJECT') {
-        setOwnProjectConflict(e.data?.conflictingProjectName as string ?? '')
-      } else if (e instanceof ApiError && e.status === 409) {
-        setDomainInputError(t('publish.domainTaken'))
-      } else {
-        setDomainInputError(t('publish.domainSaveError'))
-      }
-    } finally {
-      setSavingDomain(false)
-    }
-  }
-
   const formatDate = (ts: number) =>
     new Date(ts).toLocaleDateString(i18n.language === 'pt' ? 'pt-BR' : 'en-US', {
-      day: '2-digit',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
+      day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
     })
 
   const slugStatusColor = {
-    idle: 'text-text-muted',
-    checking: 'text-text-muted',
-    available: 'text-green-400',
-    taken: 'text-forge-terracotta',
-    invalid: 'text-forge-terracotta',
-    already_set: 'text-text-muted',
+    idle: 'text-text-muted', checking: 'text-text-muted', available: 'text-green-400',
+    taken: 'text-forge-terracotta', invalid: 'text-forge-terracotta', already_set: 'text-text-muted',
   }[status]
 
   const slugStatusLabel = {
-    idle: '',
-    checking: t('publish.subdomainChecking'),
-    available: t('publish.subdomainAvailable'),
-    taken: t('publish.subdomainTaken'),
-    invalid: t('publish.subdomainInvalid'),
-    already_set: '',
+    idle: '', checking: t('publish.subdomainChecking'), available: t('publish.subdomainAvailable'),
+    taken: t('publish.subdomainTaken'), invalid: t('publish.subdomainInvalid'), already_set: '',
   }[status]
 
   return (
@@ -122,13 +72,11 @@ export default function PublishButton() {
         <div className="absolute right-0 top-full mt-1 w-80 bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden">
           <div className="p-3 space-y-3">
 
-            {/* ── Subdomain section (temporary URL) ── */}
+            {/* ── Subdomain section ── */}
             {appDomain && (
               <>
                 <div className="space-y-1.5">
                   <span className="text-[11px] font-medium text-text-secondary">{t('publish.subdomainLabel')}</span>
-
-                  {/* Active subdomain link */}
                   {subdomain && !slugInput && (
                     <a
                       href={`https://${subdomain}.${appDomain}`}
@@ -140,8 +88,6 @@ export default function PublishButton() {
                       {subdomain}.{appDomain}
                     </a>
                   )}
-
-                  {/* Input to set or change subdomain */}
                   <div className="flex gap-1.5">
                     <div className="flex-1 flex items-center bg-bg-elevated border border-border-subtle rounded-lg overflow-hidden focus-within:border-vibe-blue/40 transition">
                       <input
@@ -165,17 +111,9 @@ export default function PublishButton() {
                       {saving ? <Loader2 size={12} className="animate-spin" /> : <Link size={12} />}
                     </button>
                   </div>
-                  {slugStatusLabel && (
-                    <p className={`text-[10px] ${slugStatusColor}`}>{slugStatusLabel}</p>
-                  )}
-                  {saveError && (
-                    <p className="text-[10px] text-forge-terracotta">{saveError}</p>
-                  )}
-                  {!subdomain && (
-                    <p className="text-[10px] text-text-muted">{t('publish.subdomainHint')}</p>
-                  )}
-
-                  {/* Subdomain publish button */}
+                  {slugStatusLabel && <p className={`text-[10px] ${slugStatusColor}`}>{slugStatusLabel}</p>}
+                  {saveError && <p className="text-[10px] text-forge-terracotta">{saveError}</p>}
+                  {!subdomain && <p className="text-[10px] text-text-muted">{t('publish.subdomainHint')}</p>}
                   {subdomain && (
                     <>
                       {subdomainError && (
@@ -196,7 +134,6 @@ export default function PublishButton() {
                     </>
                   )}
                 </div>
-
                 <div className="border-t border-border-subtle" />
               </>
             )}
@@ -217,9 +154,7 @@ export default function PublishButton() {
                   {savingDomain ? <Loader2 size={12} className="animate-spin" /> : domainSaved ? <Check size={12} className="text-vibe-blue" /> : t('publish.saveDomain')}
                 </Button>
               </div>
-              {domainInputError && (
-                <p className="text-[10px] text-forge-terracotta">{domainInputError}</p>
-              )}
+              {domainInputError && <p className="text-[10px] text-forge-terracotta">{domainInputError}</p>}
               {ownProjectConflict !== null && (
                 <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-2 space-y-2">
                   <div className="flex items-start gap-1.5">
@@ -271,8 +206,6 @@ export default function PublishButton() {
                   />
                 </p>
               )}
-
-              {/* Custom domain publish button */}
               {domainError && (
                 <div className="text-xs text-forge-terracotta bg-forge-terracotta/10 border border-forge-terracotta/20 rounded-lg px-3 py-2">
                   {domainError}

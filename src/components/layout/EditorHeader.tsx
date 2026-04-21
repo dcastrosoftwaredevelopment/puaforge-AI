@@ -1,4 +1,3 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
 import { Home, ImageIcon, History, RotateCcw, Save, Trash2, Palette, MoreHorizontal } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import Button from '@/components/ui/Button'
@@ -7,6 +6,7 @@ import { useProjectImages } from '@/hooks/useProjectImages'
 import { useCheckpoints } from '@/hooks/useCheckpoints'
 import { usePanelSizes } from '@/hooks/usePanelSizes'
 import { useDraft } from '@/hooks/useDraft'
+import { useEditorHeaderDropdowns } from '@/hooks/useEditorHeaderDropdowns'
 import ViewToggle from '@/components/layout/ViewToggle'
 import DeviceToggle from '@/components/layout/DeviceToggle'
 import ExportButton from '@/components/layout/ExportButton'
@@ -24,55 +24,22 @@ export default function EditorHeader() {
   const { images } = useProjectImages()
   const { checkpoints } = useCheckpoints()
   const { resetPanels } = usePanelSizes()
-  const { isDraft, saveDraft, discardDraft } = useDraft()
+  const { isDraft } = useDraft()
   const { t } = useTranslation()
-  const [showImages, setShowImages] = useState(false)
-  const [showCheckpoints, setShowCheckpoints] = useState(false)
-  const [showPalette, setShowPalette] = useState(false)
-  const [showMobileMenu, setShowMobileMenu] = useState(false)
-  const [showDiscardModal, setShowDiscardModal] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const panelRef = useRef<HTMLDivElement>(null)
-  const mobilePanelRef = useRef<HTMLDivElement>(null)
-  const checkpointRef = useRef<HTMLDivElement>(null)
-  const mobileCheckpointRef = useRef<HTMLDivElement>(null)
-  const paletteRef = useRef<HTMLDivElement>(null)
-  const mobilePaletteRef = useRef<HTMLDivElement>(null)
-  const mobileMenuRef = useRef<HTMLDivElement>(null)
-
-  const handleSave = useCallback(async () => {
-    setSaving(true)
-    try { await saveDraft() } finally { setSaving(false) }
-  }, [saveDraft])
-
-  const handleDiscard = useCallback(async () => {
-    await discardDraft()
-    setShowDiscardModal(false)
-    window.location.reload()
-  }, [discardDraft])
-
-  useEffect(() => {
-    if (!showImages && !showCheckpoints && !showPalette && !showMobileMenu) return
-    function handleClick(e: MouseEvent) {
-      if (showImages) {
-        const inside = panelRef.current?.contains(e.target as Node) || mobilePanelRef.current?.contains(e.target as Node)
-        if (!inside) setShowImages(false)
-      }
-      if (showCheckpoints) {
-        const inside = checkpointRef.current?.contains(e.target as Node) || mobileCheckpointRef.current?.contains(e.target as Node)
-        if (!inside) setShowCheckpoints(false)
-      }
-      if (showPalette) {
-        const inside = paletteRef.current?.contains(e.target as Node) || mobilePaletteRef.current?.contains(e.target as Node)
-        if (!inside) setShowPalette(false)
-      }
-      if (showMobileMenu && mobileMenuRef.current && !mobileMenuRef.current.contains(e.target as Node)) {
-        setShowMobileMenu(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [showImages, showCheckpoints, showPalette, showMobileMenu])
+  const {
+    showImages, setShowImages,
+    showCheckpoints, setShowCheckpoints,
+    showPalette, setShowPalette,
+    showMobileMenu, setShowMobileMenu,
+    showDiscardModal, setShowDiscardModal,
+    saving,
+    panelRef, mobilePanelRef,
+    checkpointRef, mobileCheckpointRef,
+    paletteRef, mobilePaletteRef,
+    mobileMenuRef,
+    handleSave,
+    handleDiscard,
+  } = useEditorHeaderDropdowns()
 
   return (
     <>
@@ -213,7 +180,6 @@ export default function EditorHeader() {
             </button>
             {showMobileMenu && (
               <div className="absolute right-0 top-full mt-1 w-52 bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden p-1 space-y-0.5">
-                {/* Images */}
                 <button
                   onClick={() => { setShowMobileMenu(false); setShowImages(!showImages) }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
@@ -222,7 +188,6 @@ export default function EditorHeader() {
                   {t('editor.images')}
                   {images.length > 0 && <span className="ml-auto text-[10px] text-text-muted">{images.length}</span>}
                 </button>
-                {/* Palette */}
                 <button
                   onClick={() => { setShowMobileMenu(false); setShowPalette(!showPalette) }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
@@ -230,7 +195,6 @@ export default function EditorHeader() {
                   <Palette size={14} className="text-forge-terracotta/60" />
                   {t('editor.palette')}
                 </button>
-                {/* Checkpoints */}
                 <button
                   onClick={() => { setShowMobileMenu(false); setShowCheckpoints(!showCheckpoints) }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
@@ -265,7 +229,6 @@ export default function EditorHeader() {
               </div>
             )}
           </div>
-          {/* Dropdowns rendered outside the menu so they stay accessible */}
           {showImages && (
             <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-72 max-h-[calc(100svh-5rem)] bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-y-auto overflow-x-hidden" ref={mobilePanelRef}>
               <ImageAssets />

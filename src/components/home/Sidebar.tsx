@@ -1,57 +1,17 @@
 import React, { useEffect, type ComponentProps } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Layers, Settings, LogOut, CreditCard, HelpCircle, X, Menu } from 'lucide-react'
+import { Layers, Settings, LogOut, CreditCard, HelpCircle, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Sidebar as FlowbiteSidebar, SidebarItem, SidebarItems, SidebarItemGroup, Drawer, Progress } from 'flowbite-react'
+import { Sidebar as FlowbiteSidebar, SidebarItem, SidebarItems, SidebarItemGroup, Drawer } from 'flowbite-react'
 import Button from '@/components/ui/Button'
 import { useSidebar } from '@/hooks/useSidebar'
 import { useAuth } from '@/hooks/useAuth'
 import { useLanguage } from '@/hooks/useLanguage'
-import { useUsage, formatBytes, formatLimit } from '@/hooks/useUsage'
+import { useUsage } from '@/hooks/useUsage'
+import UsageBar from './UsageBar'
+import UserAvatar from './UserAvatar'
 
-function UsageBar({ used, limit, unit }: { used: number; limit: number; unit?: string }) {
-  const isUnlimited = limit === Infinity || limit >= 1e9
-  const pct = isUnlimited ? 0 : Math.min(100, (used / limit) * 100)
-  const isWarning = pct >= 80
-  const usedLabel = unit === 'bytes' ? formatBytes(used) : String(used)
-  const limitLabel = formatLimit(limit, unit)
-
-  return (
-    <div className="space-y-1">
-      <div className="flex justify-between text-[10px]">
-        <span className={isWarning ? 'text-yellow-400' : 'text-text-muted'}>{usedLabel}</span>
-        <span className="text-text-muted">{limitLabel}</span>
-      </div>
-      {!isUnlimited && (
-        <Progress progress={pct} size="xs" color={isWarning ? 'yellow' : 'primary'} />
-      )}
-    </div>
-  )
-}
-
-function UserAvatar({ name }: { name?: string | null }) {
-  const initials = name
-    ? name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
-    : '?'
-  return (
-    <span className="w-5 h-5 rounded-full bg-forge-terracotta/20 text-forge-terracotta text-[10px] font-semibold flex items-center justify-center shrink-0">
-      {initials}
-    </span>
-  )
-}
-
-/** Hamburger button — show on mobile to open the sidebar drawer */
-export function SidebarMenuButton() {
-  const { open } = useSidebar()
-  return (
-    <button
-      onClick={open}
-      className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer md:hidden"
-    >
-      <Menu size={18} />
-    </button>
-  )
-}
+export { default as SidebarMenuButton } from './SidebarMenuButton'
 
 export default function Sidebar() {
   const location = useLocation()

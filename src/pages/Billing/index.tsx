@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import { Check, Zap, Rocket, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import Sidebar, { SidebarMenuButton } from '@/components/home/Sidebar'
-import { useUsage, usePlansConfig, formatBytes, formatLimit } from '@/hooks/useUsage'
+import { useUsage, usePlansConfig, formatBytes } from '@/hooks/useUsage'
 import { track } from '@/lib/analytics'
+import UsageRow from './components/UsageRow'
 
 interface PlanFeature {
   text: string
@@ -21,33 +22,6 @@ interface Plan {
   current: boolean
   comingSoon: boolean
   features: PlanFeature[]
-}
-
-function UsageRow({ label, used, limit, unit }: { label: string; used: number; limit: number; unit?: string }) {
-  const isUnlimited = limit === Infinity || limit >= 1e9
-  const pct = isUnlimited ? 0 : Math.min(100, (used / limit) * 100)
-  const isWarning = pct >= 80
-  const usedLabel = unit === 'bytes' ? formatBytes(used) : String(used)
-  const limitLabel = formatLimit(limit, unit)
-
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between text-xs">
-        <span className="text-text-secondary">{label}</span>
-        <span className={`font-mono ${isWarning ? 'text-yellow-400' : 'text-text-muted'}`}>
-          {usedLabel}{!isUnlimited && ` / ${limitLabel}`}{isUnlimited && ` / ${limitLabel}`}
-        </span>
-      </div>
-      {!isUnlimited && (
-        <div className="h-1 bg-bg-primary rounded-full overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all ${isWarning ? 'bg-yellow-400' : 'bg-forge-terracotta/60'}`}
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-      )}
-    </div>
-  )
 }
 
 export default function Billing() {
@@ -83,7 +57,7 @@ export default function Billing() {
         { text: t('billing.features.export'), available: true },
         { text: t('billing.features.publish', { count: lim(f?.free.maxPublishedSites ?? 1) }), available: true },
         { text: t('billing.features.domain', { count: lim(f?.free.maxCustomDomains ?? 0) }), available: (f?.free.maxCustomDomains ?? 0) > 0 },
-{ text: t('billing.features.storage', { size: lim(f?.free.maxStorageBytes ?? 0, 'bytes') }), available: (f?.free.maxStorageBytes ?? 0) > 0 },
+        { text: t('billing.features.storage', { size: lim(f?.free.maxStorageBytes ?? 0, 'bytes') }), available: (f?.free.maxStorageBytes ?? 0) > 0 },
         { text: t('billing.features.checkpoints', { count: lim(f?.free.maxCheckpointsPerProject ?? 0) }), available: (f?.free.maxCheckpointsPerProject ?? 0) > 0 },
       ],
     },
@@ -103,7 +77,7 @@ export default function Billing() {
         { text: t('billing.features.export'), available: true },
         { text: t('billing.features.publish', { count: lim(f?.indie.maxPublishedSites ?? 1) }), available: true },
         { text: t('billing.features.domain', { count: lim(f?.indie.maxCustomDomains ?? 1) }), available: true },
-{ text: t('billing.features.storage', { size: lim(f?.indie.maxStorageBytes ?? 0, 'bytes') }), available: true },
+        { text: t('billing.features.storage', { size: lim(f?.indie.maxStorageBytes ?? 0, 'bytes') }), available: true },
         { text: t('billing.features.checkpoints', { count: lim(f?.indie.maxCheckpointsPerProject ?? 10) }), available: true },
       ],
     },
@@ -123,7 +97,7 @@ export default function Billing() {
         { text: t('billing.features.export'), available: true },
         { text: t('billing.features.publish', { count: lim(f?.pro.maxPublishedSites ?? 5) }), available: true },
         { text: t('billing.features.domains', { count: lim(f?.pro.maxCustomDomains ?? 5) }), available: true },
-{ text: t('billing.features.storage', { size: lim(f?.pro.maxStorageBytes ?? 0, 'bytes') }), available: true },
+        { text: t('billing.features.storage', { size: lim(f?.pro.maxStorageBytes ?? 0, 'bytes') }), available: true },
         { text: t('billing.features.checkpoints', { count: lim(f?.pro.maxCheckpointsPerProject ?? Infinity) }), available: true },
       ],
     },

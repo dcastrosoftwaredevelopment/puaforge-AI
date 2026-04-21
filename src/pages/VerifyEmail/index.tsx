@@ -1,57 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Mail, Loader2, ArrowLeft, CheckCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useAuth } from '@/hooks/useAuth'
-import { ApiError } from '@/services/api'
-
-const RESEND_COOLDOWN = 60
+import { useResendCooldown } from '@/hooks/useResendCooldown'
 
 export default function VerifyEmail() {
   const { t } = useTranslation()
-  const { resendVerification } = useAuth()
   const navigate = useNavigate()
+  const { cooldown, resendState, handleResend } = useResendCooldown()
 
   const email = sessionStorage.getItem('verify_email') ?? ''
   const maskedEmail = email.replace(/(.{2})(.*)(@.*)/, (_, a, b, c) => a + b.replace(/./g, '•') + c)
-
-  const [cooldown, setCooldown] = useState(0)
-  const [resendState, setResendState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  useEffect(() => {
-    return () => { if (timerRef.current) clearInterval(timerRef.current) }
-  }, [])
-
-  const startCooldown = () => {
-    setCooldown(RESEND_COOLDOWN)
-    timerRef.current = setInterval(() => {
-      setCooldown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current!)
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-  }
-
-  const handleResend = async () => {
-    if (!email || cooldown > 0) return
-    setResendState('loading')
-    try {
-      await resendVerification(email)
-      setResendState('success')
-      startCooldown()
-    } catch (err) {
-      const code = err instanceof ApiError ? err.code : ''
-      if (code === 'ERROR_ALREADY_VERIFIED') {
-        navigate('/login')
-        return
-      }
-      setResendState('error')
-    }
-  }
 
   return (
     <div className="h-screen w-screen bg-bg-primary flex items-center justify-center px-4">
@@ -75,7 +33,6 @@ export default function VerifyEmail() {
           </div>
 
           <p className="text-xs text-text-muted leading-relaxed">{t('verifyEmail.instruction')}</p>
-
           <p className="text-[11px] text-text-muted/70">{t('verifyEmail.spamHint')}</p>
 
           {resendState === 'success' && (
@@ -89,7 +46,7 @@ export default function VerifyEmail() {
           )}
 
           <button
-            onClick={handleResend}
+            onClick={() => handleResend(email)}
             disabled={cooldown > 0 || resendState === 'loading'}
             className="w-full py-2 rounded-lg bg-bg-elevated border border-border-subtle text-xs text-text-secondary hover:text-text-primary hover:border-border-default transition disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
           >

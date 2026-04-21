@@ -1,41 +1,11 @@
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, Key, CheckCircle2 } from 'lucide-react'
 import Sidebar, { SidebarMenuButton } from '@/components/home/Sidebar'
+import Step from './components/Step'
 
 const CONSOLE_URL = 'https://console.anthropic.com'
 const API_KEYS_URL = 'https://console.anthropic.com/settings/keys'
 const DOCS_URL = 'https://docs.anthropic.com/en/api/getting-started'
-
-function Step({ number, title, desc, link, linkLabel }: {
-  number: number
-  title: string
-  desc: string
-  link?: string
-  linkLabel?: string
-}) {
-  return (
-    <div className="flex gap-4">
-      <div className="shrink-0 w-7 h-7 rounded-full bg-forge-terracotta/15 text-forge-terracotta text-xs font-bold flex items-center justify-center">
-        {number}
-      </div>
-      <div className="space-y-1">
-        <p className="text-sm font-medium text-text-primary">{title}</p>
-        <p className="text-xs text-text-secondary">{desc}</p>
-        {link && linkLabel && (
-          <a
-            href={link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs text-forge-terracotta hover:underline mt-0.5"
-          >
-            {linkLabel}
-            <ExternalLink size={11} />
-          </a>
-        )}
-      </div>
-    </div>
-  )
-}
 
 export default function Help() {
   const { t } = useTranslation()
@@ -89,6 +59,7 @@ export default function Help() {
               className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition"
             >
               {t('help.apiSetup_docsLink')}
+              <ExternalLink size={11} />
             </a>
           </section>
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { SandpackProvider } from '@codesandbox/sandpack-react'
-import { Loader2, MessageCircle, Eye, Code2, MessageSquare } from 'lucide-react'
+import { Loader2, MessageCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useFiles } from '@/hooks/useFiles'
 import { useChat } from '@/hooks/useChat'
@@ -13,47 +13,9 @@ import { TAILWIND_HTML, buildPackageJson } from '@/utils/defaultFiles'
 import EditorHeader from '@/components/layout/EditorHeader'
 import SandpackContent from '@/components/layout/SandpackContent'
 import ResizeHandle from '@/components/layout/ResizeHandle'
+import MobileTabBar from './MobileTabBar'
 import FloatingChat, { DockedChat, MobileChatPanel } from '@/components/chat/FloatingChat'
-import { useViewMode } from '@/hooks/useViewMode'
 import { useIsMobile } from '@/hooks/useIsMobile'
-
-function MobileTabBar() {
-  const { viewMode, setViewMode } = useViewMode()
-  const { isOpen: isChatOpen, setIsOpen: setIsChatOpen } = useChat()
-  const isMobile = useIsMobile()
-  const { t } = useTranslation()
-
-  const mobileTab = isChatOpen && isMobile ? 'chat' : viewMode === 'split' ? 'preview' : viewMode
-
-  return (
-    <div className="flex md:hidden shrink-0 border-t border-border-subtle bg-bg-secondary">
-      {([
-        { tab: 'editor', icon: <Code2 size={18} />, label: t('viewToggle.code') },
-        { tab: 'preview', icon: <Eye size={18} />, label: t('viewToggle.preview') },
-        { tab: 'chat', icon: <MessageSquare size={18} />, label: t('viewToggle.chat') },
-      ] as const).map(({ tab, icon, label }) => (
-        <button
-          key={tab}
-          onClick={() => {
-            if (tab === 'chat') {
-              setIsChatOpen(true)
-              setViewMode('preview')
-            } else {
-              setIsChatOpen(false)
-              setViewMode(tab)
-            }
-          }}
-          className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium transition ${
-            mobileTab === tab ? 'text-vibe-blue' : 'text-text-muted hover:text-text-secondary'
-          }`}
-        >
-          {icon}
-          {label}
-        </button>
-      ))}
-    </div>
-  )
-}
 
 const CHAT_MIN = 280
 const CHAT_MAX = 600
@@ -66,7 +28,6 @@ export default function EditorView() {
   const { t } = useTranslation()
   useDraft()
   const { chatWidth, setChatWidth } = usePanelSizes()
-
 
   // When files change: extract new deps from imports (skip package.json to avoid circular update)
   useEffect(() => {
