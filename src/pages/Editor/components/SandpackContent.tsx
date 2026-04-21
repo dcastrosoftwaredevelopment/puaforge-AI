@@ -134,7 +134,7 @@ export default function SandpackContent() {
           {/* Drawer — absolute overlay from bottom, slides in/out */}
           <div
             ref={drawerRef}
-            className={`absolute bottom-0 left-0 right-0 flex flex-col bg-bg-secondary border-t border-border-subtle overflow-hidden transition-transform duration-300 ease-in-out ${drawerOpen ? 'translate-y-0' : 'translate-y-full'}`}
+            className={`absolute bottom-0 left-0 right-0 z-20 flex flex-col bg-bg-secondary border-t border-border-subtle overflow-hidden transition-transform duration-300 ease-in-out ${drawerOpen ? 'translate-y-0' : 'translate-y-full'}`}
             style={{ height: `${drawerHeightPct}%` }}
           >
             {/* Drag handle */}

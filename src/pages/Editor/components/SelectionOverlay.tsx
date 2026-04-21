@@ -9,7 +9,7 @@ export default function SelectionOverlay() {
     <>
       {hoveredElement && hoveredElement.id !== selectedElement?.id && (
         <div
-          className="pointer-events-none border border-dashed border-sky-400/70 bg-sky-400/5 z-[9999]"
+          className="pointer-events-none border border-dashed border-sky-400/70 bg-sky-400/5 z-10"
           style={{
             position: 'fixed',
             boxSizing: 'border-box',
@@ -22,7 +22,7 @@ export default function SelectionOverlay() {
       )}
       {selectedElement && (
         <div
-          className="pointer-events-none border border-forge-terracotta z-[9999]"
+          className="pointer-events-none border border-forge-terracotta z-10"
           style={{
             position: 'fixed',
             boxSizing: 'border-box',
