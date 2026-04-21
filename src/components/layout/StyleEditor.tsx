@@ -126,7 +126,7 @@ function SpacingInput({ label, value, onChange }: { label: string; value: string
 
 export default function StyleEditor() {
   const { t } = useTranslation()
-  const { selectedElement, parsed, parsedInlineStyle, applyClass, removeOneClass, addOneClass, removeCategory, setInlineProp, removeInlineProp, addInlineProp, withDebounce, flushDebounce } = useStyleEditor()
+  const { selectedElement, parsed, parsedInlineStyle, applyClass, removeOneClass, addOneClass, removeCategory, removeInlineProp, addInlineProp, withDebounce, flushDebounce, applyLiveClass, removeLiveCategory, commitClassName, applyLiveInlineProp, commitInlineStyle } = useStyleEditor()
   const [newClass, setNewClass] = useState('')
   const [newInlineProp, setNewInlineProp] = useState('')
   const [newInlineValue, setNewInlineValue] = useState('')
@@ -199,13 +199,13 @@ export default function StyleEditor() {
       {/* Dimensions */}
       <Section title={t('inspect.sectionDimensions')}>
         <Row label={t('inspect.width')}>
-          <input key={`${selectedElement?.id}-w`} type="text" defaultValue={parsed.width} onChange={(e) => withDebounce('w', () => e.target.value ? applyClass(`w-${e.target.value}`) : removeCategory('w-0'))} onBlur={() => flushDebounce('w')} onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }} placeholder="full / auto / 64" className="w-full text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono" />
+          <input key={`${selectedElement?.id}-w`} type="text" defaultValue={parsed.width} onChange={(e) => withDebounce('w', () => e.target.value ? applyLiveClass(`w-${e.target.value}`) : removeLiveCategory('w-0'))} onBlur={() => { flushDebounce('w'); commitClassName() }} onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }} placeholder="full / auto / 64" className="w-full text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono" />
         </Row>
         <Row label={t('inspect.height')}>
-          <input key={`${selectedElement?.id}-h`} type="text" defaultValue={parsed.height} onChange={(e) => withDebounce('h', () => e.target.value ? applyClass(`h-${e.target.value}`) : removeCategory('h-0'))} onBlur={() => flushDebounce('h')} onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }} placeholder="full / auto / 64" className="w-full text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono" />
+          <input key={`${selectedElement?.id}-h`} type="text" defaultValue={parsed.height} onChange={(e) => withDebounce('h', () => e.target.value ? applyLiveClass(`h-${e.target.value}`) : removeLiveCategory('h-0'))} onBlur={() => { flushDebounce('h'); commitClassName() }} onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }} placeholder="full / auto / 64" className="w-full text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono" />
         </Row>
         <Row label={t('inspect.maxWidth')}>
-          <input key={`${selectedElement?.id}-mw`} type="text" defaultValue={parsed.maxWidth} onChange={(e) => withDebounce('mw', () => e.target.value ? applyClass(`max-w-${e.target.value}`) : removeCategory('max-w-sm'))} onBlur={() => flushDebounce('mw')} onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }} placeholder="sm / lg / xl / full" className="w-full text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono" />
+          <input key={`${selectedElement?.id}-mw`} type="text" defaultValue={parsed.maxWidth} onChange={(e) => withDebounce('mw', () => e.target.value ? applyLiveClass(`max-w-${e.target.value}`) : removeLiveCategory('max-w-sm'))} onBlur={() => { flushDebounce('mw'); commitClassName() }} onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }} placeholder="sm / lg / xl / full" className="w-full text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono" />
         </Row>
       </Section>
 
@@ -269,8 +269,8 @@ export default function StyleEditor() {
                   key={`${selectedElement?.id}-${prop}`}
                   type="text"
                   defaultValue={value}
-                  onChange={(e) => withDebounce(`il-${prop}`, () => e.target.value ? setInlineProp(prop, e.target.value) : removeInlineProp(prop))}
-                  onBlur={() => flushDebounce(`il-${prop}`)}
+                  onChange={(e) => withDebounce(`il-${prop}`, () => applyLiveInlineProp(prop, e.target.value))}
+                  onBlur={() => { flushDebounce(`il-${prop}`); commitInlineStyle() }}
                   onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }}
                   className="flex-1 text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono"
                 />

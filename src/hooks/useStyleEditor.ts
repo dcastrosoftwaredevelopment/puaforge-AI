@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useAtom } from 'jotai'
 import { selectedElementAtom } from '@/atoms'
 import { parseClasses, replaceClass, removeClass, addClass, removeClassCategory } from '@/utils/tailwindClasses'
@@ -18,6 +18,16 @@ export function useStyleEditor() {
     () => (selectedElement?.inlineStyle ? parseInlineStyle(selectedElement.inlineStyle) : {}),
     [selectedElement?.inlineStyle],
   )
+
+  // Live refs track in-progress edits without triggering re-renders.
+  // Synced from atom only when the selected element changes (not on every keystroke).
+  const liveClassNameRef = useRef(selectedElement?.className ?? '')
+  const liveInlineStyleRef = useRef(selectedElement?.inlineStyle ?? '')
+
+  useEffect(() => {
+    liveClassNameRef.current = selectedElement?.className ?? ''
+    liveInlineStyleRef.current = selectedElement?.inlineStyle ?? ''
+  }, [selectedElement?.id])
 
   // ── debounce per field ────────────────────────────────────────────────────
 
@@ -40,11 +50,49 @@ export function useStyleEditor() {
     pendingRef.current.delete(key)
   }, [])
 
-  // ── className helpers ─────────────────────────────────────────────────────
+  // ── live className helpers (no atom update → no re-render) ───────────────
+
+  const applyLiveClass = useCallback((newClass: string) => {
+    if (!selectedElement) return
+    const newClassName = replaceClass(liveClassNameRef.current, newClass)
+    applyClassChange(liveClassNameRef.current, newClassName)
+    liveClassNameRef.current = newClassName
+  }, [selectedElement, applyClassChange])
+
+  const removeLiveCategory = useCallback((representative: string) => {
+    if (!selectedElement) return
+    const newClassName = removeClassCategory(liveClassNameRef.current, representative)
+    applyClassChange(liveClassNameRef.current, newClassName)
+    liveClassNameRef.current = newClassName
+  }, [selectedElement, applyClassChange])
+
+  const commitClassName = useCallback(() => {
+    if (!selectedElement) return
+    setSelectedElement((prev) => prev ? { ...prev, className: liveClassNameRef.current } : null)
+  }, [selectedElement, setSelectedElement])
+
+  // ── live inline style helpers (no atom update → no re-render) ───────────
+
+  const applyLiveInlineProp = useCallback((prop: string, value: string) => {
+    if (!selectedElement) return
+    const current = parseInlineStyle(liveInlineStyleRef.current)
+    const updated = value ? { ...current, [prop]: value } : (() => { const c = { ...current }; delete c[prop]; return c })()
+    const newStyle = toInlineCss(updated)
+    applyInlineStyleChange(liveInlineStyleRef.current, newStyle)
+    liveInlineStyleRef.current = newStyle
+  }, [selectedElement, applyInlineStyleChange])
+
+  const commitInlineStyle = useCallback(() => {
+    if (!selectedElement) return
+    setSelectedElement((prev) => prev ? { ...prev, inlineStyle: liveInlineStyleRef.current } : null)
+  }, [selectedElement, setSelectedElement])
+
+  // ── immediate helpers (for selects, buttons — instant feedback needed) ───
 
   const apply = useCallback((newClassName: string) => {
     if (!selectedElement) return
     applyClassChange(selectedElement.className, newClassName)
+    liveClassNameRef.current = newClassName
     setSelectedElement((prev) => (prev ? { ...prev, className: newClassName } : null))
   }, [selectedElement, applyClassChange, setSelectedElement])
 
@@ -68,12 +116,13 @@ export function useStyleEditor() {
     apply(removeClassCategory(selectedElement.className, representative))
   }, [selectedElement, apply])
 
-  // ── inline style helpers ──────────────────────────────────────────────────
+  // ── inline style helpers (immediate, for add/remove buttons) ─────────────
 
   const applyInlineStyle = useCallback((updated: Record<string, string>) => {
     if (!selectedElement) return
     const newStyle = toInlineCss(updated)
     applyInlineStyleChange(selectedElement.inlineStyle ?? '', newStyle)
+    liveInlineStyleRef.current = newStyle
     setSelectedElement((prev) => (prev ? { ...prev, inlineStyle: newStyle } : null))
   }, [selectedElement, applyInlineStyleChange, setSelectedElement])
 
@@ -106,5 +155,10 @@ export function useStyleEditor() {
     setSelectedElement,
     withDebounce,
     flushDebounce,
+    applyLiveClass,
+    removeLiveCategory,
+    commitClassName,
+    applyLiveInlineProp,
+    commitInlineStyle,
   }
 }
