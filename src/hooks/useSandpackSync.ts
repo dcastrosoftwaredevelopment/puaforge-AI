@@ -54,6 +54,7 @@ export function useSandpackSync() {
       const spFiles = sandpackRef.current.files
       for (const [path, file] of Object.entries(spFiles)) {
         if (path === '/index.html' || path === '/package.json') continue
+        if (typeof file === 'object' && file.hidden) continue
         const code = typeof file === 'string' ? file : file.code
         if (prevFilesRef.current[path] !== undefined && prevFilesRef.current[path] !== code) {
           setDirty(true)
@@ -71,6 +72,7 @@ export function useSandpackSync() {
 
     for (const [path, file] of Object.entries(spFiles)) {
       if (path === '/index.html' || path === '/package.json') continue
+      if (typeof file === 'object' && file.hidden) continue
       const code = typeof file === 'string' ? file : file.code
       updated[path] = code
     }

@@ -10,6 +10,7 @@ import { useProjectLoader } from '@/hooks/useProjectLoader'
 import { useDraft } from '@/hooks/useDraft'
 import { extractDependencies } from '@/services/fileParser'
 import { TAILWIND_HTML, buildPackageJson } from '@/utils/defaultFiles'
+import { VIBE_INSPECT_SOURCE, VIBE_ENTRY_SOURCE } from '@/utils/inspectFiles'
 import EditorHeader from '@/components/layout/EditorHeader'
 import SandpackContent from '@/components/layout/SandpackContent'
 import ResizeHandle from '@/components/layout/ResizeHandle'
@@ -67,13 +68,9 @@ export default function EditorView() {
   }, [setChatWidth])
 
   const sandpackKey = useMemo(() => {
-    const filesHash = Object.entries(files)
-      .map(([p, c]) => `${p}:${c.length}`)
-      .sort()
-      .join('|')
     const depsKey = Object.keys(deps).sort().join(',')
-    return `${projectId}-${filesHash}-${depsKey}`
-  }, [projectId, files, deps])
+    return `${projectId}-${depsKey}`
+  }, [projectId, deps])
 
   if (!projectReady) {
     return (
@@ -94,7 +91,12 @@ export default function EditorView() {
           <main className="flex-1 min-w-0">
             <SandpackProvider
               key={sandpackKey}
-              files={{ '/index.html': TAILWIND_HTML, ...files }}
+              files={{
+                '/index.html': TAILWIND_HTML,
+                ...files,
+                '/__vibeInspect.tsx': { code: VIBE_INSPECT_SOURCE, hidden: true },
+                '/index.tsx': { code: VIBE_ENTRY_SOURCE, hidden: true },
+              }}
               theme="dark"
               template="react-ts"
               customSetup={{

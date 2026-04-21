@@ -33,8 +33,16 @@ export function useInspectBridge() {
   useEffect(() => { inspectModeRef.current = inspectMode }, [inspectMode])
 
   const post = (msg: object) => {
+    let sent = false
     for (const client of Object.values(sandpackRef.current.clients)) {
-      client.iframe?.contentWindow?.postMessage(msg, '*')
+      if (client.iframe?.contentWindow) {
+        client.iframe.contentWindow.postMessage(msg, '*')
+        sent = true
+      }
+    }
+    if (!sent) {
+      document.querySelector<HTMLIFrameElement>('.preview-iframe')
+        ?.contentWindow?.postMessage(msg, '*')
     }
   }
 
@@ -75,10 +83,15 @@ export function useInspectBridge() {
       if (!e.data || typeof e.data !== 'object') return
       const { type } = e.data
 
-      if (type === 'VIBE_ELEMENT_SELECTED') {
+      if (type === 'VIBE_READY') {
+        if (inspectModeRef.current) post({ type: 'VIBE_INSPECT_TOGGLE', enabled: true })
+      } else if (type === 'VIBE_ELEMENT_SELECTED') {
         const el: SelectedElement = { id: e.data.id, tagName: e.data.tagName, className: e.data.className, rect: e.data.rect }
         setSelected(el)
         setPanelMode('style')
+      } else if (type === 'VIBE_ELEMENT_RESIZED') {
+        const rect = e.data.rect
+        setSelected((prev) => prev ? { ...prev, rect } : null)
       } else if (type === 'VIBE_ELEMENT_HOVERED') {
         const el: SelectedElement = { id: e.data.id, tagName: e.data.tagName, className: e.data.className, rect: e.data.rect }
         setHovered(el)

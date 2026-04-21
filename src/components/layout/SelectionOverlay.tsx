@@ -1,7 +1,7 @@
 import { useSelectionOverlay } from '@/hooks/useSelectionOverlay'
 
 export default function SelectionOverlay() {
-  const { selectedElement, hoveredElement, inspectMode } = useSelectionOverlay()
+  const { selectedElement, hoveredElement, inspectMode, iframeTop } = useSelectionOverlay()
 
   if (!inspectMode) return null
 
@@ -11,7 +11,8 @@ export default function SelectionOverlay() {
         <div
           className="absolute pointer-events-none border border-dashed border-sky-400/70 bg-sky-400/5 z-40"
           style={{
-            top: hoveredElement.rect.top,
+            boxSizing: 'border-box',
+            top: hoveredElement.rect.top + iframeTop,
             left: hoveredElement.rect.left,
             width: hoveredElement.rect.width,
             height: hoveredElement.rect.height,
@@ -22,7 +23,8 @@ export default function SelectionOverlay() {
         <div
           className="absolute pointer-events-none border border-forge-terracotta z-40"
           style={{
-            top: selectedElement.rect.top,
+            boxSizing: 'border-box',
+            top: selectedElement.rect.top + iframeTop,
             left: selectedElement.rect.left,
             width: selectedElement.rect.width,
             height: selectedElement.rect.height,

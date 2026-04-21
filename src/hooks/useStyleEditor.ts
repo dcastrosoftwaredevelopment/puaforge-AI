@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react'
-import { useAtom, useSetAtom } from 'jotai'
+import { useAtom } from 'jotai'
 import { selectedElementAtom } from '@/atoms'
 import { parseClasses, replaceClass, removeClass, addClass } from '@/utils/tailwindClasses'
 import { useStylePatcher } from './useStylePatcher'
@@ -7,7 +7,6 @@ import { useStylePatcher } from './useStylePatcher'
 export function useStyleEditor() {
   const [selectedElement, setSelectedElement] = useAtom(selectedElementAtom)
   const { applyClassChange } = useStylePatcher()
-  const setSelected = useSetAtom(selectedElementAtom)
 
   const parsed = useMemo(
     () => (selectedElement ? parseClasses(selectedElement.className) : null),
@@ -17,8 +16,8 @@ export function useStyleEditor() {
   const apply = useCallback((newClassName: string) => {
     if (!selectedElement) return
     applyClassChange(selectedElement.className, newClassName)
-    setSelected((prev) => (prev ? { ...prev, className: newClassName } : null))
-  }, [selectedElement, applyClassChange, setSelected])
+    setSelectedElement((prev) => (prev ? { ...prev, className: newClassName } : null))
+  }, [selectedElement, applyClassChange, setSelectedElement])
 
   const applyClass = useCallback((newClass: string) => {
     if (!selectedElement) return
@@ -35,12 +34,5 @@ export function useStyleEditor() {
     apply(addClass(selectedElement.className, cls))
   }, [selectedElement, apply])
 
-  return {
-    selectedElement,
-    parsed,
-    applyClass,
-    removeOneClass,
-    addOneClass,
-    setSelectedElement,
-  }
+  return { selectedElement, parsed, applyClass, removeOneClass, addOneClass, setSelectedElement }
 }
