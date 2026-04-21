@@ -49,37 +49,32 @@ export function useStyleEditor() {
   // ── immediate helpers (selects/buttons) ──────────────────────────────────
 
   const apply = useCallback((newClassName: string) => {
-    const el = store.get(selectedElementAtom)
-    if (!el) return
-    applyClassChange(el.className, newClassName)
+    if (!store.get(selectedElementAtom)) return
+    applyClassChange(liveClassNameRef.current, newClassName)
     liveClassNameRef.current = newClassName
     setSelectedElement((prev) => (prev ? { ...prev, className: newClassName } : null))
   }, [store, applyClassChange, setSelectedElement])
 
   const applyClass = useCallback((newClass: string) => {
-    const el = store.get(selectedElementAtom)
-    if (!el) return
+    if (!store.get(selectedElementAtom)) return
     const prefix = PREFIX_MAP[store.get(styleBreakpointAtom)]
-    apply(replaceClassWithPrefix(el.className, newClass, prefix))
+    apply(replaceClassWithPrefix(liveClassNameRef.current, newClass, prefix))
   }, [store, apply])
 
   const removeOneClass = useCallback((cls: string) => {
-    const el = store.get(selectedElementAtom)
-    if (!el) return
-    apply(removeClass(el.className, cls))
+    if (!store.get(selectedElementAtom)) return
+    apply(removeClass(liveClassNameRef.current, cls))
   }, [store, apply])
 
   const addOneClass = useCallback((cls: string) => {
-    const el = store.get(selectedElementAtom)
-    if (!el) return
-    apply(addClass(el.className, cls))
+    if (!store.get(selectedElementAtom)) return
+    apply(addClass(liveClassNameRef.current, cls))
   }, [store, apply])
 
   const removeCategory = useCallback((representative: string) => {
-    const el = store.get(selectedElementAtom)
-    if (!el) return
+    if (!store.get(selectedElementAtom)) return
     const prefix = PREFIX_MAP[store.get(styleBreakpointAtom)]
-    apply(removeClassCategoryWithPrefix(el.className, representative, prefix))
+    apply(removeClassCategoryWithPrefix(liveClassNameRef.current, representative, prefix))
   }, [store, apply])
 
   // ── live className helpers (no atom update → no re-render) ───────────────
