@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useContext, useEffect, useRef } from 'react'
 import { useStore, useSetAtom } from 'jotai'
 import { selectedElementAtom, styleBreakpointAtom, PREFIX_MAP } from '@/atoms'
 import { replaceClassWithPrefix, removeClassCategoryWithPrefix, removeClass, addClass } from '@/utils/tailwindClasses'
 import { parseInlineStyle, toInlineCss } from '@/utils/inlineStyles'
-import { useStylePatcher } from './useStylePatcher'
+import { StylePatcherContext } from './useStylePatcher'
 
 export function useStyleEditor() {
   const store = useStore()
   const setSelectedElement = useSetAtom(selectedElementAtom)
-  const { applyClassChange, applyInlineStyleChange } = useStylePatcher()
+  const { applyClassChange, applyInlineStyleChange } = useContext(StylePatcherContext)
 
   // Live refs — updated via store.sub, never cause re-renders
   const liveClassNameRef = useRef(store.get(selectedElementAtom)?.className ?? '')

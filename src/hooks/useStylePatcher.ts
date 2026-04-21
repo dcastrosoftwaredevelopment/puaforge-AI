@@ -1,8 +1,18 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { createContext, useCallback, useEffect, useRef } from 'react'
 import { useStore, useSetAtom } from 'jotai'
 import { useSandpack } from '@codesandbox/sandpack-react'
 import { filesAtom } from '@/atoms'
 import { toJSXStyleObject } from '@/utils/inlineStyles'
+
+type StylePatcherValue = {
+  applyClassChange: (old: string, next: string) => void
+  applyInlineStyleChange: (old: string, next: string) => void
+}
+
+export const StylePatcherContext = createContext<StylePatcherValue>({
+  applyClassChange: () => {},
+  applyInlineStyleChange: () => {},
+})
 
 function escapeRegex(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -47,20 +57,23 @@ export function useStylePatcher() {
     })
   }, [store])
 
+  const sandpackRef = useRef(sandpack)
+  useEffect(() => { sandpackRef.current = sandpack }, [sandpack])
+
   const flushToSandpack = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
       const entries = [...pendingRef.current.entries()]
       pendingRef.current.clear()
       if (entries.length === 0) return
-      for (const [path, code] of entries) sandpack.updateFile(path, code)
+      for (const [path, code] of entries) sandpackRef.current.updateFile(path, code)
       setFiles((prev) => {
         const next = { ...prev }
         for (const [path, code] of entries) next[path] = code
         return next
       })
     }, DEBOUNCE_MS)
-  }, [sandpack, setFiles])
+  }, [setFiles])
 
   const commitUpdates = useCallback((updates: Array<[string, string]>) => {
     const next = { ...filesRef.current }
