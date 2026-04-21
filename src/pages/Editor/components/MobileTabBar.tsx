@@ -1,42 +1,32 @@
-import { Code2, Eye, MessageSquare } from 'lucide-react';
+import { Code2, Paintbrush, Layers, MessageSquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useViewMode } from '@/hooks/useViewMode';
-import { useChat } from '@/hooks/useChat';
-import { useIsMobile } from '@/hooks/useIsMobile';
+import { useMobileDrawer } from '@/hooks/useMobileDrawer';
+import { useEditorPanelTabs } from '@/hooks/useEditorPanelTabs';
+import type { MobileDrawerTab } from '@/atoms';
 
 export default function MobileTabBar() {
-  const { viewMode, setViewMode } = useViewMode();
-  const { isOpen: isChatOpen, setIsOpen: setIsChatOpen } = useChat();
-  const isMobile = useIsMobile();
   const { t } = useTranslation();
+  const { drawerOpen, drawerTab, toggleDrawer } = useMobileDrawer();
+  const { inspectMode } = useEditorPanelTabs();
 
-  const mobileTab =
-    isChatOpen && isMobile ? 'chat'
-    : viewMode === 'split' ? 'preview'
-    : viewMode;
+  const tabs: Array<{ tab: MobileDrawerTab; icon: React.ReactNode; label: string; enabled: boolean }> = [
+    { tab: 'code', icon: <Code2 size={18} />, label: t('inspect.tabCode'), enabled: true },
+    { tab: 'style', icon: <Paintbrush size={18} />, label: t('inspect.tabStyle'), enabled: true },
+    { tab: 'layers', icon: <Layers size={18} />, label: t('inspect.tabLayers'), enabled: inspectMode },
+    { tab: 'chat', icon: <MessageSquare size={18} />, label: t('viewToggle.chat'), enabled: true },
+  ];
 
   return (
-    <div className="flex md:hidden shrink-0 border-t border-border-subtle bg-bg-secondary">
-      {(
-        [
-          { tab: 'editor', icon: <Code2 size={18} />, label: t('viewToggle.code') },
-          { tab: 'preview', icon: <Eye size={18} />, label: t('viewToggle.preview') },
-          { tab: 'chat', icon: <MessageSquare size={18} />, label: t('viewToggle.chat') },
-        ] as const
-      ).map(({ tab, icon, label }) => (
+    <div className="flex shrink-0 border-t border-border-subtle bg-bg-secondary md:hidden">
+      {tabs.map(({ tab, icon, label, enabled }) => (
         <button
           key={tab}
-          onClick={() => {
-            if (tab === 'chat') {
-              setIsChatOpen(true);
-              setViewMode('preview');
-            } else {
-              setIsChatOpen(false);
-              setViewMode(tab);
-            }
-          }}
-          className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium transition ${
-            mobileTab === tab ? 'text-vibe-blue' : 'text-text-muted hover:text-text-secondary'
+          onClick={() => enabled && toggleDrawer(tab)}
+          disabled={!enabled}
+          className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium transition ${
+            drawerOpen && drawerTab === tab ? 'text-forge-terracotta'
+            : enabled ? 'text-text-muted hover:text-text-secondary'
+            : 'text-text-muted/30 cursor-not-allowed'
           }`}
         >
           {icon}

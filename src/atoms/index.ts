@@ -218,3 +218,10 @@ export const shadowAtom = field('shadow');
 export const opacityAtom = field('opacity');
 export const overflowAtom = field('overflow');
 export const unknownClassesAtom = field('unknown');
+
+// ── Mobile bottom drawer ──────────────────────────────────────────────────────
+
+export type MobileDrawerTab = 'code' | 'style' | 'layers' | 'chat';
+export const mobileDrawerOpenAtom = atom(false);
+export const mobileDrawerHeightPctAtom = atom(55);
+export const mobileDrawerTabAtom = atom<MobileDrawerTab>('style');
