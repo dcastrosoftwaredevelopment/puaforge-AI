@@ -29,7 +29,7 @@ export function useStyleEditor() {
 
   const pendingRef = useRef<Map<string, { timer: ReturnType<typeof setTimeout>; fn: () => void }>>(new Map())
 
-  const withDebounce = useCallback((key: string, fn: () => void, delay = 300) => {
+  const withDebounce = useCallback((key: string, fn: () => void, delay = 1000) => {
     const existing = pendingRef.current.get(key)
     if (existing) clearTimeout(existing.timer)
     pendingRef.current.set(key, {

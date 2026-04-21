@@ -2,9 +2,9 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
 import { usePersistence } from '@/hooks/usePersistence'
 import { trackPageView } from '@/lib/analytics'
-import ProjectList from '@/components/home/ProjectList'
-import EditorView from '@/components/layout/EditorView'
-import Settings from '@/components/settings/Settings'
+import Home from '@/pages/Home'
+import Editor from '@/pages/Editor'
+import Settings from '@/pages/Settings'
 import Login from '@/pages/Login'
 import VerifyEmail from '@/pages/VerifyEmail'
 import EmailConfirmed from '@/pages/EmailConfirmed'
@@ -31,8 +31,8 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/email-confirmed" element={<EmailConfirmed />} />
-          <Route path="/" element={<ProjectList />} />
-          <Route path="/project/:projectId" element={<EditorView />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/project/:projectId" element={<Editor />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/billing" element={<Billing />} />

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import Sidebar, { SidebarMenuButton } from '@/components/home/Sidebar'
+import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar'
 import ApiSetupSection from './components/ApiSetupSection'
 import FeaturesSection from './components/FeaturesSection'
 

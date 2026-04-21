@@ -1,7 +1,7 @@
 import { Key, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useSettingsForm } from '@/hooks/useSettingsForm'
-import Sidebar, { SidebarMenuButton } from '@/components/home/Sidebar'
+import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar'
 import Button from '@/components/ui/Button'
 
 export default function Settings() {

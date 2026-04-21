@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useProfileForm } from '@/hooks/useProfileForm'
-import Sidebar, { SidebarMenuButton } from '@/components/home/Sidebar'
+import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar'
 import NameSection from './components/NameSection'
 import PasswordSection from './components/PasswordSection'
 

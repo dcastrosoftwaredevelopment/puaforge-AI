@@ -6,12 +6,12 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/useAuth'
 import { useProjects } from '@/hooks/useProjects'
 import { useProjectActions } from '@/hooks/useProjectActions'
-import Sidebar, { SidebarMenuButton } from '@/components/home/Sidebar'
-import EmptyState from '@/components/home/EmptyState'
-import ProjectCard from '@/components/home/ProjectCard'
+import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar'
+import EmptyState from './components/EmptyState'
+import ProjectCard from './components/ProjectCard'
 import Button from '@/components/ui/Button'
 
-export default function ProjectList() {
+export default function Home() {
   const { projects } = useProjects()
   const { createProject, openProject, deleteProject, fetchPublishedIds } = useProjectActions()
   const { token } = useAuth()

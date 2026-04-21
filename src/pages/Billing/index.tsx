@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Zap, Rocket, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import Sidebar, { SidebarMenuButton } from '@/components/home/Sidebar'
+import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar'
 import { useUsage, usePlansConfig, formatBytes } from '@/hooks/useUsage'
 import { track } from '@/lib/analytics'
 import UsageSection from './components/UsageSection'

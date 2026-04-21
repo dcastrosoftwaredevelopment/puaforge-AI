@@ -11,17 +11,17 @@ import { useDraft } from '@/hooks/useDraft'
 import { extractDependencies } from '@/services/fileParser'
 import { TAILWIND_HTML, buildPackageJson } from '@/utils/defaultFiles'
 import { FORGE_INSPECT_SOURCE, FORGE_ENTRY_SOURCE } from '@/utils/inspectFiles'
-import EditorHeader from '@/components/layout/EditorHeader'
-import SandpackContent from '@/components/layout/SandpackContent'
-import ResizeHandle from '@/components/layout/ResizeHandle'
-import MobileTabBar from './MobileTabBar'
+import EditorHeader from './components/EditorHeader'
+import SandpackContent from './components/SandpackContent'
+import ResizeHandle from './components/ResizeHandle'
+import MobileTabBar from './components/MobileTabBar'
 import FloatingChat, { DockedChat, MobileChatPanel } from '@/components/chat/FloatingChat'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
 const CHAT_MIN = 280
 const CHAT_MAX = 600
 
-export default function EditorView() {
+export default function Editor() {
   const { projectId } = useParams<{ projectId: string }>()
   const projectReady = useProjectLoader(projectId)
   const { files, setFiles, deps, setDeps } = useFiles()
