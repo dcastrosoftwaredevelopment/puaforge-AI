@@ -3,11 +3,16 @@ import { RotateCcw, Trash2, Pencil, Check, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '@/utils/dateUtils';
 
-export default function CheckpointRow({ checkpoint, onRestore, onDelete, onRename }: {
-  checkpoint: { id: string; name: string; files: Record<string, string>; createdAt: number }
-  onRestore: (id: string) => void
-  onDelete: (id: string) => void
-  onRename: (id: string, name: string) => void
+export default function CheckpointRow({
+  checkpoint,
+  onRestore,
+  onDelete,
+  onRename,
+}: {
+  checkpoint: { id: string; name: string; files: Record<string, string>; createdAt: number };
+  onRestore: (id: string) => void;
+  onDelete: (id: string) => void;
+  onRename: (id: string, name: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
@@ -46,10 +51,16 @@ export default function CheckpointRow({ checkpoint, onRestore, onDelete, onRenam
               className="flex-1 min-w-0 text-xs bg-bg-elevated border border-border-default rounded px-1.5 py-0.5 text-text-primary outline-none focus:border-accent"
               autoFocus
             />
-            <button onClick={confirmRename} className="p-0.5 text-success hover:text-vibe-blue transition cursor-pointer">
+            <button
+              onClick={confirmRename}
+              className="p-0.5 text-success hover:text-vibe-blue transition cursor-pointer"
+            >
               <Check size={11} />
             </button>
-            <button onClick={() => setEditing(false)} className="p-0.5 text-text-muted hover:text-text-primary transition cursor-pointer">
+            <button
+              onClick={() => setEditing(false)}
+              className="p-0.5 text-text-muted hover:text-text-primary transition cursor-pointer"
+            >
               <X size={11} />
             </button>
           </div>

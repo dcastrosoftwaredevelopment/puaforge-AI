@@ -31,10 +31,26 @@ export function useLayersPanel() {
   const toggleCollapse = useCallback((id: string) => {
     setCollapsed((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) { next.delete(id); } else { next.add(id); }
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
   }, []);
 
-  return { domTree, selectedElement, search, setSearch, collapsed, toggleCollapse, selectById, goToStyleById, hoverById, clearHover, refreshTree };
+  return {
+    domTree,
+    selectedElement,
+    search,
+    setSearch,
+    collapsed,
+    toggleCollapse,
+    selectById,
+    goToStyleById,
+    hoverById,
+    clearHover,
+    refreshTree,
+  };
 }

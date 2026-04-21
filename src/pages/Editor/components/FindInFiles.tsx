@@ -5,11 +5,11 @@ import { useSandpack } from '@codesandbox/sandpack-react';
 import { useFiles } from '@/hooks/useFiles';
 
 interface Match {
-  file: string
-  line: number
-  preview: string
-  matchStart: number
-  matchEnd: number
+  file: string;
+  line: number;
+  preview: string;
+  matchStart: number;
+  matchEnd: number;
 }
 
 function search(files: Record<string, string>, query: string): Match[] {
@@ -38,8 +38,8 @@ function search(files: Record<string, string>, query: string): Match[] {
 }
 
 interface Props {
-  open: boolean
-  onClose: () => void
+  open: boolean;
+  onClose: () => void;
 }
 
 export default function FindInFiles({ open, onClose }: Props) {
@@ -96,9 +96,7 @@ export default function FindInFiles({ open, onClose }: Props) {
             }, {}),
           ).map(([file, matches]) => (
             <div key={file}>
-              <div className="px-3 py-1.5 text-xs font-medium text-text-muted bg-bg-primary sticky top-0">
-                {file}
-              </div>
+              <div className="px-3 py-1.5 text-xs font-medium text-text-muted bg-bg-primary sticky top-0">{file}</div>
               {matches.map((m, i) => (
                 <button
                   key={i}

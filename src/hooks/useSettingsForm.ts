@@ -10,12 +10,17 @@ export function useSettingsForm() {
   const [showKey, setShowKey] = useState(false);
   const [validated, setValidated] = useState<boolean | null>(null);
 
-  useEffect(() => { setDraft(apiKey); }, [apiKey]);
+  useEffect(() => {
+    setDraft(apiKey);
+  }, [apiKey]);
 
   const hasChanges = draft !== apiKey;
 
-  const { loading: validating, error: validationError, execute: validateKey } =
-    useApiCall<{ apiKey: string }, { valid: boolean; error?: string }>(HttpMethod.POST, '/api/settings/validate-key');
+  const {
+    loading: validating,
+    error: validationError,
+    execute: validateKey,
+  } = useApiCall<{ apiKey: string }, { valid: boolean; error?: string }>(HttpMethod.POST, '/api/settings/validate-key');
 
   const handleValidate = async () => {
     if (!draft.trim()) return;
@@ -50,10 +55,19 @@ export function useSettingsForm() {
   };
 
   return {
-    apiKey, draft, setDraft,
-    showKey, setShowKey,
-    validated, validating, validationError,
-    hasChanges, apiKeyEnabled,
-    handleValidate, handleSave, handleClear, handleToggleEnabled,
+    apiKey,
+    draft,
+    setDraft,
+    showKey,
+    setShowKey,
+    validated,
+    validating,
+    validationError,
+    hasChanges,
+    apiKeyEnabled,
+    handleValidate,
+    handleSave,
+    handleClear,
+    handleToggleEnabled,
   };
 }

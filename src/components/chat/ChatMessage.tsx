@@ -7,14 +7,13 @@ import { parseSegments } from '@/utils/messageParser';
 import CollapsibleText from './CollapsibleText';
 import CodeBlock from './CodeBlock';
 
-interface Props { message: Message }
+interface Props {
+  message: Message;
+}
 
 function ChatMessage({ message }: Props) {
   const isUser = message.role === 'user';
-  const segments = useMemo(
-    () => isUser ? null : parseSegments(message.content),
-    [isUser, message.content],
-  );
+  const segments = useMemo(() => (isUser ? null : parseSegments(message.content)), [isUser, message.content]);
 
   return (
     <div className={`flex gap-2.5 ${isUser ? 'flex-row-reverse' : ''}`}>
@@ -52,14 +51,19 @@ function ChatMessage({ message }: Props) {
             {segments!.map((seg, i) =>
               seg.type === 'text' ? (
                 <CollapsibleText key={i} content={seg.content} fadeColor="var(--color-bg-secondary)">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
                     components={{
                       code: ({ children, className }) => {
                         const isBlock = !!className?.includes('language-');
                         return isBlock ? (
-                          <pre className="bg-bg-primary rounded p-2 my-1 text-[11px] font-mono text-code-muted overflow-x-auto whitespace-pre">{children}</pre>
+                          <pre className="bg-bg-primary rounded p-2 my-1 text-[11px] font-mono text-code-muted overflow-x-auto whitespace-pre">
+                            {children}
+                          </pre>
                         ) : (
-                          <code className="bg-bg-primary px-1.5 py-0.5 rounded text-xs text-text-primary font-mono">{children}</code>
+                          <code className="bg-bg-primary px-1.5 py-0.5 rounded text-xs text-text-primary font-mono">
+                            {children}
+                          </code>
                         );
                       },
                       pre: ({ children }) => <>{children}</>,
@@ -70,7 +74,7 @@ function ChatMessage({ message }: Props) {
                 </CollapsibleText>
               ) : (
                 <CodeBlock key={i} {...seg} />
-              )
+              ),
             )}
           </>
         )}

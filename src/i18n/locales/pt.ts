@@ -56,7 +56,8 @@ export const pt = {
     discardTooltip: 'Descartar rascunho e reverter para a versão salva',
     saveDraft: 'Salvar rascunho',
     discardTitle: 'Descartar rascunho',
-    discardMessage: 'Isso vai apagar todas as alterações locais não salvas e reverter o projeto para a última versão salva. Essa ação não pode ser desfeita.',
+    discardMessage:
+      'Isso vai apagar todas as alterações locais não salvas e reverter o projeto para a última versão salva. Essa ação não pode ser desfeita.',
     openChat: 'Abrir chat',
     export: 'Exportar',
     exportTooltip: 'Baixar arquivos do projeto como .zip',
@@ -98,7 +99,7 @@ export const pt = {
     title: 'Imagens do projeto',
     upload: 'Upload',
     empty: 'Faça upload de imagens para usar no seu site',
-    emptyHint: 'No chat, peça para a IA usar pelo nome.\nEx: \'usa a imagem logo como background\'',
+    emptyHint: "No chat, peça para a IA usar pelo nome.\nEx: 'usa a imagem logo como background'",
     doubleClickRename: 'Duplo-clique para renomear',
     copyToChat: 'Copiar texto para o chat',
     remove: 'Remover imagem',
@@ -115,7 +116,8 @@ export const pt = {
     changeColor: 'Alterar cor',
     editName: 'Clique para editar o nome',
     removeColor: 'Remover cor',
-    helper: 'Clique no swatch para alterar a cor. Clique no nome para renomear. A IA usará estas cores automaticamente.',
+    helper:
+      'Clique no swatch para alterar a cor. Clique no nome para renomear. A IA usará estas cores automaticamente.',
   },
 
   publish: {
@@ -158,7 +160,8 @@ export const pt = {
     toFloating: 'Modo flutuante',
     toDocked: 'Fixar no painel',
     clearTitle: 'Limpar conversa',
-    clearMessage: 'Isso vai apagar todo o histórico de mensagens e resetar o código para o estado inicial. Esta ação não pode ser desfeita.',
+    clearMessage:
+      'Isso vai apagar todo o histórico de mensagens e resetar o código para o estado inicial. Esta ação não pode ser desfeita.',
     clear: 'Limpar',
     cancel: 'Cancelar',
     shiftEnter: 'Shift+Enter para nova linha',
@@ -190,8 +193,10 @@ export const pt = {
     title: 'Configurações',
     subtitle: 'Gerencie as configurações da plataforma',
     apiKeySection: 'Claude API Key',
-    apiKeyDescription: 'Configure sua chave da API do Claude para usar a plataforma.\nA chave é necessária para gerar código e listar os modelos disponíveis.',
-    apiKeyDisabledWarning: 'Chave desabilitada. A geração de código e listagem de modelos não funcionarão até habilitar novamente.',
+    apiKeyDescription:
+      'Configure sua chave da API do Claude para usar a plataforma.\nA chave é necessária para gerar código e listar os modelos disponíveis.',
+    apiKeyDisabledWarning:
+      'Chave desabilitada. A geração de código e listagem de modelos não funcionarão até habilitar novamente.',
     apiKeyPlaceholder: 'sk-ant-api03-...',
     apiKeyValid: 'Chave válida',
     apiKeyInvalid: 'Chave inválida',
@@ -315,7 +320,8 @@ export const pt = {
     currentUsage: 'Uso atual',
     usageDomains: 'Domínios customizados',
     usagePublishedSites: 'URLs temporárias',
-    byokNote: 'Todos os planos utilizam sua própria chave da API Anthropic (BYOK). Os custos de IA são cobrados diretamente pela Anthropic.',
+    byokNote:
+      'Todos os planos utilizam sua própria chave da API Anthropic (BYOK). Os custos de IA são cobrados diretamente pela Anthropic.',
     plans: {
       free: 'Gratuito',
       indie: 'Indie',

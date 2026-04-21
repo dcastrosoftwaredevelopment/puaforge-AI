@@ -4,14 +4,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { ApiError } from '@/services/api';
 import ConfirmationCard from './components/ConfirmationCard';
 
-type State = 'verifying' | 'success' | 'error'
+type State = 'verifying' | 'success' | 'error';
 
 export default function EmailConfirmed() {
   const { verifyEmail } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
-  const [state, setState] = useState<State>(() => token ? 'verifying' : 'error');
+  const [state, setState] = useState<State>(() => (token ? 'verifying' : 'error'));
   const ran = useRef(false);
 
   useEffect(() => {

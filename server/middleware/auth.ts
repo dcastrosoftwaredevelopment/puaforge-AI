@@ -2,13 +2,13 @@ import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
 export interface AuthPayload {
-  userId: string
-  email: string
+  userId: string;
+  email: string;
 }
 
 declare module 'express-serve-static-core' {
   interface Request {
-    user?: AuthPayload
+    user?: AuthPayload;
   }
 }
 

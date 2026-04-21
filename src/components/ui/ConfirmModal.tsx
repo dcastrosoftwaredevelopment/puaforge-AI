@@ -4,13 +4,13 @@ import { Modal, ModalBody } from 'flowbite-react';
 import Button from '@/components/ui/Button';
 
 interface ConfirmModalProps {
-  open: boolean
-  title: string
-  message: string
-  confirmLabel?: string
-  cancelLabel?: string
-  onConfirm: () => void
-  onCancel: () => void
+  open: boolean;
+  title: string;
+  message: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  onConfirm: () => void;
+  onCancel: () => void;
 }
 
 export default function ConfirmModal({

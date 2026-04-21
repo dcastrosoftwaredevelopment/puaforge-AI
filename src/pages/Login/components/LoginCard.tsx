@@ -5,31 +5,39 @@ import { TextInput } from 'flowbite-react';
 import Button from '@/components/ui/Button';
 
 interface Props {
-  tab: 'login' | 'register'
-  switchTab: (tab: 'login' | 'register') => void
-  name: string
-  setName: (v: string) => void
-  email: string
-  setEmail: (v: string) => void
-  password: string
-  setPassword: (v: string) => void
-  loading: boolean
-  error: string | null
-  fieldErrors: Record<string, string>
-  handleSubmit: (e: React.FormEvent) => void
-  handleGoogle: (credential: string) => void
-  clearFieldError: (field: string) => void
-  setError: (msg: string) => void
+  tab: 'login' | 'register';
+  switchTab: (tab: 'login' | 'register') => void;
+  name: string;
+  setName: (v: string) => void;
+  email: string;
+  setEmail: (v: string) => void;
+  password: string;
+  setPassword: (v: string) => void;
+  loading: boolean;
+  error: string | null;
+  fieldErrors: Record<string, string>;
+  handleSubmit: (e: React.FormEvent) => void;
+  handleGoogle: (credential: string) => void;
+  clearFieldError: (field: string) => void;
+  setError: (msg: string) => void;
 }
 
 export default function LoginCard({
-  tab, switchTab,
-  name, setName,
-  email, setEmail,
-  password, setPassword,
-  loading, error, fieldErrors,
-  handleSubmit, handleGoogle,
-  clearFieldError, setError,
+  tab,
+  switchTab,
+  name,
+  setName,
+  email,
+  setEmail,
+  password,
+  setPassword,
+  loading,
+  error,
+  fieldErrors,
+  handleSubmit,
+  handleGoogle,
+  clearFieldError,
+  setError,
 }: Props) {
   const { t } = useTranslation();
   return (
@@ -57,7 +65,10 @@ export default function LoginCard({
               placeholder={t('login.namePlaceholder')}
               value={name}
               color={fieldErrors.name ? 'failure' : 'gray'}
-              onChange={(e) => { setName(e.target.value); clearFieldError('name'); }}
+              onChange={(e) => {
+                setName(e.target.value);
+                clearFieldError('name');
+              }}
             />
             {fieldErrors.name && <p className="text-xs text-red-400 mt-1 ml-1">{fieldErrors.name}</p>}
           </div>
@@ -69,7 +80,10 @@ export default function LoginCard({
             placeholder={t('login.emailPlaceholder')}
             value={email}
             color={fieldErrors.email ? 'failure' : 'gray'}
-            onChange={(e) => { setEmail(e.target.value); clearFieldError('email'); }}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              clearFieldError('email');
+            }}
           />
           {fieldErrors.email && <p className="text-xs text-red-400 mt-1 ml-1">{fieldErrors.email}</p>}
         </div>
@@ -80,7 +94,10 @@ export default function LoginCard({
             placeholder={t('login.passwordPlaceholder')}
             value={password}
             color={fieldErrors.password ? 'failure' : 'gray'}
-            onChange={(e) => { setPassword(e.target.value); clearFieldError('password'); }}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              clearFieldError('password');
+            }}
           />
           {fieldErrors.password && <p className="text-xs text-red-400 mt-1 ml-1">{fieldErrors.password}</p>}
         </div>
@@ -102,7 +119,9 @@ export default function LoginCard({
 
       <div className="flex justify-center">
         <GoogleLogin
-          onSuccess={(res) => { if (res.credential) handleGoogle(res.credential); }}
+          onSuccess={(res) => {
+            if (res.credential) handleGoogle(res.credential);
+          }}
           onError={() => setError(t('login.errors.googleGenericError'))}
           theme="filled_black"
           shape="rectangular"

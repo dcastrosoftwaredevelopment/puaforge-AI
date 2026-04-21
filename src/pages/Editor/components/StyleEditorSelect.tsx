@@ -1,4 +1,12 @@
-export default function StyleEditorSelect({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: Array<string | { label: string; value: string }> }) {
+export default function StyleEditorSelect({
+  value,
+  onChange,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: Array<string | { label: string; value: string }>;
+}) {
   return (
     <select
       value={value}
@@ -9,7 +17,11 @@ export default function StyleEditorSelect({ value, onChange, options }: { value:
       {options.map((opt) => {
         const val = typeof opt === 'string' ? opt : opt.value;
         const label = typeof opt === 'string' ? opt : opt.label;
-        return <option key={val} value={val}>{label}</option>;
+        return (
+          <option key={val} value={val}>
+            {label}
+          </option>
+        );
       })}
     </select>
   );

@@ -15,7 +15,15 @@ const EffectsSection = memo(() => {
         <StyleEditorSelect value={shadow} onChange={onShadow} options={SHADOW_CLASSES} />
       </StyleEditorRow>
       <StyleEditorRow label={t('inspect.opacity')}>
-        <input type="range" min={0} max={100} step={5} value={opacity || '100'} onChange={(e) => applyClass(`opacity-${e.target.value}`)} className="w-full accent-forge-terracotta cursor-pointer" />
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={5}
+          value={opacity || '100'}
+          onChange={(e) => applyClass(`opacity-${e.target.value}`)}
+          className="w-full accent-forge-terracotta cursor-pointer"
+        />
       </StyleEditorRow>
       <StyleEditorRow label={t('inspect.overflow')}>
         <StyleEditorSelect value={overflow} onChange={onOverflow} options={OVERFLOWS} />

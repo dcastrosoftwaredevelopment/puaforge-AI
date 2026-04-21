@@ -2,54 +2,54 @@ import Dexie, { type EntityTable } from 'dexie';
 
 // Schema interfaces
 export interface DbProject {
-  id: string
-  name: string
-  createdAt: number
-  updatedAt: number
+  id: string;
+  name: string;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface DbMessage {
-  id: string
-  projectId: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: number
+  id: string;
+  projectId: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
 }
 
 export interface DbProjectFile {
-  id?: number
-  projectId: string
-  path: string
-  code: string
-  updatedAt: number
+  id?: number;
+  projectId: string;
+  path: string;
+  code: string;
+  updatedAt: number;
 }
 
 export interface DbProjectImage {
-  id: string
-  projectId: string
-  name: string
-  dataUrl: string
-  mediaType: string
-  size: number
+  id: string;
+  projectId: string;
+  name: string;
+  dataUrl: string;
+  mediaType: string;
+  size: number;
 }
 
 export interface DbCheckpoint {
-  id: string
-  projectId: string
-  name: string
-  files: Record<string, string>
-  createdAt: number
+  id: string;
+  projectId: string;
+  name: string;
+  files: Record<string, string>;
+  createdAt: number;
 }
 
 export interface DbPublishedSite {
-  projectId: string
-  html: string
-  publishedAt: number
+  projectId: string;
+  html: string;
+  publishedAt: number;
 }
 
 export interface DbSetting {
-  key: string
-  value: string
+  key: string;
+  value: string;
 }
 
 // Database definition
@@ -57,13 +57,13 @@ const DB_NAME = 'puaforge-ai';
 const DB_VERSION = 6;
 
 const db = new Dexie(DB_NAME) as Dexie & {
-  projects: EntityTable<DbProject, 'id'>
-  messages: EntityTable<DbMessage, 'id'>
-  projectFiles: EntityTable<DbProjectFile, 'id'>
-  projectImages: EntityTable<DbProjectImage, 'id'>
-  checkpoints: EntityTable<DbCheckpoint, 'id'>
-  publishedSites: EntityTable<DbPublishedSite, 'projectId'>
-  settings: EntityTable<DbSetting, 'key'>
+  projects: EntityTable<DbProject, 'id'>;
+  messages: EntityTable<DbMessage, 'id'>;
+  projectFiles: EntityTable<DbProjectFile, 'id'>;
+  projectImages: EntityTable<DbProjectImage, 'id'>;
+  checkpoints: EntityTable<DbCheckpoint, 'id'>;
+  publishedSites: EntityTable<DbPublishedSite, 'projectId'>;
+  settings: EntityTable<DbSetting, 'key'>;
 };
 
 db.version(DB_VERSION).stores({

@@ -78,7 +78,9 @@ export function useProfileForm() {
     } catch (err) {
       if (err instanceof yup.ValidationError) {
         const errors: Record<string, string> = {};
-        err.inner.forEach((e) => { if (e.path) errors[e.path] = e.message; });
+        err.inner.forEach((e) => {
+          if (e.path) errors[e.path] = e.message;
+        });
         setPasswordErrors(errors);
       } else {
         const code = err instanceof ApiError ? err.code : 'UNKNOWN';
@@ -90,12 +92,21 @@ export function useProfileForm() {
   };
 
   return {
-    name, setName, nameError, nameSaving, nameSuccess,
-    currentPassword, setCurrentPassword,
-    newPassword, setNewPassword,
-    confirmPassword, setConfirmPassword,
-    passwordErrors, setPasswordErrors,
-    passwordSaving, passwordSuccess,
+    name,
+    setName,
+    nameError,
+    nameSaving,
+    nameSuccess,
+    currentPassword,
+    setCurrentPassword,
+    newPassword,
+    setNewPassword,
+    confirmPassword,
+    setConfirmPassword,
+    passwordErrors,
+    setPasswordErrors,
+    passwordSaving,
+    passwordSuccess,
     passwordError,
     handleSaveName,
     handleSavePassword,

@@ -9,8 +9,8 @@ import { requireAuth } from '../middleware/auth.js';
 const router = Router();
 
 interface PublishBody {
-  projectId: string
-  files: Record<string, string>
+  projectId: string;
+  files: Record<string, string>;
 }
 
 /**

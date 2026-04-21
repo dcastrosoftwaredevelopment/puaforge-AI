@@ -3,11 +3,11 @@ import { useTranslation } from 'react-i18next';
 import type { Project } from '@/atoms';
 
 interface ProjectCardProps {
-  project: Project
-  hasPreview: boolean
-  onOpen: () => void
-  onDelete: () => void
-  onPreview: () => void
+  project: Project;
+  hasPreview: boolean;
+  onOpen: () => void;
+  onDelete: () => void;
+  onPreview: () => void;
 }
 
 export default function ProjectCard({ project, hasPreview, onOpen, onDelete, onPreview }: ProjectCardProps) {
@@ -18,9 +18,7 @@ export default function ProjectCard({ project, hasPreview, onOpen, onDelete, onP
       onClick={onOpen}
       className="group relative bg-bg-secondary border border-border-subtle rounded-xl p-5 cursor-pointer hover:border-forge-terracotta/30 hover:bg-bg-elevated transition"
     >
-      <h3 className="text-sm font-medium text-text-primary mb-2 pr-8">
-        {project.name}
-      </h3>
+      <h3 className="text-sm font-medium text-text-primary mb-2 pr-8">{project.name}</h3>
       <p className="text-xs text-text-muted">
         {new Date(project.updatedAt).toLocaleDateString(i18n.language === 'pt' ? 'pt-BR' : 'en-US', {
           day: '2-digit',

@@ -13,7 +13,9 @@ export default function Billing() {
   const plansConfig = usePlansConfig();
   const [interested, setInterested] = useState<Record<string, boolean>>({});
 
-  useEffect(() => { track('billing_page_view'); }, []);
+  useEffect(() => {
+    track('billing_page_view');
+  }, []);
 
   function lim(n: number, unit?: 'bytes'): string {
     if (n === Infinity) return '∞';
@@ -39,9 +41,18 @@ export default function Billing() {
         { text: t('billing.features.preview'), available: true },
         { text: t('billing.features.export'), available: true },
         { text: t('billing.features.publish', { count: lim(f?.free.maxPublishedSites ?? 1) }), available: true },
-        { text: t('billing.features.domain', { count: lim(f?.free.maxCustomDomains ?? 0) }), available: (f?.free.maxCustomDomains ?? 0) > 0 },
-        { text: t('billing.features.storage', { size: lim(f?.free.maxStorageBytes ?? 0, 'bytes') }), available: (f?.free.maxStorageBytes ?? 0) > 0 },
-        { text: t('billing.features.checkpoints', { count: lim(f?.free.maxCheckpointsPerProject ?? 0) }), available: (f?.free.maxCheckpointsPerProject ?? 0) > 0 },
+        {
+          text: t('billing.features.domain', { count: lim(f?.free.maxCustomDomains ?? 0) }),
+          available: (f?.free.maxCustomDomains ?? 0) > 0,
+        },
+        {
+          text: t('billing.features.storage', { size: lim(f?.free.maxStorageBytes ?? 0, 'bytes') }),
+          available: (f?.free.maxStorageBytes ?? 0) > 0,
+        },
+        {
+          text: t('billing.features.checkpoints', { count: lim(f?.free.maxCheckpointsPerProject ?? 0) }),
+          available: (f?.free.maxCheckpointsPerProject ?? 0) > 0,
+        },
       ],
     },
     {
@@ -61,7 +72,10 @@ export default function Billing() {
         { text: t('billing.features.publish', { count: lim(f?.indie.maxPublishedSites ?? 1) }), available: true },
         { text: t('billing.features.domain', { count: lim(f?.indie.maxCustomDomains ?? 1) }), available: true },
         { text: t('billing.features.storage', { size: lim(f?.indie.maxStorageBytes ?? 0, 'bytes') }), available: true },
-        { text: t('billing.features.checkpoints', { count: lim(f?.indie.maxCheckpointsPerProject ?? 10) }), available: true },
+        {
+          text: t('billing.features.checkpoints', { count: lim(f?.indie.maxCheckpointsPerProject ?? 10) }),
+          available: true,
+        },
       ],
     },
     {
@@ -81,7 +95,10 @@ export default function Billing() {
         { text: t('billing.features.publish', { count: lim(f?.pro.maxPublishedSites ?? 5) }), available: true },
         { text: t('billing.features.domains', { count: lim(f?.pro.maxCustomDomains ?? 5) }), available: true },
         { text: t('billing.features.storage', { size: lim(f?.pro.maxStorageBytes ?? 0, 'bytes') }), available: true },
-        { text: t('billing.features.checkpoints', { count: lim(f?.pro.maxCheckpointsPerProject ?? Infinity) }), available: true },
+        {
+          text: t('billing.features.checkpoints', { count: lim(f?.pro.maxCheckpointsPerProject ?? Infinity) }),
+          available: true,
+        },
       ],
     },
   ];
@@ -120,9 +137,7 @@ export default function Billing() {
             ))}
           </div>
 
-          <p className="text-xs text-text-muted text-center mt-8 leading-relaxed">
-            {t('billing.byokNote')}
-          </p>
+          <p className="text-xs text-text-muted text-center mt-8 leading-relaxed">{t('billing.byokNote')}</p>
         </div>
       </main>
     </div>

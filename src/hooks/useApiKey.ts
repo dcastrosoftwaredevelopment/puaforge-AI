@@ -9,10 +9,7 @@ export function useApiKey() {
   const [apiKeyEnabled, setApiKeyEnabled] = useAtom(apiKeyEnabledAtom);
   const token = useAtomValue(authTokenAtom);
 
-  const authHeaders = useMemo(
-    () => (token ? { Authorization: `Bearer ${token}` } : undefined),
-    [token],
-  );
+  const authHeaders = useMemo(() => (token ? { Authorization: `Bearer ${token}` } : undefined), [token]);
 
   const saveApiKey = useCallback(
     async (key: string) => {

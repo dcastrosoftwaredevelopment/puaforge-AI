@@ -4,12 +4,12 @@ import { TextInput } from 'flowbite-react';
 import Button from '@/components/ui/Button';
 
 interface Props {
-  name: string
-  setName: (v: string) => void
-  nameError: string
-  nameSaving: boolean
-  nameSuccess: boolean
-  handleSaveName: (e: React.FormEvent) => void
+  name: string;
+  setName: (v: string) => void;
+  nameError: string;
+  nameSaving: boolean;
+  nameSuccess: boolean;
+  handleSaveName: (e: React.FormEvent) => void;
 }
 
 export default function NameSection({ name, setName, nameError, nameSaving, nameSuccess, handleSaveName }: Props) {

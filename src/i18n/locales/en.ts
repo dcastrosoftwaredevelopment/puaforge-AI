@@ -56,7 +56,8 @@ export const en = {
     discardTooltip: 'Discard draft and revert to saved version',
     saveDraft: 'Save draft',
     discardTitle: 'Discard draft',
-    discardMessage: 'This will delete all unsaved local changes and revert the project to the last saved version. This action cannot be undone.',
+    discardMessage:
+      'This will delete all unsaved local changes and revert the project to the last saved version. This action cannot be undone.',
     openChat: 'Open chat',
     export: 'Export',
     exportTooltip: 'Download project files as .zip',
@@ -98,7 +99,7 @@ export const en = {
     title: 'Project images',
     upload: 'Upload',
     empty: 'Upload images to use on your site',
-    emptyHint: 'In the chat, ask the AI to use them by name.\nEx: \'use the logo image as background\'',
+    emptyHint: "In the chat, ask the AI to use them by name.\nEx: 'use the logo image as background'",
     doubleClickRename: 'Double-click to rename',
     copyToChat: 'Copy text for chat',
     remove: 'Remove image',
@@ -115,7 +116,8 @@ export const en = {
     changeColor: 'Change color',
     editName: 'Click to edit name',
     removeColor: 'Remove color',
-    helper: 'Click the swatch to change the color. Click the name to rename. The AI will use these colors automatically.',
+    helper:
+      'Click the swatch to change the color. Click the name to rename. The AI will use these colors automatically.',
   },
 
   publish: {
@@ -131,8 +133,8 @@ export const en = {
     ownConflict: 'This domain is in use in project "{{name}}". That project will lose its publication.',
     confirmOverride: 'Confirm',
     cancelOverride: 'Cancel',
-    dnsWithIp: 'Point an <A/> record in your domain\'s DNS to <ip/>.',
-    dnsWithoutIp: 'Point an <A/> record in your domain\'s DNS to this server\'s IP.',
+    dnsWithIp: "Point an <A/> record in your domain's DNS to <ip/>.",
+    dnsWithoutIp: "Point an <A/> record in your domain's DNS to this server's IP.",
     lastPublished: 'Last published',
     localPreviewLabel: 'Local preview',
     openLocal: 'Generate and open locally',
@@ -158,7 +160,8 @@ export const en = {
     toFloating: 'Floating mode',
     toDocked: 'Dock to panel',
     clearTitle: 'Clear chat',
-    clearMessage: 'This will delete all message history and reset the code to its initial state. This action cannot be undone.',
+    clearMessage:
+      'This will delete all message history and reset the code to its initial state. This action cannot be undone.',
     clear: 'Clear',
     cancel: 'Cancel',
     shiftEnter: 'Shift+Enter for new line',
@@ -190,7 +193,8 @@ export const en = {
     title: 'Settings',
     subtitle: 'Manage platform settings',
     apiKeySection: 'Claude API Key',
-    apiKeyDescription: 'Configure your Claude API key to use the platform.\nThe key is required to generate code and list available models.',
+    apiKeyDescription:
+      'Configure your Claude API key to use the platform.\nThe key is required to generate code and list available models.',
     apiKeyDisabledWarning: 'Key disabled. Code generation and model listing will not work until re-enabled.',
     apiKeyPlaceholder: 'sk-ant-api03-...',
     apiKeyValid: 'Valid key',
@@ -289,8 +293,8 @@ export const en = {
     requiredPlanSuffix: 'plan.',
     limits: {
       projects: 'You have reached the project limit for your current plan.',
-      publish: 'You\'ve reached the temporary URL limit for your plan.',
-      customDomain: 'You\'ve reached the custom domain limit for your plan.',
+      publish: "You've reached the temporary URL limit for your plan.",
+      customDomain: "You've reached the custom domain limit for your plan.",
       storage: 'You have reached the storage limit for your current plan.',
       checkpoints: 'You have reached the checkpoint limit for this project.',
       unknown: 'This feature is not available on your current plan.',

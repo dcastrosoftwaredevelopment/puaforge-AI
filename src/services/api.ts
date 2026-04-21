@@ -31,9 +31,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const isFormData = options.body instanceof FormData;
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
-    headers: isFormData
-      ? options.headers
-      : { 'Content-Type': 'application/json', ...options.headers },
+    headers: isFormData ? options.headers : { 'Content-Type': 'application/json', ...options.headers },
   });
 
   if (!res.ok) {

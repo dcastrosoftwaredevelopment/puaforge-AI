@@ -36,7 +36,10 @@ function compressImage(file: File): Promise<{ base64: string; mediaType: Message
       }
       reject(new Error('chat.imageErrors.tooLarge'));
     };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('chat.imageErrors.loadError')); };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('chat.imageErrors.loadError'));
+    };
     img.src = url;
   });
 }

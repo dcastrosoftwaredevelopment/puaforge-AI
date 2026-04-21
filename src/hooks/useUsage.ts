@@ -3,23 +3,23 @@ import { useAtomValue } from 'jotai';
 import { authTokenAtom } from '@/atoms/authAtoms';
 import { api } from '@/services/api';
 
-export type Plan = 'free' | 'indie' | 'pro'
+export type Plan = 'free' | 'indie' | 'pro';
 
 export interface UsageMetric {
-  used: number
-  limit: number // Infinity = unlimited
+  used: number;
+  limit: number; // Infinity = unlimited
 }
 
 export interface Usage {
-  projects: UsageMetric
-  customDomains: UsageMetric
-  storageBytes: UsageMetric
-  publishedSites: UsageMetric
+  projects: UsageMetric;
+  customDomains: UsageMetric;
+  storageBytes: UsageMetric;
+  publishedSites: UsageMetric;
 }
 
 export interface UserUsage {
-  plan: Plan
-  usage: Usage
+  plan: Plan;
+  usage: Usage;
 }
 
 export function useUsage() {
@@ -33,7 +33,10 @@ export function useUsage() {
     try {
       const raw = await api.get<UserUsage>('/api/user/usage', { Authorization: `Bearer ${token}` });
       // Deserialize -1 sentinel back to Infinity
-      const deserialize = (m: UsageMetric): UsageMetric => ({ used: m.used, limit: m.limit === -1 ? Infinity : m.limit });
+      const deserialize = (m: UsageMetric): UsageMetric => ({
+        used: m.used,
+        limit: m.limit === -1 ? Infinity : m.limit,
+      });
       const result: UserUsage = {
         plan: raw.plan,
         usage: {
@@ -51,20 +54,22 @@ export function useUsage() {
     }
   }, [token]);
 
-  useEffect(() => { void fetch(); }, [fetch]);
+  useEffect(() => {
+    void fetch();
+  }, [fetch]);
 
   return { data, loading, refetch: fetch };
 }
 
 export interface PlanLimits {
-  maxProjects: number
-  maxCustomDomains: number
-  maxStorageBytes: number
-  maxCheckpointsPerProject: number
-  maxPublishedSites: number
+  maxProjects: number;
+  maxCustomDomains: number;
+  maxStorageBytes: number;
+  maxCheckpointsPerProject: number;
+  maxPublishedSites: number;
 }
 
-export type PlansConfig = Record<'free' | 'indie' | 'pro', PlanLimits>
+export type PlansConfig = Record<'free' | 'indie' | 'pro', PlanLimits>;
 
 function deserializeLimits(raw: PlanLimits): PlanLimits {
   const inf = (n: number) => (n === -1 ? Infinity : n);
@@ -82,13 +87,10 @@ export function usePlansConfig() {
   const [plans, setPlans] = useState<PlansConfig | null>(null);
 
   useEffect(() => {
-    api.get<Record<string, PlanLimits>>('/api/plans')
+    api
+      .get<Record<string, PlanLimits>>('/api/plans')
       .then((raw) => {
-        setPlans(
-          Object.fromEntries(
-            Object.entries(raw).map(([k, v]) => [k, deserializeLimits(v)]),
-          ) as PlansConfig,
-        );
+        setPlans(Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, deserializeLimits(v)])) as PlansConfig);
       })
       .catch(() => {});
   }, []);

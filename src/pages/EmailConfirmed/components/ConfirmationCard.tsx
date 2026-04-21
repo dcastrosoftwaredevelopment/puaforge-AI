@@ -1,13 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 
-type State = 'verifying' | 'success' | 'error'
+type State = 'verifying' | 'success' | 'error';
 
 interface Props {
-  state: State
-  email: string
-  onRequestNew: () => void
-  onBackToLogin: () => void
+  state: State;
+  email: string;
+  onRequestNew: () => void;
+  onBackToLogin: () => void;
 }
 
 export default function ConfirmationCard({ state, email, onRequestNew, onBackToLogin }: Props) {

@@ -21,9 +21,7 @@ const CodeBlock = memo(function CodeBlock({ language, filePath, code }: CodeSegm
       <div className="flex items-center justify-between px-3 py-1.5 bg-bg-secondary border-b border-border-subtle">
         <div className="flex items-center gap-2">
           <FileCode size={11} className="text-text-muted shrink-0" />
-          <span className="text-[11px] font-mono text-text-secondary truncate">
-            {filePath ?? language}
-          </span>
+          <span className="text-[11px] font-mono text-text-secondary truncate">{filePath ?? language}</span>
         </div>
         {hasMore && (
           <span className="text-[10px] text-text-muted shrink-0 ml-2 group-hover:text-vibe-blue transition-colors">

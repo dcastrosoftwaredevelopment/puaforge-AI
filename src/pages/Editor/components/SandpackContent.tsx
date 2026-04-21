@@ -50,7 +50,9 @@ export default function SandpackContent() {
   const isResponsive = device !== 'desktop';
 
   const editorFractionRef = useRef(editorFraction);
-  useLayoutEffect(() => { editorFractionRef.current = editorFraction; }, [editorFraction]);
+  useLayoutEffect(() => {
+    editorFractionRef.current = editorFraction;
+  }, [editorFraction]);
   const editorPanelRef = useRef<HTMLDivElement>(null);
   const previewPanelRef = useRef<HTMLDivElement>(null);
 
@@ -99,17 +101,14 @@ export default function SandpackContent() {
           </div>
           <div className="relative flex flex-1 min-h-0">
             {showExplorer && <SandpackFileExplorer />}
-            <SandpackCodeEditor
-              showTabs
-              closableTabs
-              showLineNumbers
-              showInlineErrors
-            />
+            <SandpackCodeEditor showTabs closableTabs showLineNumbers showInlineErrors />
             <FindInFiles key={String(findOpen)} open={findOpen} onClose={() => setFindOpen(false)} />
           </div>
         </div>
         {editorPanelMode === 'style' && (
-          <div className={`flex-1 min-h-0 overflow-hidden${!selectedElement ? ' pointer-events-none opacity-40 select-none' : ''}`}>
+          <div
+            className={`flex-1 min-h-0 overflow-hidden${!selectedElement ? ' pointer-events-none opacity-40 select-none' : ''}`}
+          >
             <StyleEditor />
           </div>
         )}
@@ -130,17 +129,14 @@ export default function SandpackContent() {
         style={isSplit ? { width: `${(1 - editorFraction) * 100}%` } : showPreview ? { flex: 1 } : undefined}
       >
         <div
-          className={`relative ${isResponsive
-            ? 'h-full border-x border-border-subtle transition-all duration-300 shrink-0 my-0 mx-auto'
-            : 'w-full h-full'
+          className={`relative ${
+            isResponsive
+              ? 'h-full border-x border-border-subtle transition-all duration-300 shrink-0 my-0 mx-auto'
+              : 'w-full h-full'
           }`}
           style={isResponsive ? { width: DEVICE_WIDTHS[device] } : undefined}
         >
-          <SandpackPreview
-            showNavigator
-            showRefreshButton
-            showOpenInCodeSandbox={false}
-          />
+          <SandpackPreview showNavigator showRefreshButton showOpenInCodeSandbox={false} />
           <SelectionOverlay />
         </div>
       </div>

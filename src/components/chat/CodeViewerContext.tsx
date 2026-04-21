@@ -46,12 +46,15 @@ export function CodeViewerProvider({ children }: { children: React.ReactNode }) 
   );
 }
 
-const SyntaxHighlighter = lazy(() =>
-  import('react-syntax-highlighter').then((m) => ({ default: m.Prism }))
-);
+const SyntaxHighlighter = lazy(() => import('react-syntax-highlighter').then((m) => ({ default: m.Prism })));
 
 const editorTheme: Record<string, React.CSSProperties> = {
-  'code[class*="language-"]': { color: '#e2e8f0', background: 'none', fontSize: '11.5px', fontFamily: "'JetBrains Mono', 'Fira Code', monospace" },
+  'code[class*="language-"]': {
+    color: '#e2e8f0',
+    background: 'none',
+    fontSize: '11.5px',
+    fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+  },
   'pre[class*="language-"]': { background: '#0D0D0D', margin: 0, padding: 0 },
   comment: { color: '#4b5563', fontStyle: 'italic' },
   punctuation: { color: '#94a3b8' },
@@ -75,13 +78,23 @@ const editorTheme: Record<string, React.CSSProperties> = {
 
 function CodeContent({ entry }: { entry: { language: string; code: string } }) {
   return (
-    <Suspense fallback={
-      <pre className="m-0 p-4 bg-bg-primary text-[11.5px] font-mono text-code-muted leading-relaxed whitespace-pre h-full">{entry.code}</pre>
-    }>
+    <Suspense
+      fallback={
+        <pre className="m-0 p-4 bg-bg-primary text-[11.5px] font-mono text-code-muted leading-relaxed whitespace-pre h-full">
+          {entry.code}
+        </pre>
+      }
+    >
       <SyntaxHighlighter
         language={entry.language || 'tsx'}
         style={editorTheme}
-        customStyle={{ margin: 0, padding: '16px', background: 'var(--color-bg-primary)', fontSize: '11.5px', minHeight: '100%' }}
+        customStyle={{
+          margin: 0,
+          padding: '16px',
+          background: 'var(--color-bg-primary)',
+          fontSize: '11.5px',
+          minHeight: '100%',
+        }}
         showLineNumbers
         lineNumberStyle={{ color: '#374151', minWidth: '2.5em', paddingRight: '1em', userSelect: 'none' }}
         wrapLongLines={false}

@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { ApiError } from '@/services/api';
 
-type Tab = 'login' | 'register'
-type FieldErrors = Record<string, string>
+type Tab = 'login' | 'register';
+type FieldErrors = Record<string, string>;
 
 export function useLoginForm() {
   const { login, register, loginWithGoogle } = useAuth();
@@ -61,7 +61,9 @@ export function useLoginForm() {
     } catch (err) {
       if (err instanceof yup.ValidationError) {
         const errors: FieldErrors = {};
-        err.inner.forEach((e) => { if (e.path) errors[e.path] = e.message; });
+        err.inner.forEach((e) => {
+          if (e.path) errors[e.path] = e.message;
+        });
         setFieldErrors(errors);
       }
       return false;
@@ -82,7 +84,10 @@ export function useLoginForm() {
       }
     } catch (err) {
       const code = err instanceof ApiError ? err.code : 'UNKNOWN';
-      if (code === 'ERROR_EMAIL_NOT_VERIFIED') { goToVerify(email); return; }
+      if (code === 'ERROR_EMAIL_NOT_VERIFIED') {
+        goToVerify(email);
+        return;
+      }
       setError(ERROR_MESSAGES[code] ?? t('login.errors.genericError'));
     } finally {
       setLoading(false);
@@ -102,16 +107,22 @@ export function useLoginForm() {
     }
   };
 
-  const clearFieldError = (field: string) =>
-    setFieldErrors((prev) => ({ ...prev, [field]: '' }));
+  const clearFieldError = (field: string) => setFieldErrors((prev) => ({ ...prev, [field]: '' }));
 
   return {
-    tab, switchTab,
-    name, setName,
-    email, setEmail,
-    password, setPassword,
-    loading, error, fieldErrors,
-    handleSubmit, handleGoogle,
+    tab,
+    switchTab,
+    name,
+    setName,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    loading,
+    error,
+    fieldErrors,
+    handleSubmit,
+    handleGoogle,
     clearFieldError,
     setError,
   };

@@ -1,6 +1,16 @@
 import { formatBytes, formatLimit } from '@/hooks/useUsage';
 
-export default function UsageRow({ label, used, limit, unit }: { label: string; used: number; limit: number; unit?: string }) {
+export default function UsageRow({
+  label,
+  used,
+  limit,
+  unit,
+}: {
+  label: string;
+  used: number;
+  limit: number;
+  unit?: string;
+}) {
   const isUnlimited = limit === Infinity || limit >= 1e9;
   const pct = isUnlimited ? 0 : Math.min(100, (used / limit) * 100);
   const isWarning = pct >= 80;
@@ -12,7 +22,9 @@ export default function UsageRow({ label, used, limit, unit }: { label: string; 
       <div className="flex items-center justify-between text-xs">
         <span className="text-text-secondary">{label}</span>
         <span className={`font-mono ${isWarning ? 'text-yellow-400' : 'text-text-muted'}`}>
-          {usedLabel}{!isUnlimited && ` / ${limitLabel}`}{isUnlimited && ` / ${limitLabel}`}
+          {usedLabel}
+          {!isUnlimited && ` / ${limitLabel}`}
+          {isUnlimited && ` / ${limitLabel}`}
         </span>
       </div>
       {!isUnlimited && (

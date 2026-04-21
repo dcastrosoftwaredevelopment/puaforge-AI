@@ -65,7 +65,8 @@ export async function login(req: Request, res: Response) {
   if (!user.emailVerified) {
     const verificationToken = randomUUID();
     const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    await db.update(users)
+    await db
+      .update(users)
       .set({ emailVerificationToken: verificationToken, emailVerificationExpiry: verificationExpiry })
       .where(eq(users.id, user.id));
     await sendVerificationEmail(email, verificationToken);
@@ -104,10 +105,7 @@ export async function googleAuth(req: Request, res: Response) {
     .where(or(eq(users.googleId, googleId), eq(users.email, email!)));
 
   if (!user) {
-    ;[user] = await db
-      .insert(users)
-      .values({ email: email!, name, googleId, emailVerified: true })
-      .returning();
+    [user] = await db.insert(users).values({ email: email!, name, googleId, emailVerified: true }).returning();
   } else {
     await db.update(users).set({ googleId, emailVerified: true }).where(eq(users.email, email!));
     user = { ...user, googleId, emailVerified: true };
@@ -137,7 +135,8 @@ export async function verifyEmail(req: Request, res: Response) {
     return;
   }
 
-  await db.update(users)
+  await db
+    .update(users)
     .set({ emailVerified: true, emailVerificationToken: null, emailVerificationExpiry: null })
     .where(eq(users.id, user.id));
 
@@ -167,7 +166,8 @@ export async function resendVerification(req: Request, res: Response) {
 
   const verificationToken = randomUUID();
   const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
-  await db.update(users)
+  await db
+    .update(users)
     .set({ emailVerificationToken: verificationToken, emailVerificationExpiry: verificationExpiry })
     .where(eq(users.id, user.id));
 

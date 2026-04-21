@@ -10,15 +10,18 @@ export function useEditorPanelTabs() {
   const setSelected = useSetAtom(selectedElementAtom);
   const setHovered = useSetAtom(hoveredElementAtom);
 
-  const switchTab = useCallback((mode: EditorPanelMode) => {
-    setEditorPanelMode(mode);
-    if (mode === 'code' && inspectMode) {
-      setInspectMode(false);
-      setSelected(null);
-      setHovered(null);
-      window.dispatchEvent(new CustomEvent('forge-inspect-toggle', { detail: { enabled: false } }));
-    }
-  }, [inspectMode, setEditorPanelMode, setInspectMode, setSelected, setHovered]);
+  const switchTab = useCallback(
+    (mode: EditorPanelMode) => {
+      setEditorPanelMode(mode);
+      if (mode === 'code' && inspectMode) {
+        setInspectMode(false);
+        setSelected(null);
+        setHovered(null);
+        window.dispatchEvent(new CustomEvent('forge-inspect-toggle', { detail: { enabled: false } }));
+      }
+    },
+    [inspectMode, setEditorPanelMode, setInspectMode, setSelected, setHovered],
+  );
 
   return { editorPanelMode, setEditorPanelMode: switchTab, inspectMode, selectedElement };
 }

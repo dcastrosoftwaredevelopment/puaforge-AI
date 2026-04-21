@@ -3,9 +3,21 @@ import { eq, and, asc, ne } from 'drizzle-orm';
 import multer from 'multer';
 import { db } from '../db.js';
 import { projects, messages, projectFiles, projectImages, checkpoints, publishedSites } from '../schema.js';
-import { uploadFileToPocketBase, deleteFileFromPocketBase, savePublishedSite, fetchPublishedSite } from '../services/pocketbase.js';
+import {
+  uploadFileToPocketBase,
+  deleteFileFromPocketBase,
+  savePublishedSite,
+  fetchPublishedSite,
+} from '../services/pocketbase.js';
 import { invalidateSiteCache, invalidateSubdomainCache } from '../middleware/siteServing.js';
-import { checkProjectLimit, checkDomainLimit, checkStorageLimit, checkCheckpointLimit, checkPublishAccess, PlanLimitError } from '../services/plans.js';
+import {
+  checkProjectLimit,
+  checkDomainLimit,
+  checkStorageLimit,
+  checkCheckpointLimit,
+  checkPublishAccess,
+  PlanLimitError,
+} from '../services/plans.js';
 
 // ─── Shared middleware ────────────────────────────────────────────────────────
 
@@ -15,7 +27,9 @@ export const upload = multer({ storage: multer.memoryStorage(), limits: { fileSi
 
 function handlePlanLimit(err: unknown, res: Response): boolean {
   if (err instanceof PlanLimitError) {
-    res.status(403).json({ error: err.message, upgradeRequired: true, requiredPlan: err.requiredPlan, limitType: err.limitType });
+    res
+      .status(403)
+      .json({ error: err.message, upgradeRequired: true, requiredPlan: err.requiredPlan, limitType: err.limitType });
     return true;
   }
   return false;
@@ -44,7 +58,19 @@ async function assertOwnership(projectId: string, userId: string, res: Response)
 }
 
 const SUBDOMAIN_REGEX = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/;
-const RESERVED_SUBDOMAINS = new Set(['www', 'api', 'app', 'mail', 'ftp', 'admin', 'static', 'cdn', 'status', 'blog', 'docs']);
+const RESERVED_SUBDOMAINS = new Set([
+  'www',
+  'api',
+  'app',
+  'mail',
+  'ftp',
+  'admin',
+  'static',
+  'cdn',
+  'status',
+  'blog',
+  'docs',
+]);
 
 function isValidSubdomain(slug: string): boolean {
   return SUBDOMAIN_REGEX.test(slug) && !slug.includes('--') && !RESERVED_SUBDOMAINS.has(slug);
@@ -63,10 +89,18 @@ export async function listProjects(req: Request, res: Response) {
 }
 
 export async function createProject(req: Request, res: Response) {
-  try { await checkProjectLimit(req.user!.userId); } catch (err) { if (handlePlanLimit(err, res)) return; throw err; }
+  try {
+    await checkProjectLimit(req.user!.userId);
+  } catch (err) {
+    if (handlePlanLimit(err, res)) return;
+    throw err;
+  }
 
   const { id, name, createdAt, updatedAt } = req.body as {
-    id: string; name: string; createdAt: number; updatedAt: number
+    id: string;
+    name: string;
+    createdAt: number;
+    updatedAt: number;
   };
 
   const [project] = await db
@@ -78,14 +112,17 @@ export async function createProject(req: Request, res: Response) {
 }
 
 export async function updateProject(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
   const { name } = req.body as { name: string };
-  await db.update(projects).set({ name, updatedAt: new Date() }).where(eq(projects.id, p(req, 'id')));
+  await db
+    .update(projects)
+    .set({ name, updatedAt: new Date() })
+    .where(eq(projects.id, p(req, 'id')));
   res.json({ ok: true });
 }
 
 export async function deleteProject(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
   await db.delete(projects).where(eq(projects.id, p(req, 'id')));
   res.json({ ok: true });
 }
@@ -93,7 +130,7 @@ export async function deleteProject(req: Request, res: Response) {
 // ─── Domain ───────────────────────────────────────────────────────────────────
 
 export async function getDomain(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   const [row] = await db
     .select({ customDomain: projects.customDomain })
@@ -105,7 +142,7 @@ export async function getDomain(req: Request, res: Response) {
 }
 
 export async function saveDomain(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   const { customDomain, force } = req.body as { customDomain: string | null; force?: boolean };
 
@@ -117,7 +154,12 @@ export async function saveDomain(req: Request, res: Response) {
       .limit(1);
 
     if (!current?.customDomain) {
-      try { await checkDomainLimit(req.user!.userId); } catch (err) { if (handlePlanLimit(err, res)) return; throw err; }
+      try {
+        await checkDomainLimit(req.user!.userId);
+      } catch (err) {
+        if (handlePlanLimit(err, res)) return;
+        throw err;
+      }
     }
 
     const [existing] = await db
@@ -152,14 +194,17 @@ export async function saveDomain(req: Request, res: Response) {
     }
   }
 
-  await db.update(projects).set({ customDomain: customDomain ?? null }).where(eq(projects.id, p(req, 'id')));
+  await db
+    .update(projects)
+    .set({ customDomain: customDomain ?? null })
+    .where(eq(projects.id, p(req, 'id')));
   res.json({ ok: true });
 }
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 
 export async function getPalette(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   const [row] = await db
     .select({ palette: projects.palette })
@@ -171,7 +216,7 @@ export async function getPalette(req: Request, res: Response) {
 }
 
 export async function savePalette(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   const { palette } = req.body as { palette: { id: string; name: string; value: string; locked?: boolean }[] };
   if (!Array.isArray(palette)) {
@@ -179,14 +224,17 @@ export async function savePalette(req: Request, res: Response) {
     return;
   }
 
-  await db.update(projects).set({ palette }).where(eq(projects.id, p(req, 'id')));
+  await db
+    .update(projects)
+    .set({ palette })
+    .where(eq(projects.id, p(req, 'id')));
   res.json({ ok: true });
 }
 
 // ─── Messages ─────────────────────────────────────────────────────────────────
 
 export async function getMessages(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   const rows = await db
     .select()
@@ -194,20 +242,22 @@ export async function getMessages(req: Request, res: Response) {
     .where(eq(messages.projectId, p(req, 'id')))
     .orderBy(asc(messages.createdAt));
 
-  res.json(rows.map((m) => ({
-    id: m.id,
-    role: m.role,
-    content: m.content,
-    timestamp: toMs(m.createdAt),
-    images: m.images ?? undefined,
-  })));
+  res.json(
+    rows.map((m) => ({
+      id: m.id,
+      role: m.role,
+      content: m.content,
+      timestamp: toMs(m.createdAt),
+      images: m.images ?? undefined,
+    })),
+  );
 }
 
 export async function saveMessages(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   const { msgs } = req.body as {
-    msgs: Array<{ id: string; role: string; content: string; timestamp: number; images?: unknown }>
+    msgs: Array<{ id: string; role: string; content: string; timestamp: number; images?: unknown }>;
   };
 
   await db.transaction(async (tx) => {
@@ -232,7 +282,7 @@ export async function saveMessages(req: Request, res: Response) {
 // ─── Files ─────────────────────────────────────────────────────────────────────
 
 export async function getFiles(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   const rows = await db
     .select()
@@ -245,7 +295,7 @@ export async function getFiles(req: Request, res: Response) {
 }
 
 export async function saveFiles(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   const files = req.body as Record<string, string>;
 
@@ -253,20 +303,23 @@ export async function saveFiles(req: Request, res: Response) {
     await tx.delete(projectFiles).where(eq(projectFiles.projectId, p(req, 'id')));
     const entries = Object.entries(files);
     if (entries.length > 0) {
-      await tx.insert(projectFiles).values(
-        entries.map(([path, code]) => ({ projectId: p(req, 'id'), path, code, updatedAt: new Date() })),
-      );
+      await tx
+        .insert(projectFiles)
+        .values(entries.map(([path, code]) => ({ projectId: p(req, 'id'), path, code, updatedAt: new Date() })));
     }
   });
 
-  await db.update(projects).set({ updatedAt: new Date() }).where(eq(projects.id, p(req, 'id')));
+  await db
+    .update(projects)
+    .set({ updatedAt: new Date() })
+    .where(eq(projects.id, p(req, 'id')));
   res.json({ ok: true });
 }
 
 // ─── Images ─────────────────────────────────────────────────────────────────────
 
 export async function listImages(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   const rows = await db
     .select()
@@ -277,14 +330,19 @@ export async function listImages(req: Request, res: Response) {
 }
 
 export async function uploadImage(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   if (!req.file) {
     res.status(400).json({ code: 'NO_FILE', error: 'No file provided' });
     return;
   }
 
-  try { await checkStorageLimit(req.user!.userId, req.file.size); } catch (err) { if (handlePlanLimit(err, res)) return; throw err; }
+  try {
+    await checkStorageLimit(req.user!.userId, req.file.size);
+  } catch (err) {
+    if (handlePlanLimit(err, res)) return;
+    throw err;
+  }
 
   const url = await uploadFileToPocketBase(req.file.buffer, req.file.originalname, req.file.mimetype, p(req, 'id'));
   const id = crypto.randomUUID();
@@ -302,7 +360,7 @@ export async function uploadImage(req: Request, res: Response) {
 }
 
 export async function renameImage(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   const { name } = req.body as { name: string };
   await db
@@ -314,7 +372,7 @@ export async function renameImage(req: Request, res: Response) {
 }
 
 export async function deleteImage(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   const [image] = await db
     .select({ url: projectImages.url })
@@ -334,7 +392,7 @@ export async function deleteImage(req: Request, res: Response) {
 // ─── Checkpoints ──────────────────────────────────────────────────────────────
 
 export async function listCheckpoints(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   const rows = await db
     .select()
@@ -346,12 +404,20 @@ export async function listCheckpoints(req: Request, res: Response) {
 }
 
 export async function createCheckpoint(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
-  try { await checkCheckpointLimit(req.user!.userId, p(req, 'id')); } catch (err) { if (handlePlanLimit(err, res)) return; throw err; }
+  try {
+    await checkCheckpointLimit(req.user!.userId, p(req, 'id'));
+  } catch (err) {
+    if (handlePlanLimit(err, res)) return;
+    throw err;
+  }
 
   const { id, name, files, createdAt } = req.body as {
-    id: string; name: string; files: Record<string, string>; createdAt: number
+    id: string;
+    name: string;
+    files: Record<string, string>;
+    createdAt: number;
   };
 
   await db.insert(checkpoints).values({ id, projectId: p(req, 'id'), name, files, createdAt: new Date(createdAt) });
@@ -359,7 +425,7 @@ export async function createCheckpoint(req: Request, res: Response) {
 }
 
 export async function renameCheckpoint(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   const { name } = req.body as { name: string };
   await db
@@ -371,7 +437,7 @@ export async function renameCheckpoint(req: Request, res: Response) {
 }
 
 export async function deleteCheckpoint(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   await db
     .delete(checkpoints)
@@ -397,7 +463,7 @@ export async function listPublishedIds(req: Request, res: Response) {
 }
 
 export async function getPublished(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   const [site] = await db
     .select()
@@ -421,7 +487,7 @@ export async function getPublished(req: Request, res: Response) {
 }
 
 export async function publishToDomain(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   const { html, publishedAt } = req.body as { html: string; publishedAt: number };
 
@@ -447,7 +513,7 @@ export async function publishToDomain(req: Request, res: Response) {
 }
 
 export async function publishToSubdomain(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   const [site] = await db
     .select({ subdomain: publishedSites.subdomain })
@@ -484,7 +550,7 @@ export async function publishToSubdomain(req: Request, res: Response) {
 // ─── Subdomain ────────────────────────────────────────────────────────────────
 
 export async function checkSubdomainAvailability(req: Request, res: Response) {
-  const slug = (req.query.slug as string ?? '').toLowerCase().trim();
+  const slug = ((req.query.slug as string) ?? '').toLowerCase().trim();
 
   if (!slug) {
     res.status(400).json({ code: 'MISSING_SLUG', error: 'slug is required' });
@@ -506,9 +572,9 @@ export async function checkSubdomainAvailability(req: Request, res: Response) {
 }
 
 export async function saveSubdomain(req: Request, res: Response) {
-  if (!await assertOwnership(p(req, 'id'), req.user!.userId, res)) return;
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
-  const slug = (req.body.subdomain as string ?? '').toLowerCase().trim();
+  const slug = ((req.body.subdomain as string) ?? '').toLowerCase().trim();
 
   if (!slug) {
     res.status(400).json({ code: 'MISSING_SUBDOMAIN', error: 'subdomain is required' });
@@ -527,7 +593,12 @@ export async function saveSubdomain(req: Request, res: Response) {
     .limit(1);
 
   if (!existing?.subdomain) {
-    try { await checkPublishAccess(req.user!.userId); } catch (err) { if (handlePlanLimit(err, res)) return; throw err; }
+    try {
+      await checkPublishAccess(req.user!.userId);
+    } catch (err) {
+      if (handlePlanLimit(err, res)) return;
+      throw err;
+    }
   }
 
   const [conflict] = await db

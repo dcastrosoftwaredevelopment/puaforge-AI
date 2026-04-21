@@ -5,9 +5,9 @@ import { filesAtom } from '@/atoms';
 import { toJSXStyleObject } from '@/utils/inlineStyles';
 
 type StylePatcherValue = {
-  applyClassChange: (old: string, next: string) => void
-  applyInlineStyleChange: (old: string, next: string) => void
-}
+  applyClassChange: (old: string, next: string) => void;
+  applyInlineStyleChange: (old: string, next: string) => void;
+};
 
 export const StylePatcherContext = createContext<StylePatcherValue>({
   applyClassChange: () => {},
@@ -58,7 +58,9 @@ export function useStylePatcher() {
   }, [store]);
 
   const sandpackRef = useRef(sandpack);
-  useEffect(() => { sandpackRef.current = sandpack; }, [sandpack]);
+  useEffect(() => {
+    sandpackRef.current = sandpack;
+  }, [sandpack]);
 
   const flushToSandpack = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -75,34 +77,43 @@ export function useStylePatcher() {
     }, DEBOUNCE_MS);
   }, [setFiles]);
 
-  const commitUpdates = useCallback((updates: Array<[string, string]>) => {
-    const next = { ...filesRef.current };
-    for (const [path, patched] of updates) {
-      next[path] = patched;
-      pendingRef.current.set(path, patched);
-    }
-    filesRef.current = next;
-    flushToSandpack();
-  }, [flushToSandpack]);
+  const commitUpdates = useCallback(
+    (updates: Array<[string, string]>) => {
+      const next = { ...filesRef.current };
+      for (const [path, patched] of updates) {
+        next[path] = patched;
+        pendingRef.current.set(path, patched);
+      }
+      filesRef.current = next;
+      flushToSandpack();
+    },
+    [flushToSandpack],
+  );
 
-  const applyClassChange = useCallback((oldClassName: string, newClassName: string) => {
-    const updates: Array<[string, string]> = [];
-    for (const [path, code] of Object.entries(filesRef.current)) {
-      const patched = patchCode(code, oldClassName, newClassName);
-      if (patched !== code) updates.push([path, patched]);
-    }
-    if (updates.length > 0) commitUpdates(updates);
-  }, [commitUpdates]);
+  const applyClassChange = useCallback(
+    (oldClassName: string, newClassName: string) => {
+      const updates: Array<[string, string]> = [];
+      for (const [path, code] of Object.entries(filesRef.current)) {
+        const patched = patchCode(code, oldClassName, newClassName);
+        if (patched !== code) updates.push([path, patched]);
+      }
+      if (updates.length > 0) commitUpdates(updates);
+    },
+    [commitUpdates],
+  );
 
-  const applyInlineStyleChange = useCallback((oldStyle: string, newStyle: string) => {
-    if (oldStyle === newStyle) return;
-    const updates: Array<[string, string]> = [];
-    for (const [path, code] of Object.entries(filesRef.current)) {
-      const patched = patchInlineStyle(code, oldStyle, newStyle);
-      if (patched !== code) updates.push([path, patched]);
-    }
-    if (updates.length > 0) commitUpdates(updates);
-  }, [commitUpdates]);
+  const applyInlineStyleChange = useCallback(
+    (oldStyle: string, newStyle: string) => {
+      if (oldStyle === newStyle) return;
+      const updates: Array<[string, string]> = [];
+      for (const [path, code] of Object.entries(filesRef.current)) {
+        const patched = patchInlineStyle(code, oldStyle, newStyle);
+        if (patched !== code) updates.push([path, patched]);
+      }
+      if (updates.length > 0) commitUpdates(updates);
+    },
+    [commitUpdates],
+  );
 
   return { applyClassChange, applyInlineStyleChange };
 }

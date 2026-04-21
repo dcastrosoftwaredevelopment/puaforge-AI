@@ -22,19 +22,22 @@ export class PlanLimitUIError extends Error {
 export function usePlanLimit() {
   const setUpgradePrompt = useSetAtom(upgradePromptAtom);
 
-  return useCallback(async function withPlanLimit<T>(fn: () => Promise<T>): Promise<T | null> {
-    try {
-      return await fn();
-    } catch (err) {
-      if (err instanceof PlanLimitError) {
-        setUpgradePrompt({
-          requiredPlan: err.requiredPlan,
-          limitType: err.limitType,
-          message: '', // resolved in the modal via i18n
-        });
-        throw new PlanLimitUIError(err);
+  return useCallback(
+    async function withPlanLimit<T>(fn: () => Promise<T>): Promise<T | null> {
+      try {
+        return await fn();
+      } catch (err) {
+        if (err instanceof PlanLimitError) {
+          setUpgradePrompt({
+            requiredPlan: err.requiredPlan,
+            limitType: err.limitType,
+            message: '', // resolved in the modal via i18n
+          });
+          throw new PlanLimitUIError(err);
+        }
+        throw err;
       }
-      throw err;
-    }
-  }, [setUpgradePrompt]);
+    },
+    [setUpgradePrompt],
+  );
 }

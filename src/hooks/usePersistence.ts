@@ -18,18 +18,29 @@ import { api } from '@/services/api';
 // ─── localStorage helpers ─────────────────────────────────────────────────────
 
 function lsGet(key: string): string | null {
-  try { return localStorage.getItem(key); } catch { return null; }
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
 }
 function lsSet(key: string, value: string) {
-  try { localStorage.setItem(key, value); } catch { /* ignore */ }
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    /* ignore */
+  }
 }
 
 function useDebounced(fn: (value: string) => void, delay: number) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  return useCallback((value: string) => {
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => fn(value), delay);
-  }, [fn, delay]);
+  return useCallback(
+    (value: string) => {
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = setTimeout(() => fn(value), delay);
+    },
+    [fn, delay],
+  );
 }
 
 // ─── Hook for useProjectLoader to wait for projects to load ───────────────────
@@ -40,7 +51,10 @@ export function waitForPersist() {
 }
 
 interface ApiProject {
-  id: string; name: string; createdAt: number; updatedAt: number
+  id: string;
+  name: string;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export function usePersistence() {
@@ -83,7 +97,9 @@ export function usePersistence() {
         // Projects from API (requires auth) — runs whenever token becomes available
         if (token) {
           let resolve!: () => void;
-          pendingHydration = new Promise<void>((r) => { resolve = r; });
+          pendingHydration = new Promise<void>((r) => {
+            resolve = r;
+          });
 
           const projects = await api.get<ApiProject[]>('/api/projects', {
             Authorization: `Bearer ${token}`,

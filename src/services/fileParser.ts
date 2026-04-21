@@ -14,10 +14,7 @@ function isStub(code: string): boolean {
  * Smart merge: merges new AI-generated files into existing project files.
  * Protects existing real implementations from being overwritten by stubs.
  */
-export function mergeFiles(
-  existing: Record<string, string>,
-  incoming: Record<string, string>,
-): Record<string, string> {
+export function mergeFiles(existing: Record<string, string>, incoming: Record<string, string>): Record<string, string> {
   const merged = { ...existing };
 
   for (const [path, code] of Object.entries(incoming)) {
@@ -76,7 +73,11 @@ function addMissingStubs(files: Record<string, string>): Record<string, string> 
       const resolvedPath = resolveImport(filePath, importPath);
 
       if (!result[resolvedPath]) {
-        const componentName = resolvedPath.split('/').pop()?.replace(/\.\w+$/, '') ?? 'Component';
+        const componentName =
+          resolvedPath
+            .split('/')
+            .pop()
+            ?.replace(/\.\w+$/, '') ?? 'Component';
         result[resolvedPath] = `${STUB_MARKER}
 export default function ${componentName}() {
   return (
@@ -109,9 +110,7 @@ export function extractDependencies(files: Record<string, string>): Record<strin
     while ((match = importRegex.exec(code)) !== null) {
       const specifier = match[1];
       // Get the package name (handle scoped packages like @org/pkg)
-      const pkgName = specifier.startsWith('@')
-        ? specifier.split('/').slice(0, 2).join('/')
-        : specifier.split('/')[0];
+      const pkgName = specifier.startsWith('@') ? specifier.split('/').slice(0, 2).join('/') : specifier.split('/')[0];
 
       if (!builtIn.has(pkgName) && !builtIn.has(specifier)) {
         deps[pkgName] = 'latest';

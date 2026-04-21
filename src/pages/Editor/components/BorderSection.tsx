@@ -20,7 +20,12 @@ const BorderSection = memo(() => {
       </StyleEditorRow>
       {borderWidth && borderWidth !== 'border-0' && (
         <StyleEditorRow label={t('inspect.borderColor')}>
-          <StyleEditorColorInput key={`${elementId}-bdc`} value={borderColor} onChange={(v) => applyClass(v)} prefix="border-" />
+          <StyleEditorColorInput
+            key={`${elementId}-bdc`}
+            value={borderColor}
+            onChange={(v) => applyClass(v)}
+            prefix="border-"
+          />
         </StyleEditorRow>
       )}
     </StyleEditorSection>

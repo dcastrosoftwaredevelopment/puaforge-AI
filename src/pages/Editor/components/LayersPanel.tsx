@@ -15,16 +15,16 @@ function LayerNode({
   onDoubleSelect,
   search,
 }: {
-  node: DOMNode
-  depth: number
-  selectedId: string | undefined
-  collapsed: Set<string>
-  toggleCollapse: (id: string) => void
-  onHover: (id: string) => void
-  onLeave: () => void
-  onSelect: (id: string) => void
-  onDoubleSelect: (id: string) => void
-  search: string
+  node: DOMNode;
+  depth: number;
+  selectedId: string | undefined;
+  collapsed: Set<string>;
+  toggleCollapse: (id: string) => void;
+  onHover: (id: string) => void;
+  onLeave: () => void;
+  onSelect: (id: string) => void;
+  onDoubleSelect: (id: string) => void;
+  search: string;
 }) {
   const label = `${node.tagName}${node.className ? '.' + node.className.split(' ').slice(0, 3).join('.') : ''}`;
   const isSelected = node.id === selectedId;
@@ -39,7 +39,9 @@ function LayerNode({
     <div>
       <div
         className={`flex items-center gap-1 py-0.5 px-2 cursor-pointer rounded text-xs select-none group transition ${
-          isSelected ? 'bg-forge-terracotta/10 text-forge-terracotta' : 'text-text-muted hover:bg-bg-elevated hover:text-text-secondary'
+          isSelected
+            ? 'bg-forge-terracotta/10 text-forge-terracotta'
+            : 'text-text-muted hover:bg-bg-elevated hover:text-text-secondary'
         }`}
         style={{ paddingLeft: `${8 + depth * 12}px` }}
         onMouseEnter={() => onHover(node.id)}
@@ -49,7 +51,10 @@ function LayerNode({
       >
         {hasChildren ? (
           <button
-            onClick={(e) => { e.stopPropagation(); toggleCollapse(node.id); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleCollapse(node.id);
+            }}
             className="shrink-0 text-text-muted/60 hover:text-text-muted cursor-pointer"
           >
             {isCollapsed ? <ChevronRight size={11} /> : <ChevronDown size={11} />}
@@ -84,7 +89,19 @@ function LayerNode({
 
 export default function LayersPanel() {
   const { t } = useTranslation();
-  const { domTree, selectedElement, search, setSearch, collapsed, toggleCollapse, selectById, goToStyleById, hoverById, clearHover, refreshTree } = useLayersPanel();
+  const {
+    domTree,
+    selectedElement,
+    search,
+    setSearch,
+    collapsed,
+    toggleCollapse,
+    selectById,
+    goToStyleById,
+    hoverById,
+    clearHover,
+    refreshTree,
+  } = useLayersPanel();
 
   return (
     <div className="flex flex-col h-full overflow-hidden">

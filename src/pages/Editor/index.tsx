@@ -32,9 +32,7 @@ export default function Editor() {
 
   // When files change: extract new deps from imports (skip package.json to avoid circular update)
   useEffect(() => {
-    const filesToScan = Object.fromEntries(
-      Object.entries(files).filter(([p]) => p !== '/package.json'),
-    );
+    const filesToScan = Object.fromEntries(Object.entries(files).filter(([p]) => p !== '/package.json'));
     const newDeps = extractDependencies(filesToScan);
     setDeps((prev) => {
       const hasNew = Object.keys(newDeps).some((k) => !(k in prev));
@@ -45,7 +43,7 @@ export default function Editor() {
   // When deps change: keep package.json in sync so it's visible in the editor
   useEffect(() => {
     const next = buildPackageJson(deps);
-    setFiles((prev) => prev['/package.json'] === next ? prev : { ...prev, '/package.json': next });
+    setFiles((prev) => (prev['/package.json'] === next ? prev : { ...prev, '/package.json': next }));
   }, [deps, setFiles]);
 
   const isDocked = chatMode === 'docked';
@@ -54,7 +52,9 @@ export default function Editor() {
 
   // Live width during drag — mutate DOM directly, no setState per frame
   const chatWidthRef = useRef(chatWidth);
-  useLayoutEffect(() => { chatWidthRef.current = chatWidth; }, [chatWidth]);
+  useLayoutEffect(() => {
+    chatWidthRef.current = chatWidth;
+  }, [chatWidth]);
   const chatPanelRef = useRef<HTMLDivElement>(null);
 
   const onChatResize = useCallback((delta: number) => {

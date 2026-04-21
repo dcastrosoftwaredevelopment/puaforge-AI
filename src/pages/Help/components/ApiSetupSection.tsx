@@ -16,11 +16,28 @@ export default function ApiSetupSection() {
       </div>
       <p className="text-xs text-text-secondary leading-relaxed">{t('help.apiSetup_intro')}</p>
       <div className="space-y-5">
-        <Step number={1} title={t('help.apiSetup_step1_title')} desc={t('help.apiSetup_step1_desc')} link={CONSOLE_URL} linkLabel={t('help.apiSetup_step1_link')} />
-        <Step number={2} title={t('help.apiSetup_step2_title')} desc={t('help.apiSetup_step2_desc')} link={API_KEYS_URL} linkLabel={t('help.apiSetup_step2_link')} />
+        <Step
+          number={1}
+          title={t('help.apiSetup_step1_title')}
+          desc={t('help.apiSetup_step1_desc')}
+          link={CONSOLE_URL}
+          linkLabel={t('help.apiSetup_step1_link')}
+        />
+        <Step
+          number={2}
+          title={t('help.apiSetup_step2_title')}
+          desc={t('help.apiSetup_step2_desc')}
+          link={API_KEYS_URL}
+          linkLabel={t('help.apiSetup_step2_link')}
+        />
         <Step number={3} title={t('help.apiSetup_step3_title')} desc={t('help.apiSetup_step3_desc')} />
       </div>
-      <a href={DOCS_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition">
+      <a
+        href={DOCS_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition"
+      >
         {t('help.apiSetup_docsLink')}
         <ExternalLink size={11} />
       </a>

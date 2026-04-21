@@ -41,26 +41,15 @@ export default function ImageAssets() {
 
       {images.length === 0 ? (
         <div className="text-center py-4 space-y-2">
-          <p className="text-xs text-text-muted">
-            {t('images.empty')}
-          </p>
-          <p className="text-[10px] text-text-muted/70 leading-relaxed whitespace-pre-line">
-            {t('images.emptyHint')}
-          </p>
+          <p className="text-xs text-text-muted">{t('images.empty')}</p>
+          <p className="text-[10px] text-text-muted/70 leading-relaxed whitespace-pre-line">{t('images.emptyHint')}</p>
         </div>
       ) : (
         <div className="space-y-2">
           {images.map((img) => (
-            <ImageRow
-              key={img.id}
-              img={img}
-              onRename={renameImage}
-              onRemove={removeImage}
-            />
+            <ImageRow key={img.id} img={img} onRename={renameImage} onRemove={removeImage} />
           ))}
-          <p className="text-[10px] text-text-muted/70 leading-relaxed pt-1">
-            {t('images.helper')}
-          </p>
+          <p className="text-[10px] text-text-muted/70 leading-relaxed pt-1">{t('images.helper')}</p>
         </div>
       )}
     </div>

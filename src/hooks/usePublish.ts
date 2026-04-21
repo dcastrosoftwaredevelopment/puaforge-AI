@@ -31,10 +31,7 @@ export function usePublish() {
     { html: string; publishedAt: number }
   >(HttpMethod.POST, '/api/publish');
 
-  const authHeaders = useMemo(
-    () => (token ? { Authorization: `Bearer ${token}` } : undefined),
-    [token],
-  );
+  const authHeaders = useMemo(() => (token ? { Authorization: `Bearer ${token}` } : undefined), [token]);
 
   const isPublishingToDomain = isSavingToDomain;
   const isPublishingToSubdomain = isSavingToSubdomain;
@@ -46,10 +43,11 @@ export function usePublish() {
     setDomainSaveError(null);
     setSubdomainSaveError(null);
 
-    api.get<{ publishedAt: number | null; subdomainPublishedAt: number | null; subdomain: string | null }>(
-      `/api/projects/${activeProjectId}/published`,
-      authHeaders,
-    )
+    api
+      .get<{ publishedAt: number | null; subdomainPublishedAt: number | null; subdomain: string | null }>(
+        `/api/projects/${activeProjectId}/published`,
+        authHeaders,
+      )
       .then((site) => {
         setPublishedAt(site.publishedAt ?? null);
         setSubdomainPublishedAt(site.subdomainPublishedAt ?? null);
@@ -61,9 +59,12 @@ export function usePublish() {
         setSubdomain(null);
       });
 
-    dbReady.then(() => db.publishedSites.get(activeProjectId)).then((local) => {
-      setLocalPublishedAt(local?.publishedAt ?? null);
-    }).catch(() => {});
+    dbReady
+      .then(() => db.publishedSites.get(activeProjectId))
+      .then((local) => {
+        setLocalPublishedAt(local?.publishedAt ?? null);
+      })
+      .catch(() => {});
   }, [activeProjectId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /** Publish to custom domain (production) */

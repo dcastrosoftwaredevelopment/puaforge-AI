@@ -42,8 +42,7 @@ export default function UpgradeModal() {
           <div>
             <p className="text-sm font-semibold text-text-primary">{t('upgrade.title')}</p>
             <p className="text-[11px] text-text-muted mt-0.5">
-              {t('upgrade.requiredPlanPrefix')}{' '}
-              <span className="font-semibold text-vibe-blue">{planLabel}</span>
+              {t('upgrade.requiredPlanPrefix')} <span className="font-semibold text-vibe-blue">{planLabel}</span>
               {t('upgrade.requiredPlanSuffix') ? ` ${t('upgrade.requiredPlanSuffix')}` : ''}
             </p>
           </div>
@@ -51,13 +50,12 @@ export default function UpgradeModal() {
       </div>
 
       <div className="px-5 pb-5 space-y-4">
-        <p className="text-sm text-text-secondary leading-relaxed">
-          {limitMessage}
-        </p>
+        <p className="text-sm text-text-secondary leading-relaxed">{limitMessage}</p>
         <div className="flex items-center gap-2.5 p-3 rounded-xl bg-bg-elevated border border-border-subtle">
           <div className="w-1.5 h-1.5 rounded-full bg-vibe-blue shrink-0" />
           <p className="text-xs text-text-muted leading-relaxed">
-            {t('billing.plans.' + (prompt?.requiredPlan ?? 'indie'))} — {prompt?.requiredPlan === 'indie' ? 'R$39/mês' : 'R$99/mês'}
+            {t('billing.plans.' + (prompt?.requiredPlan ?? 'indie'))} —{' '}
+            {prompt?.requiredPlan === 'indie' ? 'R$39/mês' : 'R$99/mês'}
           </p>
         </div>
         <div className="flex gap-2">
@@ -65,7 +63,10 @@ export default function UpgradeModal() {
             variant="secondary"
             size="sm"
             fullWidth
-            onClick={() => { track('upgrade_modal_dismiss', { limit_type: prompt?.limitType ?? '' }); setPrompt(null); }}
+            onClick={() => {
+              track('upgrade_modal_dismiss', { limit_type: prompt?.limitType ?? '' });
+              setPrompt(null);
+            }}
             className="text-xs"
           >
             {t('upgrade.maybeLater')}
@@ -74,7 +75,11 @@ export default function UpgradeModal() {
             variant="blue"
             size="sm"
             fullWidth
-            onClick={() => { track('upgrade_modal_see_plans', { limit_type: prompt?.limitType ?? '' }); setPrompt(null); navigate('/billing'); }}
+            onClick={() => {
+              track('upgrade_modal_see_plans', { limit_type: prompt?.limitType ?? '' });
+              setPrompt(null);
+              navigate('/billing');
+            }}
             className="gap-1.5 text-xs"
           >
             {t('upgrade.seePlans')}

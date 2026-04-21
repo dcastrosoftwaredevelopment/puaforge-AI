@@ -11,10 +11,7 @@ function serializeLimit(n: number) {
 export async function getUserUsage(req: Request, res: Response) {
   const userId = req.user!.userId;
 
-  const [, plan] = await Promise.all([
-    getOrCreateSubscription(userId),
-    getUserPlan(userId),
-  ]);
+  const [, plan] = await Promise.all([getOrCreateSubscription(userId), getUserPlan(userId)]);
 
   const limits = PLAN_LIMITS[plan];
 
@@ -57,10 +54,7 @@ export async function getCheckpointUsage(req: Request, res: Response) {
   const plan = await getUserPlan(userId);
   const limits = PLAN_LIMITS[plan];
 
-  const [{ value }] = await db
-    .select({ value: count() })
-    .from(checkpoints)
-    .where(eq(checkpoints.projectId, projectId));
+  const [{ value }] = await db.select({ value: count() }).from(checkpoints).where(eq(checkpoints.projectId, projectId));
 
   res.json({ used: value, limit: limits.maxCheckpointsPerProject });
 }

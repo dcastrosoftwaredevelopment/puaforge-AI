@@ -7,12 +7,23 @@ import PasswordSection from './components/PasswordSection';
 export default function Profile() {
   const { t } = useTranslation();
   const {
-    name, setName, nameError, nameSaving, nameSuccess, handleSaveName,
-    currentPassword, setCurrentPassword,
-    newPassword, setNewPassword,
-    confirmPassword, setConfirmPassword,
-    passwordErrors, setPasswordErrors,
-    passwordSaving, passwordSuccess, passwordError,
+    name,
+    setName,
+    nameError,
+    nameSaving,
+    nameSuccess,
+    handleSaveName,
+    currentPassword,
+    setCurrentPassword,
+    newPassword,
+    setNewPassword,
+    confirmPassword,
+    setConfirmPassword,
+    passwordErrors,
+    setPasswordErrors,
+    passwordSaving,
+    passwordSuccess,
+    passwordError,
     handleSavePassword,
   } = useProfileForm();
 

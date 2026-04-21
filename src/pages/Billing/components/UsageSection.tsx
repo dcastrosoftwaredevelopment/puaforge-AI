@@ -12,10 +12,27 @@ export default function UsageSection({ usage }: { usage: UserUsage }) {
           {usage.plan === 'free' ? t('billing.plans.free') : usage.plan === 'indie' ? 'Indie' : 'Pro'}
         </span>
       </div>
-      <UsageRow label={t('sidebar.usageProjects')} used={usage.usage.projects.used} limit={usage.usage.projects.limit} />
-      <UsageRow label={t('sidebar.usageStorage')} used={usage.usage.storageBytes.used} limit={usage.usage.storageBytes.limit} unit="bytes" />
-      <UsageRow label={t('billing.usageDomains')} used={usage.usage.customDomains.used} limit={usage.usage.customDomains.limit} />
-      <UsageRow label={t('billing.usagePublishedSites')} used={usage.usage.publishedSites.used} limit={usage.usage.publishedSites.limit} />
+      <UsageRow
+        label={t('sidebar.usageProjects')}
+        used={usage.usage.projects.used}
+        limit={usage.usage.projects.limit}
+      />
+      <UsageRow
+        label={t('sidebar.usageStorage')}
+        used={usage.usage.storageBytes.used}
+        limit={usage.usage.storageBytes.limit}
+        unit="bytes"
+      />
+      <UsageRow
+        label={t('billing.usageDomains')}
+        used={usage.usage.customDomains.used}
+        limit={usage.usage.customDomains.limit}
+      />
+      <UsageRow
+        label={t('billing.usagePublishedSites')}
+        used={usage.usage.publishedSites.used}
+        limit={usage.usage.publishedSites.limit}
+      />
     </div>
   );
 }

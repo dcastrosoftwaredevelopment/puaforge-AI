@@ -1,11 +1,17 @@
 import { ExternalLink } from 'lucide-react';
 
-export default function Step({ number, title, desc, link, linkLabel }: {
-  number: number
-  title: string
-  desc: string
-  link?: string
-  linkLabel?: string
+export default function Step({
+  number,
+  title,
+  desc,
+  link,
+  linkLabel,
+}: {
+  number: number;
+  title: string;
+  desc: string;
+  link?: string;
+  linkLabel?: string;
 }) {
   return (
     <div className="flex gap-4">

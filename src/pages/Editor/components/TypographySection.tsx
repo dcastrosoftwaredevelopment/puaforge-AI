@@ -16,10 +16,18 @@ const TypographySection = memo(() => {
   return (
     <StyleEditorSection title={t('inspect.sectionTypography')}>
       <StyleEditorRow label={t('inspect.fontSize')}>
-        <StyleEditorSelect value={fontSize} onChange={onFontSize} options={FONT_SIZES.map((s) => ({ label: s.replace('text-', ''), value: s }))} />
+        <StyleEditorSelect
+          value={fontSize}
+          onChange={onFontSize}
+          options={FONT_SIZES.map((s) => ({ label: s.replace('text-', ''), value: s }))}
+        />
       </StyleEditorRow>
       <StyleEditorRow label={t('inspect.fontWeight')}>
-        <StyleEditorSelect value={fontWeight} onChange={onFontWeight} options={FONT_WEIGHTS.map((s) => ({ label: s.replace('font-', ''), value: s }))} />
+        <StyleEditorSelect
+          value={fontWeight}
+          onChange={onFontWeight}
+          options={FONT_WEIGHTS.map((s) => ({ label: s.replace('font-', ''), value: s }))}
+        />
       </StyleEditorRow>
       <StyleEditorRow label={t('inspect.textAlign')}>
         <div className="flex gap-1">
@@ -35,7 +43,12 @@ const TypographySection = memo(() => {
         </div>
       </StyleEditorRow>
       <StyleEditorRow label={t('inspect.textColor')}>
-        <StyleEditorColorInput key={`${elementId}-tc`} value={textColor} onChange={(v) => applyClass(v)} prefix="text-" />
+        <StyleEditorColorInput
+          key={`${elementId}-tc`}
+          value={textColor}
+          onChange={(v) => applyClass(v)}
+          prefix="text-"
+        />
       </StyleEditorRow>
     </StyleEditorSection>
   );

@@ -23,7 +23,9 @@ export const userSettings = pgTable('user_settings', {
 
 export const projects = pgTable('projects', {
   id: uuid('id').primaryKey(),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
   name: varchar('name', { length: 255 }).notNull(),
   palette: jsonb('palette').$type<{ id: string; name: string; value: string; locked?: boolean }[]>(),
   customDomain: varchar('custom_domain', { length: 255 }),
@@ -33,7 +35,9 @@ export const projects = pgTable('projects', {
 
 export const messages = pgTable('messages', {
   id: uuid('id').primaryKey(),
-  projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  projectId: uuid('project_id')
+    .notNull()
+    .references(() => projects.id, { onDelete: 'cascade' }),
   role: varchar('role', { length: 20 }).notNull(),
   content: text('content').notNull(),
   images: jsonb('images'),
@@ -42,7 +46,9 @@ export const messages = pgTable('messages', {
 
 export const projectFiles = pgTable('project_files', {
   id: uuid('id').primaryKey().defaultRandom(),
-  projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  projectId: uuid('project_id')
+    .notNull()
+    .references(() => projects.id, { onDelete: 'cascade' }),
   path: text('path').notNull(),
   code: text('code').notNull(),
   updatedAt: timestamp('updated_at').notNull(),
@@ -50,7 +56,9 @@ export const projectFiles = pgTable('project_files', {
 
 export const projectImages = pgTable('project_images', {
   id: uuid('id').primaryKey(),
-  projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  projectId: uuid('project_id')
+    .notNull()
+    .references(() => projects.id, { onDelete: 'cascade' }),
   name: varchar('name', { length: 255 }).notNull(),
   url: text('url').notNull(),
   mediaType: varchar('media_type', { length: 100 }).notNull(),
@@ -59,19 +67,23 @@ export const projectImages = pgTable('project_images', {
 
 export const checkpoints = pgTable('checkpoints', {
   id: uuid('id').primaryKey(),
-  projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  projectId: uuid('project_id')
+    .notNull()
+    .references(() => projects.id, { onDelete: 'cascade' }),
   name: varchar('name', { length: 255 }).notNull(),
   files: jsonb('files').$type<Record<string, string>>().notNull(),
   createdAt: timestamp('created_at').notNull(),
 });
 
 export const publishedSites = pgTable('published_sites', {
-  projectId: uuid('project_id').primaryKey().references(() => projects.id, { onDelete: 'cascade' }),
-  pbRecordId: varchar('pb_record_id', { length: 255 }).notNull(),          // custom domain publish
-  publishedAt: timestamp('published_at').notNull(),                         // custom domain publish time
-  subdomain: varchar('subdomain', { length: 63 }).unique(),                 // claimed slug
+  projectId: uuid('project_id')
+    .primaryKey()
+    .references(() => projects.id, { onDelete: 'cascade' }),
+  pbRecordId: varchar('pb_record_id', { length: 255 }).notNull(), // custom domain publish
+  publishedAt: timestamp('published_at').notNull(), // custom domain publish time
+  subdomain: varchar('subdomain', { length: 63 }).unique(), // claimed slug
   subdomainPbRecordId: varchar('subdomain_pb_record_id', { length: 255 }), // subdomain publish
-  subdomainPublishedAt: timestamp('subdomain_published_at'),                // subdomain publish time
+  subdomainPublishedAt: timestamp('subdomain_published_at'), // subdomain publish time
 });
 
 export const subscriptions = pgTable('subscriptions', {
@@ -87,13 +99,13 @@ export const subscriptions = pgTable('subscriptions', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export type User = typeof users.$inferSelect
-export type NewUser = typeof users.$inferInsert
-export type UserSettings = typeof userSettings.$inferSelect
-export type Project = typeof projects.$inferSelect
-export type Message = typeof messages.$inferSelect
-export type ProjectFile = typeof projectFiles.$inferSelect
-export type ProjectImage = typeof projectImages.$inferSelect
-export type Checkpoint = typeof checkpoints.$inferSelect
-export type PublishedSite = typeof publishedSites.$inferSelect
-export type Subscription = typeof subscriptions.$inferSelect
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+export type UserSettings = typeof userSettings.$inferSelect;
+export type Project = typeof projects.$inferSelect;
+export type Message = typeof messages.$inferSelect;
+export type ProjectFile = typeof projectFiles.$inferSelect;
+export type ProjectImage = typeof projectImages.$inferSelect;
+export type Checkpoint = typeof checkpoints.$inferSelect;
+export type PublishedSite = typeof publishedSites.$inferSelect;
+export type Subscription = typeof subscriptions.$inferSelect;

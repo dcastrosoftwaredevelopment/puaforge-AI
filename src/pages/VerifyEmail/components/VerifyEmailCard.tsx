@@ -3,11 +3,11 @@ import { Mail, Loader2, ArrowLeft, CheckCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
-  maskedEmail: string
-  email: string
-  cooldown: number
-  resendState: 'idle' | 'loading' | 'success' | 'error'
-  handleResend: (email: string) => void
+  maskedEmail: string;
+  email: string;
+  cooldown: number;
+  resendState: 'idle' | 'loading' | 'success' | 'error';
+  handleResend: (email: string) => void;
 }
 
 export default function VerifyEmailCard({ maskedEmail, email, cooldown, resendState, handleResend }: Props) {
@@ -22,8 +22,7 @@ export default function VerifyEmailCard({ maskedEmail, email, cooldown, resendSt
       <div className="space-y-1">
         <h1 className="text-base font-semibold text-text-primary">{t('verifyEmail.title')}</h1>
         <p className="text-xs text-text-muted">
-          {t('verifyEmail.subtitle')}{' '}
-          <span className="text-text-primary font-medium">{maskedEmail}</span>
+          {t('verifyEmail.subtitle')} <span className="text-text-primary font-medium">{maskedEmail}</span>
         </p>
       </div>
 
@@ -36,9 +35,7 @@ export default function VerifyEmailCard({ maskedEmail, email, cooldown, resendSt
           {t('verifyEmail.resendSuccess')}
         </div>
       )}
-      {resendState === 'error' && (
-        <p className="text-xs text-red-400">{t('verifyEmail.resendError')}</p>
-      )}
+      {resendState === 'error' && <p className="text-xs text-red-400">{t('verifyEmail.resendError')}</p>}
 
       <button
         onClick={() => handleResend(email)}

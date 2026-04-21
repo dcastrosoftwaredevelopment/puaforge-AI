@@ -13,7 +13,13 @@ import PromptInput from './PromptInput';
 import ModelSelector from './ModelSelector';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 
-export default function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?: (e: React.PointerEvent) => void }) {
+export default function ChatPanel({
+  isDocked,
+  onDragStart,
+}: {
+  isDocked: boolean;
+  onDragStart?: (e: React.PointerEvent) => void;
+}) {
   const { messages, setMessages } = useMessages();
   const { setFiles, setDeps } = useFiles();
   const { mode: chatMode, setMode: setChatMode, setIsOpen } = useChat();
@@ -25,7 +31,10 @@ export default function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean
 
   function exportMessages() {
     const projectName = projects.find((p) => p.id === activeProjectId)?.name ?? 'projeto';
-    const slug = projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const slug = projectName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
     const now = new Date();
     const date = now.toISOString().slice(0, 10);
     const time = now.toTimeString().slice(0, 8).replace(/:/g, '-');
@@ -59,7 +68,8 @@ export default function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean
     <>
       <div
         onPointerDown={onDragStart}
-        className={`px-4 py-3 border-b border-border-subtle flex items-center justify-between select-none ${!isDocked ? 'cursor-grab active:cursor-grabbing' : ''}`}>
+        className={`px-4 py-3 border-b border-border-subtle flex items-center justify-between select-none ${!isDocked ? 'cursor-grab active:cursor-grabbing' : ''}`}
+      >
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-vibe-blue animate-pulse shadow-[0_0_6px_rgba(0,229,255,0.6)]" />
           <span className="flex items-center gap-1 text-xs">

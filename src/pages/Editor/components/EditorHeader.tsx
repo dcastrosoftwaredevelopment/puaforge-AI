@@ -28,15 +28,23 @@ export default function EditorHeader() {
   const { isDraft } = useDraft();
   const { t } = useTranslation();
   const {
-    showImages, setShowImages,
-    showCheckpoints, setShowCheckpoints,
-    showPalette, setShowPalette,
-    showMobileMenu, setShowMobileMenu,
-    showDiscardModal, setShowDiscardModal,
+    showImages,
+    setShowImages,
+    showCheckpoints,
+    setShowCheckpoints,
+    showPalette,
+    setShowPalette,
+    showMobileMenu,
+    setShowMobileMenu,
+    showDiscardModal,
+    setShowDiscardModal,
     saving,
-    panelRef, mobilePanelRef,
-    checkpointRef, mobileCheckpointRef,
-    paletteRef, mobilePaletteRef,
+    panelRef,
+    mobilePanelRef,
+    checkpointRef,
+    mobileCheckpointRef,
+    paletteRef,
+    mobilePaletteRef,
     mobileMenuRef,
     handleSave,
     handleDiscard,
@@ -68,9 +76,7 @@ export default function EditorHeader() {
                 className="flex items-center gap-1.5 p-1.5 rounded-lg text-forge-terracotta/60 hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
               >
                 <ImageIcon size={15} />
-                {images.length > 0 && (
-                  <span className="text-[10px] text-text-secondary">{images.length}</span>
-                )}
+                {images.length > 0 && <span className="text-[10px] text-text-secondary">{images.length}</span>}
               </button>
             </Tooltip>
             {showImages && (
@@ -136,7 +142,13 @@ export default function EditorHeader() {
             <>
               <div className="w-px h-4 bg-border-subtle" />
               <Tooltip
-                content={<>{t('editor.draftTooltip').replace('**Salvar**', '')}<strong className="text-text-primary">{t('common.save')}</strong>{t('editor.draftTooltip').split('**Salvar**')[1]}</>}
+                content={
+                  <>
+                    {t('editor.draftTooltip').replace('**Salvar**', '')}
+                    <strong className="text-text-primary">{t('common.save')}</strong>
+                    {t('editor.draftTooltip').split('**Salvar**')[1]}
+                  </>
+                }
                 side="bottom"
                 align="center"
                 width="w-44"
@@ -176,14 +188,15 @@ export default function EditorHeader() {
               className="relative p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
             >
               <MoreHorizontal size={16} />
-              {isDraft && (
-                <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-forge-terracotta" />
-              )}
+              {isDraft && <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-forge-terracotta" />}
             </button>
             {showMobileMenu && (
               <div className="absolute right-0 top-full mt-1 w-52 bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden p-1 space-y-0.5">
                 <button
-                  onClick={() => { setShowMobileMenu(false); setShowImages(!showImages); }}
+                  onClick={() => {
+                    setShowMobileMenu(false);
+                    setShowImages(!showImages);
+                  }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
                 >
                   <ImageIcon size={14} className="text-forge-terracotta/60" />
@@ -191,19 +204,27 @@ export default function EditorHeader() {
                   {images.length > 0 && <span className="ml-auto text-[10px] text-text-muted">{images.length}</span>}
                 </button>
                 <button
-                  onClick={() => { setShowMobileMenu(false); setShowPalette(!showPalette); }}
+                  onClick={() => {
+                    setShowMobileMenu(false);
+                    setShowPalette(!showPalette);
+                  }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
                 >
                   <Palette size={14} className="text-forge-terracotta/60" />
                   {t('editor.palette')}
                 </button>
                 <button
-                  onClick={() => { setShowMobileMenu(false); setShowCheckpoints(!showCheckpoints); }}
+                  onClick={() => {
+                    setShowMobileMenu(false);
+                    setShowCheckpoints(!showCheckpoints);
+                  }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
                 >
                   <History size={14} className="text-forge-terracotta/60" />
                   {t('editor.checkpoints')}
-                  {checkpoints.length > 0 && <span className="ml-auto text-[10px] text-text-muted">{checkpoints.length}</span>}
+                  {checkpoints.length > 0 && (
+                    <span className="ml-auto text-[10px] text-text-muted">{checkpoints.length}</span>
+                  )}
                 </button>
                 <div className="border-t border-border-subtle my-1" />
                 <ExportButton menuItem />
@@ -212,7 +233,10 @@ export default function EditorHeader() {
                   <>
                     <div className="border-t border-border-subtle my-1" />
                     <button
-                      onClick={() => { setShowMobileMenu(false); void handleSave(); }}
+                      onClick={() => {
+                        setShowMobileMenu(false);
+                        void handleSave();
+                      }}
                       disabled={saving}
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-accent hover:bg-accent/10 disabled:opacity-50 transition cursor-pointer"
                     >
@@ -220,7 +244,10 @@ export default function EditorHeader() {
                       {saving ? t('common.saving') : t('editor.saveDraft')}
                     </button>
                     <button
-                      onClick={() => { setShowMobileMenu(false); setShowDiscardModal(true); }}
+                      onClick={() => {
+                        setShowMobileMenu(false);
+                        setShowDiscardModal(true);
+                      }}
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
                     >
                       <Trash2 size={14} />
@@ -232,17 +259,26 @@ export default function EditorHeader() {
             )}
           </div>
           {showImages && (
-            <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-72 max-h-[calc(100svh-5rem)] bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-y-auto overflow-x-hidden" ref={mobilePanelRef}>
+            <div
+              className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-72 max-h-[calc(100svh-5rem)] bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-y-auto overflow-x-hidden"
+              ref={mobilePanelRef}
+            >
               <ImageAssets />
             </div>
           )}
           {showPalette && (
-            <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-64 max-h-[calc(100svh-5rem)] bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-y-auto overflow-x-hidden" ref={mobilePaletteRef}>
+            <div
+              className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-64 max-h-[calc(100svh-5rem)] bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-y-auto overflow-x-hidden"
+              ref={mobilePaletteRef}
+            >
               <ColorPalette />
             </div>
           )}
           {showCheckpoints && (
-            <div className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-80 max-h-[calc(100svh-5rem)] bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-y-auto overflow-x-hidden" ref={mobileCheckpointRef}>
+            <div
+              className="absolute right-4 top-12 w-[calc(100vw-2rem)] max-w-80 max-h-[calc(100svh-5rem)] bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-y-auto overflow-x-hidden"
+              ref={mobileCheckpointRef}
+            >
               <Checkpoints />
             </div>
           )}

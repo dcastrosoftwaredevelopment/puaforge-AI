@@ -29,15 +29,21 @@ export default function PublishButton() {
     onSubdomainSaved,
   } = usePublish();
   const { customDomain, saveDomain } = useCustomDomain();
-  const { slugInput, status, saving, saveError, handleSlugChange, saveSubdomain } = useSubdomain(subdomain, onSubdomainSaved);
+  const { slugInput, status, saving, saveError, handleSlugChange, saveSubdomain } = useSubdomain(
+    subdomain,
+    onSubdomainSaved,
+  );
   const { t, i18n } = useTranslation();
   const {
-    showPanel, setShowPanel,
-    domainInput, setDomainInput,
+    showPanel,
+    setShowPanel,
+    domainInput,
+    setDomainInput,
     savingDomain,
     domainInputError,
     domainSaved,
-    ownProjectConflict, setOwnProjectConflict,
+    ownProjectConflict,
+    setOwnProjectConflict,
     panelRef,
     handleSaveDomain,
   } = usePublishPanel(customDomain, saveDomain);
@@ -46,23 +52,40 @@ export default function PublishButton() {
 
   const formatDate = (ts: number) =>
     new Date(ts).toLocaleDateString(i18n.language === 'pt' ? 'pt-BR' : 'en-US', {
-      day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
     });
 
   const slugStatusColor = {
-    idle: 'text-text-muted', checking: 'text-text-muted', available: 'text-green-400',
-    taken: 'text-forge-terracotta', invalid: 'text-forge-terracotta', already_set: 'text-text-muted',
+    idle: 'text-text-muted',
+    checking: 'text-text-muted',
+    available: 'text-green-400',
+    taken: 'text-forge-terracotta',
+    invalid: 'text-forge-terracotta',
+    already_set: 'text-text-muted',
   }[status];
 
   const slugStatusLabel = {
-    idle: '', checking: t('publish.subdomainChecking'), available: t('publish.subdomainAvailable'),
-    taken: t('publish.subdomainTaken'), invalid: t('publish.subdomainInvalid'), already_set: '',
+    idle: '',
+    checking: t('publish.subdomainChecking'),
+    available: t('publish.subdomainAvailable'),
+    taken: t('publish.subdomainTaken'),
+    invalid: t('publish.subdomainInvalid'),
+    already_set: '',
   }[status];
 
   return (
     <div className="relative" ref={panelRef}>
       <Tooltip content={t('publish.tooltip')} side="bottom" align="right">
-        <Button variant="blue" size="xs" isLoading={isBusy} onClick={() => setShowPanel(!showPanel)} className="gap-1.5">
+        <Button
+          variant="blue"
+          size="xs"
+          isLoading={isBusy}
+          onClick={() => setShowPanel(!showPanel)}
+          className="gap-1.5"
+        >
           {isBusy ? <Loader2 size={13} className="animate-spin" /> : <Globe size={13} />}
           {t('publish.publish')}
         </Button>
@@ -71,7 +94,6 @@ export default function PublishButton() {
       {showPanel && (
         <div className="absolute right-0 top-full mt-1 w-80 bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden">
           <div className="p-3 space-y-3">
-
             {/* ── Subdomain section ── */}
             {appDomain && (
               <>
@@ -94,7 +116,9 @@ export default function PublishButton() {
                         type="text"
                         value={slugInput}
                         onChange={(e) => handleSlugChange(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === 'Enter' && status === 'available') void saveSubdomain(); }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && status === 'available') void saveSubdomain();
+                        }}
                         placeholder={subdomain ?? t('publish.subdomainPlaceholder')}
                         className="flex-1 bg-transparent px-2.5 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none font-mono min-w-0"
                         maxLength={63}
@@ -127,9 +151,20 @@ export default function PublishButton() {
                           <span className="text-[10px] text-text-muted">{formatDate(subdomainPublishedAt)}</span>
                         </div>
                       )}
-                      <Button variant="blue" size="xs" isLoading={isBusy} fullWidth onClick={() => void publishToSubdomain()} className="gap-1.5 justify-center">
+                      <Button
+                        variant="blue"
+                        size="xs"
+                        isLoading={isBusy}
+                        fullWidth
+                        onClick={() => void publishToSubdomain()}
+                        className="gap-1.5 justify-center"
+                      >
                         {isPublishingToSubdomain ? <Loader2 size={12} className="animate-spin" /> : <Globe size={12} />}
-                        {isPublishingToSubdomain ? t('publish.publishing') : subdomainPublishedAt ? t('publish.republish') : t('publish.publishNow')}
+                        {isPublishingToSubdomain
+                          ? t('publish.publishing')
+                          : subdomainPublishedAt
+                            ? t('publish.republish')
+                            : t('publish.publishNow')}
                       </Button>
                     </>
                   )}
@@ -146,12 +181,20 @@ export default function PublishButton() {
                   type="text"
                   value={domainInput}
                   onChange={(e) => setDomainInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') void handleSaveDomain(); }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') void handleSaveDomain();
+                  }}
                   placeholder={t('publish.domainPlaceholder')}
                   className="flex-1 bg-bg-elevated border border-border-subtle rounded-lg px-2.5 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-vibe-blue/40 font-mono"
                 />
                 <Button variant="secondary" size="xs" isLoading={savingDomain} onClick={() => handleSaveDomain()}>
-                  {savingDomain ? <Loader2 size={12} className="animate-spin" /> : domainSaved ? <Check size={12} className="text-vibe-blue" /> : t('publish.saveDomain')}
+                  {savingDomain ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : domainSaved ? (
+                    <Check size={12} className="text-vibe-blue" />
+                  ) : (
+                    t('publish.saveDomain')
+                  )}
                 </Button>
               </div>
               {domainInputError && <p className="text-[10px] text-forge-terracotta">{domainInputError}</p>}
@@ -171,7 +214,12 @@ export default function PublishButton() {
                     >
                       {t('publish.confirmOverride')}
                     </button>
-                    <Button variant="secondary" size="xs" onClick={() => setOwnProjectConflict(null)} className="flex-1 text-[10px]">
+                    <Button
+                      variant="secondary"
+                      size="xs"
+                      onClick={() => setOwnProjectConflict(null)}
+                      className="flex-1 text-[10px]"
+                    >
                       {t('publish.cancelOverride')}
                     </Button>
                   </div>
@@ -217,9 +265,20 @@ export default function PublishButton() {
                   <span className="text-[10px] text-text-muted">{formatDate(publishedAt)}</span>
                 </div>
               )}
-              <Button variant="secondary" size="xs" isLoading={isBusy} fullWidth onClick={() => void publish()} className="gap-1.5 justify-center">
+              <Button
+                variant="secondary"
+                size="xs"
+                isLoading={isBusy}
+                fullWidth
+                onClick={() => void publish()}
+                className="gap-1.5 justify-center"
+              >
                 {isPublishingToDomain ? <Loader2 size={12} className="animate-spin" /> : <Globe size={12} />}
-                {isPublishingToDomain ? t('publish.publishing') : publishedAt ? t('publish.republish') : t('publish.publishNow')}
+                {isPublishingToDomain
+                  ? t('publish.publishing')
+                  : publishedAt
+                    ? t('publish.republish')
+                    : t('publish.publishNow')}
               </Button>
             </div>
 
@@ -234,9 +293,20 @@ export default function PublishButton() {
                 </div>
               )}
               <div className="flex gap-1.5">
-                <Button variant="secondary" size="xs" isLoading={isPublishingLocally} fullWidth onClick={() => void publishLocally()} className="gap-1.5 justify-center">
+                <Button
+                  variant="secondary"
+                  size="xs"
+                  isLoading={isPublishingLocally}
+                  fullWidth
+                  onClick={() => void publishLocally()}
+                  className="gap-1.5 justify-center"
+                >
                   {isPublishingLocally ? <Loader2 size={12} className="animate-spin" /> : <Globe size={12} />}
-                  {isPublishingLocally ? t('publish.publishing') : localPublishedAt ? t('publish.republish') : t('publish.publishNow')}
+                  {isPublishingLocally
+                    ? t('publish.publishing')
+                    : localPublishedAt
+                      ? t('publish.republish')
+                      : t('publish.publishNow')}
                 </Button>
                 {localPublishedAt && (
                   <button
@@ -249,7 +319,6 @@ export default function PublishButton() {
                 )}
               </div>
             </div>
-
           </div>
         </div>
       )}

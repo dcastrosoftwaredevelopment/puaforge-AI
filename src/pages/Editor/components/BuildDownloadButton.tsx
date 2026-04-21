@@ -19,10 +19,14 @@ export default function BuildDownloadButton({ menuItem = false }: { menuItem?: b
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/-+$/, '');
 
-  const { loading, error, execute: build } = useApiCall<
-    { projectId: string | null; files: Record<string, string> },
-    { html: string }
-  >(HttpMethod.POST, '/api/publish');
+  const {
+    loading,
+    error,
+    execute: build,
+  } = useApiCall<{ projectId: string | null; files: Record<string, string> }, { html: string }>(
+    HttpMethod.POST,
+    '/api/publish',
+  );
 
   const handleDownload = async () => {
     const result = await build({ projectId: activeProjectId, files }, { Authorization: `Bearer ${token}` });
@@ -48,7 +52,11 @@ export default function BuildDownloadButton({ menuItem = false }: { menuItem?: b
           disabled={loading}
           className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-elevated disabled:opacity-40 transition cursor-pointer"
         >
-          {loading ? <Loader2 size={14} className="animate-spin" /> : <PackageCheck size={14} className="text-forge-terracotta/60" />}
+          {loading ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : (
+            <PackageCheck size={14} className="text-forge-terracotta/60" />
+          )}
           {t('editor.build')}
         </button>
         {error && (
@@ -64,13 +72,7 @@ export default function BuildDownloadButton({ menuItem = false }: { menuItem?: b
   return (
     <div className="flex flex-col items-end gap-1">
       <Tooltip content={t('editor.buildTooltip')} side="bottom" align="right">
-        <Button
-          variant="secondary"
-          size="xs"
-          isLoading={loading}
-          onClick={handleDownload}
-          className="gap-1.5 text-xs"
-        >
+        <Button variant="secondary" size="xs" isLoading={loading} onClick={handleDownload} className="gap-1.5 text-xs">
           {loading ? <Loader2 size={14} className="animate-spin" /> : <PackageCheck size={14} />}
           {t('editor.build')}
         </Button>

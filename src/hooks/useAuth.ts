@@ -6,12 +6,12 @@ import { apiKeyAtom, apiKeyEnabledAtom } from '@/atoms';
 import { api } from '@/services/api';
 
 interface AuthResponse {
-  token: string
-  user: AuthUser
+  token: string;
+  user: AuthUser;
 }
 
 interface NeedsVerificationResponse {
-  status: 'needs_verification'
+  status: 'needs_verification';
 }
 
 export function useAuth() {
@@ -53,20 +53,17 @@ export function useAuth() {
   );
 
   const loginWithGoogle = useCallback(
-    (credential: string) =>
-      api.post<AuthResponse>('/api/auth/google', { credential }).then(saveSession),
+    (credential: string) => api.post<AuthResponse>('/api/auth/google', { credential }).then(saveSession),
     [saveSession],
   );
 
   const verifyEmail = useCallback(
-    (token: string) =>
-      api.get<AuthResponse>(`/api/auth/verify-email?token=${token}`).then(saveSession),
+    (token: string) => api.get<AuthResponse>(`/api/auth/verify-email?token=${token}`).then(saveSession),
     [saveSession],
   );
 
   const resendVerification = useCallback(
-    (email: string) =>
-      api.post<{ status: string }>('/api/auth/resend-verification', { email }),
+    (email: string) => api.post<{ status: string }>('/api/auth/resend-verification', { email }),
     [],
   );
 

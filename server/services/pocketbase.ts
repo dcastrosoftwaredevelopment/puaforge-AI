@@ -32,7 +32,7 @@ async function getAdminToken(): Promise<string> {
     throw new Error(err?.message ?? `PocketBase auth failed: HTTP ${res.status}`);
   }
 
-  const data = await res.json() as { token: string };
+  const data = (await res.json()) as { token: string };
   cachedToken = data.token;
   // Tokens last ~7 days; refresh after 6 days
   tokenExpiresAt = Date.now() + 6 * 24 * 60 * 60 * 1000;
@@ -62,7 +62,7 @@ export async function uploadFileToPocketBase(
     throw new Error(err?.message ?? 'PocketBase upload failed');
   }
 
-  const record = await res.json() as { id: string; file: string; collectionId: string };
+  const record = (await res.json()) as { id: string; file: string; collectionId: string };
   return `${PB_PUBLIC_URL}/api/files/${record.collectionId}/${record.id}/${record.file}`;
 }
 
@@ -79,7 +79,7 @@ export async function savePublishedSite(projectId: string, html: string): Promis
     `${PB_URL}/api/collections/${PB_SITES_COLLECTION}/records?filter=(projectId="${projectId}")&perPage=1`,
     { headers: { Authorization: token } },
   );
-  const listData = await listRes.json() as { items: { id: string }[] };
+  const listData = (await listRes.json()) as { items: { id: string }[] };
   const existingId = listData.items?.[0]?.id ?? null;
 
   const formData = new FormData();
@@ -97,7 +97,7 @@ export async function savePublishedSite(projectId: string, html: string): Promis
     throw new Error(err?.message ?? 'PocketBase site save failed');
   }
 
-  const record = await res.json() as { id: string };
+  const record = (await res.json()) as { id: string };
   return record.id;
 }
 
@@ -107,13 +107,12 @@ export async function savePublishedSite(projectId: string, html: string): Promis
 export async function fetchPublishedSite(pbRecordId: string): Promise<string | null> {
   const token = await getAdminToken();
 
-  const res = await fetch(
-    `${PB_URL}/api/collections/${PB_SITES_COLLECTION}/records/${pbRecordId}`,
-    { headers: { Authorization: token } },
-  );
+  const res = await fetch(`${PB_URL}/api/collections/${PB_SITES_COLLECTION}/records/${pbRecordId}`, {
+    headers: { Authorization: token },
+  });
   if (!res.ok) return null;
 
-  const record = await res.json() as { html: string; collectionId: string; id: string };
+  const record = (await res.json()) as { html: string; collectionId: string; id: string };
   // Fetch the actual HTML file content
   const htmlUrl = `${PB_URL}/api/files/${record.collectionId}/${record.id}/${record.html}`;
   const htmlRes = await fetch(htmlUrl, { headers: { Authorization: token } });

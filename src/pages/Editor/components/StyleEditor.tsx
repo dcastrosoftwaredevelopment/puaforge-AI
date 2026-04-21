@@ -29,13 +29,25 @@ export default function StyleEditor() {
               {selectedElement.tagName}
             </span>
             <div className="ml-auto flex items-center gap-0.5 bg-bg-elevated rounded px-1 py-0.5">
-              <button onClick={() => setBreakpoint('desktop')} title={t('inspect.breakpointDesktop')} className={`p-1 rounded transition cursor-pointer ${breakpoint === 'desktop' ? 'text-forge-terracotta' : 'text-text-muted hover:text-text-secondary'}`}>
+              <button
+                onClick={() => setBreakpoint('desktop')}
+                title={t('inspect.breakpointDesktop')}
+                className={`p-1 rounded transition cursor-pointer ${breakpoint === 'desktop' ? 'text-forge-terracotta' : 'text-text-muted hover:text-text-secondary'}`}
+              >
                 <Monitor size={11} />
               </button>
-              <button onClick={() => setBreakpoint('tablet')} title={t('inspect.breakpointTablet')} className={`p-1 rounded transition cursor-pointer ${breakpoint === 'tablet' ? 'text-forge-terracotta' : 'text-text-muted hover:text-text-secondary'}`}>
+              <button
+                onClick={() => setBreakpoint('tablet')}
+                title={t('inspect.breakpointTablet')}
+                className={`p-1 rounded transition cursor-pointer ${breakpoint === 'tablet' ? 'text-forge-terracotta' : 'text-text-muted hover:text-text-secondary'}`}
+              >
                 <Tablet size={11} />
               </button>
-              <button onClick={() => setBreakpoint('mobile')} title={t('inspect.breakpointMobile')} className={`p-1 rounded transition cursor-pointer ${breakpoint === 'mobile' ? 'text-forge-terracotta' : 'text-text-muted hover:text-text-secondary'}`}>
+              <button
+                onClick={() => setBreakpoint('mobile')}
+                title={t('inspect.breakpointMobile')}
+                className={`p-1 rounded transition cursor-pointer ${breakpoint === 'mobile' ? 'text-forge-terracotta' : 'text-text-muted hover:text-text-secondary'}`}
+              >
                 <Smartphone size={11} />
               </button>
             </div>

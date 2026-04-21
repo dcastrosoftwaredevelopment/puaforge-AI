@@ -16,7 +16,11 @@ export default function Home() {
   const { createProject, openProject, deleteProject, fetchPublishedIds } = useProjectActions();
   const { token } = useAuth();
   const { t } = useTranslation();
-  interface PublishedInfo { projectId: string; subdomain: string | null; customDomain: string | null }
+  interface PublishedInfo {
+    projectId: string;
+    subdomain: string | null;
+    customDomain: string | null;
+  }
   const [publishedMap, setPublishedMap] = useState<Map<string, PublishedInfo>>(new Map());
 
   useEffect(() => {
@@ -24,16 +28,19 @@ export default function Home() {
     fetchPublishedIds().then(setPublishedMap);
   }, [token, fetchPublishedIds]);
 
-  const openPreview = useCallback((projectId: string) => {
-    const info = publishedMap.get(projectId);
-    if (!info) return;
-    const url = info.customDomain
-      ? `https://${info.customDomain}`
-      : info.subdomain
-        ? `https://${info.subdomain}.${__APP_DOMAIN__}`
-        : null;
-    if (url) window.open(url, '_blank');
-  }, [publishedMap]);
+  const openPreview = useCallback(
+    (projectId: string) => {
+      const info = publishedMap.get(projectId);
+      if (!info) return;
+      const url = info.customDomain
+        ? `https://${info.customDomain}`
+        : info.subdomain
+          ? `https://${info.subdomain}.${__APP_DOMAIN__}`
+          : null;
+      if (url) window.open(url, '_blank');
+    },
+    [publishedMap],
+  );
 
   return (
     <div className="h-screen flex bg-bg-primary">
@@ -51,9 +58,7 @@ export default function Home() {
             <div>
               <h1 className="text-xl md:text-2xl font-semibold text-text-primary">{t('projects.title')}</h1>
               <p className="text-sm text-text-muted mt-1">
-                {projects.length === 0
-                  ? t('projects.emptyHint')
-                  : t('projects.count', { count: projects.length })}
+                {projects.length === 0 ? t('projects.emptyHint') : t('projects.count', { count: projects.length })}
               </p>
             </div>
             <div className="flex items-center gap-2">

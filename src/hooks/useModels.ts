@@ -10,24 +10,27 @@ export function useModels() {
   const { effectiveApiKey } = useApiKey();
   const fetched = useRef(false);
 
-  const { loading, execute: fetchModels } = useApiCall<
-    undefined,
-    { models: { id: string; name: string }[] }
-  >(HttpMethod.GET, '/api/models');
+  const { loading, execute: fetchModels } = useApiCall<undefined, { models: { id: string; name: string }[] }>(
+    HttpMethod.GET,
+    '/api/models',
+  );
 
-  const loadModels = useCallback(async (key?: string) => {
-    const headers: Record<string, string> = {};
-    if (key) headers['X-API-Key'] = key;
+  const loadModels = useCallback(
+    async (key?: string) => {
+      const headers: Record<string, string> = {};
+      if (key) headers['X-API-Key'] = key;
 
-    const data = await fetchModels(undefined, headers);
-    if (!data) return;
+      const data = await fetchModels(undefined, headers);
+      if (!data) return;
 
-    const list = data.models || [];
-    setModels(list);
-    if (list.length > 0 && !selectedModel) {
-      setSelectedModel(list[0].id);
-    }
-  }, [fetchModels, setModels, selectedModel, setSelectedModel]);
+      const list = data.models || [];
+      setModels(list);
+      if (list.length > 0 && !selectedModel) {
+        setSelectedModel(list[0].id);
+      }
+    },
+    [fetchModels, setModels, selectedModel, setSelectedModel],
+  );
 
   useEffect(() => {
     if (fetched.current) return;

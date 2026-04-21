@@ -6,8 +6,8 @@ import { projects, publishedSites } from '../schema.js';
 import { fetchPublishedSite } from '../services/pocketbase.js';
 
 interface CachedSite {
-  html: string
-  projectId: string
+  html: string;
+  projectId: string;
 }
 
 // Cache up to 200 sites in memory, each for 5 minutes
@@ -96,11 +96,7 @@ export async function siteServingMiddleware(req: Request, res: Response, next: N
     return res.send(cached.html);
   }
 
-  const [project] = await db
-    .select({ id: projects.id })
-    .from(projects)
-    .where(eq(projects.customDomain, host))
-    .limit(1);
+  const [project] = await db.select({ id: projects.id }).from(projects).where(eq(projects.customDomain, host)).limit(1);
 
   if (!project) return next();
 

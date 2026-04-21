@@ -5,11 +5,14 @@ export const flowbiteTheme = createTheme({
     base: 'group flex items-center justify-center text-center font-medium rounded-lg relative focus:z-10 focus:outline-none transition-colors duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
     color: {
       primary: 'bg-forge-terracotta text-white hover:bg-forge-terracotta/90 border border-transparent',
-      secondary: 'bg-bg-elevated text-text-secondary border border-border-subtle hover:text-text-primary hover:bg-bg-tertiary',
+      secondary:
+        'bg-bg-elevated text-text-secondary border border-border-subtle hover:text-text-primary hover:bg-bg-tertiary',
       blue: 'bg-vibe-blue/10 text-vibe-blue border border-vibe-blue/20 hover:bg-vibe-blue/15',
-      ghost: 'bg-transparent text-text-secondary border border-transparent hover:text-text-primary hover:bg-bg-elevated',
+      ghost:
+        'bg-transparent text-text-secondary border border-transparent hover:text-text-primary hover:bg-bg-elevated',
       danger: 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20',
-      terracotta: 'bg-forge-terracotta/10 text-forge-terracotta border border-forge-terracotta/20 hover:bg-forge-terracotta/20',
+      terracotta:
+        'bg-forge-terracotta/10 text-forge-terracotta border border-forge-terracotta/20 hover:bg-forge-terracotta/20',
     },
     size: {
       xs: 'px-2 py-1 text-xs',
@@ -79,7 +82,8 @@ export const flowbiteTheme = createTheme({
   },
   textInput: {
     base: 'flex',
-    addon: 'inline-flex items-center rounded-l-lg border border-r-0 border-border-subtle bg-bg-elevated px-3 text-sm text-text-muted',
+    addon:
+      'inline-flex items-center rounded-l-lg border border-r-0 border-border-subtle bg-bg-elevated px-3 text-sm text-text-muted',
     field: {
       base: 'relative w-full',
       icon: {
@@ -173,15 +177,28 @@ export const flowbiteTheme = createTheme({
       backdrop: 'fixed inset-0 z-30 bg-black/50',
       edge: 'bottom-16',
       position: {
-        top: { on: 'left-0 right-0 top-0 w-full translate-y-0 border-b', off: 'left-0 right-0 top-0 w-full -translate-y-full border-b' },
-        right: { on: 'right-0 top-0 h-screen w-80 translate-x-0 border-l', off: 'right-0 top-0 h-screen w-80 translate-x-full border-l' },
-        bottom: { on: 'bottom-0 left-0 right-0 w-full translate-y-0 border-t', off: 'bottom-0 left-0 right-0 w-full translate-y-full border-t' },
-        left: { on: 'left-0 top-0 h-screen w-80 translate-x-0 border-r', off: 'left-0 top-0 h-screen w-80 -translate-x-full border-r' },
+        top: {
+          on: 'left-0 right-0 top-0 w-full translate-y-0 border-b',
+          off: 'left-0 right-0 top-0 w-full -translate-y-full border-b',
+        },
+        right: {
+          on: 'right-0 top-0 h-screen w-80 translate-x-0 border-l',
+          off: 'right-0 top-0 h-screen w-80 translate-x-full border-l',
+        },
+        bottom: {
+          on: 'bottom-0 left-0 right-0 w-full translate-y-0 border-t',
+          off: 'bottom-0 left-0 right-0 w-full translate-y-full border-t',
+        },
+        left: {
+          on: 'left-0 top-0 h-screen w-80 translate-x-0 border-r',
+          off: 'left-0 top-0 h-screen w-80 -translate-x-full border-r',
+        },
       },
     },
     header: {
       inner: {
-        closeButton: 'absolute end-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition',
+        closeButton:
+          'absolute end-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition',
         closeIcon: 'h-4 w-4',
         titleIcon: 'me-2.5 h-4 w-4',
         titleText: 'mb-4 inline-flex items-center text-base font-semibold text-text-primary',

@@ -9,12 +9,12 @@ export default function ColorRow({
   onUpdate,
   onRemove,
 }: {
-  id: string
-  name: string
-  value: string
-  locked?: boolean
-  onUpdate: (updates: { name?: string; value?: string }) => void
-  onRemove: () => void
+  id: string;
+  name: string;
+  value: string;
+  locked?: boolean;
+  onUpdate: (updates: { name?: string; value?: string }) => void;
+  onRemove: () => void;
 }) {
   const colorInputRef = useRef<HTMLInputElement>(null);
   const [editingName, setEditingName] = useState(false);
@@ -50,7 +50,13 @@ export default function ColorRow({
           value={nameVal}
           onChange={(e) => setNameVal(e.target.value)}
           onBlur={commitName}
-          onKeyDown={(e) => { if (e.key === 'Enter') commitName(); if (e.key === 'Escape') { setNameVal(name); setEditingName(false); } }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') commitName();
+            if (e.key === 'Escape') {
+              setNameVal(name);
+              setEditingName(false);
+            }
+          }}
           className="flex-1 bg-bg-elevated border border-border-default rounded px-1.5 py-0.5 text-xs text-text-primary focus:outline-none focus:border-accent/50"
         />
       ) : (

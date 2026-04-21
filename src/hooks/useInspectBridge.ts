@@ -29,8 +29,12 @@ export function useInspectBridge() {
   const setDomTree = useSetAtom(domTreeAtom);
   const setPanelMode = useSetAtom(editorPanelModeAtom);
 
-  useEffect(() => { sandpackRef.current = sandpack; }, [sandpack]);
-  useEffect(() => { inspectModeRef.current = inspectMode; }, [inspectMode]);
+  useEffect(() => {
+    sandpackRef.current = sandpack;
+  }, [sandpack]);
+  useEffect(() => {
+    inspectModeRef.current = inspectMode;
+  }, [inspectMode]);
 
   const post = (msg: object) => {
     let sent = false;
@@ -41,8 +45,7 @@ export function useInspectBridge() {
       }
     }
     if (!sent) {
-      document.querySelector<HTMLIFrameElement>('.preview-iframe')
-        ?.contentWindow?.postMessage(msg, '*');
+      document.querySelector<HTMLIFrameElement>('.preview-iframe')?.contentWindow?.postMessage(msg, '*');
     }
   };
 
@@ -60,7 +63,12 @@ export function useInspectBridge() {
   // Forward platform CustomEvents → iframe postMessages
   useEffect(() => {
     const onToggle = (e: Event) => post({ type: 'FORGE_INSPECT_TOGGLE', enabled: (e as CustomEvent).detail.enabled });
-    const onSelectById = (e: Event) => post({ type: 'FORGE_SELECT_BY_ID', id: (e as CustomEvent).detail.id, stayInLayers: !!(e as CustomEvent).detail.stayInLayers });
+    const onSelectById = (e: Event) =>
+      post({
+        type: 'FORGE_SELECT_BY_ID',
+        id: (e as CustomEvent).detail.id,
+        stayInLayers: !!(e as CustomEvent).detail.stayInLayers,
+      });
     const onHoverById = (e: Event) => post({ type: 'FORGE_HOVER_BY_ID', id: (e as CustomEvent).detail.id });
     const onRefreshTree = () => post({ type: 'FORGE_REFRESH_TREE' });
 
@@ -86,14 +94,26 @@ export function useInspectBridge() {
       if (type === 'FORGE_READY') {
         if (inspectModeRef.current) post({ type: 'FORGE_INSPECT_TOGGLE', enabled: true });
       } else if (type === 'FORGE_ELEMENT_SELECTED') {
-        const el: SelectedElement = { id: e.data.id, tagName: e.data.tagName, className: e.data.className, inlineStyle: e.data.inlineStyle || '', rect: e.data.rect };
+        const el: SelectedElement = {
+          id: e.data.id,
+          tagName: e.data.tagName,
+          className: e.data.className,
+          inlineStyle: e.data.inlineStyle || '',
+          rect: e.data.rect,
+        };
         setSelected(el);
         if (!e.data.stayInLayers) setPanelMode('style');
       } else if (type === 'FORGE_ELEMENT_RESIZED') {
         const rect = e.data.rect;
-        setSelected((prev) => prev ? { ...prev, rect } : null);
+        setSelected((prev) => (prev ? { ...prev, rect } : null));
       } else if (type === 'FORGE_ELEMENT_HOVERED') {
-        const el: SelectedElement = { id: e.data.id, tagName: e.data.tagName, className: e.data.className, inlineStyle: e.data.inlineStyle || '', rect: e.data.rect };
+        const el: SelectedElement = {
+          id: e.data.id,
+          tagName: e.data.tagName,
+          className: e.data.className,
+          inlineStyle: e.data.inlineStyle || '',
+          rect: e.data.rect,
+        };
         setHovered(el);
       } else if (type === 'FORGE_DOM_TREE') {
         setDomTree(e.data.tree as DOMNode[]);

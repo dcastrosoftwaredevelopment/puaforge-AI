@@ -20,7 +20,11 @@ export function useEditorHeaderDropdowns() {
 
   const handleSave = useCallback(async () => {
     setSaving(true);
-    try { await saveDraft(); } finally { setSaving(false); }
+    try {
+      await saveDraft();
+    } finally {
+      setSaving(false);
+    }
   }, [saveDraft]);
 
   const handleDiscard = useCallback(async () => {
@@ -33,15 +37,18 @@ export function useEditorHeaderDropdowns() {
     if (!showImages && !showCheckpoints && !showPalette && !showMobileMenu) return;
     function handleClick(e: MouseEvent) {
       if (showImages) {
-        const inside = panelRef.current?.contains(e.target as Node) || mobilePanelRef.current?.contains(e.target as Node);
+        const inside =
+          panelRef.current?.contains(e.target as Node) || mobilePanelRef.current?.contains(e.target as Node);
         if (!inside) setShowImages(false);
       }
       if (showCheckpoints) {
-        const inside = checkpointRef.current?.contains(e.target as Node) || mobileCheckpointRef.current?.contains(e.target as Node);
+        const inside =
+          checkpointRef.current?.contains(e.target as Node) || mobileCheckpointRef.current?.contains(e.target as Node);
         if (!inside) setShowCheckpoints(false);
       }
       if (showPalette) {
-        const inside = paletteRef.current?.contains(e.target as Node) || mobilePaletteRef.current?.contains(e.target as Node);
+        const inside =
+          paletteRef.current?.contains(e.target as Node) || mobilePaletteRef.current?.contains(e.target as Node);
         if (!inside) setShowPalette(false);
       }
       if (showMobileMenu && mobileMenuRef.current && !mobileMenuRef.current.contains(e.target as Node)) {
@@ -53,15 +60,23 @@ export function useEditorHeaderDropdowns() {
   }, [showImages, showCheckpoints, showPalette, showMobileMenu]);
 
   return {
-    showImages, setShowImages,
-    showCheckpoints, setShowCheckpoints,
-    showPalette, setShowPalette,
-    showMobileMenu, setShowMobileMenu,
-    showDiscardModal, setShowDiscardModal,
+    showImages,
+    setShowImages,
+    showCheckpoints,
+    setShowCheckpoints,
+    showPalette,
+    setShowPalette,
+    showMobileMenu,
+    setShowMobileMenu,
+    showDiscardModal,
+    setShowDiscardModal,
     saving,
-    panelRef, mobilePanelRef,
-    checkpointRef, mobileCheckpointRef,
-    paletteRef, mobilePaletteRef,
+    panelRef,
+    mobilePanelRef,
+    checkpointRef,
+    mobileCheckpointRef,
+    paletteRef,
+    mobilePaletteRef,
     mobileMenuRef,
     handleSave,
     handleDiscard,

@@ -69,16 +69,16 @@ Native element styling guide (apply these patterns consistently):
 - Card: className="bg-[#141414] border border-[rgba(255,255,255,0.06)] rounded-lg p-4"`;
 
 interface ImageData {
-  base64: string
-  mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp'
+  base64: string;
+  mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
 }
 
 interface GenerateBody {
-  prompt: string
-  model?: string
-  currentFiles: Record<string, string>
-  history: { role: string; content: string; images?: ImageData[] }[]
-  images?: ImageData[]
+  prompt: string;
+  model?: string;
+  currentFiles: Record<string, string>;
+  history: { role: string; content: string; images?: ImageData[] }[];
+  images?: ImageData[];
 }
 
 router.post('/generate', async (req: Request<object, object, GenerateBody>, res: Response) => {
@@ -93,7 +93,9 @@ router.post('/generate', async (req: Request<object, object, GenerateBody>, res:
   console.log('[generate] API key from frontend:', apiKey ? 'yes' : 'no');
 
   if (!apiKey) {
-    res.status(401).json({ code: 'MISSING_API_KEY', error: 'API key not configured. Go to Settings to add your Claude API key.' });
+    res
+      .status(401)
+      .json({ code: 'MISSING_API_KEY', error: 'API key not configured. Go to Settings to add your Claude API key.' });
     return;
   }
 
@@ -181,9 +183,10 @@ function buildConversation(
       // Compress old assistant messages: strip code, keep file list
       const fileNames = [...h.content.matchAll(/file="([^"]+)"/g)].map((m) => m[1]);
       const text = h.content.replace(CODE_BLOCK_RE, '').trim();
-      const summary = fileNames.length > 0
-        ? `${text}\n[Generated/updated files: ${fileNames.join(', ')}]`
-        : text || '[code response]';
+      const summary =
+        fileNames.length > 0
+          ? `${text}\n[Generated/updated files: ${fileNames.join(', ')}]`
+          : text || '[code response]';
       messages.push({ role, content: summary });
     } else if (role === 'user' && h.images && h.images.length > 0) {
       // User messages with images use multimodal content blocks
@@ -206,9 +209,7 @@ function buildConversation(
     if (typeof msg.content === 'string') {
       messages[cacheIdx] = {
         role: msg.role,
-        content: [
-          { type: 'text', text: msg.content, cache_control: { type: 'ephemeral' } },
-        ],
+        content: [{ type: 'text', text: msg.content, cache_control: { type: 'ephemeral' } }],
       };
     }
   }
@@ -218,9 +219,7 @@ function buildConversation(
   let userContent = '';
 
   if (entries.length > 0) {
-    const fileContext = entries
-      .map(([path, code]) => `File: ${path}\n\`\`\`\n${code}\n\`\`\``)
-      .join('\n\n');
+    const fileContext = entries.map(([path, code]) => `File: ${path}\n\`\`\`\n${code}\n\`\`\``).join('\n\n');
     userContent += `Current project files (${entries.length} files):\n${fileContext}\n\n`;
   }
 

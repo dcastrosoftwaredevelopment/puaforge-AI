@@ -13,14 +13,19 @@ export function useResendCooldown() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   }, []);
 
   const startCooldown = () => {
     setCooldown(RESEND_COOLDOWN);
     timerRef.current = setInterval(() => {
       setCooldown((prev) => {
-        if (prev <= 1) { clearInterval(timerRef.current!); return 0; }
+        if (prev <= 1) {
+          clearInterval(timerRef.current!);
+          return 0;
+        }
         return prev - 1;
       });
     }, 1000);
@@ -35,7 +40,10 @@ export function useResendCooldown() {
       startCooldown();
     } catch (err) {
       const code = err instanceof ApiError ? err.code : '';
-      if (code === 'ERROR_ALREADY_VERIFIED') { navigate('/login'); return; }
+      if (code === 'ERROR_ALREADY_VERIFIED') {
+        navigate('/login');
+        return;
+      }
       setResendState('error');
     }
   };

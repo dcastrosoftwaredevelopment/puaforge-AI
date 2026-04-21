@@ -4,10 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { toExportName, formatSize, baseName } from '@/utils/imageUtils';
 import CopyButton from './CopyButton';
 
-export default function ImageRow({ img, onRename, onRemove }: {
-  img: { id: string; name: string; url: string; size: number }
-  onRename: (id: string, name: string) => void
-  onRemove: (id: string) => void
+export default function ImageRow({
+  img,
+  onRename,
+  onRemove,
+}: {
+  img: { id: string; name: string; url: string; size: number };
+  onRename: (id: string, name: string) => void;
+  onRemove: (id: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
@@ -34,11 +38,7 @@ export default function ImageRow({ img, onRename, onRemove }: {
 
   return (
     <div className="flex items-center gap-2 p-2 rounded-lg bg-bg-tertiary border border-border-subtle group">
-      <img
-        src={img.url}
-        alt={img.name}
-        className="w-10 h-10 rounded object-cover shrink-0"
-      />
+      <img src={img.url} alt={img.name} className="w-10 h-10 rounded object-cover shrink-0" />
       <div className="flex-1 min-w-0">
         {editing ? (
           <div className="flex items-center gap-1">
@@ -53,10 +53,16 @@ export default function ImageRow({ img, onRename, onRemove }: {
               className="flex-1 min-w-0 text-xs bg-bg-elevated border border-border-default rounded px-1.5 py-0.5 text-text-primary outline-none focus:border-accent"
               autoFocus
             />
-            <button onClick={confirmRename} className="p-0.5 text-success hover:text-vibe-blue transition cursor-pointer">
+            <button
+              onClick={confirmRename}
+              className="p-0.5 text-success hover:text-vibe-blue transition cursor-pointer"
+            >
               <Check size={11} />
             </button>
-            <button onClick={cancelRename} className="p-0.5 text-text-muted hover:text-text-primary transition cursor-pointer">
+            <button
+              onClick={cancelRename}
+              className="p-0.5 text-text-muted hover:text-text-primary transition cursor-pointer"
+            >
               <X size={11} />
             </button>
           </div>

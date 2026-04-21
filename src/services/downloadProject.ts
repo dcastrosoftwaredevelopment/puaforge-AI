@@ -134,7 +134,10 @@ export async function downloadProject(files: Record<string, string>, projectName
   }
 
   const safeName = projectName
-    ? projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '')
+    ? projectName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/-+$/, '')
     : 'puaforge-project';
 
   const blob = await zip.generateAsync({ type: 'blob' });

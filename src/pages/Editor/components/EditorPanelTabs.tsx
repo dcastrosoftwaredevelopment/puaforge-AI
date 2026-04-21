@@ -8,10 +8,22 @@ export default function EditorPanelTabs() {
   const { t } = useTranslation();
   const { editorPanelMode, setEditorPanelMode, inspectMode, selectedElement } = useEditorPanelTabs();
 
-  const tabs: Array<{ mode: EditorPanelMode; label: string; icon: React.ReactNode; enabled: boolean; disabledTip: string }> = [
+  const tabs: Array<{
+    mode: EditorPanelMode;
+    label: string;
+    icon: React.ReactNode;
+    enabled: boolean;
+    disabledTip: string;
+  }> = [
     { mode: 'code', label: t('inspect.tabCode'), icon: <Code2 size={13} />, enabled: true, disabledTip: '' },
     { mode: 'style', label: t('inspect.tabStyle'), icon: <Paintbrush size={13} />, enabled: true, disabledTip: '' },
-    { mode: 'layers', label: t('inspect.tabLayers'), icon: <Layers size={13} />, enabled: inspectMode, disabledTip: t('inspect.tabLayersDisabled') },
+    {
+      mode: 'layers',
+      label: t('inspect.tabLayers'),
+      icon: <Layers size={13} />,
+      enabled: inspectMode,
+      disabledTip: t('inspect.tabLayersDisabled'),
+    },
   ];
 
   return (

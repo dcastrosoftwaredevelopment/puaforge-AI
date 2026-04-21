@@ -1,7 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSetAtom, useAtomValue } from 'jotai';
-import { activeProjectIdAtom, messagesAtom, filesAtom, projectImagesAtom, checkpointsAtom, colorPaletteAtom, customDomainAtom, projectLoadedAtom, DEFAULT_PALETTE, type ProjectImage, type Checkpoint } from '@/atoms';
+import {
+  activeProjectIdAtom,
+  messagesAtom,
+  filesAtom,
+  projectImagesAtom,
+  checkpointsAtom,
+  colorPaletteAtom,
+  customDomainAtom,
+  projectLoadedAtom,
+  DEFAULT_PALETTE,
+  type ProjectImage,
+  type Checkpoint,
+} from '@/atoms';
 import { authTokenAtom } from '@/atoms/authAtoms';
 import { depsAtom } from '@/atoms';
 import { DEFAULT_FILES, buildPackageJson } from '@/utils/defaultFiles';
@@ -75,9 +87,7 @@ export function useProjectLoader(projectId: string | undefined) {
         if (cancelled) return;
 
         // Messages and files: prefer local draft if it exists
-        const draft = await hasDraft(projectId!)
-          ? await loadDraft(projectId!)
-          : null;
+        const draft = (await hasDraft(projectId!)) ? await loadDraft(projectId!) : null;
 
         let messages, files: Record<string, string>;
 
@@ -102,9 +112,8 @@ export function useProjectLoader(projectId: string | undefined) {
         // Pre-build the correct package.json so EditorView's deps effect finds no change
         // and avoids a second setFiles call that would falsely trigger the draft guard.
         const syncedFiles = { ...files, '/package.json': buildPackageJson(detectedDeps) };
-        const filesWithImages = savedImages.length > 0
-          ? { ...syncedFiles, ...generateImagesFiles(savedImages) }
-          : syncedFiles;
+        const filesWithImages =
+          savedImages.length > 0 ? { ...syncedFiles, ...generateImagesFiles(savedImages) } : syncedFiles;
 
         setColorPalette(savedPalette ?? DEFAULT_PALETTE);
         setCustomDomain(domainData.customDomain);
@@ -126,7 +135,9 @@ export function useProjectLoader(projectId: string | undefined) {
     }
 
     load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [projectId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return isReady;

@@ -6,9 +6,9 @@ import { users } from '../schema.js';
 
 export async function updateProfile(req: Request, res: Response) {
   const { name, currentPassword, newPassword } = req.body as {
-    name?: string
-    currentPassword?: string
-    newPassword?: string
+    name?: string;
+    currentPassword?: string;
+    newPassword?: string;
   };
 
   const [user] = await db.select().from(users).where(eq(users.id, req.user!.userId));

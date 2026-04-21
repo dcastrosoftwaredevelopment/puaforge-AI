@@ -3,11 +3,11 @@ import { Tooltip as FlowbiteTooltip } from 'flowbite-react';
 import type { Placement } from '@floating-ui/core';
 
 interface TooltipProps {
-  content: ReactNode
-  children: ReactNode
-  side?: 'top' | 'bottom'
-  align?: 'left' | 'center' | 'right'
-  width?: string
+  content: ReactNode;
+  children: ReactNode;
+  side?: 'top' | 'bottom';
+  align?: 'left' | 'center' | 'right';
+  width?: string;
 }
 
 function toPlacement(side: 'top' | 'bottom', align: 'left' | 'center' | 'right'): Placement {

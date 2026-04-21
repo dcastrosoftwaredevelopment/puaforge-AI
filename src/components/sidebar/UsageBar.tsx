@@ -14,9 +14,7 @@ export default function UsageBar({ used, limit, unit }: { used: number; limit: n
         <span className={isWarning ? 'text-yellow-400' : 'text-text-muted'}>{usedLabel}</span>
         <span className="text-text-muted">{limitLabel}</span>
       </div>
-      {!isUnlimited && (
-        <Progress progress={pct} size="xs" color={isWarning ? 'yellow' : 'primary'} />
-      )}
+      {!isUnlimited && <Progress progress={pct} size="xs" color={isWarning ? 'yellow' : 'primary'} />}
     </div>
   );
 }

@@ -20,8 +20,12 @@ export function useSandpackSync() {
   const isFirstRunRef = useRef(true);
   const isDirtyRef = useRef(isDirty);
 
-  useEffect(() => { sandpackRef.current = sandpack; });
-  useEffect(() => { isDirtyRef.current = isDirty; });
+  useEffect(() => {
+    sandpackRef.current = sandpack;
+  });
+  useEffect(() => {
+    isDirtyRef.current = isDirty;
+  });
 
   // Push atom changes → Sandpack (skip first run, Provider already has correct files)
   useEffect(() => {

@@ -4,7 +4,9 @@ import styleToObject from 'style-to-object';
 export function parseInlineStyle(style: string): Record<string, string> {
   const result: Record<string, string> = {};
   try {
-    styleToObject(style, (prop, value) => { result[prop] = value; });
+    styleToObject(style, (prop, value) => {
+      result[prop] = value;
+    });
   } catch {
     // ignore malformed style strings
   }

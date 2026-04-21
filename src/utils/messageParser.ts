@@ -1,6 +1,14 @@
-export interface TextSegment { type: 'text'; content: string }
-export interface CodeSegment { type: 'code'; language: string; filePath?: string; code: string }
-export type Segment = TextSegment | CodeSegment
+export interface TextSegment {
+  type: 'text';
+  content: string;
+}
+export interface CodeSegment {
+  type: 'code';
+  language: string;
+  filePath?: string;
+  code: string;
+}
+export type Segment = TextSegment | CodeSegment;
 
 const CODE_BLOCK_RE = /```(\w+)?(?:\s+file="([^"]+)")?\n([\s\S]*?)```/g;
 

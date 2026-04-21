@@ -67,9 +67,7 @@ export default function ModelSelector() {
                 <span className="text-xs font-medium text-text-primary">{model.name}</span>
                 <div className="text-[10px] text-text-muted truncate">{model.id}</div>
               </div>
-              {selectedModel === model.id && (
-                <Check size={14} className="text-forge-terracotta shrink-0" />
-              )}
+              {selectedModel === model.id && <Check size={14} className="text-forge-terracotta shrink-0" />}
             </button>
           ))}
         </div>

@@ -58,9 +58,7 @@ export default function Checkpoints() {
       </div>
 
       {checkpoints.length === 0 ? (
-        <p className="text-xs text-text-muted text-center py-4">
-          {t('checkpoints.empty')}
-        </p>
+        <p className="text-xs text-text-muted text-center py-4">{t('checkpoints.empty')}</p>
       ) : (
         <div className="space-y-2 max-h-64 overflow-y-auto">
           {checkpoints.map((cp) => (

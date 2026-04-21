@@ -2,7 +2,7 @@ import { eq, and, count, isNotNull } from 'drizzle-orm';
 import { db } from '../db.js';
 import { subscriptions, projects, projectImages, checkpoints, users, publishedSites } from '../schema.js';
 
-export type Plan = 'free' | 'indie' | 'pro'
+export type Plan = 'free' | 'indie' | 'pro';
 
 export const PLAN_LIMITS = {
   free: {
@@ -26,13 +26,16 @@ export const PLAN_LIMITS = {
     maxCheckpointsPerProject: Infinity,
     maxPublishedSites: 5,
   },
-} as const satisfies Record<Plan, {
-  maxProjects: number
-  maxCustomDomains: number
-  maxStorageBytes: number
-  maxCheckpointsPerProject: number
-  maxPublishedSites: number
-}>;
+} as const satisfies Record<
+  Plan,
+  {
+    maxProjects: number;
+    maxCustomDomains: number;
+    maxStorageBytes: number;
+    maxCheckpointsPerProject: number;
+    maxPublishedSites: number;
+  }
+>;
 
 function getSuperUserEmails(): string[] {
   return (process.env.SUPERUSER_EMAILS ?? '')
@@ -61,11 +64,7 @@ export class PlanLimitError extends Error {
 
 /** Gets or creates a subscription row for the user (defaults to free). */
 export async function getOrCreateSubscription(userId: string) {
-  const [existing] = await db
-    .select()
-    .from(subscriptions)
-    .where(eq(subscriptions.userId, userId))
-    .limit(1);
+  const [existing] = await db.select().from(subscriptions).where(eq(subscriptions.userId, userId)).limit(1);
 
   if (existing) return existing;
 
@@ -77,11 +76,7 @@ export async function getOrCreateSubscription(userId: string) {
 
   if (created) return created;
 
-  const [row] = await db
-    .select()
-    .from(subscriptions)
-    .where(eq(subscriptions.userId, userId))
-    .limit(1);
+  const [row] = await db.select().from(subscriptions).where(eq(subscriptions.userId, userId)).limit(1);
 
   return row;
 }
@@ -99,10 +94,7 @@ export async function checkProjectLimit(userId: string): Promise<void> {
   const limits = PLAN_LIMITS[plan];
   if (limits.maxProjects === Infinity) return;
 
-  const [{ value }] = await db
-    .select({ value: count() })
-    .from(projects)
-    .where(eq(projects.userId, userId));
+  const [{ value }] = await db.select({ value: count() }).from(projects).where(eq(projects.userId, userId));
 
   if (value >= limits.maxProjects) {
     throw new PlanLimitError(
@@ -139,21 +131,14 @@ export async function checkDomainLimit(userId: string): Promise<void> {
   const plan = await getUserPlan(userId);
   const limits = PLAN_LIMITS[plan];
   if (limits.maxCustomDomains === 0) {
-    throw new PlanLimitError(
-      'Custom domains are not available on the Free plan.',
-      'indie',
-      'customDomain',
-    );
+    throw new PlanLimitError('Custom domains are not available on the Free plan.', 'indie', 'customDomain');
   }
   if (limits.maxCustomDomains === Infinity) return;
 
   const [{ value }] = await db
     .select({ value: count() })
     .from(projects)
-    .where(and(
-      eq(projects.userId, userId),
-      isNotNull(projects.customDomain),
-    ));
+    .where(and(eq(projects.userId, userId), isNotNull(projects.customDomain)));
 
   if (value >= limits.maxCustomDomains) {
     throw new PlanLimitError(
@@ -169,11 +154,7 @@ export async function checkStorageLimit(userId: string, newFileBytes: number): P
   const plan = await getUserPlan(userId);
   const limits = PLAN_LIMITS[plan];
   if (limits.maxStorageBytes === 0) {
-    throw new PlanLimitError(
-      'Image upload is not available on the Free plan.',
-      'indie',
-      'storage',
-    );
+    throw new PlanLimitError('Image upload is not available on the Free plan.', 'indie', 'storage');
   }
   if (limits.maxStorageBytes === Infinity) return;
 
@@ -199,18 +180,11 @@ export async function checkCheckpointLimit(userId: string, projectId: string): P
   const plan = await getUserPlan(userId);
   const limits = PLAN_LIMITS[plan];
   if (limits.maxCheckpointsPerProject === 0) {
-    throw new PlanLimitError(
-      'Checkpoints are not available on the Free plan.',
-      'indie',
-      'checkpoints',
-    );
+    throw new PlanLimitError('Checkpoints are not available on the Free plan.', 'indie', 'checkpoints');
   }
   if (limits.maxCheckpointsPerProject === Infinity) return;
 
-  const [{ value }] = await db
-    .select({ value: count() })
-    .from(checkpoints)
-    .where(eq(checkpoints.projectId, projectId));
+  const [{ value }] = await db.select({ value: count() }).from(checkpoints).where(eq(checkpoints.projectId, projectId));
 
   if (value >= limits.maxCheckpointsPerProject) {
     throw new PlanLimitError(

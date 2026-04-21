@@ -7,11 +7,20 @@ import Button from '@/components/ui/Button';
 export default function Settings() {
   const { t } = useTranslation();
   const {
-    apiKey, draft, setDraft,
-    showKey, setShowKey,
-    validated, validating, validationError,
-    hasChanges, apiKeyEnabled,
-    handleValidate, handleSave, handleClear, handleToggleEnabled,
+    apiKey,
+    draft,
+    setDraft,
+    showKey,
+    setShowKey,
+    validated,
+    validating,
+    validationError,
+    hasChanges,
+    apiKeyEnabled,
+    handleValidate,
+    handleSave,
+    handleClear,
+    handleToggleEnabled,
   } = useSettingsForm();
 
   return (
@@ -66,7 +75,9 @@ export default function Settings() {
                 <input
                   type={showKey ? 'text' : 'password'}
                   value={draft}
-                  onChange={(e) => { setDraft(e.target.value); }}
+                  onChange={(e) => {
+                    setDraft(e.target.value);
+                  }}
                   placeholder={t('settings.apiKeyPlaceholder')}
                   className="w-full bg-bg-tertiary border border-border-subtle rounded-lg px-3 py-2.5 pr-10 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-border-default transition font-mono"
                 />
@@ -92,7 +103,13 @@ export default function Settings() {
               )}
 
               <div className="flex items-center gap-2">
-                <Button variant="secondary" size="sm" isLoading={validating} onClick={handleValidate} disabled={!draft.trim()}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  isLoading={validating}
+                  onClick={handleValidate}
+                  disabled={!draft.trim()}
+                >
                   {t('settings.validate')}
                 </Button>
                 <Button variant="blue" size="sm" isLoading={validating} onClick={handleSave} disabled={!hasChanges}>

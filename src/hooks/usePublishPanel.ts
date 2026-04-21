@@ -3,7 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { ApiError } from '@/services/api';
 import { PlanLimitUIError } from '@/hooks/usePlanLimit';
 
-export function usePublishPanel(customDomain: string | null, saveDomain: (domain: string | null, force?: boolean) => Promise<void>) {
+export function usePublishPanel(
+  customDomain: string | null,
+  saveDomain: (domain: string | null, force?: boolean) => Promise<void>,
+) {
   const { t } = useTranslation();
   const [showPanel, setShowPanel] = useState(false);
   const [domainInput, setDomainInput] = useState('');
@@ -40,7 +43,7 @@ export function usePublishPanel(customDomain: string | null, saveDomain: (domain
       if (e instanceof PlanLimitUIError) {
         setDomainInputError(t('publish.domainLimitReached'));
       } else if (e instanceof ApiError && e.code === 'DOMAIN_OWN_PROJECT') {
-        setOwnProjectConflict(e.data?.conflictingProjectName as string ?? '');
+        setOwnProjectConflict((e.data?.conflictingProjectName as string) ?? '');
       } else if (e instanceof ApiError && e.status === 409) {
         setDomainInputError(t('publish.domainTaken'));
       } else {
@@ -52,12 +55,15 @@ export function usePublishPanel(customDomain: string | null, saveDomain: (domain
   };
 
   return {
-    showPanel, setShowPanel,
-    domainInput, setDomainInput,
+    showPanel,
+    setShowPanel,
+    domainInput,
+    setDomainInput,
     savingDomain,
     domainInputError,
     domainSaved,
-    ownProjectConflict, setOwnProjectConflict,
+    ownProjectConflict,
+    setOwnProjectConflict,
     panelRef,
     handleSaveDomain,
   };

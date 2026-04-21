@@ -28,7 +28,9 @@ export function useDraft() {
     if (!activeProjectId) return;
     ignoreNextMessagesRef.current = true;
     ignoreNextFilesRef.current = true;
-    hasDraft(activeProjectId).then((exists) => { setIsDraft(exists); });
+    hasDraft(activeProjectId).then((exists) => {
+      setIsDraft(exists);
+    });
   }, [activeProjectId]);
 
   // Auto-save messages to IndexedDB — only after project is fully loaded
@@ -40,13 +42,15 @@ export function useDraft() {
     }
     const pid = activeProjectId;
     const entries = messagesValue.map((m) => ({ ...m, projectId: pid }));
-    dbReady.then(() =>
-      db.transaction('rw', db.messages, async () => {
-        await db.messages.where('projectId').equals(pid).delete();
-        await db.messages.bulkPut(entries);
-      }),
-    ).then(() => setIsDraft(true))
-     .catch((e) => console.error('[draft] messages save error:', e));
+    dbReady
+      .then(() =>
+        db.transaction('rw', db.messages, async () => {
+          await db.messages.where('projectId').equals(pid).delete();
+          await db.messages.bulkPut(entries);
+        }),
+      )
+      .then(() => setIsDraft(true))
+      .catch((e) => console.error('[draft] messages save error:', e));
   }, [messagesValue, activeProjectId, projectLoaded]);
 
   // Auto-save files to IndexedDB — only after project is fully loaded
@@ -63,13 +67,15 @@ export function useDraft() {
       code,
       updatedAt: Date.now(),
     }));
-    dbReady.then(() =>
-      db.transaction('rw', db.projectFiles, async () => {
-        await db.projectFiles.where('projectId').equals(pid).delete();
-        await db.projectFiles.bulkAdd(entries);
-      }),
-    ).then(() => setIsDraft(true))
-     .catch((e) => console.error('[draft] files save error:', e));
+    dbReady
+      .then(() =>
+        db.transaction('rw', db.projectFiles, async () => {
+          await db.projectFiles.where('projectId').equals(pid).delete();
+          await db.projectFiles.bulkAdd(entries);
+        }),
+      )
+      .then(() => setIsDraft(true))
+      .catch((e) => console.error('[draft] files save error:', e));
   }, [filesValue, activeProjectId, projectLoaded]);
 
   /** Persist current state (messages + files) to PostgreSQL and clear local draft */
@@ -80,10 +86,12 @@ export function useDraft() {
     await Promise.all([
       api.put(`/api/projects/${pid}/messages`, { msgs: messagesValue }, headers),
       api.put(`/api/projects/${pid}/files`, filesValue, headers),
-      dbReady.then(() => Promise.all([
-        db.messages.where('projectId').equals(pid).delete(),
-        db.projectFiles.where('projectId').equals(pid).delete(),
-      ])),
+      dbReady.then(() =>
+        Promise.all([
+          db.messages.where('projectId').equals(pid).delete(),
+          db.projectFiles.where('projectId').equals(pid).delete(),
+        ]),
+      ),
     ]);
     setIsDraft(false);
   }, [activeProjectId, token, messagesValue, filesValue]);
@@ -113,19 +121,13 @@ export async function hasDraft(projectId: string): Promise<boolean> {
 
 /** Load draft data from IndexedDB for the given projectId */
 export async function loadDraft(projectId: string): Promise<{
-  messages: Message[]
-  files: Record<string, string>
+  messages: Message[];
+  files: Record<string, string>;
 } | null> {
   await dbReady;
-  const savedMessages = await db.messages
-    .where('projectId')
-    .equals(projectId)
-    .sortBy('timestamp');
+  const savedMessages = await db.messages.where('projectId').equals(projectId).sortBy('timestamp');
 
-  const savedFiles = await db.projectFiles
-    .where('projectId')
-    .equals(projectId)
-    .toArray();
+  const savedFiles = await db.projectFiles.where('projectId').equals(projectId).toArray();
 
   if (savedMessages.length === 0 && savedFiles.length === 0) return null;
 

@@ -17,7 +17,10 @@ const AdvancedSection = memo(() => {
             className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono border ${(unknownClasses as string[]).includes(cls) ? 'border-border-default text-text-secondary bg-bg-elevated' : 'border-border-subtle text-text-muted bg-bg-secondary'}`}
           >
             {cls}
-            <button onClick={() => removeOneClass(cls)} className="text-text-muted/50 hover:text-red-400 transition cursor-pointer">
+            <button
+              onClick={() => removeOneClass(cls)}
+              className="text-text-muted/50 hover:text-red-400 transition cursor-pointer"
+            >
               <X size={9} />
             </button>
           </span>
@@ -28,12 +31,22 @@ const AdvancedSection = memo(() => {
           type="text"
           value={newClass}
           onChange={(e) => setNewClass(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter' && newClass.trim()) { addOneClass(newClass.trim()); setNewClass(''); } }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && newClass.trim()) {
+              addOneClass(newClass.trim());
+              setNewClass('');
+            }
+          }}
           placeholder={t('inspect.addClassPlaceholder')}
           className="flex-1 text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono"
         />
         <button
-          onClick={() => { if (newClass.trim()) { addOneClass(newClass.trim()); setNewClass(''); } }}
+          onClick={() => {
+            if (newClass.trim()) {
+              addOneClass(newClass.trim());
+              setNewClass('');
+            }
+          }}
           className="px-2 py-1 rounded bg-bg-elevated border border-border-subtle text-text-muted hover:text-text-primary hover:border-border-default transition cursor-pointer"
         >
           <Plus size={11} />

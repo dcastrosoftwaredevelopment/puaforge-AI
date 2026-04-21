@@ -21,9 +21,7 @@ export default function DeviceToggle() {
           <button
             onClick={() => setDevice(d)}
             className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
-              device === d
-                ? 'bg-bg-elevated text-text-primary shadow-sm'
-                : 'text-text-muted hover:text-text-secondary'
+              device === d ? 'bg-bg-elevated text-text-primary shadow-sm' : 'text-text-muted hover:text-text-secondary'
             }`}
           >
             {icon}

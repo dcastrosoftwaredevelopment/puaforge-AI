@@ -5,9 +5,9 @@ import { checkImportLimit, incrementImportCount, PlanLimitError } from '../servi
 const router = Router();
 
 interface ExtractedDataUrl {
-  base64: string
-  mediaType: string
-  index: number
+  base64: string;
+  mediaType: string;
+  index: number;
 }
 
 /**
@@ -50,7 +50,10 @@ function extractImageUrls(html: string, baseUrl?: string): string[] {
   // srcset — take first entry
   const srcsetRe = /srcset=["']([^"']+)["']/gi;
   while ((m = srcsetRe.exec(html)) !== null) {
-    const first = m[1].trim().split(/\s*,\s*/)[0]?.split(/\s+/)[0];
+    const first = m[1]
+      .trim()
+      .split(/\s*,\s*/)[0]
+      ?.split(/\s+/)[0];
     if (first) urls.add(first);
   }
 
@@ -62,7 +65,11 @@ function extractImageUrls(html: string, baseUrl?: string): string[] {
     const base = new URL(baseUrl);
     return Array.from(urls)
       .map((u) => {
-        try { return new URL(u, base).href; } catch { return null; }
+        try {
+          return new URL(u, base).href;
+        } catch {
+          return null;
+        }
       })
       .filter((u): u is string => u !== null && !u.startsWith('data:'));
   }
@@ -109,7 +116,10 @@ function cleanHtml(html: string): { html: string; isSpa: boolean } {
   cleaned = cleaned.replace(/\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*')/gi, '');
 
   // 6. Strip noisy tag attributes: integrity, nonce, crossorigin, data-*, aria-hidden
-  cleaned = cleaned.replace(/\s+(?:integrity|nonce|crossorigin|data-[\w:-]+|aria-hidden)\s*=\s*(?:"[^"]*"|'[^']*')/gi, '');
+  cleaned = cleaned.replace(
+    /\s+(?:integrity|nonce|crossorigin|data-[\w:-]+|aria-hidden)\s*=\s*(?:"[^"]*"|'[^']*')/gi,
+    '',
+  );
 
   // 7. Remove long style attributes (likely contain base64 or generated styles)
   cleaned = cleaned.replace(/\s+style\s*=\s*"[^"]{150,}"/gi, '');
@@ -126,7 +136,10 @@ function cleanHtml(html: string): { html: string; isSpa: boolean } {
 
   // 10. SPA detection: if body text content is nearly empty, it's JS-rendered
   const bodyInner = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(cleaned)?.[1] ?? cleaned;
-  const visibleText = bodyInner.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  const visibleText = bodyInner
+    .replace(/<[^>]+>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
   const isSpa = visibleText.length < 200;
 
   return { html: cleaned, isSpa };
@@ -136,18 +149,29 @@ function suggestName(url: string, index: number): string {
   try {
     const pathname = new URL(url.startsWith('//') ? `https:${url}` : url).pathname;
     const filename = pathname.split('/').pop() ?? '';
-    const clean = filename.replace(/[?#].*$/, '').replace(/[^a-zA-Z0-9._-]/g, '').slice(0, 60);
+    const clean = filename
+      .replace(/[?#].*$/, '')
+      .replace(/[^a-zA-Z0-9._-]/g, '')
+      .slice(0, 60);
     if (clean && /\.(jpe?g|png|gif|webp|svg|avif)$/i.test(clean)) return clean;
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return `image-${index + 1}.jpg`;
 }
 
 router.post('/import-site', requireAuth, async (req, res) => {
   try {
-    try { await checkImportLimit(req.user!.userId); }
-    catch (err) {
+    try {
+      await checkImportLimit(req.user!.userId);
+    } catch (err) {
       if (err instanceof PlanLimitError) {
-        res.status(403).json({ error: err.message, upgradeRequired: true, requiredPlan: err.requiredPlan, limitType: err.limitType });
+        res.status(403).json({
+          error: err.message,
+          upgradeRequired: true,
+          requiredPlan: err.requiredPlan,
+          limitType: err.limitType,
+        });
         return;
       }
       throw err;

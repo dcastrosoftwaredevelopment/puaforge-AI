@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Button from '@/components/ui/Button';
 
 interface EmptyStateProps {
-  onCreate: () => void
+  onCreate: () => void;
 }
 
 export default function EmptyState({ onCreate }: EmptyStateProps) {

@@ -29,10 +29,7 @@ export function useProjectActions() {
   const setProjectImages = useSetAtom(projectImagesAtom);
   const setCheckpoints = useSetAtom(checkpointsAtom);
 
-  const authHeaders = useMemo(
-    () => (token ? { Authorization: `Bearer ${token}` } : undefined),
-    [token],
-  );
+  const authHeaders = useMemo(() => (token ? { Authorization: `Bearer ${token}` } : undefined), [token]);
 
   const createProject = useCallback(async () => {
     if (!authHeaders) return;
@@ -55,30 +52,54 @@ export function useProjectActions() {
 
     navigate(`/project/${project.id}`);
     return project;
-  }, [authHeaders, navigate, setProjects, setActiveProjectId, setMessages, setFiles, setDeps, setProjectImages, setCheckpoints, withPlanLimit]);
+  }, [
+    authHeaders,
+    navigate,
+    setProjects,
+    setActiveProjectId,
+    setMessages,
+    setFiles,
+    setDeps,
+    setProjectImages,
+    setCheckpoints,
+    withPlanLimit,
+  ]);
 
-  const openProject = useCallback((id: string) => {
-    navigate(`/project/${id}`);
-  }, [navigate]);
+  const openProject = useCallback(
+    (id: string) => {
+      navigate(`/project/${id}`);
+    },
+    [navigate],
+  );
 
-  const deleteProject = useCallback(async (id: string) => {
-    if (!authHeaders) return;
-    await api.delete(`/api/projects/${id}`, authHeaders);
-    setProjects((prev) => prev.filter((p) => p.id !== id));
-  }, [authHeaders, setProjects]);
+  const deleteProject = useCallback(
+    async (id: string) => {
+      if (!authHeaders) return;
+      await api.delete(`/api/projects/${id}`, authHeaders);
+      setProjects((prev) => prev.filter((p) => p.id !== id));
+    },
+    [authHeaders, setProjects],
+  );
 
-  const renameProject = useCallback(async (id: string, name: string) => {
-    if (!authHeaders) return;
-    await api.patch(`/api/projects/${id}`, { name }, authHeaders);
-    setProjects((prev) => prev.map((p) => p.id === id ? { ...p, name } : p));
-  }, [authHeaders, setProjects]);
+  const renameProject = useCallback(
+    async (id: string, name: string) => {
+      if (!authHeaders) return;
+      await api.patch(`/api/projects/${id}`, { name }, authHeaders);
+      setProjects((prev) => prev.map((p) => (p.id === id ? { ...p, name } : p)));
+    },
+    [authHeaders, setProjects],
+  );
 
   const goHome = useCallback(() => {
     setActiveProjectId(null);
     navigate('/');
   }, [navigate, setActiveProjectId]);
 
-  interface PublishedInfo { projectId: string; subdomain: string | null; customDomain: string | null }
+  interface PublishedInfo {
+    projectId: string;
+    subdomain: string | null;
+    customDomain: string | null;
+  }
 
   const fetchPublishedIds = useCallback(async (): Promise<Map<string, PublishedInfo>> => {
     if (!authHeaders) return new Map();

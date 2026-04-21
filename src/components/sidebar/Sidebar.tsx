@@ -28,9 +28,16 @@ export default function Sidebar() {
   const isHelp = location.pathname === '/help';
   const isHome = !isSettings && !isProfile && !isBilling && !isHelp;
 
-  useEffect(() => { setIsOpen(false); }, [location.pathname, setIsOpen]);
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname, setIsOpen]);
 
-  const planLabel = usage?.plan === 'indie' ? t('billing.plans.indie') : usage?.plan === 'pro' ? t('billing.plans.pro') : t('billing.plans.free');
+  const planLabel =
+    usage?.plan === 'indie'
+      ? t('billing.plans.indie')
+      : usage?.plan === 'pro'
+        ? t('billing.plans.pro')
+        : t('billing.plans.free');
 
   // Renders UserAvatar in place of the standard SVG icon slot
   const ProfileIcon: React.FC<ComponentProps<'svg'>> = () => <UserAvatar name={user?.name} />;
@@ -87,11 +94,7 @@ export default function Sidebar() {
       {/* Bottom nav */}
       <SidebarItems>
         <SidebarItemGroup>
-          <SidebarItem
-            onClick={() => navigate('/profile')}
-            icon={ProfileIcon}
-            active={isProfile}
-          >
+          <SidebarItem onClick={() => navigate('/profile')} icon={ProfileIcon} active={isProfile}>
             {t('sidebar.profile')}
           </SidebarItem>
           <SidebarItem onClick={() => navigate('/billing')} icon={CreditCard} active={isBilling}>

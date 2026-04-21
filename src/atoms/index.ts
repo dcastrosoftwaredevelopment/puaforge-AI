@@ -5,10 +5,10 @@ import { parseInlineStyle } from '@/utils/inlineStyles';
 
 // Project
 export interface Project {
-  id: string
-  name: string
-  createdAt: number
-  updatedAt: number
+  id: string;
+  name: string;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export const projectsAtom = atom<Project[]>([]);
@@ -16,16 +16,16 @@ export const activeProjectIdAtom = atom<string | null>(null);
 
 // Messages (scoped to active project)
 export interface MessageImage {
-  base64: string
-  mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp'
+  base64: string;
+  mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
 }
 
 export interface Message {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: number
-  images?: MessageImage[]
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+  images?: MessageImage[];
 }
 
 export const messagesAtom = atom<Message[]>([]);
@@ -35,23 +35,23 @@ export const filesAtom = atom<Record<string, string>>({});
 
 // Project images (reusable assets)
 export interface ProjectImage {
-  id: string
-  name: string
-  url: string
-  mediaType: string
-  size: number
+  id: string;
+  name: string;
+  url: string;
+  mediaType: string;
+  size: number;
   /** Data URL fetched client-side for use in Sandpack preview (not persisted) */
-  dataUrl?: string
+  dataUrl?: string;
 }
 
 export const projectImagesAtom = atom<ProjectImage[]>([]);
 
 // Checkpoints
 export interface Checkpoint {
-  id: string
-  name: string
-  files: Record<string, string>
-  createdAt: number
+  id: string;
+  name: string;
+  files: Record<string, string>;
+  createdAt: number;
 }
 
 export const checkpointsAtom = atom<Checkpoint[]>([]);
@@ -62,17 +62,17 @@ export const isGeneratingAtom = atom(false);
 export const activeFileAtom = atom('/App.tsx');
 
 // Chat mode
-export type ChatMode = 'floating' | 'docked'
+export type ChatMode = 'floating' | 'docked';
 export const chatModeAtom = atom<ChatMode>('docked');
 
 // View mode
-export type ViewMode = 'editor' | 'preview' | 'split'
+export type ViewMode = 'editor' | 'preview' | 'split';
 export const viewModeAtom = atom<ViewMode>('split');
 
 // Claude model selection
 export interface ClaudeModel {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
 
 export const availableModelsAtom = atom<ClaudeModel[]>([]);
@@ -94,15 +94,15 @@ export const apiKeyAtom = atom('');
 export const apiKeyEnabledAtom = atom(true);
 
 // Device preview
-export type DevicePreview = 'desktop' | 'tablet' | 'mobile'
+export type DevicePreview = 'desktop' | 'tablet' | 'mobile';
 export const devicePreviewAtom = atom<DevicePreview>('desktop');
 
 // Color palette (persisted globally in localStorage)
 export interface PaletteColor {
-  id: string
-  name: string
-  value: string // hex
-  locked?: boolean // system defaults — cannot be deleted, but can be edited
+  id: string;
+  name: string;
+  value: string; // hex
+  locked?: boolean; // system defaults — cannot be deleted, but can be edited
 }
 
 export const DEFAULT_PALETTE: PaletteColor[] = [
@@ -130,9 +130,9 @@ export const projectLoadedAtom = atom(false);
 
 // Plan upgrade modal
 export interface UpgradePrompt {
-  requiredPlan: 'indie' | 'pro'
-  limitType: string
-  message: string
+  requiredPlan: 'indie' | 'pro';
+  limitType: string;
+  message: string;
 }
 export const upgradePromptAtom = atom<UpgradePrompt | null>(null);
 
@@ -146,27 +146,27 @@ export const depsAtom = atom<Record<string, string>>({});
 export const inspectModeAtom = atom(false);
 
 export interface SelectedElement {
-  id: string
-  tagName: string
-  className: string
-  inlineStyle?: string
-  rect: { top: number; left: number; width: number; height: number }
+  id: string;
+  tagName: string;
+  className: string;
+  inlineStyle?: string;
+  rect: { top: number; left: number; width: number; height: number };
 }
 export const selectedElementAtom = atom<SelectedElement | null>(null);
 export const hoveredElementAtom = atom<SelectedElement | null>(null);
 
 export interface DOMNode {
-  id: string
-  tagName: string
-  className: string
-  children: DOMNode[]
+  id: string;
+  tagName: string;
+  className: string;
+  children: DOMNode[];
 }
 export const domTreeAtom = atom<DOMNode[]>([]);
 
-export type EditorPanelMode = 'code' | 'style' | 'layers'
+export type EditorPanelMode = 'code' | 'style' | 'layers';
 export const editorPanelModeAtom = atom<EditorPanelMode>('style');
 
-export type StyleBreakpoint = 'mobile' | 'tablet' | 'desktop'
+export type StyleBreakpoint = 'mobile' | 'tablet' | 'desktop';
 export const styleBreakpointAtom = atom<StyleBreakpoint>('mobile');
 
 export const PREFIX_MAP: Record<StyleBreakpoint, string> = {
@@ -178,10 +178,7 @@ export const PREFIX_MAP: Record<StyleBreakpoint, string> = {
 // ── Derived atoms for StyleEditor ────────────────────────────────────────────
 
 export const parsedClassesAtom = atom((get) =>
-  parseClassesByBreakpoint(
-    get(selectedElementAtom)?.className ?? '',
-    PREFIX_MAP[get(styleBreakpointAtom)],
-  )
+  parseClassesByBreakpoint(get(selectedElementAtom)?.className ?? '', PREFIX_MAP[get(styleBreakpointAtom)]),
 );
 
 export const parsedInlineStyleAtom = atom((get): Record<string, string> => {
@@ -193,31 +190,31 @@ function field<K extends keyof ParsedClasses>(k: K) {
   return selectAtom(parsedClassesAtom, (p) => p[k]);
 }
 
-export const fontSizeAtom      = field('fontSize');
-export const fontWeightAtom    = field('fontWeight');
-export const textAlignAtom     = field('textAlign');
-export const textColorAtom     = field('textColor');
-export const bgColorAtom       = field('bgColor');
-export const paddingTopAtom    = field('paddingTop');
-export const paddingRightAtom  = field('paddingRight');
+export const fontSizeAtom = field('fontSize');
+export const fontWeightAtom = field('fontWeight');
+export const textAlignAtom = field('textAlign');
+export const textColorAtom = field('textColor');
+export const bgColorAtom = field('bgColor');
+export const paddingTopAtom = field('paddingTop');
+export const paddingRightAtom = field('paddingRight');
 export const paddingBottomAtom = field('paddingBottom');
-export const paddingLeftAtom   = field('paddingLeft');
-export const marginTopAtom     = field('marginTop');
-export const marginRightAtom   = field('marginRight');
-export const marginBottomAtom  = field('marginBottom');
-export const marginLeftAtom    = field('marginLeft');
-export const widthAtom         = field('width');
-export const heightAtom        = field('height');
-export const maxWidthAtom      = field('maxWidth');
-export const displayAtom       = field('display');
-export const flexDirAtom       = field('flexDir');
-export const justifyAtom       = field('justify');
-export const alignItemsAtom    = field('alignItems');
-export const gapAtom           = field('gap');
-export const roundedAtom       = field('rounded');
-export const borderWidthAtom   = field('borderWidth');
-export const borderColorAtom   = field('borderColor');
-export const shadowAtom        = field('shadow');
-export const opacityAtom       = field('opacity');
-export const overflowAtom      = field('overflow');
+export const paddingLeftAtom = field('paddingLeft');
+export const marginTopAtom = field('marginTop');
+export const marginRightAtom = field('marginRight');
+export const marginBottomAtom = field('marginBottom');
+export const marginLeftAtom = field('marginLeft');
+export const widthAtom = field('width');
+export const heightAtom = field('height');
+export const maxWidthAtom = field('maxWidth');
+export const displayAtom = field('display');
+export const flexDirAtom = field('flexDir');
+export const justifyAtom = field('justify');
+export const alignItemsAtom = field('alignItems');
+export const gapAtom = field('gap');
+export const roundedAtom = field('rounded');
+export const borderWidthAtom = field('borderWidth');
+export const borderColorAtom = field('borderColor');
+export const shadowAtom = field('shadow');
+export const opacityAtom = field('opacity');
+export const overflowAtom = field('overflow');
 export const unknownClassesAtom = field('unknown');

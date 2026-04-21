@@ -7,10 +7,7 @@ import { requireAuth } from '../middleware/auth.js';
 export const userSettingsRoute = Router();
 
 userSettingsRoute.get('/user/settings', requireAuth, async (req, res) => {
-  const [settings] = await db
-    .select()
-    .from(userSettings)
-    .where(eq(userSettings.userId, req.user!.userId));
+  const [settings] = await db.select().from(userSettings).where(eq(userSettings.userId, req.user!.userId));
 
   res.json({
     apiKey: settings?.apiKey ?? null,
