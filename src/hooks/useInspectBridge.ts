@@ -1,11 +1,12 @@
-import { useEffect } from 'react'
-import { useSetAtom } from 'jotai'
-import { useSandpackClient } from '@codesandbox/sandpack-react'
+import { useEffect, useRef } from 'react'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { useSandpack } from '@codesandbox/sandpack-react'
 import {
   selectedElementAtom,
   hoveredElementAtom,
   domTreeAtom,
   editorPanelModeAtom,
+  inspectModeAtom,
   type SelectedElement,
   type DOMNode,
 } from '@/atoms'
@@ -14,18 +15,39 @@ import {
  * Bridges postMessage traffic between the platform and the Sandpack preview iframe.
  * Must be called exactly ONCE, inside SandpackProvider (via SandpackSyncBridge).
  *
- * Outbound (platform → iframe): listens for CustomEvents dispatched anywhere on window.
- * Inbound (iframe → platform): listens for window.message events from the preview.
+ * Uses sandpack.clients to get the actual preview iframe registered by <SandpackPreview>.
+ * Outbound: listens for CustomEvents dispatched on window, forwards to iframe via postMessage.
+ * Inbound: listens for window.message events from the preview iframe.
  */
 export function useInspectBridge() {
-  const { iframe } = useSandpackClient()
+  const { sandpack } = useSandpack()
+  const sandpackRef = useRef(sandpack)
+  const inspectMode = useAtomValue(inspectModeAtom)
+  const inspectModeRef = useRef(inspectMode)
   const setSelected = useSetAtom(selectedElementAtom)
   const setHovered = useSetAtom(hoveredElementAtom)
   const setDomTree = useSetAtom(domTreeAtom)
   const setPanelMode = useSetAtom(editorPanelModeAtom)
 
-  const post = (msg: object) =>
-    iframe.current?.contentWindow?.postMessage(msg, '*')
+  useEffect(() => { sandpackRef.current = sandpack }, [sandpack])
+  useEffect(() => { inspectModeRef.current = inspectMode }, [inspectMode])
+
+  const post = (msg: object) => {
+    for (const client of Object.values(sandpackRef.current.clients)) {
+      client.iframe?.contentWindow?.postMessage(msg, '*')
+    }
+  }
+
+  // Re-sync inspect state after Sandpack preview reloads (iframe loses state on refresh)
+  useEffect(() => {
+    if (sandpack.status !== 'running') return
+    const timer = setTimeout(() => {
+      if (inspectModeRef.current) {
+        post({ type: 'VIBE_INSPECT_TOGGLE', enabled: true })
+      }
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [sandpack.status])
 
   // Forward platform CustomEvents → iframe postMessages
   useEffect(() => {
@@ -45,7 +67,7 @@ export function useInspectBridge() {
       window.removeEventListener('vibe-hover-by-id', onHoverById)
       window.removeEventListener('vibe-refresh-tree', onRefreshTree)
     }
-  }, []) // stable — closes over iframe ref, which is a stable ref object
+  }, []) // stable — closes over sandpackRef (a stable object)
 
   // Receive iframe → platform messages
   useEffect(() => {

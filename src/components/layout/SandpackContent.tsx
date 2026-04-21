@@ -42,7 +42,7 @@ export default function SandpackContent() {
   const { device } = useDevicePreview()
   const isMobile = useIsMobile()
   const { t } = useTranslation()
-  const { editorPanelMode } = useEditorPanelTabs()
+  const { editorPanelMode, inspectMode } = useEditorPanelTabs()
   const containerRef = useRef<HTMLDivElement>(null)
   const [findOpen, setFindOpen] = useState(false)
   const [showExplorer, setShowExplorer] = useState(!isMobile)
@@ -125,7 +125,7 @@ export default function SandpackContent() {
         ref={previewPanelRef}
         className={
           showPreview
-            ? 'relative min-w-0 h-full flex items-start justify-center overflow-auto'
+            ? `relative min-w-0 h-full flex items-start justify-center overflow-auto${inspectMode ? ' cursor-crosshair ring-1 ring-inset ring-forge-terracotta/20' : ''}`
             : 'absolute w-0 h-0 overflow-hidden opacity-0 pointer-events-none'
         }
         style={isSplit ? { width: `${(1 - editorFraction) * 100}%` } : showPreview ? { flex: 1 } : undefined}
