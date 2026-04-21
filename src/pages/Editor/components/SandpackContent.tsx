@@ -42,7 +42,7 @@ export default function SandpackContent() {
   const { device } = useDevicePreview();
   const isMobile = useIsMobile();
   const { t } = useTranslation();
-  const { editorPanelMode, inspectMode, selectedElement } = useEditorPanelTabs();
+  const { editorPanelMode, inspectMode } = useEditorPanelTabs();
   const containerRef = useRef<HTMLDivElement>(null);
   const [findOpen, setFindOpen] = useState(false);
   const [showExplorer, setShowExplorer] = useState(!isMobile);
