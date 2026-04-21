@@ -62,15 +62,17 @@ export default function StyleEditor() {
             )}
           </div>
         </div>
-        <TypographySection />
-        <ColorsSection />
-        <SpacingSection />
-        <DimensionsSection />
-        <LayoutSection />
-        <BorderSection />
-        <EffectsSection />
-        <InlineStylesSection />
-        {selectedElement && <AdvancedSection />}
+        <div className={!selectedElement ? 'pointer-events-none opacity-40 select-none' : ''}>
+          <TypographySection />
+          <ColorsSection />
+          <SpacingSection />
+          <DimensionsSection />
+          <LayoutSection />
+          <BorderSection />
+          <EffectsSection />
+          <InlineStylesSection />
+          {selectedElement && <AdvancedSection />}
+        </div>
       </div>
     </StylePatcherContext.Provider>
   );

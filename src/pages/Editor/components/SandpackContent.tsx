@@ -106,9 +106,7 @@ export default function SandpackContent() {
           </div>
         </div>
         {editorPanelMode === 'style' && (
-          <div
-            className={`flex-1 min-h-0 overflow-hidden${!selectedElement ? ' pointer-events-none opacity-40 select-none' : ''}`}
-          >
+          <div className="flex-1 min-h-0 overflow-hidden">
             <StyleEditor />
           </div>
         )}
