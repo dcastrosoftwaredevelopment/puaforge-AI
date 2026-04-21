@@ -1,60 +1,18 @@
-import { useState, useEffect } from 'react'
 import { Key, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useApiKey } from '@/hooks/useApiKey'
-import { useModels } from '@/hooks/useModels'
-import { useApiCall, HttpMethod } from '@/hooks/useApiCall'
+import { useSettingsForm } from '@/hooks/useSettingsForm'
 import Sidebar, { SidebarMenuButton } from '@/components/home/Sidebar'
 import Button from '@/components/ui/Button'
 
 export default function Settings() {
-  const { apiKey, setApiKey, apiKeyEnabled, setApiKeyEnabled } = useApiKey()
-  const { refetchModels } = useModels()
   const { t } = useTranslation()
-  const [draft, setDraft] = useState(apiKey)
-  const [showKey, setShowKey] = useState(false)
-  const [validated, setValidated] = useState<boolean | null>(null)
-
-  useEffect(() => {
-    setDraft(apiKey)
-  }, [apiKey])
-
-  const hasChanges = draft !== apiKey
-
-  const { loading: validating, error: validationError, execute: validateKey } =
-    useApiCall<{ apiKey: string }, { valid: boolean; error?: string }>(HttpMethod.POST, '/api/settings/validate-key')
-
-  const handleValidate = async () => {
-    if (!draft.trim()) return
-    setValidated(null)
-    const result = await validateKey({ apiKey: draft.trim() })
-    setValidated(result ? result.valid : false)
-  }
-
-  const handleSave = async () => {
-    const trimmed = draft.trim()
-    if (trimmed && validated !== true) {
-      const result = await validateKey({ apiKey: trimmed })
-      const isValid = result ? result.valid : false
-      setValidated(isValid)
-      if (!isValid) return
-    }
-    setApiKey(trimmed)
-    if (trimmed) refetchModels()
-    setValidated(null)
-  }
-
-  const handleClear = () => {
-    setDraft('')
-    setApiKey('')
-    setApiKeyEnabled(true)
-    setValidated(null)
-  }
-
-  const handleToggleEnabled = () => {
-    setApiKeyEnabled(!apiKeyEnabled)
-    refetchModels()
-  }
+  const {
+    apiKey, draft, setDraft,
+    showKey, setShowKey,
+    validated, validating, validationError,
+    hasChanges, apiKeyEnabled,
+    handleValidate, handleSave, handleClear, handleToggleEnabled,
+  } = useSettingsForm()
 
   return (
     <div className="h-screen flex bg-bg-primary">
@@ -108,10 +66,7 @@ export default function Settings() {
                 <input
                   type={showKey ? 'text' : 'password'}
                   value={draft}
-                  onChange={(e) => {
-                    setDraft(e.target.value)
-                    setValidated(null)
-                  }}
+                  onChange={(e) => { setDraft(e.target.value) }}
                   placeholder={t('settings.apiKeyPlaceholder')}
                   className="w-full bg-bg-tertiary border border-border-subtle rounded-lg px-3 py-2.5 pr-10 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-border-default transition font-mono"
                 />
@@ -123,7 +78,6 @@ export default function Settings() {
                 </button>
               </div>
 
-              {/* Validation status */}
               {validated === true && (
                 <div className="flex items-center gap-2 text-xs text-vibe-blue">
                   <CheckCircle2 size={13} />
@@ -138,22 +92,10 @@ export default function Settings() {
               )}
 
               <div className="flex items-center gap-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  isLoading={validating}
-                  onClick={handleValidate}
-                  disabled={!draft.trim()}
-                >
+                <Button variant="secondary" size="sm" isLoading={validating} onClick={handleValidate} disabled={!draft.trim()}>
                   {t('settings.validate')}
                 </Button>
-                <Button
-                  variant="blue"
-                  size="sm"
-                  isLoading={validating}
-                  onClick={handleSave}
-                  disabled={!hasChanges}
-                >
+                <Button variant="blue" size="sm" isLoading={validating} onClick={handleSave} disabled={!hasChanges}>
                   {t('settings.save')}
                 </Button>
                 {apiKey && (
@@ -164,9 +106,7 @@ export default function Settings() {
               </div>
 
               {apiKey && !hasChanges && apiKeyEnabled && (
-                <p className="text-xs text-text-muted">
-                  {t('settings.apiKeyActive')}
-                </p>
+                <p className="text-xs text-text-muted">{t('settings.apiKeyActive')}</p>
               )}
             </div>
           </section>
