@@ -191,3 +191,36 @@ export function addClass(className: string, cls: string): string {
   if (classes.includes(cls)) return className
   return [...classes, cls].join(' ')
 }
+
+const BREAKPOINT_RE = /^(sm|md|lg|xl|2xl):/
+
+/** Parse classes filtering by breakpoint prefix. Mobile = no prefix; Desktop = `md:` prefix. */
+export function parseClassesByBreakpoint(className: string, prefix: string): ParsedClasses {
+  const classes = className.split(/\s+/).filter(Boolean)
+  const relevant = classes.map((cls) => {
+    if (!prefix) return BREAKPOINT_RE.test(cls) ? null : cls
+    return cls.startsWith(`${prefix}:`) ? cls.slice(prefix.length + 1) : null
+  }).filter(Boolean) as string[]
+  return parseClasses(relevant.join(' '))
+}
+
+/** Replace class for a specific breakpoint prefix. Empty prefix = base (mobile). */
+export function replaceClassWithPrefix(className: string, newClass: string, prefix: string): string {
+  if (!prefix) return replaceClass(className, newClass)
+  const classes = className.split(/\s+/).filter(Boolean)
+  const filtered = classes.filter((cls) => {
+    if (!cls.startsWith(`${prefix}:`)) return true
+    return !sameCategory(cls.slice(prefix.length + 1), newClass)
+  })
+  if (!newClass) return filtered.join(' ')
+  return [...filtered, `${prefix}:${newClass}`].join(' ')
+}
+
+/** Remove all classes of a category for a specific breakpoint prefix. */
+export function removeClassCategoryWithPrefix(className: string, representative: string, prefix: string): string {
+  if (!prefix) return removeClassCategory(className, representative)
+  return className.split(/\s+/).filter(Boolean).filter((cls) => {
+    if (!cls.startsWith(`${prefix}:`)) return true
+    return !sameCategory(cls.slice(prefix.length + 1), representative)
+  }).join(' ')
+}

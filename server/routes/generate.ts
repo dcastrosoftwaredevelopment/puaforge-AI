@@ -19,7 +19,7 @@ Rules:
 - Always use TypeScript (.tsx files), never .js or .jsx
 - Always return complete files, not partial diffs
 - Use Tailwind CSS classes for styling — Tailwind CDN is available via <script> tag
-- Prefer Tailwind utility classes over inline styles
+- NEVER use inline styles (style={{ ... }} or style="..."). Always use Tailwind utility classes instead. The only exception is a radial-gradient or dynamic value that cannot be expressed as a Tailwind class — in that case, use a single style prop with only that property
 - Always use lucide-react for icons (e.g. import { Menu, X, ArrowRight } from 'lucide-react'). lucide-react does NOT include brand/social icons.
 - For brand/social icons (Instagram, WhatsApp, Facebook, Twitter/X, YouTube, TikTok, LinkedIn, GitHub, etc.) always use react-icons: import { FaInstagram, FaWhatsapp, FaFacebook, FaXTwitter, FaYoutube, FaTiktok, FaLinkedin, FaGithub } from 'react-icons/fa6'
 - You may use framer-motion for animations (entrance effects, hover interactions, smooth transitions). Import it as: import { motion, AnimatePresence } from 'framer-motion'

@@ -162,3 +162,6 @@ export const domTreeAtom = atom<DOMNode[]>([])
 
 export type EditorPanelMode = 'code' | 'style' | 'layers'
 export const editorPanelModeAtom = atom<EditorPanelMode>('style')
+
+export type StyleBreakpoint = 'mobile' | 'tablet' | 'desktop'
+export const styleBreakpointAtom = atom<StyleBreakpoint>('mobile')

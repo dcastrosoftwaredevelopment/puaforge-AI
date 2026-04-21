@@ -1,22 +1,24 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useAtom } from 'jotai'
 import { selectedElementAtom } from '@/atoms'
-import { parseClasses, replaceClass, removeClass, addClass, removeClassCategory } from '@/utils/tailwindClasses'
+import { parseClassesByBreakpoint, replaceClassWithPrefix, removeClassCategoryWithPrefix, removeClass, addClass } from '@/utils/tailwindClasses'
 import { parseInlineStyle, toInlineCss } from '@/utils/inlineStyles'
 import { useStylePatcher } from './useStylePatcher'
+import { useStyleBreakpoint } from './useStyleBreakpoint'
 
 export function useStyleEditor() {
   const [selectedElement, setSelectedElement] = useAtom(selectedElementAtom)
   const { applyClassChange, applyInlineStyleChange } = useStylePatcher()
+  const { prefix } = useStyleBreakpoint()
 
   const parsed = useMemo(
-    () => parseClasses(selectedElement?.className ?? ''),
-    [selectedElement],
+    () => parseClassesByBreakpoint(selectedElement?.className ?? '', prefix),
+    [selectedElement, prefix],
   )
 
   const parsedInlineStyle = useMemo(
     () => (selectedElement?.inlineStyle ? parseInlineStyle(selectedElement.inlineStyle) : {}),
-    [selectedElement?.inlineStyle],
+    [selectedElement],
   )
 
   // Live refs track in-progress edits without triggering re-renders.
@@ -54,17 +56,17 @@ export function useStyleEditor() {
 
   const applyLiveClass = useCallback((newClass: string) => {
     if (!selectedElement) return
-    const newClassName = replaceClass(liveClassNameRef.current, newClass)
+    const newClassName = replaceClassWithPrefix(liveClassNameRef.current, newClass, prefix)
     applyClassChange(liveClassNameRef.current, newClassName)
     liveClassNameRef.current = newClassName
-  }, [selectedElement, applyClassChange])
+  }, [selectedElement, applyClassChange, prefix])
 
   const removeLiveCategory = useCallback((representative: string) => {
     if (!selectedElement) return
-    const newClassName = removeClassCategory(liveClassNameRef.current, representative)
+    const newClassName = removeClassCategoryWithPrefix(liveClassNameRef.current, representative, prefix)
     applyClassChange(liveClassNameRef.current, newClassName)
     liveClassNameRef.current = newClassName
-  }, [selectedElement, applyClassChange])
+  }, [selectedElement, applyClassChange, prefix])
 
   const commitClassName = useCallback(() => {
     if (!selectedElement) return
@@ -98,8 +100,8 @@ export function useStyleEditor() {
 
   const applyClass = useCallback((newClass: string) => {
     if (!selectedElement) return
-    apply(replaceClass(selectedElement.className, newClass))
-  }, [selectedElement, apply])
+    apply(replaceClassWithPrefix(selectedElement.className, newClass, prefix))
+  }, [selectedElement, apply, prefix])
 
   const removeOneClass = useCallback((cls: string) => {
     if (!selectedElement) return
@@ -113,8 +115,8 @@ export function useStyleEditor() {
 
   const removeCategory = useCallback((representative: string) => {
     if (!selectedElement) return
-    apply(removeClassCategory(selectedElement.className, representative))
-  }, [selectedElement, apply])
+    apply(removeClassCategoryWithPrefix(selectedElement.className, representative, prefix))
+  }, [selectedElement, apply, prefix])
 
   // ── inline style helpers (immediate, for add/remove buttons) ─────────────
 
