@@ -12,8 +12,9 @@ function patchCode(code: string, oldClass: string, newClass: string): string {
   const esc = escapeRegex(oldClass)
   const replace = (_m: string, p1: string, p2: string) => `${p1}${newClass}${p2}`
   return code
-    .replace(new RegExp(`(className=")${esc}(")`, 'g'), replace)
-    .replace(new RegExp(`(className={'")${esc}("'})`, 'g'), replace)
+    .replace(new RegExp(`(className\\s*=\\s*")${esc}(")`, 'g'), replace)
+    .replace(new RegExp(`(className\\s*=\\s*')${esc}(')`, 'g'), replace)
+    .replace(new RegExp(`(className\\s*=\\s*\\{'")${esc}("'\\})`, 'g'), replace)
 }
 
 function patchInlineStyle(code: string, oldStyle: string, newStyle: string): string {

@@ -29,7 +29,7 @@ export function useStyleEditor() {
   useEffect(() => {
     liveClassNameRef.current = selectedElement?.className ?? ''
     liveInlineStyleRef.current = selectedElement?.inlineStyle ?? ''
-  }, [selectedElement?.id])
+  }, [selectedElement?.id, prefix])
 
   // ── debounce per field ────────────────────────────────────────────────────
 

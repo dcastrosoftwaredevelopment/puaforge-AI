@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { ChevronDown, ChevronRight, X, Plus, Copy, Check, Smartphone, Tablet, Monitor } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useStyleEditor } from '@/hooks/useStyleEditor'
@@ -58,6 +58,13 @@ function ColorInput({ value, onChange, prefix = '' }: { value: string; onChange:
   const hexMatch = value.match(/\[#([0-9a-fA-F]{3,6})\]/)
   const hex = hexMatch ? `#${hexMatch[1]}` : '#000000'
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const textRef = useRef<HTMLInputElement>(null)
+  const colorRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (textRef.current && document.activeElement !== textRef.current) textRef.current.value = value
+    if (colorRef.current && document.activeElement !== colorRef.current) colorRef.current.value = hex
+  }, [value, hex])
 
   const handleCopy = () => {
     navigator.clipboard.writeText(hex)
@@ -82,12 +89,14 @@ function ColorInput({ value, onChange, prefix = '' }: { value: string; onChange:
   return (
     <div className="flex items-center gap-1.5">
       <input
+        ref={colorRef}
         type="color"
         defaultValue={hex}
         onChange={(e) => handleColorChange(e.target.value)}
         className="w-6 h-6 rounded border border-border-subtle cursor-pointer shrink-0 bg-transparent"
       />
       <input
+        ref={textRef}
         type="text"
         defaultValue={value}
         onChange={(e) => { if (timerRef.current) clearTimeout(timerRef.current); timerRef.current = setTimeout(() => onChange(e.target.value), 300) }}
