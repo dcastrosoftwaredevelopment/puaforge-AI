@@ -112,36 +112,98 @@ export default function SandpackContent() {
   );
 
   return (
-    <SandpackLayout ref={containerRef} className="relative flex h-full w-full">
+    <SandpackLayout ref={containerRef} className="flex h-full w-full">
       <SandpackSyncBridge />
 
-      {/* Preview panel — desktop: flex sibling; mobile: always flex:1 */}
-      <div
-        ref={previewPanelRef}
-        className={
-          showPreview || isMobile ?
-            `relative min-w-0 h-full flex items-start justify-center overflow-auto${inspectMode ? ' cursor-crosshair ring-1 ring-inset ring-forge-terracotta/20' : ''}`
-          : 'absolute w-0 h-0 overflow-hidden opacity-0 pointer-events-none'
-        }
-        style={isSplit && !isMobile ? { width: `${(1 - editorFraction) * 100}%` } : { flex: 1 }}
-      >
-        <div
-          className={`relative ${
-            isResponsive ?
-              'h-full border-x border-border-subtle transition-all duration-300 shrink-0 my-0 mx-auto'
-            : 'w-full h-full'
-          }`}
-          style={isResponsive ? { width: DEVICE_WIDTHS[device] } : undefined}
-        >
-          <SandpackPreview showNavigator showRefreshButton showOpenInCodeSandbox={false} />
-          <SelectionOverlay />
-        </div>
-      </div>
+      {/* Mobile: flex-column so drawer pushes preview up instead of overlapping */}
+      {isMobile ?
+        <div className="flex flex-1 flex-col min-w-0 h-full">
+          {/* Preview — shrinks to give space to drawer */}
+          <div
+            className={`relative flex-1 min-h-0 flex items-start justify-center overflow-auto${inspectMode ? ' cursor-crosshair ring-1 ring-inset ring-forge-terracotta/20' : ''}`}
+          >
+            <div
+              className={`relative ${isResponsive ? 'h-full border-x border-border-subtle transition-all duration-300 shrink-0 my-0 mx-auto' : 'w-full h-full'}`}
+              style={isResponsive ? { width: DEVICE_WIDTHS[device] } : undefined}
+            >
+              <SandpackPreview showNavigator showRefreshButton showOpenInCodeSandbox={false} />
+              <SelectionOverlay />
+            </div>
+          </div>
 
-      {/* Desktop: editor as flex sibling + resize handle */}
-      {!isMobile && (
+          {/* Drawer — height-based, not absolute, so preview shrinks */}
+          <div
+            ref={drawerRef}
+            className="flex shrink-0 flex-col bg-bg-secondary border-t border-border-subtle overflow-hidden transition-[height] duration-300 ease-in-out"
+            style={{ height: drawerOpen ? `${drawerHeightPct}%` : 0 }}
+          >
+            {/* Drag handle */}
+            <div
+              className="flex shrink-0 touch-none cursor-row-resize justify-center py-2"
+              onPointerDown={onDrawerDragStart}
+            >
+              <div className="h-1 w-10 rounded-full bg-border-default" />
+            </div>
+
+            {isDirty && <EditBar onSave={saveEdits} onDiscard={discardEdits} />}
+
+            {drawerTab === 'chat' ?
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <MobileChatPanel />
+              </div>
+            : <>
+                <EditorPanelTabs />
+                <div className={editorPanelMode === 'code' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
+                  <div className="flex items-center justify-end gap-1 px-2 py-1 border-b border-border-subtle shrink-0 bg-bg-secondary">
+                    <button
+                      onClick={() => setFindOpen((v) => !v)}
+                      className="p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+                      title={t('editor.findInFilesTooltip')}
+                    >
+                      <Search size={13} />
+                    </button>
+                  </div>
+                  <div className="relative flex flex-1 min-h-0">
+                    <SandpackCodeEditor showTabs closableTabs showLineNumbers showInlineErrors />
+                    <FindInFiles key={String(findOpen)} open={findOpen} onClose={() => setFindOpen(false)} />
+                  </div>
+                </div>
+                {editorPanelMode === 'style' && (
+                  <div className="flex-1 min-h-0 overflow-hidden">
+                    <StyleEditor />
+                  </div>
+                )}
+                {editorPanelMode === 'layers' && (
+                  <div className="flex-1 min-h-0 overflow-hidden">
+                    <LayersPanel />
+                  </div>
+                )}
+              </>
+            }
+          </div>
+        </div>
+      : /* Desktop: preview + resize handle + editor as horizontal flex siblings */
         <>
+          <div
+            ref={previewPanelRef}
+            className={
+              showPreview ?
+                `relative min-w-0 h-full flex items-start justify-center overflow-auto${inspectMode ? ' cursor-crosshair ring-1 ring-inset ring-forge-terracotta/20' : ''}`
+              : 'absolute w-0 h-0 overflow-hidden opacity-0 pointer-events-none'
+            }
+            style={isSplit ? { width: `${(1 - editorFraction) * 100}%` } : { flex: 1 }}
+          >
+            <div
+              className={`relative ${isResponsive ? 'h-full border-x border-border-subtle transition-all duration-300 shrink-0 my-0 mx-auto' : 'w-full h-full'}`}
+              style={isResponsive ? { width: DEVICE_WIDTHS[device] } : undefined}
+            >
+              <SandpackPreview showNavigator showRefreshButton showOpenInCodeSandbox={false} />
+              <SelectionOverlay />
+            </div>
+          </div>
+
           {isSplit && <ResizeHandle onResize={onSplitResize} onCommit={onSplitCommit} />}
+
           <div
             ref={editorPanelRef}
             className={showEditor ? 'flex flex-col min-w-0 h-full' : 'hidden'}
@@ -184,60 +246,7 @@ export default function SandpackContent() {
             )}
           </div>
         </>
-      )}
-
-      {/* Mobile: bottom drawer */}
-      {isMobile && (
-        <div
-          ref={drawerRef}
-          className={`absolute bottom-0 left-0 right-0 z-10 flex flex-col bg-bg-secondary border-t border-border-subtle transition-transform duration-300 ease-in-out ${drawerOpen ? 'translate-y-0' : 'translate-y-full'}`}
-          style={{ height: `${drawerHeightPct}%` }}
-        >
-          {/* Drag handle */}
-          <div
-            className="flex shrink-0 touch-none cursor-row-resize justify-center py-2"
-            onPointerDown={onDrawerDragStart}
-          >
-            <div className="h-1 w-10 rounded-full bg-border-default" />
-          </div>
-
-          {isDirty && <EditBar onSave={saveEdits} onDiscard={discardEdits} />}
-
-          {drawerTab === 'chat' ?
-            <div className="flex-1 min-h-0 overflow-hidden">
-              <MobileChatPanel />
-            </div>
-          : <>
-              <EditorPanelTabs />
-              <div className={editorPanelMode === 'code' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
-                <div className="flex items-center justify-end gap-1 px-2 py-1 border-b border-border-subtle shrink-0 bg-bg-secondary">
-                  <button
-                    onClick={() => setFindOpen((v) => !v)}
-                    className="p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
-                    title={t('editor.findInFilesTooltip')}
-                  >
-                    <Search size={13} />
-                  </button>
-                </div>
-                <div className="relative flex flex-1 min-h-0">
-                  <SandpackCodeEditor showTabs closableTabs showLineNumbers showInlineErrors />
-                  <FindInFiles key={String(findOpen)} open={findOpen} onClose={() => setFindOpen(false)} />
-                </div>
-              </div>
-              {editorPanelMode === 'style' && (
-                <div className="flex-1 min-h-0 overflow-hidden">
-                  <StyleEditor />
-                </div>
-              )}
-              {editorPanelMode === 'layers' && (
-                <div className="flex-1 min-h-0 overflow-hidden">
-                  <LayersPanel />
-                </div>
-              )}
-            </>
-          }
-        </div>
-      )}
+      }
     </SandpackLayout>
   );
 }
