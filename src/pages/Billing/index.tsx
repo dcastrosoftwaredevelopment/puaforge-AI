@@ -1,28 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Check, Zap, Rocket, Sparkles } from 'lucide-react'
+import { Zap, Rocket, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import Sidebar, { SidebarMenuButton } from '@/components/home/Sidebar'
 import { useUsage, usePlansConfig, formatBytes } from '@/hooks/useUsage'
 import { track } from '@/lib/analytics'
-import UsageRow from './components/UsageRow'
-
-interface PlanFeature {
-  text: string
-  available: boolean
-}
-
-interface Plan {
-  key: 'free' | 'indie' | 'pro'
-  price: string
-  period: string
-  icon: React.ReactNode
-  color: string
-  borderColor: string
-  badgeColor: string
-  current: boolean
-  comingSoon: boolean
-  features: PlanFeature[]
-}
+import UsageSection from './components/UsageSection'
+import PlanCard, { type BillingPlan } from './components/PlanCard'
 
 export default function Billing() {
   const { t } = useTranslation()
@@ -40,7 +23,7 @@ export default function Billing() {
 
   const f = plansConfig
 
-  const plans: Plan[] = [
+  const plans: BillingPlan[] = [
     {
       key: 'free',
       price: 'R$0',
@@ -124,106 +107,19 @@ export default function Billing() {
             <p className="text-sm text-text-muted mt-1">{t('billing.subtitle')}</p>
           </div>
 
-          {usage && (
-            <div className="mb-8 p-5 rounded-xl border border-border-subtle bg-bg-secondary space-y-3">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-semibold text-text-primary">{t('billing.currentUsage')}</span>
-                <span className="text-[10px] px-2 py-0.5 rounded border font-semibold uppercase tracking-wide bg-forge-terracotta/10 text-forge-terracotta border-forge-terracotta/20">
-                  {usage.plan === 'free' ? t('billing.plans.free') : usage.plan === 'indie' ? 'Indie' : 'Pro'}
-                </span>
-              </div>
-              <UsageRow
-                label={t('sidebar.usageProjects')}
-                used={usage.usage.projects.used}
-                limit={usage.usage.projects.limit}
-              />
-              <UsageRow
-                label={t('sidebar.usageStorage')}
-                used={usage.usage.storageBytes.used}
-                limit={usage.usage.storageBytes.limit}
-                unit="bytes"
-              />
-              <UsageRow
-                label={t('billing.usageDomains')}
-                used={usage.usage.customDomains.used}
-                limit={usage.usage.customDomains.limit}
-              />
-              <UsageRow
-                label={t('billing.usagePublishedSites')}
-                used={usage.usage.publishedSites.used}
-                limit={usage.usage.publishedSites.limit}
-              />
-            </div>
-          )}
+          {usage && <UsageSection usage={usage} />}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {plans.map((plan) => (
-              <div
+              <PlanCard
                 key={plan.key}
-                className={`relative flex flex-col rounded-xl border bg-bg-secondary p-5 ${plan.borderColor} ${plan.current ? 'ring-1 ring-border-default' : ''}`}
-              >
-                {/* Header */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`flex items-center gap-2 font-semibold text-sm ${plan.color}`}>
-                    {plan.icon}
-                    {t(`billing.plans.${plan.key}`)}
-                  </div>
-                  {plan.current && (
-                    <span className={`text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded border ${plan.badgeColor}`}>
-                      {t('billing.currentPlan')}
-                    </span>
-                  )}
-                  {plan.comingSoon && !plan.current && (
-                    <span className={`text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded border ${plan.badgeColor}`}>
-                      {t('billing.comingSoon')}
-                    </span>
-                  )}
-                </div>
-
-                {/* Price */}
-                <div className="mb-5">
-                  <span className="text-3xl font-bold text-text-primary">{plan.price}</span>
-                  <span className="text-xs text-text-muted ml-1">{plan.period}</span>
-                </div>
-
-                {/* Features */}
-                <ul className="flex-1 space-y-2.5 mb-6">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-2.5">
-                      <span className={`mt-0.5 shrink-0 ${feature.available ? plan.color : 'text-text-muted'}`}>
-                        {feature.available
-                          ? <Check size={13} />
-                          : <span className="block w-3 h-[1px] bg-current mt-2" />}
-                      </span>
-                      <span className={`text-xs leading-relaxed ${feature.available ? 'text-text-secondary' : 'text-text-muted line-through'}`}>
-                        {feature.text}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-
-                {/* CTA */}
-                {plan.current ? (
-                  <div className="py-2 text-center text-xs text-text-muted border border-border-subtle rounded-lg">
-                    {t('billing.activePlan')}
-                  </div>
-                ) : interested[plan.key] ? (
-                  <div className={`py-2 text-center text-xs rounded-lg border ${plan.badgeColor}`}>
-                    {t('billing.interestConfirmed')}
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => handleInterest(plan.key)}
-                    className={`py-2 text-sm font-medium rounded-lg border transition cursor-pointer ${plan.badgeColor} hover:opacity-80`}
-                  >
-                    {t('billing.notifyMe')}
-                  </button>
-                )}
-              </div>
+                plan={plan}
+                interested={!!interested[plan.key]}
+                onInterestClick={() => handleInterest(plan.key)}
+              />
             ))}
           </div>
 
-          {/* Footer note */}
           <p className="text-xs text-text-muted text-center mt-8 leading-relaxed">
             {t('billing.byokNote')}
           </p>
