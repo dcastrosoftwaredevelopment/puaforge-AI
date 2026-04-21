@@ -14,6 +14,24 @@ export const SHADOW_CLASSES = ['shadow-none', 'shadow-sm', 'shadow', 'shadow-md'
 
 export const SPACING_SCALE = [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 72, 80, 96]
 export const BORDER_WIDTHS = ['border-0', 'border', 'border-2', 'border-4', 'border-8']
+
+const CSS_UNIT_RE = /^-?\d+(\.\d+)?(px|em|rem|%|vh|vw|vmin|vmax|ch|ex|cm|mm|in|pt|pc)$/i
+const PLAIN_NUMBER_RE = /^-?\d+(\.\d+)?$/
+
+/** Convert a user-typed value to a Tailwind suffix. Plain numbers become [Npx] arbitrary values. */
+export function toTailwindValue(value: string): string {
+  if (!value) return value
+  if (value.startsWith('[') && value.endsWith(']')) return value
+  if (CSS_UNIT_RE.test(value)) return `[${value}]`
+  if (PLAIN_NUMBER_RE.test(value)) return `[${value}px]`
+  return value
+}
+
+/** Strip arbitrary brackets for display: [50px] → 50px */
+export function fromTailwindValue(value: string): string {
+  if (value.startsWith('[') && value.endsWith(']')) return value.slice(1, -1)
+  return value
+}
 export const OPACITY_VALUES = [0, 5, 10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 95, 100]
 
 // Sets for O(1) membership checks

@@ -15,9 +15,16 @@ export function useStyleEditor() {
   const liveInlineStyleRef = useRef(store.get(selectedElementAtom)?.inlineStyle ?? '')
 
   useEffect(() => {
+    let prevId = store.get(selectedElementAtom)?.id
     const unsubEl = store.sub(selectedElementAtom, () => {
-      liveClassNameRef.current = store.get(selectedElementAtom)?.className ?? ''
-      liveInlineStyleRef.current = store.get(selectedElementAtom)?.inlineStyle ?? ''
+      const el = store.get(selectedElementAtom)
+      if (el?.id !== prevId) {
+        // Different element selected: reset refs to the incoming element's values
+        liveClassNameRef.current = el?.className ?? ''
+        liveInlineStyleRef.current = el?.inlineStyle ?? ''
+        prevId = el?.id
+      }
+      // Same element (e.g. rect-only update from ResizeObserver): don't overwrite live refs
     })
     const unsubBp = store.sub(styleBreakpointAtom, () => {
       liveClassNameRef.current = store.get(selectedElementAtom)?.className ?? ''
@@ -29,7 +36,7 @@ export function useStyleEditor() {
 
   const pendingRef = useRef<Map<string, { timer: ReturnType<typeof setTimeout>; fn: () => void }>>(new Map())
 
-  const withDebounce = useCallback((key: string, fn: () => void, delay = 1000) => {
+  const withDebounce = useCallback((key: string, fn: () => void, delay = 500) => {
     const existing = pendingRef.current.get(key)
     if (existing) clearTimeout(existing.timer)
     pendingRef.current.set(key, {
