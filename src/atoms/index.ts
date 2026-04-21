@@ -138,3 +138,26 @@ export const sidebarOpenAtom = atom(false)
 
 // External npm dependencies detected from AI-generated code
 export const depsAtom = atom<Record<string, string>>({})
+
+// Elementor-style inspect mode
+export const inspectModeAtom = atom(false)
+
+export interface SelectedElement {
+  id: string
+  tagName: string
+  className: string
+  rect: { top: number; left: number; width: number; height: number }
+}
+export const selectedElementAtom = atom<SelectedElement | null>(null)
+export const hoveredElementAtom = atom<SelectedElement | null>(null)
+
+export interface DOMNode {
+  id: string
+  tagName: string
+  className: string
+  children: DOMNode[]
+}
+export const domTreeAtom = atom<DOMNode[]>([])
+
+export type EditorPanelMode = 'code' | 'style' | 'layers'
+export const editorPanelModeAtom = atom<EditorPanelMode>('code')
