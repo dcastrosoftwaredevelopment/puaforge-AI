@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { ChevronDown, ChevronRight, X, Plus } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { ChevronDown, ChevronRight, X, Plus, Copy, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useStyleEditor } from '@/hooks/useStyleEditor'
 import {
@@ -53,33 +53,55 @@ function Select({ value, onChange, options }: { value: string; onChange: (v: str
 }
 
 function ColorInput({ value, onChange, prefix = '' }: { value: string; onChange: (v: string) => void; prefix?: string }) {
+  const [copied, setCopied] = useState(false)
   const hexMatch = value.match(/\[#([0-9a-fA-F]{3,6})\]/)
   const hex = hexMatch ? `#${hexMatch[1]}` : '#000000'
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(hex)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+
+  const handleColorChange = (h: string) => {
+    const apply = () => {
+      const replaced = value.replace(/\[#[0-9a-fA-F]{3,6}\]/, `[${h}]`)
+      if (replaced !== value) {
+        onChange(replaced)
+      } else {
+        const detectedPrefix = value.match(/^(text|bg|border)-/)?.[0] ?? prefix
+        onChange(`${detectedPrefix}[${h}]`)
+      }
+    }
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(apply, 300)
+  }
+
   return (
     <div className="flex items-center gap-1.5">
       <input
         type="color"
-        value={hex}
-        onChange={(e) => {
-          const h = e.target.value
-          const replaced = value.replace(/\[#[0-9a-fA-F]{3,6}\]/, `[${h}]`)
-          if (replaced !== value) {
-            onChange(replaced)
-          } else {
-            // value is a named class (e.g. text-gray-500) — detect prefix or fall back to prop
-            const detectedPrefix = value.match(/^(text|bg|border)-/)?.[0] ?? prefix
-            onChange(`${detectedPrefix}[${h}]`)
-          }
-        }}
+        defaultValue={hex}
+        onChange={(e) => handleColorChange(e.target.value)}
         className="w-6 h-6 rounded border border-border-subtle cursor-pointer shrink-0 bg-transparent"
       />
       <input
         type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        defaultValue={value}
+        onChange={(e) => { if (timerRef.current) clearTimeout(timerRef.current); timerRef.current = setTimeout(() => onChange(e.target.value), 300) }}
+        onBlur={(e) => { if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null } onChange(e.target.value) }}
+        onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }}
         placeholder="text-gray-500 or [#hex]"
         className="flex-1 text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono"
       />
+      <button
+        onClick={handleCopy}
+        className="shrink-0 text-text-muted/50 hover:text-text-secondary transition cursor-pointer"
+        title={hex}
+      >
+        {copied ? <Check size={11} className="text-green-400" /> : <Copy size={11} />}
+      </button>
     </div>
   )
 }
@@ -104,30 +126,24 @@ function SpacingInput({ label, value, onChange }: { label: string; value: string
 
 export default function StyleEditor() {
   const { t } = useTranslation()
-  const { selectedElement, parsed, parsedInlineStyle, applyClass, removeOneClass, addOneClass, removeCategory, setInlineProp, removeInlineProp, addInlineProp } = useStyleEditor()
+  const { selectedElement, parsed, parsedInlineStyle, applyClass, removeOneClass, addOneClass, removeCategory, setInlineProp, removeInlineProp, addInlineProp, withDebounce, flushDebounce } = useStyleEditor()
   const [newClass, setNewClass] = useState('')
   const [newInlineProp, setNewInlineProp] = useState('')
   const [newInlineValue, setNewInlineValue] = useState('')
 
-  if (!selectedElement || !parsed) {
-    return (
-      <div className="flex items-center justify-center h-full text-xs text-text-muted/50 px-4 text-center">
-        {t('inspect.styleEditorEmpty')}
-      </div>
-    )
-  }
-
-  const allClasses = selectedElement.className.split(/\s+/).filter(Boolean)
+  const allClasses = selectedElement?.className.split(/\s+/).filter(Boolean) ?? []
   const unknownClasses = parsed.unknown
 
   return (
     <div className="flex flex-col h-full overflow-y-auto text-xs">
       {/* Header */}
-      <div className="px-3 py-2 border-b border-border-subtle flex items-center gap-2 shrink-0">
-        <span className="text-[10px] font-mono bg-forge-terracotta/10 text-forge-terracotta border border-forge-terracotta/20 px-1.5 py-0.5 rounded">
-          {selectedElement.tagName}
-        </span>
-      </div>
+      {selectedElement && (
+        <div className="px-3 py-2 border-b border-border-subtle flex items-center gap-2 shrink-0">
+          <span className="text-[10px] font-mono bg-forge-terracotta/10 text-forge-terracotta border border-forge-terracotta/20 px-1.5 py-0.5 rounded">
+            {selectedElement.tagName}
+          </span>
+        </div>
+      )}
 
       {/* Typography */}
       <Section title={t('inspect.sectionTypography')}>
@@ -151,14 +167,14 @@ export default function StyleEditor() {
           </div>
         </Row>
         <Row label={t('inspect.textColor')}>
-          <ColorInput value={parsed.textColor} onChange={(v) => applyClass(v)} prefix="text-" />
+          <ColorInput key={`${selectedElement?.id}-tc`} value={parsed.textColor} onChange={(v) => applyClass(v)} prefix="text-" />
         </Row>
       </Section>
 
       {/* Colors */}
       <Section title={t('inspect.sectionColors')}>
         <Row label={t('inspect.bgColor')}>
-          <ColorInput value={parsed.bgColor} onChange={(v) => applyClass(v)} prefix="bg-" />
+          <ColorInput key={`${selectedElement?.id}-bc`} value={parsed.bgColor} onChange={(v) => applyClass(v)} prefix="bg-" />
         </Row>
       </Section>
 
@@ -183,13 +199,13 @@ export default function StyleEditor() {
       {/* Dimensions */}
       <Section title={t('inspect.sectionDimensions')}>
         <Row label={t('inspect.width')}>
-          <input type="text" value={parsed.width} onChange={(e) => e.target.value ? applyClass(`w-${e.target.value}`) : removeCategory('w-0')} placeholder="full / auto / 64" className="w-full text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono" />
+          <input key={`${selectedElement?.id}-w`} type="text" defaultValue={parsed.width} onChange={(e) => withDebounce('w', () => e.target.value ? applyClass(`w-${e.target.value}`) : removeCategory('w-0'))} onBlur={() => flushDebounce('w')} onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }} placeholder="full / auto / 64" className="w-full text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono" />
         </Row>
         <Row label={t('inspect.height')}>
-          <input type="text" value={parsed.height} onChange={(e) => e.target.value ? applyClass(`h-${e.target.value}`) : removeCategory('h-0')} placeholder="full / auto / 64" className="w-full text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono" />
+          <input key={`${selectedElement?.id}-h`} type="text" defaultValue={parsed.height} onChange={(e) => withDebounce('h', () => e.target.value ? applyClass(`h-${e.target.value}`) : removeCategory('h-0'))} onBlur={() => flushDebounce('h')} onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }} placeholder="full / auto / 64" className="w-full text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono" />
         </Row>
         <Row label={t('inspect.maxWidth')}>
-          <input type="text" value={parsed.maxWidth} onChange={(e) => e.target.value ? applyClass(`max-w-${e.target.value}`) : removeCategory('max-w-sm')} placeholder="sm / lg / xl / full" className="w-full text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono" />
+          <input key={`${selectedElement?.id}-mw`} type="text" defaultValue={parsed.maxWidth} onChange={(e) => withDebounce('mw', () => e.target.value ? applyClass(`max-w-${e.target.value}`) : removeCategory('max-w-sm'))} onBlur={() => flushDebounce('mw')} onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }} placeholder="sm / lg / xl / full" className="w-full text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono" />
         </Row>
       </Section>
 
@@ -226,7 +242,7 @@ export default function StyleEditor() {
         </Row>
         {parsed.borderWidth && parsed.borderWidth !== 'border-0' && (
           <Row label={t('inspect.borderColor')}>
-            <ColorInput value={parsed.borderColor} onChange={(v) => applyClass(v)} prefix="border-" />
+            <ColorInput key={`${selectedElement?.id}-bdc`} value={parsed.borderColor} onChange={(v) => applyClass(v)} prefix="border-" />
           </Row>
         )}
       </Section>
@@ -250,10 +266,12 @@ export default function StyleEditor() {
             <Row key={prop} label={prop}>
               <div className="flex gap-1">
                 <input
+                  key={`${selectedElement?.id}-${prop}`}
                   type="text"
-                  value={value}
-                  onChange={(e) => setInlineProp(prop, e.target.value)}
-                  onBlur={(e) => { if (!e.target.value) removeInlineProp(prop) }}
+                  defaultValue={value}
+                  onChange={(e) => withDebounce(`il-${prop}`, () => e.target.value ? setInlineProp(prop, e.target.value) : removeInlineProp(prop))}
+                  onBlur={() => flushDebounce(`il-${prop}`)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }}
                   className="flex-1 text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono"
                 />
                 <button
@@ -302,8 +320,8 @@ export default function StyleEditor() {
           </div>
         </Section>
 
-      {/* Advanced classes */}
-      <Section title={t('inspect.sectionAdvanced')} defaultOpen={false}>
+      {/* Advanced classes — only shown when an element is selected */}
+      {selectedElement && <Section title={t('inspect.sectionAdvanced')} defaultOpen={false}>
         <div className="flex flex-wrap gap-1 min-h-6">
           {allClasses.map((cls) => (
             <span
@@ -333,7 +351,7 @@ export default function StyleEditor() {
             <Plus size={11} />
           </button>
         </div>
-      </Section>
+      </Section>}
     </div>
   )
 }

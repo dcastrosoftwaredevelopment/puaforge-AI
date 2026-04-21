@@ -1,7 +1,7 @@
 import { useAtom } from 'jotai'
 import { editorFractionAtom, chatWidthAtom } from '@/atoms'
 
-const EDITOR_DEFAULT = 0.5
+const EDITOR_DEFAULT = 0.3
 const CHAT_DEFAULT = 384
 
 export function usePanelSizes() {

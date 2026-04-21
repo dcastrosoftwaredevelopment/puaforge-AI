@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 import { useAtom } from 'jotai'
 import { selectedElementAtom } from '@/atoms'
 import { parseClasses, replaceClass, removeClass, addClass, removeClassCategory } from '@/utils/tailwindClasses'
@@ -10,7 +10,7 @@ export function useStyleEditor() {
   const { applyClassChange, applyInlineStyleChange } = useStylePatcher()
 
   const parsed = useMemo(
-    () => (selectedElement ? parseClasses(selectedElement.className) : null),
+    () => parseClasses(selectedElement?.className ?? ''),
     [selectedElement],
   )
 
@@ -18,6 +18,27 @@ export function useStyleEditor() {
     () => (selectedElement?.inlineStyle ? parseInlineStyle(selectedElement.inlineStyle) : {}),
     [selectedElement?.inlineStyle],
   )
+
+  // ── debounce per field ────────────────────────────────────────────────────
+
+  const pendingRef = useRef<Map<string, { timer: ReturnType<typeof setTimeout>; fn: () => void }>>(new Map())
+
+  const withDebounce = useCallback((key: string, fn: () => void, delay = 300) => {
+    const existing = pendingRef.current.get(key)
+    if (existing) clearTimeout(existing.timer)
+    pendingRef.current.set(key, {
+      fn,
+      timer: setTimeout(() => { fn(); pendingRef.current.delete(key) }, delay),
+    })
+  }, [])
+
+  const flushDebounce = useCallback((key: string) => {
+    const pending = pendingRef.current.get(key)
+    if (!pending) return
+    clearTimeout(pending.timer)
+    pending.fn()
+    pendingRef.current.delete(key)
+  }, [])
 
   // ── className helpers ─────────────────────────────────────────────────────
 
@@ -83,5 +104,7 @@ export function useStyleEditor() {
     removeInlineProp,
     addInlineProp,
     setSelectedElement,
+    withDebounce,
+    flushDebounce,
   }
 }

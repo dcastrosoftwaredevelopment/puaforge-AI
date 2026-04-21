@@ -1,4 +1,5 @@
-import { Plus, RotateCcw } from 'lucide-react'
+import { useState } from 'react'
+import { Plus, RotateCcw, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useColorPalette } from '@/hooks/useColorPalette'
 import ColorRow from './ColorRow'
@@ -6,6 +7,13 @@ import ColorRow from './ColorRow'
 export default function ColorPalette() {
   const { palette, addColor, updateColor, removeColor, resetToDefaults } = useColorPalette()
   const { t } = useTranslation()
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+
+  const handleCopy = (id: string, value: string) => {
+    navigator.clipboard.writeText(value)
+    setCopiedId(id)
+    setTimeout(() => setCopiedId(null), 1500)
+  }
 
   return (
     <div className="flex flex-col">
@@ -31,12 +39,19 @@ export default function ColorPalette() {
 
       <div className="flex flex-wrap gap-1.5 px-3 py-2.5 border-b border-border-subtle">
         {palette.map((c) => (
-          <div
+          <button
             key={c.id}
-            className="w-5 h-5 rounded border border-[rgba(255,255,255,0.1)]"
+            onClick={() => handleCopy(c.id, c.value)}
+            className="relative w-5 h-5 rounded border border-[rgba(255,255,255,0.1)] cursor-pointer hover:scale-110 transition-transform shrink-0"
             style={{ background: c.value }}
             title={`${c.name}: ${c.value}`}
-          />
+          >
+            {copiedId === c.id && (
+              <span className="absolute inset-0 flex items-center justify-center bg-black/40 rounded">
+                <Check size={10} className="text-white" />
+              </span>
+            )}
+          </button>
         ))}
       </div>
 

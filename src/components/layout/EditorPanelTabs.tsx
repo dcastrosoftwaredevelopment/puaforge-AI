@@ -10,7 +10,7 @@ export default function EditorPanelTabs() {
 
   const tabs: Array<{ mode: EditorPanelMode; label: string; icon: React.ReactNode; enabled: boolean; disabledTip: string }> = [
     { mode: 'code', label: t('inspect.tabCode'), icon: <Code2 size={13} />, enabled: true, disabledTip: '' },
-    { mode: 'style', label: t('inspect.tabStyle'), icon: <Paintbrush size={13} />, enabled: !!selectedElement, disabledTip: t('inspect.tabStyleDisabled') },
+    { mode: 'style', label: t('inspect.tabStyle'), icon: <Paintbrush size={13} />, enabled: true, disabledTip: '' },
     { mode: 'layers', label: t('inspect.tabLayers'), icon: <Layers size={13} />, enabled: inspectMode, disabledTip: t('inspect.tabLayersDisabled') },
   ]
 

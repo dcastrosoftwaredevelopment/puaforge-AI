@@ -64,7 +64,7 @@ export const chatModeAtom = atom<ChatMode>('docked')
 
 // View mode
 export type ViewMode = 'editor' | 'preview' | 'split'
-export const viewModeAtom = atom<ViewMode>('preview')
+export const viewModeAtom = atom<ViewMode>('split')
 
 // Claude model selection
 export interface ClaudeModel {
@@ -83,7 +83,7 @@ export const editorActionsAtom = atom<{ save: () => void; discard: () => void }>
 })
 
 // Panel sizes
-export const editorFractionAtom = atom(0.5)
+export const editorFractionAtom = atom(0.3)
 export const chatWidthAtom = atom(384)
 
 // API key (configured via settings page)
@@ -161,4 +161,4 @@ export interface DOMNode {
 export const domTreeAtom = atom<DOMNode[]>([])
 
 export type EditorPanelMode = 'code' | 'style' | 'layers'
-export const editorPanelModeAtom = atom<EditorPanelMode>('code')
+export const editorPanelModeAtom = atom<EditorPanelMode>('style')

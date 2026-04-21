@@ -42,7 +42,7 @@ export default function SandpackContent() {
   const { device } = useDevicePreview()
   const isMobile = useIsMobile()
   const { t } = useTranslation()
-  const { editorPanelMode, inspectMode } = useEditorPanelTabs()
+  const { editorPanelMode, inspectMode, selectedElement } = useEditorPanelTabs()
   const containerRef = useRef<HTMLDivElement>(null)
   const [findOpen, setFindOpen] = useState(false)
   const [showExplorer, setShowExplorer] = useState(!isMobile)
@@ -109,7 +109,7 @@ export default function SandpackContent() {
           </div>
         </div>
         {editorPanelMode === 'style' && (
-          <div className="flex-1 min-h-0 overflow-hidden">
+          <div className={`flex-1 min-h-0 overflow-hidden${!selectedElement ? ' pointer-events-none opacity-40 select-none' : ''}`}>
             <StyleEditor />
           </div>
         )}
