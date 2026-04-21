@@ -12,7 +12,6 @@ import DeviceToggle from './DeviceToggle';
 import ExportButton from './ExportButton';
 import BuildDownloadButton from './BuildDownloadButton';
 import PublishButton from './PublishButton';
-import InspectToggle from './InspectToggle';
 import ProjectName from './ProjectName';
 import ImageAssets from './ImageAssets';
 import Checkpoints from './Checkpoints';
@@ -135,7 +134,6 @@ export default function EditorHeader() {
 
           <DeviceToggle />
           <ViewToggle />
-          <InspectToggle />
 
           {/* Draft controls */}
           {isDraft && (
