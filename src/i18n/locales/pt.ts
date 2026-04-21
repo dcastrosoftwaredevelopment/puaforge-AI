@@ -352,6 +352,7 @@ export const pt = {
     sectionBorder: 'Borda',
     sectionEffects: 'Efeitos',
     sectionAdvanced: 'Classes avançadas',
+    sectionInlineStyles: 'Estilos inline',
     fontSize: 'Tamanho',
     fontWeight: 'Peso',
     textAlign: 'Alinhamento',

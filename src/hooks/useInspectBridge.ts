@@ -51,7 +51,7 @@ export function useInspectBridge() {
     if (sandpack.status !== 'running') return
     const timer = setTimeout(() => {
       if (inspectModeRef.current) {
-        post({ type: 'VIBE_INSPECT_TOGGLE', enabled: true })
+        post({ type: 'FORGE_INSPECT_TOGGLE', enabled: true })
       }
     }, 400)
     return () => clearTimeout(timer)
@@ -59,21 +59,21 @@ export function useInspectBridge() {
 
   // Forward platform CustomEvents → iframe postMessages
   useEffect(() => {
-    const onToggle = (e: Event) => post({ type: 'VIBE_INSPECT_TOGGLE', enabled: (e as CustomEvent).detail.enabled })
-    const onSelectById = (e: Event) => post({ type: 'VIBE_SELECT_BY_ID', id: (e as CustomEvent).detail.id })
-    const onHoverById = (e: Event) => post({ type: 'VIBE_HOVER_BY_ID', id: (e as CustomEvent).detail.id })
-    const onRefreshTree = () => post({ type: 'VIBE_REFRESH_TREE' })
+    const onToggle = (e: Event) => post({ type: 'FORGE_INSPECT_TOGGLE', enabled: (e as CustomEvent).detail.enabled })
+    const onSelectById = (e: Event) => post({ type: 'FORGE_SELECT_BY_ID', id: (e as CustomEvent).detail.id, stayInLayers: !!(e as CustomEvent).detail.stayInLayers })
+    const onHoverById = (e: Event) => post({ type: 'FORGE_HOVER_BY_ID', id: (e as CustomEvent).detail.id })
+    const onRefreshTree = () => post({ type: 'FORGE_REFRESH_TREE' })
 
-    window.addEventListener('vibe-inspect-toggle', onToggle)
-    window.addEventListener('vibe-select-by-id', onSelectById)
-    window.addEventListener('vibe-hover-by-id', onHoverById)
-    window.addEventListener('vibe-refresh-tree', onRefreshTree)
+    window.addEventListener('forge-inspect-toggle', onToggle)
+    window.addEventListener('forge-select-by-id', onSelectById)
+    window.addEventListener('forge-hover-by-id', onHoverById)
+    window.addEventListener('forge-refresh-tree', onRefreshTree)
 
     return () => {
-      window.removeEventListener('vibe-inspect-toggle', onToggle)
-      window.removeEventListener('vibe-select-by-id', onSelectById)
-      window.removeEventListener('vibe-hover-by-id', onHoverById)
-      window.removeEventListener('vibe-refresh-tree', onRefreshTree)
+      window.removeEventListener('forge-inspect-toggle', onToggle)
+      window.removeEventListener('forge-select-by-id', onSelectById)
+      window.removeEventListener('forge-hover-by-id', onHoverById)
+      window.removeEventListener('forge-refresh-tree', onRefreshTree)
     }
   }, []) // stable — closes over sandpackRef (a stable object)
 
@@ -83,19 +83,19 @@ export function useInspectBridge() {
       if (!e.data || typeof e.data !== 'object') return
       const { type } = e.data
 
-      if (type === 'VIBE_READY') {
-        if (inspectModeRef.current) post({ type: 'VIBE_INSPECT_TOGGLE', enabled: true })
-      } else if (type === 'VIBE_ELEMENT_SELECTED') {
-        const el: SelectedElement = { id: e.data.id, tagName: e.data.tagName, className: e.data.className, rect: e.data.rect }
+      if (type === 'FORGE_READY') {
+        if (inspectModeRef.current) post({ type: 'FORGE_INSPECT_TOGGLE', enabled: true })
+      } else if (type === 'FORGE_ELEMENT_SELECTED') {
+        const el: SelectedElement = { id: e.data.id, tagName: e.data.tagName, className: e.data.className, inlineStyle: e.data.inlineStyle || '', rect: e.data.rect }
         setSelected(el)
-        setPanelMode('style')
-      } else if (type === 'VIBE_ELEMENT_RESIZED') {
+        if (!e.data.stayInLayers) setPanelMode('style')
+      } else if (type === 'FORGE_ELEMENT_RESIZED') {
         const rect = e.data.rect
         setSelected((prev) => prev ? { ...prev, rect } : null)
-      } else if (type === 'VIBE_ELEMENT_HOVERED') {
-        const el: SelectedElement = { id: e.data.id, tagName: e.data.tagName, className: e.data.className, rect: e.data.rect }
+      } else if (type === 'FORGE_ELEMENT_HOVERED') {
+        const el: SelectedElement = { id: e.data.id, tagName: e.data.tagName, className: e.data.className, inlineStyle: e.data.inlineStyle || '', rect: e.data.rect }
         setHovered(el)
-      } else if (type === 'VIBE_DOM_TREE') {
+      } else if (type === 'FORGE_DOM_TREE') {
         setDomTree(e.data.tree as DOMNode[])
       }
     }

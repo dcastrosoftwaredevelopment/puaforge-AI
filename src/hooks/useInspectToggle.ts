@@ -18,7 +18,7 @@ export function useInspectToggle() {
       setHovered(null)
       setPanelMode('code')
     }
-    window.dispatchEvent(new CustomEvent('vibe-inspect-toggle', { detail: { enabled: next } }))
+    window.dispatchEvent(new CustomEvent('forge-inspect-toggle', { detail: { enabled: next } }))
   }, [inspectMode, setInspectMode, setSelected, setHovered, setPanelMode])
 
   return { inspectMode, toggleInspect, showInspect: showPreview }

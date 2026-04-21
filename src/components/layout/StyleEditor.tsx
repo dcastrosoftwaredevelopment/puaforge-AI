@@ -97,7 +97,7 @@ function SpacingInput({ label, value, onChange }: { label: string; value: string
 
 export default function StyleEditor() {
   const { t } = useTranslation()
-  const { selectedElement, parsed, applyClass, removeOneClass, addOneClass } = useStyleEditor()
+  const { selectedElement, parsed, applyClass, removeOneClass, addOneClass, removeCategory } = useStyleEditor()
   const [newClass, setNewClass] = useState('')
 
   if (!selectedElement || !parsed) {
@@ -123,10 +123,10 @@ export default function StyleEditor() {
       {/* Typography */}
       <Section title={t('inspect.sectionTypography')}>
         <Row label={t('inspect.fontSize')}>
-          <Select value={parsed.fontSize} onChange={(v) => applyClass(v)} options={FONT_SIZES.map((s) => ({ label: s.replace('text-', ''), value: s }))} />
+          <Select value={parsed.fontSize} onChange={(v) => v ? applyClass(v) : removeCategory(FONT_SIZES[0])} options={FONT_SIZES.map((s) => ({ label: s.replace('text-', ''), value: s }))} />
         </Row>
         <Row label={t('inspect.fontWeight')}>
-          <Select value={parsed.fontWeight} onChange={(v) => applyClass(v)} options={FONT_WEIGHTS.map((s) => ({ label: s.replace('font-', ''), value: s }))} />
+          <Select value={parsed.fontWeight} onChange={(v) => v ? applyClass(v) : removeCategory(FONT_WEIGHTS[0])} options={FONT_WEIGHTS.map((s) => ({ label: s.replace('font-', ''), value: s }))} />
         </Row>
         <Row label={t('inspect.textAlign')}>
           <div className="flex gap-1">
@@ -157,51 +157,51 @@ export default function StyleEditor() {
       <Section title={t('inspect.sectionSpacing')}>
         <span className="text-[10px] text-text-muted/60 uppercase">{t('inspect.padding')}</span>
         <div className="grid grid-cols-2 gap-1">
-          <SpacingInput label="T" value={parsed.paddingTop} onChange={(v) => applyClass(v ? `pt-${v}` : '')} />
-          <SpacingInput label="R" value={parsed.paddingRight} onChange={(v) => applyClass(v ? `pr-${v}` : '')} />
-          <SpacingInput label="B" value={parsed.paddingBottom} onChange={(v) => applyClass(v ? `pb-${v}` : '')} />
-          <SpacingInput label="L" value={parsed.paddingLeft} onChange={(v) => applyClass(v ? `pl-${v}` : '')} />
+          <SpacingInput label="T" value={parsed.paddingTop} onChange={(v) => v ? applyClass(`pt-${v}`) : removeCategory('pt-0')} />
+          <SpacingInput label="R" value={parsed.paddingRight} onChange={(v) => v ? applyClass(`pr-${v}`) : removeCategory('pr-0')} />
+          <SpacingInput label="B" value={parsed.paddingBottom} onChange={(v) => v ? applyClass(`pb-${v}`) : removeCategory('pb-0')} />
+          <SpacingInput label="L" value={parsed.paddingLeft} onChange={(v) => v ? applyClass(`pl-${v}`) : removeCategory('pl-0')} />
         </div>
         <span className="text-[10px] text-text-muted/60 uppercase">{t('inspect.margin')}</span>
         <div className="grid grid-cols-2 gap-1">
-          <SpacingInput label="T" value={parsed.marginTop} onChange={(v) => applyClass(v ? `mt-${v}` : '')} />
-          <SpacingInput label="R" value={parsed.marginRight} onChange={(v) => applyClass(v ? `mr-${v}` : '')} />
-          <SpacingInput label="B" value={parsed.marginBottom} onChange={(v) => applyClass(v ? `mb-${v}` : '')} />
-          <SpacingInput label="L" value={parsed.marginLeft} onChange={(v) => applyClass(v ? `ml-${v}` : '')} />
+          <SpacingInput label="T" value={parsed.marginTop} onChange={(v) => v ? applyClass(`mt-${v}`) : removeCategory('mt-0')} />
+          <SpacingInput label="R" value={parsed.marginRight} onChange={(v) => v ? applyClass(`mr-${v}`) : removeCategory('mr-0')} />
+          <SpacingInput label="B" value={parsed.marginBottom} onChange={(v) => v ? applyClass(`mb-${v}`) : removeCategory('mb-0')} />
+          <SpacingInput label="L" value={parsed.marginLeft} onChange={(v) => v ? applyClass(`ml-${v}`) : removeCategory('ml-0')} />
         </div>
       </Section>
 
       {/* Dimensions */}
       <Section title={t('inspect.sectionDimensions')}>
         <Row label={t('inspect.width')}>
-          <input type="text" value={parsed.width} onChange={(e) => applyClass(e.target.value ? `w-${e.target.value}` : '')} placeholder="full / auto / 64" className="w-full text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono" />
+          <input type="text" value={parsed.width} onChange={(e) => e.target.value ? applyClass(`w-${e.target.value}`) : removeCategory('w-0')} placeholder="full / auto / 64" className="w-full text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono" />
         </Row>
         <Row label={t('inspect.height')}>
-          <input type="text" value={parsed.height} onChange={(e) => applyClass(e.target.value ? `h-${e.target.value}` : '')} placeholder="full / auto / 64" className="w-full text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono" />
+          <input type="text" value={parsed.height} onChange={(e) => e.target.value ? applyClass(`h-${e.target.value}`) : removeCategory('h-0')} placeholder="full / auto / 64" className="w-full text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono" />
         </Row>
         <Row label={t('inspect.maxWidth')}>
-          <input type="text" value={parsed.maxWidth} onChange={(e) => applyClass(e.target.value ? `max-w-${e.target.value}` : '')} placeholder="sm / lg / xl / full" className="w-full text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono" />
+          <input type="text" value={parsed.maxWidth} onChange={(e) => e.target.value ? applyClass(`max-w-${e.target.value}`) : removeCategory('max-w-sm')} placeholder="sm / lg / xl / full" className="w-full text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono" />
         </Row>
       </Section>
 
       {/* Layout */}
       <Section title={t('inspect.sectionLayout')}>
         <Row label={t('inspect.display')}>
-          <Select value={parsed.display} onChange={(v) => applyClass(v)} options={DISPLAYS} />
+          <Select value={parsed.display} onChange={(v) => v ? applyClass(v) : removeCategory(DISPLAYS[0])} options={DISPLAYS} />
         </Row>
         {(parsed.display === 'flex' || parsed.display === 'inline-flex') && (
           <>
             <Row label={t('inspect.flexDir')}>
-              <Select value={parsed.flexDir} onChange={(v) => applyClass(v)} options={FLEX_DIRS.map((s) => ({ label: s.replace('flex-', ''), value: s }))} />
+              <Select value={parsed.flexDir} onChange={(v) => v ? applyClass(v) : removeCategory(FLEX_DIRS[0])} options={FLEX_DIRS.map((s) => ({ label: s.replace('flex-', ''), value: s }))} />
             </Row>
             <Row label={t('inspect.justify')}>
-              <Select value={parsed.justify} onChange={(v) => applyClass(v)} options={JUSTIFY.map((s) => ({ label: s.replace('justify-', ''), value: s }))} />
+              <Select value={parsed.justify} onChange={(v) => v ? applyClass(v) : removeCategory(JUSTIFY[0])} options={JUSTIFY.map((s) => ({ label: s.replace('justify-', ''), value: s }))} />
             </Row>
             <Row label={t('inspect.alignItems')}>
-              <Select value={parsed.alignItems} onChange={(v) => applyClass(v)} options={ALIGN_ITEMS.map((s) => ({ label: s.replace('items-', ''), value: s }))} />
+              <Select value={parsed.alignItems} onChange={(v) => v ? applyClass(v) : removeCategory(ALIGN_ITEMS[0])} options={ALIGN_ITEMS.map((s) => ({ label: s.replace('items-', ''), value: s }))} />
             </Row>
             <Row label={t('inspect.gap')}>
-              <Select value={parsed.gap} onChange={(v) => applyClass(v ? `gap-${v}` : '')} options={SPACING_SCALE.map((n) => String(n))} />
+              <Select value={parsed.gap} onChange={(v) => v ? applyClass(`gap-${v}`) : removeCategory('gap-0')} options={SPACING_SCALE.map((n) => String(n))} />
             </Row>
           </>
         )}
@@ -210,10 +210,10 @@ export default function StyleEditor() {
       {/* Border */}
       <Section title={t('inspect.sectionBorder')}>
         <Row label={t('inspect.rounded')}>
-          <Select value={parsed.rounded} onChange={(v) => applyClass(v)} options={ROUNDED_CLASSES} />
+          <Select value={parsed.rounded} onChange={(v) => v ? applyClass(v) : removeCategory(ROUNDED_CLASSES[0])} options={ROUNDED_CLASSES} />
         </Row>
         <Row label={t('inspect.borderWidth')}>
-          <Select value={parsed.borderWidth} onChange={(v) => applyClass(v)} options={BORDER_WIDTHS} />
+          <Select value={parsed.borderWidth} onChange={(v) => v ? applyClass(v) : removeCategory(BORDER_WIDTHS[0])} options={BORDER_WIDTHS} />
         </Row>
         {parsed.borderWidth && parsed.borderWidth !== 'border-0' && (
           <Row label={t('inspect.borderColor')}>
@@ -225,15 +225,24 @@ export default function StyleEditor() {
       {/* Effects */}
       <Section title={t('inspect.sectionEffects')}>
         <Row label={t('inspect.shadow')}>
-          <Select value={parsed.shadow} onChange={(v) => applyClass(v)} options={SHADOW_CLASSES} />
+          <Select value={parsed.shadow} onChange={(v) => v ? applyClass(v) : removeCategory(SHADOW_CLASSES[0])} options={SHADOW_CLASSES} />
         </Row>
         <Row label={t('inspect.opacity')}>
           <input type="range" min={0} max={100} step={5} value={parsed.opacity || '100'} onChange={(e) => applyClass(`opacity-${e.target.value}`)} className="w-full accent-forge-terracotta cursor-pointer" />
         </Row>
         <Row label={t('inspect.overflow')}>
-          <Select value={parsed.overflow} onChange={(v) => applyClass(v)} options={OVERFLOWS} />
+          <Select value={parsed.overflow} onChange={(v) => v ? applyClass(v) : removeCategory(OVERFLOWS[0])} options={OVERFLOWS} />
         </Row>
       </Section>
+
+      {/* Inline styles */}
+      {selectedElement.inlineStyle && (
+        <Section title={t('inspect.sectionInlineStyles')} defaultOpen={true}>
+          <div className="font-mono text-[11px] text-text-muted/80 bg-bg-secondary rounded px-2 py-1.5 break-all select-text">
+            {selectedElement.inlineStyle}
+          </div>
+        </Section>
+      )}
 
       {/* Advanced classes */}
       <Section title={t('inspect.sectionAdvanced')} defaultOpen={false}>

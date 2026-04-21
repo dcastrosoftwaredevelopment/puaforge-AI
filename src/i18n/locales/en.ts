@@ -352,6 +352,7 @@ export const en = {
     sectionBorder: 'Border',
     sectionEffects: 'Effects',
     sectionAdvanced: 'Advanced classes',
+    sectionInlineStyles: 'Inline styles',
     fontSize: 'Size',
     fontWeight: 'Weight',
     textAlign: 'Align',

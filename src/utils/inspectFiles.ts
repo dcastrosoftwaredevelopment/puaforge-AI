@@ -1,7 +1,7 @@
-export const VIBE_INSPECT_SOURCE = `
+export const FORGE_INSPECT_SOURCE = `
 import React, { useEffect, useRef } from 'react'
 
-export function VibeInspect({ children }) {
+export function ForgeInspect({ children }) {
   const activeRef = useRef(false)
   const overlayRef = useRef(null)
 
@@ -54,7 +54,7 @@ export function VibeInspect({ children }) {
         var n = domNode(root.children[i], 0)
         if (n) tree.push(n)
       }
-      window.parent.postMessage({ type: 'VIBE_DOM_TREE', tree: tree }, '*')
+      window.parent.postMessage({ type: 'FORGE_DOM_TREE', tree: tree }, '*')
     }
 
     function getInfo(el) {
@@ -63,6 +63,7 @@ export function VibeInspect({ children }) {
         id: el.getAttribute('data-vibe-id') || '',
         tagName: el.tagName.toLowerCase(),
         className: el.getAttribute('class') || '',
+        inlineStyle: el.getAttribute('style') || '',
         rect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
       }
     }
@@ -77,7 +78,7 @@ export function VibeInspect({ children }) {
 
     function onMove(e) {
       var el = hitElement(e.clientX, e.clientY)
-      if (el) window.parent.postMessage(Object.assign({ type: 'VIBE_ELEMENT_HOVERED' }, getInfo(el)), '*')
+      if (el) window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_HOVERED' }, getInfo(el)), '*')
     }
 
     var selectedElRef = null
@@ -91,7 +92,7 @@ export function VibeInspect({ children }) {
       resizeObs = new ResizeObserver(function() {
         if (skipFirst) { skipFirst = false; return }
         if (selectedElRef && document.body.contains(selectedElRef)) {
-          window.parent.postMessage(Object.assign({ type: 'VIBE_ELEMENT_RESIZED' }, getInfo(selectedElRef)), '*')
+          window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_RESIZED' }, getInfo(selectedElRef)), '*')
         }
       })
       resizeObs.observe(el)
@@ -103,7 +104,7 @@ export function VibeInspect({ children }) {
       var el = hitElement(e.clientX, e.clientY)
       if (!el) return
       watchSelected(el)
-      window.parent.postMessage(Object.assign({ type: 'VIBE_ELEMENT_SELECTED' }, getInfo(el)), '*')
+      window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_SELECTED' }, getInfo(el)), '*')
     }
 
     function activate() {
@@ -111,7 +112,7 @@ export function VibeInspect({ children }) {
       assignIds()
       sendTree()
       if (selectedElRef && document.body.contains(selectedElRef)) {
-        window.parent.postMessage(Object.assign({ type: 'VIBE_ELEMENT_RESIZED' }, getInfo(selectedElRef)), '*')
+        window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_RESIZED' }, getInfo(selectedElRef)), '*')
       }
       if (!overlayRef.current) {
         var ov = document.createElement('div')
@@ -139,26 +140,26 @@ export function VibeInspect({ children }) {
     function onMessage(e) {
       if (!e.data || typeof e.data !== 'object') return
       var t = e.data.type
-      if (!t || t.indexOf('VIBE_') !== 0) return
-      if (t === 'VIBE_INSPECT_TOGGLE') {
+      if (!t || t.indexOf('FORGE_') !== 0) return
+      if (t === 'FORGE_INSPECT_TOGGLE') {
         var on = !!e.data.enabled
         if (on === activeRef.current) return
         if (on) activate(); else deactivate()
-      } else if (t === 'VIBE_SELECT_BY_ID') {
+      } else if (t === 'FORGE_SELECT_BY_ID') {
         var el = document.querySelector('[data-vibe-id="' + e.data.id + '"]')
         if (!el) return
         try { el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) } catch(x) {}
-        window.parent.postMessage(Object.assign({ type: 'VIBE_ELEMENT_SELECTED' }, getInfo(el)), '*')
-      } else if (t === 'VIBE_HOVER_BY_ID') {
+        window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_SELECTED', stayInLayers: !!e.data.stayInLayers }, getInfo(el)), '*')
+      } else if (t === 'FORGE_HOVER_BY_ID') {
         var el2 = document.querySelector('[data-vibe-id="' + e.data.id + '"]')
-        if (el2) window.parent.postMessage(Object.assign({ type: 'VIBE_ELEMENT_HOVERED' }, getInfo(el2)), '*')
-      } else if (t === 'VIBE_REFRESH_TREE') {
+        if (el2) window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_HOVERED' }, getInfo(el2)), '*')
+      } else if (t === 'FORGE_REFRESH_TREE') {
         if (activeRef.current) { assignIds(); sendTree() }
       }
     }
 
     window.addEventListener('message', onMessage)
-    window.parent.postMessage({ type: 'VIBE_READY' }, '*')
+    window.parent.postMessage({ type: 'FORGE_READY' }, '*')
 
     return function() {
       window.removeEventListener('message', onMessage)
@@ -170,13 +171,13 @@ export function VibeInspect({ children }) {
 }
 `
 
-export const VIBE_ENTRY_SOURCE = `
+export const FORGE_ENTRY_SOURCE = `
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
-import { VibeInspect } from './__vibeInspect'
+import { ForgeInspect } from './__forgeInspect'
 
 createRoot(document.getElementById('root')).render(
-  React.createElement(VibeInspect, null, React.createElement(App, null))
+  React.createElement(ForgeInspect, null, React.createElement(App, null))
 )
 `

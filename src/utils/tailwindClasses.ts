@@ -170,6 +170,12 @@ export function replaceClass(className: string, newClass: string): string {
   return [...filtered, newClass].join(' ')
 }
 
+/** Remove all classes in the same category as `representative` (use any member of the category). */
+export function removeClassCategory(className: string, representative: string): string {
+  if (!representative) return className
+  return className.split(/\s+/).filter(Boolean).filter((c) => !sameCategory(c, representative)).join(' ')
+}
+
 /** Remove a specific class from the className string. */
 export function removeClass(className: string, cls: string): string {
   return className.split(/\s+/).filter((c) => c !== cls).join(' ')

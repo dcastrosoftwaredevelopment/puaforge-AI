@@ -10,7 +10,7 @@ import { useProjectLoader } from '@/hooks/useProjectLoader'
 import { useDraft } from '@/hooks/useDraft'
 import { extractDependencies } from '@/services/fileParser'
 import { TAILWIND_HTML, buildPackageJson } from '@/utils/defaultFiles'
-import { VIBE_INSPECT_SOURCE, VIBE_ENTRY_SOURCE } from '@/utils/inspectFiles'
+import { FORGE_INSPECT_SOURCE, FORGE_ENTRY_SOURCE } from '@/utils/inspectFiles'
 import EditorHeader from '@/components/layout/EditorHeader'
 import SandpackContent from '@/components/layout/SandpackContent'
 import ResizeHandle from '@/components/layout/ResizeHandle'
@@ -94,8 +94,8 @@ export default function EditorView() {
               files={{
                 '/index.html': TAILWIND_HTML,
                 ...files,
-                '/__vibeInspect.tsx': { code: VIBE_INSPECT_SOURCE, hidden: true },
-                '/index.tsx': { code: VIBE_ENTRY_SOURCE, hidden: true },
+                '/__forgeInspect.tsx': { code: FORGE_INSPECT_SOURCE, hidden: true },
+                '/index.tsx': { code: FORGE_ENTRY_SOURCE, hidden: true },
               }}
               theme="dark"
               template="react-ts"

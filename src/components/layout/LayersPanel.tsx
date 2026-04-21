@@ -12,6 +12,7 @@ function LayerNode({
   onHover,
   onLeave,
   onSelect,
+  onDoubleSelect,
   search,
 }: {
   node: DOMNode
@@ -22,6 +23,7 @@ function LayerNode({
   onHover: (id: string) => void
   onLeave: () => void
   onSelect: (id: string) => void
+  onDoubleSelect: (id: string) => void
   search: string
 }) {
   const label = `${node.tagName}${node.className ? '.' + node.className.split(' ').slice(0, 3).join('.') : ''}`
@@ -43,6 +45,7 @@ function LayerNode({
         onMouseEnter={() => onHover(node.id)}
         onMouseLeave={onLeave}
         onClick={() => onSelect(node.id)}
+        onDoubleClick={() => onDoubleSelect(node.id)}
       >
         {hasChildren ? (
           <button
@@ -69,6 +72,7 @@ function LayerNode({
               onHover={onHover}
               onLeave={onLeave}
               onSelect={onSelect}
+              onDoubleSelect={onDoubleSelect}
               search={search}
             />
           ))}
@@ -80,7 +84,7 @@ function LayerNode({
 
 export default function LayersPanel() {
   const { t } = useTranslation()
-  const { domTree, selectedElement, search, setSearch, collapsed, toggleCollapse, selectById, hoverById, clearHover, refreshTree } = useLayersPanel()
+  const { domTree, selectedElement, search, setSearch, collapsed, toggleCollapse, selectById, goToStyleById, hoverById, clearHover, refreshTree } = useLayersPanel()
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -117,6 +121,7 @@ export default function LayersPanel() {
               onHover={hoverById}
               onLeave={clearHover}
               onSelect={selectById}
+              onDoubleSelect={goToStyleById}
               search={search}
             />
           ))

@@ -9,19 +9,23 @@ export function useLayersPanel() {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
 
   const selectById = useCallback((id: string) => {
-    window.dispatchEvent(new CustomEvent('vibe-select-by-id', { detail: { id } }))
+    window.dispatchEvent(new CustomEvent('forge-select-by-id', { detail: { id, stayInLayers: true } }))
+  }, [])
+
+  const goToStyleById = useCallback((id: string) => {
+    window.dispatchEvent(new CustomEvent('forge-select-by-id', { detail: { id, stayInLayers: false } }))
   }, [])
 
   const hoverById = useCallback((id: string) => {
-    window.dispatchEvent(new CustomEvent('vibe-hover-by-id', { detail: { id } }))
+    window.dispatchEvent(new CustomEvent('forge-hover-by-id', { detail: { id } }))
   }, [])
 
   const clearHover = useCallback(() => {
-    window.dispatchEvent(new CustomEvent('vibe-hover-by-id', { detail: { id: '' } }))
+    window.dispatchEvent(new CustomEvent('forge-hover-by-id', { detail: { id: '' } }))
   }, [])
 
   const refreshTree = useCallback(() => {
-    window.dispatchEvent(new CustomEvent('vibe-refresh-tree', { detail: {} }))
+    window.dispatchEvent(new CustomEvent('forge-refresh-tree', { detail: {} }))
   }, [])
 
   const toggleCollapse = useCallback((id: string) => {
@@ -32,5 +36,5 @@ export function useLayersPanel() {
     })
   }, [])
 
-  return { domTree, selectedElement, search, setSearch, collapsed, toggleCollapse, selectById, hoverById, clearHover, refreshTree }
+  return { domTree, selectedElement, search, setSearch, collapsed, toggleCollapse, selectById, goToStyleById, hoverById, clearHover, refreshTree }
 }

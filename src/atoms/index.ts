@@ -146,6 +146,7 @@ export interface SelectedElement {
   id: string
   tagName: string
   className: string
+  inlineStyle?: string
   rect: { top: number; left: number; width: number; height: number }
 }
 export const selectedElementAtom = atom<SelectedElement | null>(null)

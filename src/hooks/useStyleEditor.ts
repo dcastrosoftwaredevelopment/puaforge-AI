@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { useAtom } from 'jotai'
 import { selectedElementAtom } from '@/atoms'
-import { parseClasses, replaceClass, removeClass, addClass } from '@/utils/tailwindClasses'
+import { parseClasses, replaceClass, removeClass, addClass, removeClassCategory } from '@/utils/tailwindClasses'
 import { useStylePatcher } from './useStylePatcher'
 
 export function useStyleEditor() {
@@ -34,5 +34,10 @@ export function useStyleEditor() {
     apply(addClass(selectedElement.className, cls))
   }, [selectedElement, apply])
 
-  return { selectedElement, parsed, applyClass, removeOneClass, addOneClass, setSelectedElement }
+  const removeCategory = useCallback((representative: string) => {
+    if (!selectedElement) return
+    apply(removeClassCategory(selectedElement.className, representative))
+  }, [selectedElement, apply])
+
+  return { selectedElement, parsed, applyClass, removeOneClass, addOneClass, removeCategory, setSelectedElement }
 }
