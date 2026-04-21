@@ -83,6 +83,17 @@ export function ForgeInspect({ children }) {
 
     var selectedElRef = null
     var resizeObs = null
+    var scrollRafId = null
+
+    function onScroll() {
+      if (scrollRafId) return
+      scrollRafId = requestAnimationFrame(function() {
+        scrollRafId = null
+        if (selectedElRef && document.body.contains(selectedElRef)) {
+          window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_RESIZED' }, getInfo(selectedElRef)), '*')
+        }
+      })
+    }
 
     function watchSelected(el) {
       if (resizeObs) { resizeObs.disconnect(); resizeObs = null }
@@ -114,6 +125,7 @@ export function ForgeInspect({ children }) {
       if (selectedElRef && document.body.contains(selectedElRef)) {
         window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_RESIZED' }, getInfo(selectedElRef)), '*')
       }
+      window.addEventListener('scroll', onScroll, true)
       if (!overlayRef.current) {
         var ov = document.createElement('div')
         ov.style.cssText = 'position:fixed;inset:0;z-index:9999;cursor:crosshair;'
@@ -126,6 +138,8 @@ export function ForgeInspect({ children }) {
 
     function deactivate() {
       activeRef.current = false
+      window.removeEventListener('scroll', onScroll, true)
+      if (scrollRafId) { cancelAnimationFrame(scrollRafId); scrollRafId = null }
       if (resizeObs) { resizeObs.disconnect(); resizeObs = null }
       selectedElRef = null
       if (overlayRef.current) {
