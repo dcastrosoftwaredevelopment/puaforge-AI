@@ -1,6 +1,6 @@
-import { useNavigate } from 'react-router-dom'
-import { Mail, Loader2, ArrowLeft, CheckCircle } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom';
+import { Mail, Loader2, ArrowLeft, CheckCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   maskedEmail: string
@@ -11,8 +11,8 @@ interface Props {
 }
 
 export default function VerifyEmailCard({ maskedEmail, email, cooldown, resendState, handleResend }: Props) {
-  const { t } = useTranslation()
-  const navigate = useNavigate()
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   return (
     <div className="bg-bg-secondary border border-border-subtle rounded-2xl p-6 flex flex-col items-center text-center gap-4">
       <div className="w-14 h-14 rounded-full bg-forge-terracotta/10 flex items-center justify-center">
@@ -61,5 +61,5 @@ export default function VerifyEmailCard({ maskedEmail, email, cooldown, resendSt
         {t('verifyEmail.backToLogin')}
       </button>
     </div>
-  )
+  );
 }

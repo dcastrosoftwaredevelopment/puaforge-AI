@@ -1,10 +1,10 @@
-import { useTranslation } from 'react-i18next'
-import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar'
-import ApiSetupSection from './components/ApiSetupSection'
-import FeaturesSection from './components/FeaturesSection'
+import { useTranslation } from 'react-i18next';
+import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar';
+import ApiSetupSection from './components/ApiSetupSection';
+import FeaturesSection from './components/FeaturesSection';
 
 export default function Help() {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
   return (
     <div className="flex h-screen bg-bg-primary overflow-hidden">
@@ -22,5 +22,5 @@ export default function Help() {
         </main>
       </div>
     </div>
-  )
+  );
 }

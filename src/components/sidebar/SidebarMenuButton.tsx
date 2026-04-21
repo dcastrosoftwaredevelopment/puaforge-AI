@@ -1,8 +1,8 @@
-import { Menu } from 'lucide-react'
-import { useSidebar } from '@/hooks/useSidebar'
+import { Menu } from 'lucide-react';
+import { useSidebar } from '@/hooks/useSidebar';
 
 export default function SidebarMenuButton() {
-  const { open } = useSidebar()
+  const { open } = useSidebar();
   return (
     <button
       onClick={open}
@@ -10,5 +10,5 @@ export default function SidebarMenuButton() {
     >
       <Menu size={18} />
     </button>
-  )
+  );
 }

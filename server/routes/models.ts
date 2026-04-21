@@ -1,36 +1,36 @@
-import { Router, type Request, type Response } from 'express'
-import Anthropic from '@anthropic-ai/sdk'
-import { getApiKey } from '../utils/getApiKey.js'
+import { Router, type Request, type Response } from 'express';
+import Anthropic from '@anthropic-ai/sdk';
+import { getApiKey } from '../utils/getApiKey.js';
 
-const router = Router()
+const router = Router();
 
 router.get('/models', async (req: Request, res: Response) => {
-  const apiKey = getApiKey(req)
+  const apiKey = getApiKey(req);
   if (!apiKey) {
-    res.json({ models: [] })
-    return
+    res.json({ models: [] });
+    return;
   }
 
   try {
-    const client = new Anthropic({ apiKey, timeout: 30_000 })
-    const page = await client.models.list({ limit: 100 })
+    const client = new Anthropic({ apiKey, timeout: 30_000 });
+    const page = await client.models.list({ limit: 100 });
 
     const models = page.data
       .filter((m) => m.id.startsWith('claude-'))
       .sort((a, b) => b.created_at.localeCompare(a.created_at))
-      .map((m) => ({ id: m.id, name: m.display_name }))
+      .map((m) => ({ id: m.id, name: m.display_name }));
 
-    res.json({ models })
+    res.json({ models });
   } catch (error) {
     if (error instanceof Anthropic.APIError) {
-      console.error('[models] Anthropic API Error:', error.status, error.message)
-      res.status(error.status ?? 500).json({ code: 'ANTHROPIC_ERROR', error: error.message })
+      console.error('[models] Anthropic API Error:', error.status, error.message);
+      res.status(error.status ?? 500).json({ code: 'ANTHROPIC_ERROR', error: error.message });
     } else {
-      const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error('[models] Error:', message)
-      res.status(500).json({ code: 'MODELS_ERROR', error: message })
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error('[models] Error:', message);
+      res.status(500).json({ code: 'MODELS_ERROR', error: message });
     }
   }
-})
+});
 
-export { router as modelsRoute }
+export { router as modelsRoute };

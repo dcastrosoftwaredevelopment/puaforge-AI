@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react'
-import { Search, X } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { useSandpack } from '@codesandbox/sandpack-react'
-import { useFiles } from '@/hooks/useFiles'
+import { useState, useRef, useEffect } from 'react';
+import { Search, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useSandpack } from '@codesandbox/sandpack-react';
+import { useFiles } from '@/hooks/useFiles';
 
 interface Match {
   file: string
@@ -13,16 +13,16 @@ interface Match {
 }
 
 function search(files: Record<string, string>, query: string): Match[] {
-  if (!query.trim()) return []
-  const results: Match[] = []
-  const lower = query.toLowerCase()
+  if (!query.trim()) return [];
+  const results: Match[] = [];
+  const lower = query.toLowerCase();
 
   for (const [path, code] of Object.entries(files)) {
-    if (path === '/index.html') continue
-    const lines = code.split('\n')
+    if (path === '/index.html') continue;
+    const lines = code.split('\n');
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i]
-      const idx = line.toLowerCase().indexOf(lower)
+      const line = lines[i];
+      const idx = line.toLowerCase().indexOf(lower);
       if (idx !== -1) {
         results.push({
           file: path,
@@ -30,11 +30,11 @@ function search(files: Record<string, string>, query: string): Match[] {
           preview: line.trim(),
           matchStart: line.slice(0, idx).trimStart().length,
           matchEnd: line.slice(0, idx).trimStart().length + query.length,
-        })
+        });
       }
     }
   }
-  return results
+  return results;
 }
 
 interface Props {
@@ -43,27 +43,27 @@ interface Props {
 }
 
 export default function FindInFiles({ open, onClose }: Props) {
-  const [query, setQuery] = useState('')
-  const { files } = useFiles()
-  const { sandpack } = useSandpack()
-  const inputRef = useRef<HTMLInputElement>(null)
-  const { t } = useTranslation()
+  const [query, setQuery] = useState('');
+  const { files } = useFiles();
+  const { sandpack } = useSandpack();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (open) {
-      inputRef.current?.focus()
-      inputRef.current?.select()
+      inputRef.current?.focus();
+      inputRef.current?.select();
     }
-  }, [open])
+  }, [open]);
 
-  const results = search(files, query)
+  const results = search(files, query);
 
   function goTo(file: string) {
-    sandpack.openFile(file)
-    onClose()
+    sandpack.openFile(file);
+    onClose();
   }
 
-  if (!open) return null
+  if (!open) return null;
 
   return (
     <div className="absolute top-0 right-0 z-20 w-96 bg-bg-elevated border border-border-default rounded-bl-xl shadow-xl flex flex-col max-h-[60vh]">
@@ -91,8 +91,8 @@ export default function FindInFiles({ open, onClose }: Props) {
         <div className="overflow-y-auto">
           {Object.entries(
             results.reduce<Record<string, Match[]>>((acc, m) => {
-              acc[m.file] = [...(acc[m.file] ?? []), m]
-              return acc
+              acc[m.file] = [...(acc[m.file] ?? []), m];
+              return acc;
             }, {}),
           ).map(([file, matches]) => (
             <div key={file}>
@@ -124,5 +124,5 @@ export default function FindInFiles({ open, onClose }: Props) {
         <p className="px-3 py-4 text-xs text-text-muted text-center">{t('findInFiles.noResults', { query })}</p>
       )}
     </div>
-  )
+  );
 }

@@ -1,36 +1,36 @@
-import { useRef, type KeyboardEvent } from 'react'
-import TextareaAutosize from 'react-textarea-autosize'
-import { Send, ImagePlus, X } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { useMessages } from '@/hooks/useMessages'
-import { useEditorState } from '@/hooks/useEditorState'
-import { useMessageSender } from '@/hooks/useMessageSender'
-import { useImageUpload } from '@/hooks/useImageUpload'
-import { useState } from 'react'
+import { useRef, type KeyboardEvent } from 'react';
+import TextareaAutosize from 'react-textarea-autosize';
+import { Send, ImagePlus, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useMessages } from '@/hooks/useMessages';
+import { useEditorState } from '@/hooks/useEditorState';
+import { useMessageSender } from '@/hooks/useMessageSender';
+import { useImageUpload } from '@/hooks/useImageUpload';
+import { useState } from 'react';
 
 export default function PromptInput() {
-  const [prompt, setPrompt] = useState('')
-  const { t } = useTranslation()
-  const { isGenerating } = useMessages()
-  const { isDirty } = useEditorState()
-  const { sendMessage } = useMessageSender()
-  const { pendingImages, imageError, handleImageSelect, removeImage, clearImages } = useImageUpload()
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [prompt, setPrompt] = useState('');
+  const { t } = useTranslation();
+  const { isGenerating } = useMessages();
+  const { isDirty } = useEditorState();
+  const { sendMessage } = useMessageSender();
+  const { pendingImages, imageError, handleImageSelect, removeImage, clearImages } = useImageUpload();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSend = async () => {
-    const text = prompt.trim()
-    if ((!text && pendingImages.length === 0) || isGenerating || isDirty) return
-    const images = pendingImages.length > 0 ? [...pendingImages] : undefined
-    setPrompt('')
-    clearImages()
-    await sendMessage(text, images)
-  }
+    const text = prompt.trim();
+    if ((!text && pendingImages.length === 0) || isGenerating || isDirty) return;
+    const images = pendingImages.length > 0 ? [...pendingImages] : undefined;
+    setPrompt('');
+    clearImages();
+    await sendMessage(text, images);
+  };
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
-  }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+  };
 
-  const isDisabled = isGenerating || isDirty
+  const isDisabled = isGenerating || isDirty;
 
   return (
     <div className="space-y-2">
@@ -101,5 +101,5 @@ export default function PromptInput() {
         </div>
       </div>
     </div>
-  )
+  );
 }

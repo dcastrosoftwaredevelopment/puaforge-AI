@@ -169,7 +169,7 @@ export function ForgeInspect({ children }) {
 
   return React.createElement(React.Fragment, null, children)
 }
-`
+`;
 
 export const FORGE_ENTRY_SOURCE = `
 import React from 'react'
@@ -180,4 +180,4 @@ import { ForgeInspect } from './__forgeInspect'
 createRoot(document.getElementById('root')).render(
   React.createElement(ForgeInspect, null, React.createElement(App, null))
 )
-`
+`;

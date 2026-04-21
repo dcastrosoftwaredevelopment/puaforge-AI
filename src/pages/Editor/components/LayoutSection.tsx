@@ -1,15 +1,15 @@
-import { memo } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useLayoutSection } from '@/hooks/useLayoutSection'
-import { DISPLAYS, FLEX_DIRS, JUSTIFY, ALIGN_ITEMS, SPACING_SCALE } from '@/utils/tailwindClasses'
-import StyleEditorSection from './StyleEditorSection'
-import StyleEditorRow from './StyleEditorRow'
-import StyleEditorSelect from './StyleEditorSelect'
+import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLayoutSection } from '@/hooks/useLayoutSection';
+import { DISPLAYS, FLEX_DIRS, JUSTIFY, ALIGN_ITEMS, SPACING_SCALE } from '@/utils/tailwindClasses';
+import StyleEditorSection from './StyleEditorSection';
+import StyleEditorRow from './StyleEditorRow';
+import StyleEditorSelect from './StyleEditorSelect';
 
 const LayoutSection = memo(() => {
-  const { t } = useTranslation()
-  const { display, flexDir, justify, alignItems, gap, onDisplay, onFlexDir, onJustify, onAlignItems, onGap } = useLayoutSection()
-  const isFlex = display === 'flex' || display === 'inline-flex'
+  const { t } = useTranslation();
+  const { display, flexDir, justify, alignItems, gap, onDisplay, onFlexDir, onJustify, onAlignItems, onGap } = useLayoutSection();
+  const isFlex = display === 'flex' || display === 'inline-flex';
   return (
     <StyleEditorSection title={t('inspect.sectionLayout')}>
       <StyleEditorRow label={t('inspect.display')}>
@@ -32,7 +32,7 @@ const LayoutSection = memo(() => {
         </>
       )}
     </StyleEditorSection>
-  )
-})
+  );
+});
 
-export default LayoutSection
+export default LayoutSection;

@@ -1,4 +1,4 @@
-import { createTheme } from 'flowbite-react'
+import { createTheme } from 'flowbite-react';
 
 export const flowbiteTheme = createTheme({
   button: {
@@ -251,4 +251,4 @@ export const flowbiteTheme = createTheme({
     inlineWrapper: 'flex items-center',
     arrowIcon: 'ml-2 h-4 w-4',
   },
-})
+});

@@ -1,13 +1,13 @@
-import { useState } from 'react'
-import { lazy, Suspense } from 'react'
-import { useTranslation } from 'react-i18next'
-import { CodeViewerContext, type CodeEntry } from '@/contexts/codeViewerContext'
+import { useState } from 'react';
+import { lazy, Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
+import { CodeViewerContext, type CodeEntry } from '@/contexts/codeViewerContext';
 
-export { CodeViewerContext }
+export { CodeViewerContext };
 
 export function CodeViewerProvider({ children }: { children: React.ReactNode }) {
-  const [entry, setEntry] = useState<CodeEntry | null>(null)
-  const { t } = useTranslation()
+  const [entry, setEntry] = useState<CodeEntry | null>(null);
+  const { t } = useTranslation();
 
   return (
     <CodeViewerContext.Provider value={{ open: setEntry }}>
@@ -43,12 +43,12 @@ export function CodeViewerProvider({ children }: { children: React.ReactNode }) 
         )}
       </div>
     </CodeViewerContext.Provider>
-  )
+  );
 }
 
 const SyntaxHighlighter = lazy(() =>
   import('react-syntax-highlighter').then((m) => ({ default: m.Prism }))
-)
+);
 
 const editorTheme: Record<string, React.CSSProperties> = {
   'code[class*="language-"]': { color: '#e2e8f0', background: 'none', fontSize: '11.5px', fontFamily: "'JetBrains Mono', 'Fira Code', monospace" },
@@ -71,7 +71,7 @@ const editorTheme: Record<string, React.CSSProperties> = {
   'template-string': { color: '#a5f3fc' },
   imports: { color: '#c084fc' },
   'maybe-class-name': { color: '#f59e0b' },
-}
+};
 
 function CodeContent({ entry }: { entry: { language: string; code: string } }) {
   return (
@@ -89,5 +89,5 @@ function CodeContent({ entry }: { entry: { language: string; code: string } }) {
         {entry.code}
       </SyntaxHighlighter>
     </Suspense>
-  )
+  );
 }

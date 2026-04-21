@@ -1,25 +1,25 @@
-import { useState, useRef, useEffect } from 'react'
-import { ChevronDown, Check, Cpu, Loader2 } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { useModels } from '@/hooks/useModels'
+import { useState, useRef, useEffect } from 'react';
+import { ChevronDown, Check, Cpu, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useModels } from '@/hooks/useModels';
 
 export default function ModelSelector() {
-  const { models, selectedModel, setSelectedModel, loading } = useModels()
-  const { t } = useTranslation()
-  const [isOpen, setIsOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const { models, selectedModel, setSelectedModel, loading } = useModels();
+  const { t } = useTranslation();
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
-  const current = models.find((m) => m.id === selectedModel)
+  const current = models.find((m) => m.id === selectedModel);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
-        setIsOpen(false)
+        setIsOpen(false);
       }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   if (loading) {
     return (
@@ -27,7 +27,7 @@ export default function ModelSelector() {
         <Loader2 size={12} className="animate-spin" />
         <span>{t('chat.loadingModels')}</span>
       </div>
-    )
+    );
   }
 
   if (models.length === 0) {
@@ -36,7 +36,7 @@ export default function ModelSelector() {
         <Cpu size={12} />
         <span>{t('chat.noModels')}</span>
       </div>
-    )
+    );
   }
 
   return (
@@ -56,8 +56,8 @@ export default function ModelSelector() {
             <button
               key={model.id}
               onClick={() => {
-                setSelectedModel(model.id)
-                setIsOpen(false)
+                setSelectedModel(model.id);
+                setIsOpen(false);
               }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition hover:bg-forge-terracotta/10 ${
                 selectedModel === model.id ? 'bg-forge-terracotta/10' : ''
@@ -75,5 +75,5 @@ export default function ModelSelector() {
         </div>
       )}
     </div>
-  )
+  );
 }

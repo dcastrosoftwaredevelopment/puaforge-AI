@@ -1,7 +1,7 @@
-import { RefreshCw, ChevronRight, ChevronDown, Search } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { useLayersPanel } from '@/hooks/useLayersPanel'
-import type { DOMNode } from '@/atoms'
+import { RefreshCw, ChevronRight, ChevronDown, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useLayersPanel } from '@/hooks/useLayersPanel';
+import type { DOMNode } from '@/atoms';
 
 function LayerNode({
   node,
@@ -26,14 +26,14 @@ function LayerNode({
   onDoubleSelect: (id: string) => void
   search: string
 }) {
-  const label = `${node.tagName}${node.className ? '.' + node.className.split(' ').slice(0, 3).join('.') : ''}`
-  const isSelected = node.id === selectedId
-  const isCollapsed = collapsed.has(node.id)
-  const hasChildren = node.children.length > 0
-  const matchesSearch = !search || label.toLowerCase().includes(search.toLowerCase())
-  const childrenMatchSearch = !search || node.children.some((c) => matchesSearch || c.tagName.includes(search))
+  const label = `${node.tagName}${node.className ? '.' + node.className.split(' ').slice(0, 3).join('.') : ''}`;
+  const isSelected = node.id === selectedId;
+  const isCollapsed = collapsed.has(node.id);
+  const hasChildren = node.children.length > 0;
+  const matchesSearch = !search || label.toLowerCase().includes(search.toLowerCase());
+  const childrenMatchSearch = !search || node.children.some((c) => matchesSearch || c.tagName.includes(search));
 
-  if (search && !matchesSearch && !childrenMatchSearch) return null
+  if (search && !matchesSearch && !childrenMatchSearch) return null;
 
   return (
     <div>
@@ -49,7 +49,7 @@ function LayerNode({
       >
         {hasChildren ? (
           <button
-            onClick={(e) => { e.stopPropagation(); toggleCollapse(node.id) }}
+            onClick={(e) => { e.stopPropagation(); toggleCollapse(node.id); }}
             className="shrink-0 text-text-muted/60 hover:text-text-muted cursor-pointer"
           >
             {isCollapsed ? <ChevronRight size={11} /> : <ChevronDown size={11} />}
@@ -79,12 +79,12 @@ function LayerNode({
         </div>
       )}
     </div>
-  )
+  );
 }
 
 export default function LayersPanel() {
-  const { t } = useTranslation()
-  const { domTree, selectedElement, search, setSearch, collapsed, toggleCollapse, selectById, goToStyleById, hoverById, clearHover, refreshTree } = useLayersPanel()
+  const { t } = useTranslation();
+  const { domTree, selectedElement, search, setSearch, collapsed, toggleCollapse, selectById, goToStyleById, hoverById, clearHover, refreshTree } = useLayersPanel();
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -128,5 +128,5 @@ export default function LayersPanel() {
         )}
       </div>
     </div>
-  )
+  );
 }

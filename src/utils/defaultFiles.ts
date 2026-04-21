@@ -9,7 +9,7 @@ export const TAILWIND_HTML = `<!DOCTYPE html>
   <body>
     <div id="root"></div>
   </body>
-</html>`
+</html>`;
 
 export const DEFAULT_PACKAGE_JSON = {
   name: 'puaforgeai-project',
@@ -19,14 +19,14 @@ export const DEFAULT_PACKAGE_JSON = {
     'react-dom': '^18.0.0',
     'flowbite-react': '^0.12.0',
   },
-}
+};
 
 export function buildPackageJson(extraDeps: Record<string, string> = {}): string {
   return JSON.stringify(
     { ...DEFAULT_PACKAGE_JSON, dependencies: { ...DEFAULT_PACKAGE_JSON.dependencies, ...extraDeps } },
     null,
     2,
-  )
+  );
 }
 
 export const DEFAULT_FILES: Record<string, string> = {
@@ -131,4 +131,4 @@ export default function App() {
     </ThemeProvider>
   )
 }`,
-}
+};

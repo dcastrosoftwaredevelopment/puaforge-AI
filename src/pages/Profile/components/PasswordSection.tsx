@@ -1,7 +1,7 @@
-import { useTranslation } from 'react-i18next'
-import { Loader2 } from 'lucide-react'
-import { TextInput } from 'flowbite-react'
-import Button from '@/components/ui/Button'
+import { useTranslation } from 'react-i18next';
+import { Loader2 } from 'lucide-react';
+import { TextInput } from 'flowbite-react';
+import Button from '@/components/ui/Button';
 
 interface Props {
   currentPassword: string
@@ -26,7 +26,7 @@ export default function PasswordSection({
   passwordSaving, passwordSuccess, passwordError,
   handleSavePassword,
 }: Props) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   return (
     <div className="bg-bg-secondary border border-border-subtle rounded-xl p-5">
       <h2 className="text-sm font-medium text-text-primary mb-4">{t('profile.passwordSection')}</h2>
@@ -36,7 +36,7 @@ export default function PasswordSection({
             type="password"
             value={currentPassword}
             color={passwordErrors.currentPassword ? 'failure' : 'gray'}
-            onChange={(e) => { setCurrentPassword(e.target.value); setPasswordErrors((p) => ({ ...p, currentPassword: '' })) }}
+            onChange={(e) => { setCurrentPassword(e.target.value); setPasswordErrors((p) => ({ ...p, currentPassword: '' })); }}
             placeholder={t('profile.currentPassword')}
           />
           {passwordErrors.currentPassword && <p className="text-xs text-red-400 mt-1">{passwordErrors.currentPassword}</p>}
@@ -46,7 +46,7 @@ export default function PasswordSection({
             type="password"
             value={newPassword}
             color={passwordErrors.newPassword ? 'failure' : 'gray'}
-            onChange={(e) => { setNewPassword(e.target.value); setPasswordErrors((p) => ({ ...p, newPassword: '' })) }}
+            onChange={(e) => { setNewPassword(e.target.value); setPasswordErrors((p) => ({ ...p, newPassword: '' })); }}
             placeholder={t('profile.newPassword')}
           />
           {passwordErrors.newPassword && <p className="text-xs text-red-400 mt-1">{passwordErrors.newPassword}</p>}
@@ -56,7 +56,7 @@ export default function PasswordSection({
             type="password"
             value={confirmPassword}
             color={passwordErrors.confirmPassword ? 'failure' : 'gray'}
-            onChange={(e) => { setConfirmPassword(e.target.value); setPasswordErrors((p) => ({ ...p, confirmPassword: '' })) }}
+            onChange={(e) => { setConfirmPassword(e.target.value); setPasswordErrors((p) => ({ ...p, confirmPassword: '' })); }}
             placeholder={t('profile.confirmPassword')}
           />
           {passwordErrors.confirmPassword && <p className="text-xs text-red-400 mt-1">{passwordErrors.confirmPassword}</p>}
@@ -69,5 +69,5 @@ export default function PasswordSection({
         </Button>
       </form>
     </div>
-  )
+  );
 }

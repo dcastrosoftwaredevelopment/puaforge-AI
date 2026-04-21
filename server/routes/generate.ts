@@ -1,8 +1,8 @@
-import { Router, type Request, type Response } from 'express'
-import Anthropic from '@anthropic-ai/sdk'
-import { getApiKey } from '../utils/getApiKey.js'
+import { Router, type Request, type Response } from 'express';
+import Anthropic from '@anthropic-ai/sdk';
+import { getApiKey } from '../utils/getApiKey.js';
 
-const router = Router()
+const router = Router();
 
 const SYSTEM_PROMPT = `You are an expert React + TypeScript developer who builds visually stunning, production-quality UIs. The user will describe a UI or feature they want.
 
@@ -66,7 +66,7 @@ Native element styling guide (apply these patterns consistently):
 - Button primary: className="px-4 py-2 rounded-md bg-[#D65A31] text-white font-medium hover:bg-[#c04e27] transition"
 - Button secondary: className="px-4 py-2 rounded-md bg-[#1A1A1A] border border-[rgba(255,255,255,0.08)] text-[#E0E0E0] hover:bg-[#1F1F1F] transition"
 - Input: className="w-full px-3 py-2 rounded-md bg-[#1A1A1A] border border-[rgba(255,255,255,0.08)] text-[#E0E0E0] focus:outline-none focus:border-[#D65A31]"
-- Card: className="bg-[#141414] border border-[rgba(255,255,255,0.06)] rounded-lg p-4"`
+- Card: className="bg-[#141414] border border-[rgba(255,255,255,0.06)] rounded-lg p-4"`;
 
 interface ImageData {
   base64: string
@@ -82,28 +82,28 @@ interface GenerateBody {
 }
 
 router.post('/generate', async (req: Request<object, object, GenerateBody>, res: Response) => {
-  const { prompt, model, currentFiles, history, images } = req.body
+  const { prompt, model, currentFiles, history, images } = req.body;
 
   if (!prompt) {
-    res.status(400).json({ code: 'MISSING_PROMPT', error: 'Prompt is required' })
-    return
+    res.status(400).json({ code: 'MISSING_PROMPT', error: 'Prompt is required' });
+    return;
   }
 
-  const apiKey = getApiKey(req)
-  console.log('[generate] API key from frontend:', apiKey ? 'yes' : 'no')
+  const apiKey = getApiKey(req);
+  console.log('[generate] API key from frontend:', apiKey ? 'yes' : 'no');
 
   if (!apiKey) {
-    res.status(401).json({ code: 'MISSING_API_KEY', error: 'API key not configured. Go to Settings to add your Claude API key.' })
-    return
+    res.status(401).json({ code: 'MISSING_API_KEY', error: 'API key not configured. Go to Settings to add your Claude API key.' });
+    return;
   }
 
   try {
-    const modelId = model || 'claude-haiku-4-5-20251001'
-    console.log('[generate] Calling Anthropic SDK | model:', modelId)
+    const modelId = model || 'claude-haiku-4-5-20251001';
+    console.log('[generate] Calling Anthropic SDK | model:', modelId);
 
-    const client = new Anthropic({ apiKey, timeout: 5 * 60 * 1000 })
+    const client = new Anthropic({ apiKey, timeout: 5 * 60 * 1000 });
 
-    const conversationMessages = buildConversation(history, prompt, currentFiles, images)
+    const conversationMessages = buildConversation(history, prompt, currentFiles, images);
 
     const stream = client.messages.stream({
       model: modelId,
@@ -116,35 +116,35 @@ router.post('/generate', async (req: Request<object, object, GenerateBody>, res:
         },
       ],
       messages: conversationMessages,
-    })
+    });
 
-    const response = await stream.finalMessage()
+    const response = await stream.finalMessage();
 
     const rawResponse = response.content
       .filter((block): block is Anthropic.TextBlock => block.type === 'text')
       .map((block) => block.text)
-      .join('\n')
+      .join('\n');
 
-    console.log('[generate] Response length:', rawResponse.length)
-    console.log('[generate] Stop reason:', response.stop_reason)
-    console.log('[generate] Usage:', response.usage)
+    console.log('[generate] Response length:', rawResponse.length);
+    console.log('[generate] Stop reason:', response.stop_reason);
+    console.log('[generate] Usage:', response.usage);
 
-    res.json({ rawResponse })
+    res.json({ rawResponse });
   } catch (error) {
     if (error instanceof Anthropic.APIError) {
-      console.error('[generate] Anthropic API Error:', error.status, error.message)
-      res.status(error.status ?? 500).json({ code: 'ANTHROPIC_ERROR', error: error.message })
+      console.error('[generate] Anthropic API Error:', error.status, error.message);
+      res.status(error.status ?? 500).json({ code: 'ANTHROPIC_ERROR', error: error.message });
     } else {
-      const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error('[generate] Error:', message)
-      res.status(500).json({ code: 'GENERATE_ERROR', error: message })
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error('[generate] Error:', message);
+      res.status(500).json({ code: 'GENERATE_ERROR', error: message });
     }
   }
-})
+});
 
 /** Rough token estimate: ~4 chars per token */
 function estimateTokens(text: string): number {
-  return Math.ceil(text.length / 4)
+  return Math.ceil(text.length / 4);
 }
 
 /**
@@ -160,8 +160,8 @@ function estimateTokens(text: string): number {
  * - Prompt caching is applied to the oldest cached-eligible message to avoid
  *   re-processing the same prefix on every call.
  */
-const KEEP_RECENT = 4 // keep last N messages with full code
-const CODE_BLOCK_RE = /```[\w]*\s+file="[^"]+"\n[\s\S]*?```/g
+const KEEP_RECENT = 4; // keep last N messages with full code
+const CODE_BLOCK_RE = /```[\w]*\s+file="[^"]+"\n[\s\S]*?```/g;
 
 function buildConversation(
   history: { role: string; content: string; images?: ImageData[] }[],
@@ -169,82 +169,82 @@ function buildConversation(
   currentFiles: Record<string, string>,
   images?: ImageData[],
 ): Anthropic.MessageParam[] {
-  const messages: Anthropic.MessageParam[] = []
+  const messages: Anthropic.MessageParam[] = [];
 
   // --- Build history messages ---
   for (let i = 0; i < history.length; i++) {
-    const h = history[i]
-    const role = (h.role === 'assistant' ? 'assistant' : 'user') as 'user' | 'assistant'
-    const isRecent = i >= history.length - KEEP_RECENT
+    const h = history[i];
+    const role = (h.role === 'assistant' ? 'assistant' : 'user') as 'user' | 'assistant';
+    const isRecent = i >= history.length - KEEP_RECENT;
 
     if (role === 'assistant' && !isRecent) {
       // Compress old assistant messages: strip code, keep file list
-      const fileNames = [...h.content.matchAll(/file="([^"]+)"/g)].map((m) => m[1])
-      const text = h.content.replace(CODE_BLOCK_RE, '').trim()
+      const fileNames = [...h.content.matchAll(/file="([^"]+)"/g)].map((m) => m[1]);
+      const text = h.content.replace(CODE_BLOCK_RE, '').trim();
       const summary = fileNames.length > 0
         ? `${text}\n[Generated/updated files: ${fileNames.join(', ')}]`
-        : text || '[code response]'
-      messages.push({ role, content: summary })
+        : text || '[code response]';
+      messages.push({ role, content: summary });
     } else if (role === 'user' && h.images && h.images.length > 0) {
       // User messages with images use multimodal content blocks
       const contentBlocks: Anthropic.ContentBlockParam[] = h.images.map((img) => ({
         type: 'image' as const,
         source: { type: 'base64' as const, media_type: img.mediaType, data: img.base64 },
-      }))
-      contentBlocks.push({ type: 'text' as const, text: h.content })
-      messages.push({ role, content: contentBlocks })
+      }));
+      contentBlocks.push({ type: 'text' as const, text: h.content });
+      messages.push({ role, content: contentBlocks });
     } else {
-      messages.push({ role, content: h.content })
+      messages.push({ role, content: h.content });
     }
   }
 
   // --- Apply cache_control to the boundary between old and recent history ---
   // This lets the API cache the compressed prefix and only process recent turns
   if (messages.length >= KEEP_RECENT && messages.length > 0) {
-    const cacheIdx = Math.max(0, messages.length - KEEP_RECENT)
-    const msg = messages[cacheIdx]
+    const cacheIdx = Math.max(0, messages.length - KEEP_RECENT);
+    const msg = messages[cacheIdx];
     if (typeof msg.content === 'string') {
       messages[cacheIdx] = {
         role: msg.role,
         content: [
           { type: 'text', text: msg.content, cache_control: { type: 'ephemeral' } },
         ],
-      }
+      };
     }
   }
 
   // --- Build final user message with current files + new prompt ---
-  const entries = Object.entries(currentFiles).filter(([path]) => path !== '/index.html')
-  let userContent = ''
+  const entries = Object.entries(currentFiles).filter(([path]) => path !== '/index.html');
+  let userContent = '';
 
   if (entries.length > 0) {
     const fileContext = entries
       .map(([path, code]) => `File: ${path}\n\`\`\`\n${code}\n\`\`\``)
-      .join('\n\n')
-    userContent += `Current project files (${entries.length} files):\n${fileContext}\n\n`
+      .join('\n\n');
+    userContent += `Current project files (${entries.length} files):\n${fileContext}\n\n`;
   }
 
-  userContent += `IMPORTANT: Only return files that NEED TO CHANGE. All other files are preserved automatically.\n\n`
-  userContent += `User request: ${prompt}`
+  userContent += `IMPORTANT: Only return files that NEED TO CHANGE. All other files are preserved automatically.\n\n`;
+  userContent += `User request: ${prompt}`;
 
   if (images && images.length > 0) {
     const contentBlocks: Anthropic.ContentBlockParam[] = images.map((img) => ({
       type: 'image' as const,
       source: { type: 'base64' as const, media_type: img.mediaType, data: img.base64 },
-    }))
-    contentBlocks.push({ type: 'text' as const, text: userContent })
-    messages.push({ role: 'user', content: contentBlocks })
+    }));
+    contentBlocks.push({ type: 'text' as const, text: userContent });
+    messages.push({ role: 'user', content: contentBlocks });
   } else {
-    messages.push({ role: 'user', content: userContent })
+    messages.push({ role: 'user', content: userContent });
   }
 
   const totalTokens = messages.reduce((sum, m) => {
-    const text = typeof m.content === 'string' ? m.content : JSON.stringify(m.content)
-    return sum + estimateTokens(text)
-  }, 0)
-  console.log(`[generate] Conversation: ${messages.length} messages, ~${totalTokens} tokens (estimated)`)
+    const text = typeof m.content === 'string' ? m.content : JSON.stringify(m.content);
+    return sum + estimateTokens(text);
+  }, 0);
+  console.log(`[generate] Conversation: ${messages.length} messages, ~${totalTokens} tokens (estimated)`);
 
-  return messages
+  return messages;
 }
 
-export { router as generateRoute }
+export { router as generateRoute };

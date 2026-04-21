@@ -1,5 +1,5 @@
-import { gettingStarted } from '../../docs/en/getting-started'
-import { features } from '../../docs/en/features'
+import { gettingStarted } from '../../docs/en/getting-started';
+import { features } from '../../docs/en/features';
 
 export const en = {
   common: {
@@ -381,4 +381,4 @@ export const en = {
     overflow: 'Overflow',
     addClassPlaceholder: 'Add class...',
   },
-}
+};

@@ -1,44 +1,44 @@
-import { PackageCheck, Loader2, AlertCircle } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { useFiles } from '@/hooks/useFiles'
-import { useProjects } from '@/hooks/useProjects'
-import { useAuth } from '@/hooks/useAuth'
-import { useApiCall, HttpMethod } from '@/hooks/useApiCall'
-import JSZip from 'jszip'
-import Tooltip from '@/components/ui/Tooltip'
-import Button from '@/components/ui/Button'
+import { PackageCheck, Loader2, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useFiles } from '@/hooks/useFiles';
+import { useProjects } from '@/hooks/useProjects';
+import { useAuth } from '@/hooks/useAuth';
+import { useApiCall, HttpMethod } from '@/hooks/useApiCall';
+import JSZip from 'jszip';
+import Tooltip from '@/components/ui/Tooltip';
+import Button from '@/components/ui/Button';
 
 export default function BuildDownloadButton({ menuItem = false }: { menuItem?: boolean }) {
-  const { files } = useFiles()
-  const { activeProjectId, activeProject } = useProjects()
-  const { token } = useAuth()
-  const { t } = useTranslation()
+  const { files } = useFiles();
+  const { activeProjectId, activeProject } = useProjects();
+  const { token } = useAuth();
+  const { t } = useTranslation();
 
   const safeName = (activeProject?.name || 'puaforge-project')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/-+$/, '')
+    .replace(/-+$/, '');
 
   const { loading, error, execute: build } = useApiCall<
     { projectId: string | null; files: Record<string, string> },
     { html: string }
-  >(HttpMethod.POST, '/api/publish')
+  >(HttpMethod.POST, '/api/publish');
 
   const handleDownload = async () => {
-    const result = await build({ projectId: activeProjectId, files }, { Authorization: `Bearer ${token}` })
-    if (!result) return
+    const result = await build({ projectId: activeProjectId, files }, { Authorization: `Bearer ${token}` });
+    if (!result) return;
 
-    const zip = new JSZip()
-    zip.file('index.html', result.html)
+    const zip = new JSZip();
+    zip.file('index.html', result.html);
 
-    const blob = await zip.generateAsync({ type: 'blob' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${safeName}-build.zip`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${safeName}-build.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   if (menuItem) {
     return (
@@ -58,7 +58,7 @@ export default function BuildDownloadButton({ menuItem = false }: { menuItem?: b
           </p>
         )}
       </div>
-    )
+    );
   }
 
   return (
@@ -82,5 +82,5 @@ export default function BuildDownloadButton({ menuItem = false }: { menuItem?: b
         </p>
       )}
     </div>
-  )
+  );
 }

@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react'
-import { Lock, X } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
+import { useRef, useState } from 'react';
+import { Lock, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function ColorRow({
   name,
@@ -16,16 +16,16 @@ export default function ColorRow({
   onUpdate: (updates: { name?: string; value?: string }) => void
   onRemove: () => void
 }) {
-  const colorInputRef = useRef<HTMLInputElement>(null)
-  const [editingName, setEditingName] = useState(false)
-  const [nameVal, setNameVal] = useState(name)
-  const { t } = useTranslation()
+  const colorInputRef = useRef<HTMLInputElement>(null);
+  const [editingName, setEditingName] = useState(false);
+  const [nameVal, setNameVal] = useState(name);
+  const { t } = useTranslation();
 
   function commitName() {
-    setEditingName(false)
-    const trimmed = nameVal.trim()
-    if (trimmed && trimmed !== name) onUpdate({ name: trimmed })
-    else setNameVal(name)
+    setEditingName(false);
+    const trimmed = nameVal.trim();
+    if (trimmed && trimmed !== name) onUpdate({ name: trimmed });
+    else setNameVal(name);
   }
 
   return (
@@ -50,7 +50,7 @@ export default function ColorRow({
           value={nameVal}
           onChange={(e) => setNameVal(e.target.value)}
           onBlur={commitName}
-          onKeyDown={(e) => { if (e.key === 'Enter') commitName(); if (e.key === 'Escape') { setNameVal(name); setEditingName(false) } }}
+          onKeyDown={(e) => { if (e.key === 'Enter') commitName(); if (e.key === 'Escape') { setNameVal(name); setEditingName(false); } }}
           className="flex-1 bg-bg-elevated border border-border-default rounded px-1.5 py-0.5 text-xs text-text-primary focus:outline-none focus:border-accent/50"
         />
       ) : (
@@ -77,5 +77,5 @@ export default function ColorRow({
         </button>
       )}
     </div>
-  )
+  );
 }

@@ -1,17 +1,17 @@
-import { memo } from 'react'
-import { FileCode } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { useCodeViewer } from '@/hooks/useCodeViewer'
-import type { CodeSegment } from '@/utils/messageParser'
+import { memo } from 'react';
+import { FileCode } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useCodeViewer } from '@/hooks/useCodeViewer';
+import type { CodeSegment } from '@/utils/messageParser';
 
-const PREVIEW_LINES = 6
+const PREVIEW_LINES = 6;
 
 const CodeBlock = memo(function CodeBlock({ language, filePath, code }: CodeSegment) {
-  const { open } = useCodeViewer()
-  const { t } = useTranslation()
-  const lines = code.split('\n')
-  const previewCode = lines.slice(0, PREVIEW_LINES).join('\n')
-  const hasMore = lines.length > PREVIEW_LINES
+  const { open } = useCodeViewer();
+  const { t } = useTranslation();
+  const lines = code.split('\n');
+  const previewCode = lines.slice(0, PREVIEW_LINES).join('\n');
+  const hasMore = lines.length > PREVIEW_LINES;
 
   return (
     <div
@@ -49,7 +49,7 @@ const CodeBlock = memo(function CodeBlock({ language, filePath, code }: CodeSegm
         )}
       </div>
     </div>
-  )
-})
+  );
+});
 
-export default CodeBlock
+export default CodeBlock;

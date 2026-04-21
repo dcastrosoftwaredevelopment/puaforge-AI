@@ -1,5 +1,5 @@
-import { gettingStarted } from '../../docs/pt/getting-started'
-import { features } from '../../docs/pt/features'
+import { gettingStarted } from '../../docs/pt/getting-started';
+import { features } from '../../docs/pt/features';
 
 export const pt = {
   common: {
@@ -381,4 +381,4 @@ export const pt = {
     overflow: 'Overflow',
     addClassPlaceholder: 'Adicionar classe...',
   },
-} as const
+} as const;

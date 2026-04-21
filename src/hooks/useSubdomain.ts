@@ -1,104 +1,104 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useAtomValue } from 'jotai'
-import { activeProjectIdAtom } from '@/atoms'
-import { authTokenAtom } from '@/atoms/authAtoms'
-import { useTranslation } from 'react-i18next'
-import { api, ApiError } from '@/services/api'
-import { usePlanLimit, PlanLimitUIError } from '@/hooks/usePlanLimit'
-import { track } from '@/lib/analytics'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useAtomValue } from 'jotai';
+import { activeProjectIdAtom } from '@/atoms';
+import { authTokenAtom } from '@/atoms/authAtoms';
+import { useTranslation } from 'react-i18next';
+import { api, ApiError } from '@/services/api';
+import { usePlanLimit, PlanLimitUIError } from '@/hooks/usePlanLimit';
+import { track } from '@/lib/analytics';
 
 /** Regex that matches valid subdomain slugs: lowercase letters, digits, hyphens; no leading/trailing/double hyphens */
-const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/
+const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/;
 
 export type SlugStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid'
 
 export function useSubdomain(publishedSubdomain: string | null, onSaved?: (slug: string) => void) {
-  const activeProjectId = useAtomValue(activeProjectIdAtom)
-  const token = useAtomValue(authTokenAtom)
-  const authHeaders = useMemo(() => token ? { Authorization: `Bearer ${token}` } : undefined, [token])
+  const activeProjectId = useAtomValue(activeProjectIdAtom);
+  const token = useAtomValue(authTokenAtom);
+  const authHeaders = useMemo(() => token ? { Authorization: `Bearer ${token}` } : undefined, [token]);
 
-  const { t } = useTranslation()
-  const withPlanLimit = usePlanLimit()
-  const [slugInput, setSlugInput] = useState('')
-  const [status, setStatus] = useState<SlugStatus>('idle')
-  const [saving, setSaving] = useState(false)
-  const [saveError, setSaveError] = useState<string | null>(null)
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { t } = useTranslation();
+  const withPlanLimit = usePlanLimit();
+  const [slugInput, setSlugInput] = useState('');
+  const [status, setStatus] = useState<SlugStatus>('idle');
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Reset input when project changes
   useEffect(() => {
-    setSlugInput('')
-    setStatus('idle')
-    setSaveError(null)
-  }, [activeProjectId])
+    setSlugInput('');
+    setStatus('idle');
+    setSaveError(null);
+  }, [activeProjectId]);
 
   const handleSlugChange = useCallback((value: string) => {
     // Mask: only allow a-z0-9 and hyphens, auto-lowercase
-    const masked = value.toLowerCase().replace(/[^a-z0-9-]/g, '')
-    setSlugInput(masked)
-    setSaveError(null)
+    const masked = value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    setSlugInput(masked);
+    setSaveError(null);
 
-    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (debounceRef.current) clearTimeout(debounceRef.current);
 
     if (!masked) {
-      setStatus('idle')
-      return
+      setStatus('idle');
+      return;
     }
 
     if (!SLUG_REGEX.test(masked) || masked.includes('--')) {
-      setStatus('invalid')
-      return
+      setStatus('invalid');
+      return;
     }
 
     // If the user typed back the current subdomain, no need to check
     if (masked === publishedSubdomain) {
-      setStatus('available')
-      return
+      setStatus('available');
+      return;
     }
 
-    setStatus('checking')
+    setStatus('checking');
     debounceRef.current = setTimeout(async () => {
       try {
         const result = await api.get<{ available: boolean; reason?: string }>(
           `/api/subdomains/check?slug=${encodeURIComponent(masked)}`,
-        )
+        );
         if (result.reason === 'invalid') {
-          setStatus('invalid')
+          setStatus('invalid');
         } else {
-          setStatus(result.available ? 'available' : 'taken')
+          setStatus(result.available ? 'available' : 'taken');
         }
       } catch {
-        setStatus('idle')
+        setStatus('idle');
       }
-    }, 400)
-  }, [publishedSubdomain])
+    }, 400);
+  }, [publishedSubdomain]);
 
   const saveSubdomain = useCallback(async () => {
-    if (!activeProjectId || !authHeaders || status !== 'available') return
-    setSaving(true)
-    setSaveError(null)
+    if (!activeProjectId || !authHeaders || status !== 'available') return;
+    setSaving(true);
+    setSaveError(null);
     try {
       await withPlanLimit(() => api.put(
         `/api/projects/${activeProjectId}/subdomain`,
         { subdomain: slugInput },
         authHeaders,
-      ))
-      track('subdomain_slug_saved')
-      onSaved?.(slugInput)
-      setSlugInput('')
-      setStatus('idle')
+      ));
+      track('subdomain_slug_saved');
+      onSaved?.(slugInput);
+      setSlugInput('');
+      setStatus('idle');
     } catch (e) {
       if (e instanceof PlanLimitUIError) {
-        setSaveError(t('publish.subdomainLimitReached'))
+        setSaveError(t('publish.subdomainLimitReached'));
       } else if (e instanceof ApiError && e.status === 409) {
-        setStatus('taken')
+        setStatus('taken');
       } else {
-        setSaveError(t('publish.subdomainSaveError'))
+        setSaveError(t('publish.subdomainSaveError'));
       }
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }, [activeProjectId, authHeaders, slugInput, status, withPlanLimit, t, onSaved])
+  }, [activeProjectId, authHeaders, slugInput, status, withPlanLimit, t, onSaved]);
 
   return {
     slugInput,
@@ -107,5 +107,5 @@ export function useSubdomain(publishedSubdomain: string | null, onSaved?: (slug:
     saveError,
     handleSlugChange,
     saveSubdomain,
-  }
+  };
 }

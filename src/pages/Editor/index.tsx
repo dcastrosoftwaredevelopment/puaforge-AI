@@ -1,83 +1,83 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
-import { useParams } from 'react-router-dom'
-import { SandpackProvider } from '@codesandbox/sandpack-react'
-import { Loader2, MessageCircle } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { useFiles } from '@/hooks/useFiles'
-import { useChat } from '@/hooks/useChat'
-import { usePanelSizes } from '@/hooks/usePanelSizes'
-import { useProjectLoader } from '@/hooks/useProjectLoader'
-import { useDraft } from '@/hooks/useDraft'
-import { extractDependencies } from '@/services/fileParser'
-import { TAILWIND_HTML, buildPackageJson } from '@/utils/defaultFiles'
-import { FORGE_INSPECT_SOURCE, FORGE_ENTRY_SOURCE } from '@/utils/inspectFiles'
-import EditorHeader from './components/EditorHeader'
-import SandpackContent from './components/SandpackContent'
-import ResizeHandle from './components/ResizeHandle'
-import MobileTabBar from './components/MobileTabBar'
-import FloatingChat, { DockedChat, MobileChatPanel } from '@/components/chat/FloatingChat'
-import { useIsMobile } from '@/hooks/useIsMobile'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { useParams } from 'react-router-dom';
+import { SandpackProvider } from '@codesandbox/sandpack-react';
+import { Loader2, MessageCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useFiles } from '@/hooks/useFiles';
+import { useChat } from '@/hooks/useChat';
+import { usePanelSizes } from '@/hooks/usePanelSizes';
+import { useProjectLoader } from '@/hooks/useProjectLoader';
+import { useDraft } from '@/hooks/useDraft';
+import { extractDependencies } from '@/services/fileParser';
+import { TAILWIND_HTML, buildPackageJson } from '@/utils/defaultFiles';
+import { FORGE_INSPECT_SOURCE, FORGE_ENTRY_SOURCE } from '@/utils/inspectFiles';
+import EditorHeader from './components/EditorHeader';
+import SandpackContent from './components/SandpackContent';
+import ResizeHandle from './components/ResizeHandle';
+import MobileTabBar from './components/MobileTabBar';
+import FloatingChat, { DockedChat, MobileChatPanel } from '@/components/chat/FloatingChat';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
-const CHAT_MIN = 280
-const CHAT_MAX = 600
+const CHAT_MIN = 280;
+const CHAT_MAX = 600;
 
 export default function Editor() {
-  const { projectId } = useParams<{ projectId: string }>()
-  const projectReady = useProjectLoader(projectId)
-  const { files, setFiles, deps, setDeps } = useFiles()
-  const { mode: chatMode, isOpen: isChatOpen, setIsOpen: setIsChatOpen } = useChat()
-  const { t } = useTranslation()
-  useDraft()
-  const { chatWidth, setChatWidth } = usePanelSizes()
+  const { projectId } = useParams<{ projectId: string }>();
+  const projectReady = useProjectLoader(projectId);
+  const { files, setFiles, deps, setDeps } = useFiles();
+  const { mode: chatMode, isOpen: isChatOpen, setIsOpen: setIsChatOpen } = useChat();
+  const { t } = useTranslation();
+  useDraft();
+  const { chatWidth, setChatWidth } = usePanelSizes();
 
   // When files change: extract new deps from imports (skip package.json to avoid circular update)
   useEffect(() => {
     const filesToScan = Object.fromEntries(
       Object.entries(files).filter(([p]) => p !== '/package.json'),
-    )
-    const newDeps = extractDependencies(filesToScan)
+    );
+    const newDeps = extractDependencies(filesToScan);
     setDeps((prev) => {
-      const hasNew = Object.keys(newDeps).some((k) => !(k in prev))
-      return hasNew ? { ...prev, ...newDeps } : prev
-    })
-  }, [files, setDeps])
+      const hasNew = Object.keys(newDeps).some((k) => !(k in prev));
+      return hasNew ? { ...prev, ...newDeps } : prev;
+    });
+  }, [files, setDeps]);
 
   // When deps change: keep package.json in sync so it's visible in the editor
   useEffect(() => {
-    const next = buildPackageJson(deps)
-    setFiles((prev) => prev['/package.json'] === next ? prev : { ...prev, '/package.json': next })
-  }, [deps, setFiles])
+    const next = buildPackageJson(deps);
+    setFiles((prev) => prev['/package.json'] === next ? prev : { ...prev, '/package.json': next });
+  }, [deps, setFiles]);
 
-  const isDocked = chatMode === 'docked'
-  const showDockedChat = isDocked && isChatOpen
-  const isMobile = useIsMobile()
+  const isDocked = chatMode === 'docked';
+  const showDockedChat = isDocked && isChatOpen;
+  const isMobile = useIsMobile();
 
   // Live width during drag — mutate DOM directly, no setState per frame
-  const chatWidthRef = useRef(chatWidth)
-  useLayoutEffect(() => { chatWidthRef.current = chatWidth }, [chatWidth])
-  const chatPanelRef = useRef<HTMLDivElement>(null)
+  const chatWidthRef = useRef(chatWidth);
+  useLayoutEffect(() => { chatWidthRef.current = chatWidth; }, [chatWidth]);
+  const chatPanelRef = useRef<HTMLDivElement>(null);
 
   const onChatResize = useCallback((delta: number) => {
-    const next = Math.min(CHAT_MAX, Math.max(CHAT_MIN, chatWidthRef.current - delta))
-    chatWidthRef.current = next
-    if (chatPanelRef.current) chatPanelRef.current.style.width = `${next}px`
-  }, [])
+    const next = Math.min(CHAT_MAX, Math.max(CHAT_MIN, chatWidthRef.current - delta));
+    chatWidthRef.current = next;
+    if (chatPanelRef.current) chatPanelRef.current.style.width = `${next}px`;
+  }, []);
 
   const onChatCommit = useCallback(() => {
-    setChatWidth(chatWidthRef.current)
-  }, [setChatWidth])
+    setChatWidth(chatWidthRef.current);
+  }, [setChatWidth]);
 
   const sandpackKey = useMemo(() => {
-    const depsKey = Object.keys(deps).sort().join(',')
-    return `${projectId}-${depsKey}`
-  }, [projectId, deps])
+    const depsKey = Object.keys(deps).sort().join(',');
+    return `${projectId}-${depsKey}`;
+  }, [projectId, deps]);
 
   if (!projectReady) {
     return (
       <div className="h-screen w-screen bg-bg-primary flex items-center justify-center">
         <Loader2 size={24} className="animate-spin text-text-muted" />
       </div>
-    )
+    );
   }
 
   return (
@@ -135,5 +135,5 @@ export default function Editor() {
 
       <FloatingChat />
     </div>
-  )
+  );
 }

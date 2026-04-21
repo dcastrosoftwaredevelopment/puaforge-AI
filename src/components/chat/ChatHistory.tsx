@@ -1,45 +1,45 @@
-import { useEffect, useRef } from 'react'
-import { Loader2, RefreshCw } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import Button from '@/components/ui/Button'
-import { useMessagesValue } from '@/hooks/useMessages'
-import { useFiles } from '@/hooks/useFiles'
-import { useProjectImages } from '@/hooks/useProjectImages'
-import { parseFilesFromResponse, mergeFiles, extractDependencies } from '@/services/fileParser'
-import { generateImagesFiles } from '@/hooks/useProjectImages'
-import { DEFAULT_FILES } from '@/utils/defaultFiles'
-import Tooltip from '@/components/ui/Tooltip'
-import ChatMessage from './ChatMessage'
-import { CodeViewerProvider } from './CodeViewerContext'
+import { useEffect, useRef } from 'react';
+import { Loader2, RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import Button from '@/components/ui/Button';
+import { useMessagesValue } from '@/hooks/useMessages';
+import { useFiles } from '@/hooks/useFiles';
+import { useProjectImages } from '@/hooks/useProjectImages';
+import { parseFilesFromResponse, mergeFiles, extractDependencies } from '@/services/fileParser';
+import { generateImagesFiles } from '@/hooks/useProjectImages';
+import { DEFAULT_FILES } from '@/utils/defaultFiles';
+import Tooltip from '@/components/ui/Tooltip';
+import ChatMessage from './ChatMessage';
+import { CodeViewerProvider } from './CodeViewerContext';
 
-const FILE_BLOCK_RE = /```[\w]*\s+file="[^"]+"/
+const FILE_BLOCK_RE = /```[\w]*\s+file="[^"]+"/;
 
 export default function ChatHistory() {
-  const { messages, isGenerating } = useMessagesValue()
-  const { setFiles, setDeps } = useFiles()
-  const { images } = useProjectImages()
-  const bottomRef = useRef<HTMLDivElement>(null)
-  const { t } = useTranslation()
+  const { messages, isGenerating } = useMessagesValue();
+  const { setFiles, setDeps } = useFiles();
+  const { images } = useProjectImages();
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, isGenerating])
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isGenerating]);
 
-  const hasAnyCode = messages.some((m) => m.role === 'assistant' && FILE_BLOCK_RE.test(m.content))
+  const hasAnyCode = messages.some((m) => m.role === 'assistant' && FILE_BLOCK_RE.test(m.content));
 
   function reapplyAll() {
-    const imageFiles = images.length > 0 ? generateImagesFiles(images) : {}
-    let accumulated = { ...DEFAULT_FILES, ...imageFiles }
+    const imageFiles = images.length > 0 ? generateImagesFiles(images) : {};
+    let accumulated = { ...DEFAULT_FILES, ...imageFiles };
     for (const msg of messages) {
-      if (msg.role !== 'assistant') continue
-      const parsed = parseFilesFromResponse(msg.content)
+      if (msg.role !== 'assistant') continue;
+      const parsed = parseFilesFromResponse(msg.content);
       if (Object.keys(parsed).length > 0) {
-        accumulated = mergeFiles(accumulated, parsed)
+        accumulated = mergeFiles(accumulated, parsed);
       }
     }
-    setFiles(accumulated)
-    const newDeps = extractDependencies(accumulated)
-    if (Object.keys(newDeps).length > 0) setDeps((prev) => ({ ...prev, ...newDeps }))
+    setFiles(accumulated);
+    const newDeps = extractDependencies(accumulated);
+    if (Object.keys(newDeps).length > 0) setDeps((prev) => ({ ...prev, ...newDeps }));
   }
 
   if (messages.length === 0) {
@@ -47,7 +47,7 @@ export default function ChatHistory() {
       <div className="flex-1 flex items-center justify-center text-text-muted text-sm text-center px-4">
         {t('chat.emptyPlaceholder')}
       </div>
-    )
+    );
   }
 
   return (
@@ -83,5 +83,5 @@ export default function ChatHistory() {
       )}
     </div>
     </CodeViewerProvider>
-  )
+  );
 }

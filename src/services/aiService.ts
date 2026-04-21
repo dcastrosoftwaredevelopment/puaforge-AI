@@ -1,5 +1,5 @@
-import { parseFilesFromResponse } from './fileParser'
-import { api } from './api'
+import { parseFilesFromResponse } from './fileParser';
+import { api } from './api';
 
 interface HistoryImage {
   base64: string
@@ -31,10 +31,10 @@ export async function generateCode(params: GenerateParams): Promise<GenerateResu
       images: params.images,
     },
     params.apiKey ? { 'X-API-Key': params.apiKey } : undefined,
-  )
+  );
 
-  const rawResponse: string = data.rawResponse || ''
-  const files = parseFilesFromResponse(rawResponse)
+  const rawResponse: string = data.rawResponse || '';
+  const files = parseFilesFromResponse(rawResponse);
 
-  return { files, rawResponse }
+  return { files, rawResponse };
 }

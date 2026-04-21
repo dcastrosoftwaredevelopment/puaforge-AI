@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, boolean, timestamp, integer, jsonb } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, text, boolean, timestamp, integer, jsonb } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -10,7 +10,7 @@ export const users = pgTable('users', {
   emailVerificationToken: varchar('email_verification_token', { length: 255 }).unique(),
   emailVerificationExpiry: timestamp('email_verification_expiry'),
   createdAt: timestamp('created_at').defaultNow(),
-})
+});
 
 export const userSettings = pgTable('user_settings', {
   userId: uuid('user_id')
@@ -19,7 +19,7 @@ export const userSettings = pgTable('user_settings', {
   apiKey: text('api_key'),
   apiKeyEnabled: boolean('api_key_enabled').default(true).notNull(),
   updatedAt: timestamp('updated_at').defaultNow(),
-})
+});
 
 export const projects = pgTable('projects', {
   id: uuid('id').primaryKey(),
@@ -29,7 +29,7 @@ export const projects = pgTable('projects', {
   customDomain: varchar('custom_domain', { length: 255 }),
   createdAt: timestamp('created_at').notNull(),
   updatedAt: timestamp('updated_at').notNull(),
-})
+});
 
 export const messages = pgTable('messages', {
   id: uuid('id').primaryKey(),
@@ -38,7 +38,7 @@ export const messages = pgTable('messages', {
   content: text('content').notNull(),
   images: jsonb('images'),
   createdAt: timestamp('created_at').notNull(),
-})
+});
 
 export const projectFiles = pgTable('project_files', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -46,7 +46,7 @@ export const projectFiles = pgTable('project_files', {
   path: text('path').notNull(),
   code: text('code').notNull(),
   updatedAt: timestamp('updated_at').notNull(),
-})
+});
 
 export const projectImages = pgTable('project_images', {
   id: uuid('id').primaryKey(),
@@ -55,7 +55,7 @@ export const projectImages = pgTable('project_images', {
   url: text('url').notNull(),
   mediaType: varchar('media_type', { length: 100 }).notNull(),
   size: integer('size').notNull(),
-})
+});
 
 export const checkpoints = pgTable('checkpoints', {
   id: uuid('id').primaryKey(),
@@ -63,7 +63,7 @@ export const checkpoints = pgTable('checkpoints', {
   name: varchar('name', { length: 255 }).notNull(),
   files: jsonb('files').$type<Record<string, string>>().notNull(),
   createdAt: timestamp('created_at').notNull(),
-})
+});
 
 export const publishedSites = pgTable('published_sites', {
   projectId: uuid('project_id').primaryKey().references(() => projects.id, { onDelete: 'cascade' }),
@@ -72,7 +72,7 @@ export const publishedSites = pgTable('published_sites', {
   subdomain: varchar('subdomain', { length: 63 }).unique(),                 // claimed slug
   subdomainPbRecordId: varchar('subdomain_pb_record_id', { length: 255 }), // subdomain publish
   subdomainPublishedAt: timestamp('subdomain_published_at'),                // subdomain publish time
-})
+});
 
 export const subscriptions = pgTable('subscriptions', {
   userId: uuid('user_id')
@@ -85,7 +85,7 @@ export const subscriptions = pgTable('subscriptions', {
   importsResetAt: timestamp('imports_reset_at').defaultNow().notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-})
+});
 
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert

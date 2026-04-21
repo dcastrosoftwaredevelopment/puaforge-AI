@@ -1,20 +1,20 @@
-import { memo, useMemo } from 'react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import { User, Bot } from 'lucide-react'
-import type { Message } from '@/atoms'
-import { parseSegments } from '@/utils/messageParser'
-import CollapsibleText from './CollapsibleText'
-import CodeBlock from './CodeBlock'
+import { memo, useMemo } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { User, Bot } from 'lucide-react';
+import type { Message } from '@/atoms';
+import { parseSegments } from '@/utils/messageParser';
+import CollapsibleText from './CollapsibleText';
+import CodeBlock from './CodeBlock';
 
 interface Props { message: Message }
 
 function ChatMessage({ message }: Props) {
-  const isUser = message.role === 'user'
+  const isUser = message.role === 'user';
   const segments = useMemo(
     () => isUser ? null : parseSegments(message.content),
     [isUser, message.content],
-  )
+  );
 
   return (
     <div className={`flex gap-2.5 ${isUser ? 'flex-row-reverse' : ''}`}>
@@ -55,12 +55,12 @@ function ChatMessage({ message }: Props) {
                   <ReactMarkdown remarkPlugins={[remarkGfm]}
                     components={{
                       code: ({ children, className }) => {
-                        const isBlock = !!className?.includes('language-')
+                        const isBlock = !!className?.includes('language-');
                         return isBlock ? (
                           <pre className="bg-bg-primary rounded p-2 my-1 text-[11px] font-mono text-code-muted overflow-x-auto whitespace-pre">{children}</pre>
                         ) : (
                           <code className="bg-bg-primary px-1.5 py-0.5 rounded text-xs text-text-primary font-mono">{children}</code>
-                        )
+                        );
                       },
                       pre: ({ children }) => <>{children}</>,
                     }}
@@ -76,7 +76,7 @@ function ChatMessage({ message }: Props) {
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default memo(ChatMessage)
+export default memo(ChatMessage);

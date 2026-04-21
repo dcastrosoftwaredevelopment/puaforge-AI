@@ -16,4 +16,4 @@ export const features = {
   features_4_title: 'Images and color palette',
   features_4_desc:
     'Open the Images panel in the editor to upload photos for your project. They become available for the AI to use when you ask. Use the Palette panel to set your main colors — the AI will follow them when generating content.',
-}
+};

@@ -1,4 +1,4 @@
-import { ExternalLink } from 'lucide-react'
+import { ExternalLink } from 'lucide-react';
 
 export default function Step({ number, title, desc, link, linkLabel }: {
   number: number
@@ -28,5 +28,5 @@ export default function Step({ number, title, desc, link, linkLabel }: {
         )}
       </div>
     </div>
-  )
+  );
 }

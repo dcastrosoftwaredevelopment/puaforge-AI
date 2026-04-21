@@ -1,19 +1,19 @@
-import { useState } from 'react'
-import { Plus, RotateCcw, Check } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { useColorPalette } from '@/hooks/useColorPalette'
-import ColorRow from './ColorRow'
+import { useState } from 'react';
+import { Plus, RotateCcw, Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useColorPalette } from '@/hooks/useColorPalette';
+import ColorRow from './ColorRow';
 
 export default function ColorPalette() {
-  const { palette, addColor, updateColor, removeColor, resetToDefaults } = useColorPalette()
-  const { t } = useTranslation()
-  const [copiedId, setCopiedId] = useState<string | null>(null)
+  const { palette, addColor, updateColor, removeColor, resetToDefaults } = useColorPalette();
+  const { t } = useTranslation();
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const handleCopy = (id: string, value: string) => {
-    navigator.clipboard.writeText(value)
-    setCopiedId(id)
-    setTimeout(() => setCopiedId(null), 1500)
-  }
+    navigator.clipboard.writeText(value);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 1500);
+  };
 
   return (
     <div className="flex flex-col">
@@ -70,5 +70,5 @@ export default function ColorPalette() {
         {t('palette.helper')}
       </p>
     </div>
-  )
+  );
 }

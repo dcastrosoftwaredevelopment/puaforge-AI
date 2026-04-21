@@ -1,23 +1,23 @@
-import { Code2, Paintbrush, Layers } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { useEditorPanelTabs } from '@/hooks/useEditorPanelTabs'
-import type { EditorPanelMode } from '@/atoms'
-import Tooltip from '@/components/ui/Tooltip'
+import { Code2, Paintbrush, Layers } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useEditorPanelTabs } from '@/hooks/useEditorPanelTabs';
+import type { EditorPanelMode } from '@/atoms';
+import Tooltip from '@/components/ui/Tooltip';
 
 export default function EditorPanelTabs() {
-  const { t } = useTranslation()
-  const { editorPanelMode, setEditorPanelMode, inspectMode, selectedElement } = useEditorPanelTabs()
+  const { t } = useTranslation();
+  const { editorPanelMode, setEditorPanelMode, inspectMode, selectedElement } = useEditorPanelTabs();
 
   const tabs: Array<{ mode: EditorPanelMode; label: string; icon: React.ReactNode; enabled: boolean; disabledTip: string }> = [
     { mode: 'code', label: t('inspect.tabCode'), icon: <Code2 size={13} />, enabled: true, disabledTip: '' },
     { mode: 'style', label: t('inspect.tabStyle'), icon: <Paintbrush size={13} />, enabled: true, disabledTip: '' },
     { mode: 'layers', label: t('inspect.tabLayers'), icon: <Layers size={13} />, enabled: inspectMode, disabledTip: t('inspect.tabLayersDisabled') },
-  ]
+  ];
 
   return (
     <div className="flex items-center border-b border-border-subtle shrink-0 bg-bg-secondary">
       {tabs.map(({ mode, label, icon, enabled, disabledTip }) => {
-        const isActive = editorPanelMode === mode
+        const isActive = editorPanelMode === mode;
         const btn = (
           <button
             key={mode}
@@ -34,17 +34,17 @@ export default function EditorPanelTabs() {
             {icon}
             {label}
           </button>
-        )
+        );
 
         if (!enabled && disabledTip) {
           return (
             <Tooltip key={mode} content={disabledTip} side="bottom" align="left">
               <span className="contents">{btn}</span>
             </Tooltip>
-          )
+          );
         }
-        return btn
+        return btn;
       })}
     </div>
-  )
+  );
 }

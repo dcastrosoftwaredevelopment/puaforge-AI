@@ -1,14 +1,14 @@
-declare const __APP_DOMAIN__: string
-declare const __SERVER_IP__: string
+declare const __APP_DOMAIN__: string;
+declare const __SERVER_IP__: string;
 
-import { Globe, Loader2, ExternalLink, Check, AlertTriangle, Link } from 'lucide-react'
-import { useTranslation, Trans } from 'react-i18next'
-import { usePublish } from '@/hooks/usePublish'
-import { useCustomDomain } from '@/hooks/useCustomDomain'
-import { useSubdomain } from '@/hooks/useSubdomain'
-import { usePublishPanel } from '@/hooks/usePublishPanel'
-import Tooltip from '@/components/ui/Tooltip'
-import Button from '@/components/ui/Button'
+import { Globe, Loader2, ExternalLink, Check, AlertTriangle, Link } from 'lucide-react';
+import { useTranslation, Trans } from 'react-i18next';
+import { usePublish } from '@/hooks/usePublish';
+import { useCustomDomain } from '@/hooks/useCustomDomain';
+import { useSubdomain } from '@/hooks/useSubdomain';
+import { usePublishPanel } from '@/hooks/usePublishPanel';
+import Tooltip from '@/components/ui/Tooltip';
+import Button from '@/components/ui/Button';
 
 export default function PublishButton() {
   const {
@@ -27,10 +27,10 @@ export default function PublishButton() {
     publishLocally,
     openLocalPreview,
     onSubdomainSaved,
-  } = usePublish()
-  const { customDomain, saveDomain } = useCustomDomain()
-  const { slugInput, status, saving, saveError, handleSlugChange, saveSubdomain } = useSubdomain(subdomain, onSubdomainSaved)
-  const { t, i18n } = useTranslation()
+  } = usePublish();
+  const { customDomain, saveDomain } = useCustomDomain();
+  const { slugInput, status, saving, saveError, handleSlugChange, saveSubdomain } = useSubdomain(subdomain, onSubdomainSaved);
+  const { t, i18n } = useTranslation();
   const {
     showPanel, setShowPanel,
     domainInput, setDomainInput,
@@ -40,24 +40,24 @@ export default function PublishButton() {
     ownProjectConflict, setOwnProjectConflict,
     panelRef,
     handleSaveDomain,
-  } = usePublishPanel(customDomain, saveDomain)
+  } = usePublishPanel(customDomain, saveDomain);
 
-  const appDomain = __APP_DOMAIN__
+  const appDomain = __APP_DOMAIN__;
 
   const formatDate = (ts: number) =>
     new Date(ts).toLocaleDateString(i18n.language === 'pt' ? 'pt-BR' : 'en-US', {
       day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
-    })
+    });
 
   const slugStatusColor = {
     idle: 'text-text-muted', checking: 'text-text-muted', available: 'text-green-400',
     taken: 'text-forge-terracotta', invalid: 'text-forge-terracotta', already_set: 'text-text-muted',
-  }[status]
+  }[status];
 
   const slugStatusLabel = {
     idle: '', checking: t('publish.subdomainChecking'), available: t('publish.subdomainAvailable'),
     taken: t('publish.subdomainTaken'), invalid: t('publish.subdomainInvalid'), already_set: '',
-  }[status]
+  }[status];
 
   return (
     <div className="relative" ref={panelRef}>
@@ -94,7 +94,7 @@ export default function PublishButton() {
                         type="text"
                         value={slugInput}
                         onChange={(e) => handleSlugChange(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === 'Enter' && status === 'available') void saveSubdomain() }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' && status === 'available') void saveSubdomain(); }}
                         placeholder={subdomain ?? t('publish.subdomainPlaceholder')}
                         className="flex-1 bg-transparent px-2.5 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none font-mono min-w-0"
                         maxLength={63}
@@ -146,7 +146,7 @@ export default function PublishButton() {
                   type="text"
                   value={domainInput}
                   onChange={(e) => setDomainInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') void handleSaveDomain() }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') void handleSaveDomain(); }}
                   placeholder={t('publish.domainPlaceholder')}
                   className="flex-1 bg-bg-elevated border border-border-subtle rounded-lg px-2.5 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-vibe-blue/40 font-mono"
                 />
@@ -254,5 +254,5 @@ export default function PublishButton() {
         </div>
       )}
     </div>
-  )
+  );
 }

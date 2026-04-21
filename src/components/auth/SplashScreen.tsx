@@ -1,40 +1,40 @@
-import { useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
-import { Loader2 } from 'lucide-react'
-import { useAuth, useAuthLoader } from '@/hooks/useAuth'
+import { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
+import { useAuth, useAuthLoader } from '@/hooks/useAuth';
 
-const PUBLIC_PATHS = ['/login', '/verify-email', '/email-confirmed']
+const PUBLIC_PATHS = ['/login', '/verify-email', '/email-confirmed'];
 
 export default function SplashScreen() {
-  const { validate } = useAuthLoader()
-  const { isLoading, isAuthenticated, user } = useAuth()
-  const navigate = useNavigate()
-  const location = useLocation()
+  const { validate } = useAuthLoader();
+  const { isLoading, isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    validate()
-  }, [validate])
+    validate();
+  }, [validate]);
 
   useEffect(() => {
-    if (isLoading) return
+    if (isLoading) return;
 
-    const isPublic = PUBLIC_PATHS.some((p) => location.pathname.startsWith(p))
+    const isPublic = PUBLIC_PATHS.some((p) => location.pathname.startsWith(p));
 
     if (!isAuthenticated && !isPublic) {
-      navigate('/login', { replace: true })
-      return
+      navigate('/login', { replace: true });
+      return;
     }
 
     if (isAuthenticated) {
       if (!user?.emailVerified && !isPublic) {
-        navigate('/verify-email', { replace: true })
-        return
+        navigate('/verify-email', { replace: true });
+        return;
       }
       if (location.pathname === '/login') {
-        navigate('/', { replace: true })
+        navigate('/', { replace: true });
       }
     }
-  }, [isLoading, isAuthenticated, user, location.pathname, navigate])
+  }, [isLoading, isAuthenticated, user, location.pathname, navigate]);
 
   if (isLoading) {
     return (
@@ -45,8 +45,8 @@ export default function SplashScreen() {
         </div>
         <Loader2 size={20} className="animate-spin text-text-muted" />
       </div>
-    )
+    );
   }
 
-  return null
+  return null;
 }

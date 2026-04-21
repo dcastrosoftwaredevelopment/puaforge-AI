@@ -1,11 +1,11 @@
-import { useResendCooldown } from '@/hooks/useResendCooldown'
-import VerifyEmailCard from './components/VerifyEmailCard'
+import { useResendCooldown } from '@/hooks/useResendCooldown';
+import VerifyEmailCard from './components/VerifyEmailCard';
 
 export default function VerifyEmail() {
-  const { cooldown, resendState, handleResend } = useResendCooldown()
+  const { cooldown, resendState, handleResend } = useResendCooldown();
 
-  const email = sessionStorage.getItem('verify_email') ?? ''
-  const maskedEmail = email.replace(/(.{2})(.*)(@.*)/, (_, a, b, c) => a + b.replace(/./g, '•') + c)
+  const email = sessionStorage.getItem('verify_email') ?? '';
+  const maskedEmail = email.replace(/(.{2})(.*)(@.*)/, (_, a, b, c) => a + b.replace(/./g, '•') + c);
 
   return (
     <div className="h-screen w-screen bg-bg-primary flex items-center justify-center px-4">
@@ -23,5 +23,5 @@ export default function VerifyEmail() {
         />
       </div>
     </div>
-  )
+  );
 }

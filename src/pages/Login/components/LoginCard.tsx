@@ -1,8 +1,8 @@
-import { GoogleLogin } from '@react-oauth/google'
-import { Loader2, Mail, Lock, User } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { TextInput } from 'flowbite-react'
-import Button from '@/components/ui/Button'
+import { GoogleLogin } from '@react-oauth/google';
+import { Loader2, Mail, Lock, User } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { TextInput } from 'flowbite-react';
+import Button from '@/components/ui/Button';
 
 interface Props {
   tab: 'login' | 'register'
@@ -31,7 +31,7 @@ export default function LoginCard({
   handleSubmit, handleGoogle,
   clearFieldError, setError,
 }: Props) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   return (
     <div className="bg-bg-secondary border border-border-subtle rounded-2xl p-6">
       <div className="flex rounded-lg bg-bg-primary p-1 mb-6">
@@ -57,7 +57,7 @@ export default function LoginCard({
               placeholder={t('login.namePlaceholder')}
               value={name}
               color={fieldErrors.name ? 'failure' : 'gray'}
-              onChange={(e) => { setName(e.target.value); clearFieldError('name') }}
+              onChange={(e) => { setName(e.target.value); clearFieldError('name'); }}
             />
             {fieldErrors.name && <p className="text-xs text-red-400 mt-1 ml-1">{fieldErrors.name}</p>}
           </div>
@@ -69,7 +69,7 @@ export default function LoginCard({
             placeholder={t('login.emailPlaceholder')}
             value={email}
             color={fieldErrors.email ? 'failure' : 'gray'}
-            onChange={(e) => { setEmail(e.target.value); clearFieldError('email') }}
+            onChange={(e) => { setEmail(e.target.value); clearFieldError('email'); }}
           />
           {fieldErrors.email && <p className="text-xs text-red-400 mt-1 ml-1">{fieldErrors.email}</p>}
         </div>
@@ -80,7 +80,7 @@ export default function LoginCard({
             placeholder={t('login.passwordPlaceholder')}
             value={password}
             color={fieldErrors.password ? 'failure' : 'gray'}
-            onChange={(e) => { setPassword(e.target.value); clearFieldError('password') }}
+            onChange={(e) => { setPassword(e.target.value); clearFieldError('password'); }}
           />
           {fieldErrors.password && <p className="text-xs text-red-400 mt-1 ml-1">{fieldErrors.password}</p>}
         </div>
@@ -102,7 +102,7 @@ export default function LoginCard({
 
       <div className="flex justify-center">
         <GoogleLogin
-          onSuccess={(res) => { if (res.credential) handleGoogle(res.credential) }}
+          onSuccess={(res) => { if (res.credential) handleGoogle(res.credential); }}
           onError={() => setError(t('login.errors.googleGenericError'))}
           theme="filled_black"
           shape="rectangular"
@@ -112,5 +112,5 @@ export default function LoginCard({
         />
       </div>
     </div>
-  )
+  );
 }

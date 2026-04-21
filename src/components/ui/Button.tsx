@@ -1,6 +1,6 @@
-import { type ComponentProps } from 'react'
-import { Button as FlowbiteButton } from 'flowbite-react'
-import type { ButtonProps } from 'flowbite-react'
+import { type ComponentProps } from 'react';
+import { Button as FlowbiteButton } from 'flowbite-react';
+import type { ButtonProps } from 'flowbite-react';
 
 type Variant = 'primary' | 'secondary' | 'blue' | 'ghost' | 'danger' | 'terracotta'
 type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
@@ -26,5 +26,5 @@ export default function Button({ variant = 'secondary', size = 'md', isLoading, 
     >
       {children}
     </FlowbiteButton>
-  )
+  );
 }

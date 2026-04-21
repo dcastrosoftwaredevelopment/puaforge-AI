@@ -1,4 +1,4 @@
-import { SPACING_SCALE } from '@/utils/tailwindClasses'
+import { SPACING_SCALE } from '@/utils/tailwindClasses';
 
 export default function StyleEditorSpacingInput({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
@@ -13,5 +13,5 @@ export default function StyleEditorSpacingInput({ label, value, onChange }: { la
         {SPACING_SCALE.map((n) => <option key={n} value={String(n)}>{n}</option>)}
       </select>
     </div>
-  )
+  );
 }

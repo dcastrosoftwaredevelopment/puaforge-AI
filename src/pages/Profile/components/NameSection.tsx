@@ -1,7 +1,7 @@
-import { useTranslation } from 'react-i18next'
-import { Loader2 } from 'lucide-react'
-import { TextInput } from 'flowbite-react'
-import Button from '@/components/ui/Button'
+import { useTranslation } from 'react-i18next';
+import { Loader2 } from 'lucide-react';
+import { TextInput } from 'flowbite-react';
+import Button from '@/components/ui/Button';
 
 interface Props {
   name: string
@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default function NameSection({ name, setName, nameError, nameSaving, nameSuccess, handleSaveName }: Props) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   return (
     <div className="bg-bg-secondary border border-border-subtle rounded-xl p-5 mb-6">
       <h2 className="text-sm font-medium text-text-primary mb-4">{t('profile.nameSection')}</h2>
@@ -35,5 +35,5 @@ export default function NameSection({ name, setName, nameError, nameSaving, name
         </Button>
       </form>
     </div>
-  )
+  );
 }

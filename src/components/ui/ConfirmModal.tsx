@@ -1,7 +1,7 @@
-import { AlertTriangle } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { Modal, ModalBody } from 'flowbite-react'
-import Button from '@/components/ui/Button'
+import { AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Modal, ModalBody } from 'flowbite-react';
+import Button from '@/components/ui/Button';
 
 interface ConfirmModalProps {
   open: boolean
@@ -22,9 +22,9 @@ export default function ConfirmModal({
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
-  const { t } = useTranslation()
-  const resolvedConfirm = confirmLabel ?? t('common.confirm')
-  const resolvedCancel = cancelLabel ?? t('common.cancel')
+  const { t } = useTranslation();
+  const resolvedConfirm = confirmLabel ?? t('common.confirm');
+  const resolvedCancel = cancelLabel ?? t('common.cancel');
 
   return (
     <Modal show={open} onClose={onCancel} size="sm" dismissible>
@@ -48,5 +48,5 @@ export default function ConfirmModal({
         </div>
       </ModalBody>
     </Modal>
-  )
+  );
 }

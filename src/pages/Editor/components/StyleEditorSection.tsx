@@ -1,8 +1,8 @@
-import { useState } from 'react'
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { useState } from 'react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 export default function StyleEditorSection({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
-  const [open, setOpen] = useState(defaultOpen)
+  const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="border-b border-border-subtle/50">
       <button
@@ -14,5 +14,5 @@ export default function StyleEditorSection({ title, children, defaultOpen = true
       </button>
       {open && <div className="px-3 pb-3 flex flex-col gap-2">{children}</div>}
     </div>
-  )
+  );
 }

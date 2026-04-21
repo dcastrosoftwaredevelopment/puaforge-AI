@@ -1,8 +1,8 @@
-import { MessageCircle, X } from 'lucide-react'
-import { useChat } from '@/hooks/useChat'
+import { MessageCircle, X } from 'lucide-react';
+import { useChat } from '@/hooks/useChat';
 
 export default function ChatToggleButton() {
-  const { isOpen: isChatOpen, setIsOpen: setIsChatOpen } = useChat()
+  const { isOpen: isChatOpen, setIsOpen: setIsChatOpen } = useChat();
 
   return (
     <button
@@ -11,5 +11,5 @@ export default function ChatToggleButton() {
     >
       {isChatOpen ? <X size={20} /> : <MessageCircle size={20} />}
     </button>
-  )
+  );
 }

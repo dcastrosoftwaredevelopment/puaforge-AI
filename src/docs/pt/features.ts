@@ -16,4 +16,4 @@ export const features = {
   features_4_title: 'Imagens e paleta de cores',
   features_4_desc:
     'No editor, abra o painel de Imagens para fazer upload de fotos do seu projeto. As imagens ficam disponíveis para a IA usar quando você pedir. Use o painel de Paleta para definir as cores principais — a IA vai respeitá-las ao gerar o conteúdo.',
-}
+};

@@ -1,12 +1,12 @@
-import { memo } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useSpacingSection } from '@/hooks/useSpacingSection'
-import StyleEditorSection from './StyleEditorSection'
-import StyleEditorSpacingInput from './StyleEditorSpacingInput'
+import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSpacingSection } from '@/hooks/useSpacingSection';
+import StyleEditorSection from './StyleEditorSection';
+import StyleEditorSpacingInput from './StyleEditorSpacingInput';
 
 const SpacingSection = memo(() => {
-  const { t } = useTranslation()
-  const { paddingTop, paddingRight, paddingBottom, paddingLeft, marginTop, marginRight, marginBottom, marginLeft, applyClass, removeCategory } = useSpacingSection()
+  const { t } = useTranslation();
+  const { paddingTop, paddingRight, paddingBottom, paddingLeft, marginTop, marginRight, marginBottom, marginLeft, applyClass, removeCategory } = useSpacingSection();
   return (
     <StyleEditorSection title={t('inspect.sectionSpacing')}>
       <span className="text-[10px] text-text-muted/60 uppercase">{t('inspect.padding')}</span>
@@ -24,7 +24,7 @@ const SpacingSection = memo(() => {
         <StyleEditorSpacingInput label="L" value={marginLeft}   onChange={(v) => v ? applyClass(`ml-${v}`) : removeCategory('ml-0')} />
       </div>
     </StyleEditorSection>
-  )
-})
+  );
+});
 
-export default SpacingSection
+export default SpacingSection;

@@ -1,39 +1,39 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react';
 
-declare const __APP_DOMAIN__: string
-import { Plus } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { useAuth } from '@/hooks/useAuth'
-import { useProjects } from '@/hooks/useProjects'
-import { useProjectActions } from '@/hooks/useProjectActions'
-import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar'
-import EmptyState from './components/EmptyState'
-import ProjectCard from './components/ProjectCard'
-import Button from '@/components/ui/Button'
+declare const __APP_DOMAIN__: string;
+import { Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/hooks/useAuth';
+import { useProjects } from '@/hooks/useProjects';
+import { useProjectActions } from '@/hooks/useProjectActions';
+import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar';
+import EmptyState from './components/EmptyState';
+import ProjectCard from './components/ProjectCard';
+import Button from '@/components/ui/Button';
 
 export default function Home() {
-  const { projects } = useProjects()
-  const { createProject, openProject, deleteProject, fetchPublishedIds } = useProjectActions()
-  const { token } = useAuth()
-  const { t } = useTranslation()
+  const { projects } = useProjects();
+  const { createProject, openProject, deleteProject, fetchPublishedIds } = useProjectActions();
+  const { token } = useAuth();
+  const { t } = useTranslation();
   interface PublishedInfo { projectId: string; subdomain: string | null; customDomain: string | null }
-  const [publishedMap, setPublishedMap] = useState<Map<string, PublishedInfo>>(new Map())
+  const [publishedMap, setPublishedMap] = useState<Map<string, PublishedInfo>>(new Map());
 
   useEffect(() => {
-    if (!token) return
-    fetchPublishedIds().then(setPublishedMap)
-  }, [token, fetchPublishedIds])
+    if (!token) return;
+    fetchPublishedIds().then(setPublishedMap);
+  }, [token, fetchPublishedIds]);
 
   const openPreview = useCallback((projectId: string) => {
-    const info = publishedMap.get(projectId)
-    if (!info) return
+    const info = publishedMap.get(projectId);
+    if (!info) return;
     const url = info.customDomain
       ? `https://${info.customDomain}`
       : info.subdomain
         ? `https://${info.subdomain}.${__APP_DOMAIN__}`
-        : null
-    if (url) window.open(url, '_blank')
-  }, [publishedMap])
+        : null;
+    if (url) window.open(url, '_blank');
+  }, [publishedMap]);
 
   return (
     <div className="h-screen flex bg-bg-primary">
@@ -83,5 +83,5 @@ export default function Home() {
         </div>
       </main>
     </div>
-  )
+  );
 }

@@ -1,5 +1,5 @@
 /** Unique marker embedded in every auto-generated stub. The AI never reproduces this. */
-const STUB_MARKER = '/* __puaforge_stub__ */'
+const STUB_MARKER = '/* __puaforge_stub__ */';
 
 /**
  * Detects if a code string is an auto-generated placeholder stub.
@@ -7,7 +7,7 @@ const STUB_MARKER = '/* __puaforge_stub__ */'
  * cannot accidentally reproduce it in real generated code.
  */
 function isStub(code: string): boolean {
-  return code.includes(STUB_MARKER)
+  return code.includes(STUB_MARKER);
 }
 
 /**
@@ -18,27 +18,27 @@ export function mergeFiles(
   existing: Record<string, string>,
   incoming: Record<string, string>,
 ): Record<string, string> {
-  const merged = { ...existing }
+  const merged = { ...existing };
 
   for (const [path, code] of Object.entries(incoming)) {
-    const prev = existing[path]
+    const prev = existing[path];
 
     // No existing file — always accept
     if (!prev) {
-      merged[path] = code
-      continue
+      merged[path] = code;
+      continue;
     }
 
     // If the incoming file is a stub but the existing one isn't, keep existing
     if (isStub(code) && !isStub(prev)) {
-      continue
+      continue;
     }
 
     // Otherwise accept the new version
-    merged[path] = code
+    merged[path] = code;
   }
 
-  return merged
+  return merged;
 }
 
 /**
@@ -49,16 +49,16 @@ export function mergeFiles(
  * ```
  */
 export function parseFilesFromResponse(response: string): Record<string, string> {
-  const files: Record<string, string> = {}
-  const regex = /```[\w]*\s+file="([^"]+)"\n([\s\S]*?)```/g
+  const files: Record<string, string> = {};
+  const regex = /```[\w]*\s+file="([^"]+)"\n([\s\S]*?)```/g;
 
-  let match: RegExpExecArray | null
+  let match: RegExpExecArray | null;
   while ((match = regex.exec(response)) !== null) {
-    const [, filePath, code] = match
-    files[filePath] = code.trim()
+    const [, filePath, code] = match;
+    files[filePath] = code.trim();
   }
 
-  return addMissingStubs(files)
+  return addMissingStubs(files);
 }
 
 /**
@@ -66,17 +66,17 @@ export function parseFilesFromResponse(response: string): Record<string, string>
  * for any that are missing, preventing Sandpack "module not found" errors.
  */
 function addMissingStubs(files: Record<string, string>): Record<string, string> {
-  const importRegex = /import\s+\w+\s+from\s+['"](\.[^'"]+)['"]/g
-  const result = { ...files }
+  const importRegex = /import\s+\w+\s+from\s+['"](\.[^'"]+)['"]/g;
+  const result = { ...files };
 
   for (const [filePath, code] of Object.entries(files)) {
-    let importMatch: RegExpExecArray | null
+    let importMatch: RegExpExecArray | null;
     while ((importMatch = importRegex.exec(code)) !== null) {
-      const importPath = importMatch[1]
-      const resolvedPath = resolveImport(filePath, importPath)
+      const importPath = importMatch[1];
+      const resolvedPath = resolveImport(filePath, importPath);
 
       if (!result[resolvedPath]) {
-        const componentName = resolvedPath.split('/').pop()?.replace(/\.\w+$/, '') ?? 'Component'
+        const componentName = resolvedPath.split('/').pop()?.replace(/\.\w+$/, '') ?? 'Component';
         result[resolvedPath] = `${STUB_MARKER}
 export default function ${componentName}() {
   return (
@@ -84,12 +84,12 @@ export default function ${componentName}() {
       <p className="text-[#64748b] text-sm">${componentName} — em construção</p>
     </div>
   )
-}`
+}`;
       }
     }
   }
 
-  return result
+  return result;
 }
 
 /**
@@ -97,29 +97,29 @@ export default function ${componentName}() {
  * Returns a Record<packageName, "latest"> for use in Sandpack's customSetup.dependencies.
  */
 export function extractDependencies(files: Record<string, string>): Record<string, string> {
-  const deps: Record<string, string> = {}
+  const deps: Record<string, string> = {};
   // Matches: import ... from 'package' or import 'package'
-  const importRegex = /import\s+(?:[\w{},*\s]+\s+from\s+)?['"]([^'"./][^'"]*)['"]/g
+  const importRegex = /import\s+(?:[\w{},*\s]+\s+from\s+)?['"]([^'"./][^'"]*)['"]/g;
 
   // Built-in modules that Sandpack already provides
-  const builtIn = new Set(['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime'])
+  const builtIn = new Set(['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime']);
 
   for (const code of Object.values(files)) {
-    let match: RegExpExecArray | null
+    let match: RegExpExecArray | null;
     while ((match = importRegex.exec(code)) !== null) {
-      const specifier = match[1]
+      const specifier = match[1];
       // Get the package name (handle scoped packages like @org/pkg)
       const pkgName = specifier.startsWith('@')
         ? specifier.split('/').slice(0, 2).join('/')
-        : specifier.split('/')[0]
+        : specifier.split('/')[0];
 
       if (!builtIn.has(pkgName) && !builtIn.has(specifier)) {
-        deps[pkgName] = 'latest'
+        deps[pkgName] = 'latest';
       }
     }
   }
 
-  return deps
+  return deps;
 }
 
 /**
@@ -127,24 +127,24 @@ export function extractDependencies(files: Record<string, string>): Record<strin
  * e.g. ('/pages/LandingPage.tsx', '../components/Hero') → '/components/Hero.tsx'
  */
 function resolveImport(fromFile: string, importPath: string): string {
-  const fromDir = fromFile.substring(0, fromFile.lastIndexOf('/'))
-  const parts = [...fromDir.split('/'), ...importPath.split('/')]
-  const resolved: string[] = []
+  const fromDir = fromFile.substring(0, fromFile.lastIndexOf('/'));
+  const parts = [...fromDir.split('/'), ...importPath.split('/')];
+  const resolved: string[] = [];
 
   for (const part of parts) {
-    if (part === '.' || part === '') continue
+    if (part === '.' || part === '') continue;
     if (part === '..') {
-      resolved.pop()
+      resolved.pop();
     } else {
-      resolved.push(part)
+      resolved.push(part);
     }
   }
 
-  const path = '/' + resolved.join('/')
+  const path = '/' + resolved.join('/');
 
   // Add .tsx extension if missing
   if (!/\.\w+$/.test(path)) {
-    return path + '.tsx'
+    return path + '.tsx';
   }
-  return path
+  return path;
 }

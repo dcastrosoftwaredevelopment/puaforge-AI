@@ -1,11 +1,11 @@
-import { useEffect } from 'react'
-import { ArrowRight, Sparkles } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-import { Modal } from 'flowbite-react'
-import { useUpgradeModal } from '@/hooks/useUpgradeModal'
-import { track } from '@/lib/analytics'
-import Button from '@/components/ui/Button'
+import { useEffect } from 'react';
+import { ArrowRight, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Modal } from 'flowbite-react';
+import { useUpgradeModal } from '@/hooks/useUpgradeModal';
+import { track } from '@/lib/analytics';
+import Button from '@/components/ui/Button';
 
 const LIMIT_TYPE_MAP: Record<string, string> = {
   projects: 'projects',
@@ -14,21 +14,21 @@ const LIMIT_TYPE_MAP: Record<string, string> = {
   imports: 'imports',
   storage: 'storage',
   checkpoints: 'checkpoints',
-}
+};
 
 export default function UpgradeModal() {
-  const { prompt, setPrompt } = useUpgradeModal()
-  const navigate = useNavigate()
-  const { t } = useTranslation()
+  const { prompt, setPrompt } = useUpgradeModal();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
-    if (!prompt) return
-    track('upgrade_modal_view', { limit_type: prompt.limitType, required_plan: prompt.requiredPlan })
-  }, [prompt])
+    if (!prompt) return;
+    track('upgrade_modal_view', { limit_type: prompt.limitType, required_plan: prompt.requiredPlan });
+  }, [prompt]);
 
-  const planLabel = prompt?.requiredPlan === 'indie' ? 'Indie' : 'Pro'
-  const limitKey = LIMIT_TYPE_MAP[prompt?.limitType ?? ''] ?? 'unknown'
-  const limitMessage = t(`upgrade.limits.${limitKey}`)
+  const planLabel = prompt?.requiredPlan === 'indie' ? 'Indie' : 'Pro';
+  const limitKey = LIMIT_TYPE_MAP[prompt?.limitType ?? ''] ?? 'unknown';
+  const limitMessage = t(`upgrade.limits.${limitKey}`);
 
   return (
     <Modal show={!!prompt} onClose={() => setPrompt(null)} size="sm">
@@ -65,7 +65,7 @@ export default function UpgradeModal() {
             variant="secondary"
             size="sm"
             fullWidth
-            onClick={() => { track('upgrade_modal_dismiss', { limit_type: prompt?.limitType ?? '' }); setPrompt(null) }}
+            onClick={() => { track('upgrade_modal_dismiss', { limit_type: prompt?.limitType ?? '' }); setPrompt(null); }}
             className="text-xs"
           >
             {t('upgrade.maybeLater')}
@@ -74,7 +74,7 @@ export default function UpgradeModal() {
             variant="blue"
             size="sm"
             fullWidth
-            onClick={() => { track('upgrade_modal_see_plans', { limit_type: prompt?.limitType ?? '' }); setPrompt(null); navigate('/billing') }}
+            onClick={() => { track('upgrade_modal_see_plans', { limit_type: prompt?.limitType ?? '' }); setPrompt(null); navigate('/billing'); }}
             className="gap-1.5 text-xs"
           >
             {t('upgrade.seePlans')}
@@ -83,5 +83,5 @@ export default function UpgradeModal() {
         </div>
       </div>
     </Modal>
-  )
+  );
 }

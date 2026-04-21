@@ -1,8 +1,8 @@
-import { Save, Undo2 } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
+import { Save, Undo2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function EditBar({ onSave, onDiscard }: { onSave: () => void; onDiscard: () => void }) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between px-3 py-1.5 bg-forge-terracotta/10 border-b border-forge-terracotta/20 shrink-0">
       <span className="text-[11px] font-medium text-forge-terracotta">{t('editor.manualEdit')}</span>
@@ -23,5 +23,5 @@ export default function EditBar({ onSave, onDiscard }: { onSave: () => void; onD
         </button>
       </div>
     </div>
-  )
+  );
 }

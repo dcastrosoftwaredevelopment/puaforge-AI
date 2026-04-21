@@ -1,12 +1,12 @@
-import { useCallback } from 'react'
-import { useSetAtom } from 'jotai'
-import { upgradePromptAtom } from '@/atoms'
-import { PlanLimitError } from '@/services/api'
+import { useCallback } from 'react';
+import { useSetAtom } from 'jotai';
+import { upgradePromptAtom } from '@/atoms';
+import { PlanLimitError } from '@/services/api';
 
 /** Thrown after opening the upgrade modal so callers can also show inline errors */
 export class PlanLimitUIError extends Error {
   constructor(public readonly original: PlanLimitError) {
-    super('plan_limit')
+    super('plan_limit');
   }
 }
 
@@ -20,21 +20,21 @@ export class PlanLimitUIError extends Error {
  *   await withPlanLimit(() => api.post(...))
  */
 export function usePlanLimit() {
-  const setUpgradePrompt = useSetAtom(upgradePromptAtom)
+  const setUpgradePrompt = useSetAtom(upgradePromptAtom);
 
   return useCallback(async function withPlanLimit<T>(fn: () => Promise<T>): Promise<T | null> {
     try {
-      return await fn()
+      return await fn();
     } catch (err) {
       if (err instanceof PlanLimitError) {
         setUpgradePrompt({
           requiredPlan: err.requiredPlan,
           limitType: err.limitType,
           message: '', // resolved in the modal via i18n
-        })
-        throw new PlanLimitUIError(err)
+        });
+        throw new PlanLimitUIError(err);
       }
-      throw err
+      throw err;
     }
-  }, [setUpgradePrompt])
+  }, [setUpgradePrompt]);
 }

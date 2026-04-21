@@ -1,39 +1,39 @@
-import React, { useEffect, type ComponentProps } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { Layers, Settings, LogOut, CreditCard, HelpCircle, X } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { Sidebar as FlowbiteSidebar, SidebarItem, SidebarItems, SidebarItemGroup, Drawer } from 'flowbite-react'
-import Button from '@/components/ui/Button'
-import { useSidebar } from '@/hooks/useSidebar'
-import { useAuth } from '@/hooks/useAuth'
-import { useLanguage } from '@/hooks/useLanguage'
-import { useUsage } from '@/hooks/useUsage'
-import UsageBar from './UsageBar'
-import UserAvatar from './UserAvatar'
+import React, { useEffect, type ComponentProps } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Layers, Settings, LogOut, CreditCard, HelpCircle, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Sidebar as FlowbiteSidebar, SidebarItem, SidebarItems, SidebarItemGroup, Drawer } from 'flowbite-react';
+import Button from '@/components/ui/Button';
+import { useSidebar } from '@/hooks/useSidebar';
+import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
+import { useUsage } from '@/hooks/useUsage';
+import UsageBar from './UsageBar';
+import UserAvatar from './UserAvatar';
 
-export { default as SidebarMenuButton } from './SidebarMenuButton'
+export { default as SidebarMenuButton } from './SidebarMenuButton';
 
 export default function Sidebar() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { logout, user } = useAuth()
-  const { t } = useTranslation()
-  const { toggle } = useLanguage()
-  const { data: usage } = useUsage()
-  const { isOpen, setIsOpen } = useSidebar()
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { logout, user } = useAuth();
+  const { t } = useTranslation();
+  const { toggle } = useLanguage();
+  const { data: usage } = useUsage();
+  const { isOpen, setIsOpen } = useSidebar();
 
-  const isSettings = location.pathname === '/settings'
-  const isProfile = location.pathname === '/profile'
-  const isBilling = location.pathname === '/billing'
-  const isHelp = location.pathname === '/help'
-  const isHome = !isSettings && !isProfile && !isBilling && !isHelp
+  const isSettings = location.pathname === '/settings';
+  const isProfile = location.pathname === '/profile';
+  const isBilling = location.pathname === '/billing';
+  const isHelp = location.pathname === '/help';
+  const isHome = !isSettings && !isProfile && !isBilling && !isHelp;
 
-  useEffect(() => { setIsOpen(false) }, [location.pathname, setIsOpen])
+  useEffect(() => { setIsOpen(false); }, [location.pathname, setIsOpen]);
 
-  const planLabel = usage?.plan === 'indie' ? t('billing.plans.indie') : usage?.plan === 'pro' ? t('billing.plans.pro') : t('billing.plans.free')
+  const planLabel = usage?.plan === 'indie' ? t('billing.plans.indie') : usage?.plan === 'pro' ? t('billing.plans.pro') : t('billing.plans.free');
 
   // Renders UserAvatar in place of the standard SVG icon slot
-  const ProfileIcon: React.FC<ComponentProps<'svg'>> = () => <UserAvatar name={user?.name} />
+  const ProfileIcon: React.FC<ComponentProps<'svg'>> = () => <UserAvatar name={user?.name} />;
 
   const sidebarContent = (
     <FlowbiteSidebar className="bg-bg-primary">
@@ -121,7 +121,7 @@ export default function Sidebar() {
         </button>
       </div>
     </FlowbiteSidebar>
-  )
+  );
 
   return (
     <>
@@ -140,5 +140,5 @@ export default function Sidebar() {
         {sidebarContent}
       </Drawer>
     </>
-  )
+  );
 }

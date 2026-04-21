@@ -1,36 +1,36 @@
-import { useRef, useState } from 'react'
-import { Trash2, Pencil, Check, X } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { toExportName, formatSize, baseName } from '@/utils/imageUtils'
-import CopyButton from './CopyButton'
+import { useRef, useState } from 'react';
+import { Trash2, Pencil, Check, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { toExportName, formatSize, baseName } from '@/utils/imageUtils';
+import CopyButton from './CopyButton';
 
 export default function ImageRow({ img, onRename, onRemove }: {
   img: { id: string; name: string; url: string; size: number }
   onRename: (id: string, name: string) => void
   onRemove: (id: string) => void
 }) {
-  const [editing, setEditing] = useState(false)
-  const [editValue, setEditValue] = useState('')
-  const inputRef = useRef<HTMLInputElement>(null)
-  const { t } = useTranslation()
+  const [editing, setEditing] = useState(false);
+  const [editValue, setEditValue] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
 
   const startEditing = () => {
-    setEditValue(baseName(img.name))
-    setEditing(true)
-    setTimeout(() => inputRef.current?.select(), 0)
-  }
+    setEditValue(baseName(img.name));
+    setEditing(true);
+    setTimeout(() => inputRef.current?.select(), 0);
+  };
 
   const confirmRename = () => {
-    const trimmed = editValue.trim()
+    const trimmed = editValue.trim();
     if (trimmed && trimmed !== baseName(img.name)) {
-      onRename(img.id, trimmed)
+      onRename(img.id, trimmed);
     }
-    setEditing(false)
-  }
+    setEditing(false);
+  };
 
-  const cancelRename = () => setEditing(false)
+  const cancelRename = () => setEditing(false);
 
-  const exportName = toExportName(img.name)
+  const exportName = toExportName(img.name);
 
   return (
     <div className="flex items-center gap-2 p-2 rounded-lg bg-bg-tertiary border border-border-subtle group">
@@ -47,8 +47,8 @@ export default function ImageRow({ img, onRename, onRemove }: {
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') confirmRename()
-                if (e.key === 'Escape') cancelRename()
+                if (e.key === 'Enter') confirmRename();
+                if (e.key === 'Escape') cancelRename();
               }}
               className="flex-1 min-w-0 text-xs bg-bg-elevated border border-border-default rounded px-1.5 py-0.5 text-text-primary outline-none focus:border-accent"
               autoFocus
@@ -91,5 +91,5 @@ export default function ImageRow({ img, onRename, onRemove }: {
         </div>
       )}
     </div>
-  )
+  );
 }

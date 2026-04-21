@@ -1,26 +1,26 @@
-import { Routes, Route, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
-import { usePersistence } from '@/hooks/usePersistence'
-import { trackPageView } from '@/lib/analytics'
-import Home from '@/pages/Home'
-import Editor from '@/pages/Editor'
-import Settings from '@/pages/Settings'
-import Login from '@/pages/Login'
-import VerifyEmail from '@/pages/VerifyEmail'
-import EmailConfirmed from '@/pages/EmailConfirmed'
-import Profile from '@/pages/Profile'
-import Billing from '@/pages/Billing'
-import Help from '@/pages/Help'
-import SplashScreen from '@/components/auth/SplashScreen'
-import UpgradeModal from '@/components/billing/UpgradeModal'
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { usePersistence } from '@/hooks/usePersistence';
+import { trackPageView } from '@/lib/analytics';
+import Home from '@/pages/Home';
+import Editor from '@/pages/Editor';
+import Settings from '@/pages/Settings';
+import Login from '@/pages/Login';
+import VerifyEmail from '@/pages/VerifyEmail';
+import EmailConfirmed from '@/pages/EmailConfirmed';
+import Profile from '@/pages/Profile';
+import Billing from '@/pages/Billing';
+import Help from '@/pages/Help';
+import SplashScreen from '@/components/auth/SplashScreen';
+import UpgradeModal from '@/components/billing/UpgradeModal';
 
 export default function App() {
-  const { isHydrated } = usePersistence()
-  const location = useLocation()
+  const { isHydrated } = usePersistence();
+  const location = useLocation();
 
   useEffect(() => {
-    trackPageView(location.pathname)
-  }, [location.pathname])
+    trackPageView(location.pathname);
+  }, [location.pathname]);
 
   return (
     <>
@@ -40,5 +40,5 @@ export default function App() {
         </Routes>
       )}
     </>
-  )
+  );
 }

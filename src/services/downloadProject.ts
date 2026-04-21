@@ -1,4 +1,4 @@
-import JSZip from 'jszip'
+import JSZip from 'jszip';
 
 const PACKAGE_JSON = {
   name: 'puaforge-project',
@@ -24,7 +24,7 @@ const PACKAGE_JSON = {
     typescript: '~5.6.2',
     vite: '^6.0.5',
   },
-}
+};
 
 const VITE_CONFIG = `import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -32,7 +32,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
 })
-`
+`;
 
 const TSCONFIG = {
   compilerOptions: {
@@ -54,7 +54,7 @@ const TSCONFIG = {
     noUncheckedSideEffectImports: true,
   },
   include: ['src'],
-}
+};
 
 const TAILWIND_CONFIG = `/** @type {import('tailwindcss').Config} */
 export default {
@@ -64,7 +64,7 @@ export default {
   },
   plugins: [],
 }
-`
+`;
 
 const POSTCSS_CONFIG = `export default {
   plugins: {
@@ -72,12 +72,12 @@ const POSTCSS_CONFIG = `export default {
     autoprefixer: {},
   },
 }
-`
+`;
 
 const INDEX_CSS = `@tailwind base;
 @tailwind components;
 @tailwind utilities;
-`
+`;
 
 const INDEX_HTML = `<!DOCTYPE html>
 <html lang="en">
@@ -91,7 +91,7 @@ const INDEX_HTML = `<!DOCTYPE html>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-`
+`;
 
 const MAIN_TSX = `import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -103,45 +103,45 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>,
 )
-`
+`;
 
 const VITE_ENV_DTS = `/// <reference types="vite/client" />
-`
+`;
 
 export async function downloadProject(files: Record<string, string>, projectName?: string) {
-  const zip = new JSZip()
+  const zip = new JSZip();
 
   // Scaffold files
-  zip.file('package.json', JSON.stringify(PACKAGE_JSON, null, 2))
-  zip.file('vite.config.ts', VITE_CONFIG)
-  zip.file('tsconfig.json', JSON.stringify(TSCONFIG, null, 2))
-  zip.file('tailwind.config.js', TAILWIND_CONFIG)
-  zip.file('postcss.config.js', POSTCSS_CONFIG)
-  zip.file('index.html', INDEX_HTML)
+  zip.file('package.json', JSON.stringify(PACKAGE_JSON, null, 2));
+  zip.file('vite.config.ts', VITE_CONFIG);
+  zip.file('tsconfig.json', JSON.stringify(TSCONFIG, null, 2));
+  zip.file('tailwind.config.js', TAILWIND_CONFIG);
+  zip.file('postcss.config.js', POSTCSS_CONFIG);
+  zip.file('index.html', INDEX_HTML);
 
   // src/ files
-  zip.file('src/main.tsx', MAIN_TSX)
-  zip.file('src/index.css', INDEX_CSS)
-  zip.file('src/vite-env.d.ts', VITE_ENV_DTS)
+  zip.file('src/main.tsx', MAIN_TSX);
+  zip.file('src/index.css', INDEX_CSS);
+  zip.file('src/vite-env.d.ts', VITE_ENV_DTS);
 
   // Project files from Sandpack (map /App.tsx → src/App.tsx)
   for (const [path, code] of Object.entries(files)) {
     // Skip index.html from Sandpack files (we have our own)
-    if (path === '/index.html') continue
+    if (path === '/index.html') continue;
 
-    const cleanPath = path.startsWith('/') ? path.slice(1) : path
-    zip.file(`src/${cleanPath}`, code)
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    zip.file(`src/${cleanPath}`, code);
   }
 
   const safeName = projectName
     ? projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '')
-    : 'puaforge-project'
+    : 'puaforge-project';
 
-  const blob = await zip.generateAsync({ type: 'blob' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `${safeName}.zip`
-  a.click()
-  URL.revokeObjectURL(url)
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${safeName}.zip`;
+  a.click();
+  URL.revokeObjectURL(url);
 }

@@ -11,4 +11,4 @@ export const gettingStarted = {
   apiSetup_step3_title: 'Cole no PuaForgeAI',
   apiSetup_step3_desc: 'Vá em Configurações no menu lateral, cole a chave no campo indicado e salve.',
   apiSetup_docsLink: 'Documentação oficial do Claude →',
-}
+};

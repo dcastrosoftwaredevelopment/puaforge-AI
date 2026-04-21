@@ -1,14 +1,14 @@
-import { memo } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useEffectsSection } from '@/hooks/useEffectsSection'
-import { SHADOW_CLASSES, OVERFLOWS } from '@/utils/tailwindClasses'
-import StyleEditorSection from './StyleEditorSection'
-import StyleEditorRow from './StyleEditorRow'
-import StyleEditorSelect from './StyleEditorSelect'
+import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useEffectsSection } from '@/hooks/useEffectsSection';
+import { SHADOW_CLASSES, OVERFLOWS } from '@/utils/tailwindClasses';
+import StyleEditorSection from './StyleEditorSection';
+import StyleEditorRow from './StyleEditorRow';
+import StyleEditorSelect from './StyleEditorSelect';
 
 const EffectsSection = memo(() => {
-  const { t } = useTranslation()
-  const { shadow, opacity, overflow, applyClass, onShadow, onOverflow } = useEffectsSection()
+  const { t } = useTranslation();
+  const { shadow, opacity, overflow, applyClass, onShadow, onOverflow } = useEffectsSection();
   return (
     <StyleEditorSection title={t('inspect.sectionEffects')}>
       <StyleEditorRow label={t('inspect.shadow')}>
@@ -21,7 +21,7 @@ const EffectsSection = memo(() => {
         <StyleEditorSelect value={overflow} onChange={onOverflow} options={OVERFLOWS} />
       </StyleEditorRow>
     </StyleEditorSection>
-  )
-})
+  );
+});
 
-export default EffectsSection
+export default EffectsSection;

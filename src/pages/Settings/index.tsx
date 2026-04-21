@@ -1,18 +1,18 @@
-import { Key, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { useSettingsForm } from '@/hooks/useSettingsForm'
-import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar'
-import Button from '@/components/ui/Button'
+import { Key, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useSettingsForm } from '@/hooks/useSettingsForm';
+import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar';
+import Button from '@/components/ui/Button';
 
 export default function Settings() {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   const {
     apiKey, draft, setDraft,
     showKey, setShowKey,
     validated, validating, validationError,
     hasChanges, apiKeyEnabled,
     handleValidate, handleSave, handleClear, handleToggleEnabled,
-  } = useSettingsForm()
+  } = useSettingsForm();
 
   return (
     <div className="h-screen flex bg-bg-primary">
@@ -66,7 +66,7 @@ export default function Settings() {
                 <input
                   type={showKey ? 'text' : 'password'}
                   value={draft}
-                  onChange={(e) => { setDraft(e.target.value) }}
+                  onChange={(e) => { setDraft(e.target.value); }}
                   placeholder={t('settings.apiKeyPlaceholder')}
                   className="w-full bg-bg-tertiary border border-border-subtle rounded-lg px-3 py-2.5 pr-10 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-border-default transition font-mono"
                 />
@@ -113,5 +113,5 @@ export default function Settings() {
         </div>
       </main>
     </div>
-  )
+  );
 }

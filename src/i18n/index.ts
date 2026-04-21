@@ -1,18 +1,18 @@
-import i18n from 'i18next'
-import { initReactI18next } from 'react-i18next'
-import { pt } from './locales/pt'
-import { en } from './locales/en'
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import { pt } from './locales/pt';
+import { en } from './locales/en';
 
 export type Language = 'pt' | 'en'
 
-const STORAGE_KEY = 'puaforge_language'
+const STORAGE_KEY = 'puaforge_language';
 
 export function getSavedLanguage(): Language {
-  return (localStorage.getItem(STORAGE_KEY) as Language) ?? 'pt'
+  return (localStorage.getItem(STORAGE_KEY) as Language) ?? 'pt';
 }
 
 export function saveLanguage(lang: Language) {
-  localStorage.setItem(STORAGE_KEY, lang)
+  localStorage.setItem(STORAGE_KEY, lang);
 }
 
 i18n
@@ -27,6 +27,6 @@ i18n
     interpolation: {
       escapeValue: false,
     },
-  })
+  });
 
-export default i18n
+export default i18n;

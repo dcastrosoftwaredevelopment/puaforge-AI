@@ -1,9 +1,9 @@
-import { useSelectionOverlay } from '@/hooks/useSelectionOverlay'
+import { useSelectionOverlay } from '@/hooks/useSelectionOverlay';
 
 export default function SelectionOverlay() {
-  const { selectedElement, hoveredElement, inspectMode, iframeTop } = useSelectionOverlay()
+  const { selectedElement, hoveredElement, inspectMode, iframeTop } = useSelectionOverlay();
 
-  if (!inspectMode) return null
+  if (!inspectMode) return null;
 
   return (
     <>
@@ -36,5 +36,5 @@ export default function SelectionOverlay() {
         </div>
       )}
     </>
-  )
+  );
 }

@@ -1,8 +1,8 @@
-import { useLoginForm } from '@/hooks/useLoginForm'
-import LoginCard from './components/LoginCard'
+import { useLoginForm } from '@/hooks/useLoginForm';
+import LoginCard from './components/LoginCard';
 
 export default function Login() {
-  const formProps = useLoginForm()
+  const formProps = useLoginForm();
 
   return (
     <div className="h-screen w-screen bg-bg-primary flex items-center justify-center px-4">
@@ -14,5 +14,5 @@ export default function Login() {
         <LoginCard {...formProps} />
       </div>
     </div>
-  )
+  );
 }

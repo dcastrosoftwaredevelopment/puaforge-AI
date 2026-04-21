@@ -1,16 +1,16 @@
-import { useState } from 'react'
-import { Copy } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
+import { useState } from 'react';
+import { Copy } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false)
-  const { t } = useTranslation()
+  const [copied, setCopied] = useState(false);
+  const { t } = useTranslation();
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
-  }
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
 
   return copied ? (
     <span className="text-[10px] text-success">{t('common.copied')}</span>
@@ -22,5 +22,5 @@ export default function CopyButton({ text }: { text: string }) {
     >
       <Copy size={12} />
     </button>
-  )
+  );
 }

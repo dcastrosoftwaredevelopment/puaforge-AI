@@ -1,15 +1,15 @@
-import { Download } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { useFiles } from '@/hooks/useFiles'
-import { useProjects } from '@/hooks/useProjects'
-import { downloadProject } from '@/services/downloadProject'
-import Tooltip from '@/components/ui/Tooltip'
-import Button from '@/components/ui/Button'
+import { Download } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useFiles } from '@/hooks/useFiles';
+import { useProjects } from '@/hooks/useProjects';
+import { downloadProject } from '@/services/downloadProject';
+import Tooltip from '@/components/ui/Tooltip';
+import Button from '@/components/ui/Button';
 
 export default function ExportButton({ menuItem = false }: { menuItem?: boolean }) {
-  const { files } = useFiles()
-  const { activeProject } = useProjects()
-  const { t } = useTranslation()
+  const { files } = useFiles();
+  const { activeProject } = useProjects();
+  const { t } = useTranslation();
 
   if (menuItem) {
     return (
@@ -20,7 +20,7 @@ export default function ExportButton({ menuItem = false }: { menuItem?: boolean 
         <Download size={14} className="text-forge-terracotta/60" />
         {t('editor.export')}
       </button>
-    )
+    );
   }
 
   return (
@@ -35,5 +35,5 @@ export default function ExportButton({ menuItem = false }: { menuItem?: boolean 
         {t('editor.export')}
       </Button>
     </Tooltip>
-  )
+  );
 }

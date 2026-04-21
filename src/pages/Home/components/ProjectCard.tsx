@@ -1,6 +1,6 @@
-import { Trash2, Globe } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import type { Project } from '@/atoms'
+import { Trash2, Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import type { Project } from '@/atoms';
 
 interface ProjectCardProps {
   project: Project
@@ -11,7 +11,7 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ project, hasPreview, onOpen, onDelete, onPreview }: ProjectCardProps) {
-  const { t, i18n } = useTranslation()
+  const { t, i18n } = useTranslation();
 
   return (
     <div
@@ -35,8 +35,8 @@ export default function ProjectCard({ project, hasPreview, onOpen, onDelete, onP
         {hasPreview && (
           <button
             onClick={(e) => {
-              e.stopPropagation()
-              onPreview()
+              e.stopPropagation();
+              onPreview();
             }}
             className="p-1.5 rounded-lg text-text-muted hover:text-forge-terracotta hover:bg-bg-primary transition"
             title={t('projects.openPreview')}
@@ -46,8 +46,8 @@ export default function ProjectCard({ project, hasPreview, onOpen, onDelete, onP
         )}
         <button
           onClick={(e) => {
-            e.stopPropagation()
-            onDelete()
+            e.stopPropagation();
+            onDelete();
           }}
           className="p-1.5 rounded-lg text-text-muted hover:text-forge-terracotta hover:bg-bg-primary transition"
           title={t('projects.deleteProject')}
@@ -56,5 +56,5 @@ export default function ProjectCard({ project, hasPreview, onOpen, onDelete, onP
         </button>
       </div>
     </div>
-  )
+  );
 }

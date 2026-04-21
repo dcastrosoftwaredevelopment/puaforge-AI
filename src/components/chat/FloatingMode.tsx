@@ -1,10 +1,10 @@
-import { useChat } from '@/hooks/useChat'
-import { useFloatingPanel, type ResizeDirection } from '@/hooks/useFloatingPanel'
-import ChatToggleButton from './ChatToggleButton'
-import ChatPanel from './ChatPanel'
+import { useChat } from '@/hooks/useChat';
+import { useFloatingPanel, type ResizeDirection } from '@/hooks/useFloatingPanel';
+import ChatToggleButton from './ChatToggleButton';
+import ChatPanel from './ChatPanel';
 
-const INITIAL_WIDTH = 430
-const INITIAL_HEIGHT = 540
+const INITIAL_WIDTH = 430;
+const INITIAL_HEIGHT = 540;
 
 const resizeHandles: { direction: ResizeDirection; className: string }[] = [
   { direction: 'n', className: 'top-0 left-3 right-3 h-2 cursor-ns-resize' },
@@ -15,17 +15,17 @@ const resizeHandles: { direction: ResizeDirection; className: string }[] = [
   { direction: 'ne', className: 'top-0 right-0 w-4 h-4 cursor-nesw-resize' },
   { direction: 'sw', className: 'bottom-0 left-0 w-4 h-4 cursor-nesw-resize' },
   { direction: 'se', className: 'bottom-0 right-0 w-4 h-4 cursor-nwse-resize' },
-]
+];
 
 export default function FloatingMode() {
-  const { isOpen: isChatOpen } = useChat()
+  const { isOpen: isChatOpen } = useChat();
   const { position, size, panelRef, onDragStart, onResizeStart } = useFloatingPanel({
     initialPosition: {
       x: window.innerWidth - INITIAL_WIDTH - 30,
       y: window.innerHeight - INITIAL_HEIGHT - 70,
     },
     initialSize: { width: INITIAL_WIDTH, height: INITIAL_HEIGHT },
-  })
+  });
 
   return (
     <>
@@ -54,5 +54,5 @@ export default function FloatingMode() {
         </div>
       )}
     </>
-  )
+  );
 }

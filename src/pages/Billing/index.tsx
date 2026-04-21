@@ -1,27 +1,27 @@
-import { useState, useEffect } from 'react'
-import { Zap, Rocket, Sparkles } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar'
-import { useUsage, usePlansConfig, formatBytes } from '@/hooks/useUsage'
-import { track } from '@/lib/analytics'
-import UsageSection from './components/UsageSection'
-import PlanCard, { type BillingPlan } from './components/PlanCard'
+import { useState, useEffect } from 'react';
+import { Zap, Rocket, Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar';
+import { useUsage, usePlansConfig, formatBytes } from '@/hooks/useUsage';
+import { track } from '@/lib/analytics';
+import UsageSection from './components/UsageSection';
+import PlanCard, { type BillingPlan } from './components/PlanCard';
 
 export default function Billing() {
-  const { t } = useTranslation()
-  const { data: usage } = useUsage()
-  const plansConfig = usePlansConfig()
-  const [interested, setInterested] = useState<Record<string, boolean>>({})
+  const { t } = useTranslation();
+  const { data: usage } = useUsage();
+  const plansConfig = usePlansConfig();
+  const [interested, setInterested] = useState<Record<string, boolean>>({});
 
-  useEffect(() => { track('billing_page_view') }, [])
+  useEffect(() => { track('billing_page_view'); }, []);
 
   function lim(n: number, unit?: 'bytes'): string {
-    if (n === Infinity) return '∞'
-    if (unit === 'bytes') return formatBytes(n)
-    return String(n)
+    if (n === Infinity) return '∞';
+    if (unit === 'bytes') return formatBytes(n);
+    return String(n);
   }
 
-  const f = plansConfig
+  const f = plansConfig;
 
   const plans: BillingPlan[] = [
     {
@@ -84,12 +84,12 @@ export default function Billing() {
         { text: t('billing.features.checkpoints', { count: lim(f?.pro.maxCheckpointsPerProject ?? Infinity) }), available: true },
       ],
     },
-  ]
+  ];
 
   const handleInterest = (planKey: string) => {
-    setInterested((prev) => ({ ...prev, [planKey]: true }))
-    track('plan_interest_click', { plan: planKey })
-  }
+    setInterested((prev) => ({ ...prev, [planKey]: true }));
+    track('plan_interest_click', { plan: planKey });
+  };
 
   return (
     <div className="h-screen w-screen bg-bg-primary flex overflow-hidden">
@@ -126,5 +126,5 @@ export default function Billing() {
         </div>
       </main>
     </div>
-  )
+  );
 }

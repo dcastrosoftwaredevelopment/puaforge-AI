@@ -1,4 +1,4 @@
-import { SandpackPreview } from '@codesandbox/sandpack-react'
+import { SandpackPreview } from '@codesandbox/sandpack-react';
 
 export default function PreviewPanel() {
   return (
@@ -9,5 +9,5 @@ export default function PreviewPanel() {
         style={{ height: '100%' }}
       />
     </div>
-  )
+  );
 }

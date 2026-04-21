@@ -1,9 +1,9 @@
-import { useTranslation } from 'react-i18next'
-import type { UserUsage } from '@/hooks/useUsage'
-import UsageRow from './UsageRow'
+import { useTranslation } from 'react-i18next';
+import type { UserUsage } from '@/hooks/useUsage';
+import UsageRow from './UsageRow';
 
 export default function UsageSection({ usage }: { usage: UserUsage }) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   return (
     <div className="mb-8 p-5 rounded-xl border border-border-subtle bg-bg-secondary space-y-3">
       <div className="flex items-center justify-between mb-1">
@@ -17,5 +17,5 @@ export default function UsageSection({ usage }: { usage: UserUsage }) {
       <UsageRow label={t('billing.usageDomains')} used={usage.usage.customDomains.used} limit={usage.usage.customDomains.limit} />
       <UsageRow label={t('billing.usagePublishedSites')} used={usage.usage.publishedSites.used} limit={usage.usage.publishedSites.limit} />
     </div>
-  )
+  );
 }

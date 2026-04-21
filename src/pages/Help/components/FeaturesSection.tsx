@@ -1,10 +1,10 @@
-import { useTranslation } from 'react-i18next'
-import { CheckCircle2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next';
+import { CheckCircle2 } from 'lucide-react';
 
-const featureKeys = [1, 2, 3, 4] as const
+const featureKeys = [1, 2, 3, 4] as const;
 
 export default function FeaturesSection() {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   return (
     <section className="bg-bg-secondary border border-border-subtle rounded-xl p-5 space-y-5">
       <div className="flex items-center gap-2.5">
@@ -20,5 +20,5 @@ export default function FeaturesSection() {
         ))}
       </div>
     </section>
-  )
+  );
 }

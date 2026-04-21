@@ -1,4 +1,4 @@
-import { SandpackCodeEditor } from '@codesandbox/sandpack-react'
+import { SandpackCodeEditor } from '@codesandbox/sandpack-react';
 
 export default function EditorPanel() {
   return (
@@ -11,5 +11,5 @@ export default function EditorPanel() {
         style={{ height: '100%' }}
       />
     </div>
-  )
+  );
 }

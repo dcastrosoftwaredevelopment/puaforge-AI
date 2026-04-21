@@ -1,7 +1,7 @@
-import { atom } from 'jotai'
-import { selectAtom } from 'jotai/utils'
-import { parseClassesByBreakpoint, type ParsedClasses } from '@/utils/tailwindClasses'
-import { parseInlineStyle } from '@/utils/inlineStyles'
+import { atom } from 'jotai';
+import { selectAtom } from 'jotai/utils';
+import { parseClassesByBreakpoint, type ParsedClasses } from '@/utils/tailwindClasses';
+import { parseInlineStyle } from '@/utils/inlineStyles';
 
 // Project
 export interface Project {
@@ -11,8 +11,8 @@ export interface Project {
   updatedAt: number
 }
 
-export const projectsAtom = atom<Project[]>([])
-export const activeProjectIdAtom = atom<string | null>(null)
+export const projectsAtom = atom<Project[]>([]);
+export const activeProjectIdAtom = atom<string | null>(null);
 
 // Messages (scoped to active project)
 export interface MessageImage {
@@ -28,10 +28,10 @@ export interface Message {
   images?: MessageImage[]
 }
 
-export const messagesAtom = atom<Message[]>([])
+export const messagesAtom = atom<Message[]>([]);
 
 // Project files fed to Sandpack
-export const filesAtom = atom<Record<string, string>>({})
+export const filesAtom = atom<Record<string, string>>({});
 
 // Project images (reusable assets)
 export interface ProjectImage {
@@ -44,7 +44,7 @@ export interface ProjectImage {
   dataUrl?: string
 }
 
-export const projectImagesAtom = atom<ProjectImage[]>([])
+export const projectImagesAtom = atom<ProjectImage[]>([]);
 
 // Checkpoints
 export interface Checkpoint {
@@ -54,20 +54,20 @@ export interface Checkpoint {
   createdAt: number
 }
 
-export const checkpointsAtom = atom<Checkpoint[]>([])
+export const checkpointsAtom = atom<Checkpoint[]>([]);
 
 // UI state
-export const isChatOpenAtom = atom(true)
-export const isGeneratingAtom = atom(false)
-export const activeFileAtom = atom('/App.tsx')
+export const isChatOpenAtom = atom(true);
+export const isGeneratingAtom = atom(false);
+export const activeFileAtom = atom('/App.tsx');
 
 // Chat mode
 export type ChatMode = 'floating' | 'docked'
-export const chatModeAtom = atom<ChatMode>('docked')
+export const chatModeAtom = atom<ChatMode>('docked');
 
 // View mode
 export type ViewMode = 'editor' | 'preview' | 'split'
-export const viewModeAtom = atom<ViewMode>('split')
+export const viewModeAtom = atom<ViewMode>('split');
 
 // Claude model selection
 export interface ClaudeModel {
@@ -75,27 +75,27 @@ export interface ClaudeModel {
   name: string
 }
 
-export const availableModelsAtom = atom<ClaudeModel[]>([])
-export const selectedModelAtom = atom('')
+export const availableModelsAtom = atom<ClaudeModel[]>([]);
+export const selectedModelAtom = atom('');
 
 // Editor dirty state (user has unsaved manual edits)
-export const editorDirtyAtom = atom(false)
+export const editorDirtyAtom = atom(false);
 export const editorActionsAtom = atom<{ save: () => void; discard: () => void }>({
   save: () => {},
   discard: () => {},
-})
+});
 
 // Panel sizes
-export const editorFractionAtom = atom(0.3)
-export const chatWidthAtom = atom(384)
+export const editorFractionAtom = atom(0.3);
+export const chatWidthAtom = atom(384);
 
 // API key (configured via settings page)
-export const apiKeyAtom = atom('')
-export const apiKeyEnabledAtom = atom(true)
+export const apiKeyAtom = atom('');
+export const apiKeyEnabledAtom = atom(true);
 
 // Device preview
 export type DevicePreview = 'desktop' | 'tablet' | 'mobile'
-export const devicePreviewAtom = atom<DevicePreview>('desktop')
+export const devicePreviewAtom = atom<DevicePreview>('desktop');
 
 // Color palette (persisted globally in localStorage)
 export interface PaletteColor {
@@ -117,16 +117,16 @@ export const DEFAULT_PALETTE: PaletteColor[] = [
   // Text
   { id: 'text-primary', name: 'Text Primary', value: '#E0E0E0', locked: true },
   { id: 'code-muted', name: 'Code Text Muted', value: '#94a3b8', locked: true },
-]
+];
 
-export const colorPaletteAtom = atom<PaletteColor[]>(DEFAULT_PALETTE)
+export const colorPaletteAtom = atom<PaletteColor[]>(DEFAULT_PALETTE);
 
 // Custom domain for the active project (null = not configured)
-export const customDomainAtom = atom<string | null>(null)
+export const customDomainAtom = atom<string | null>(null);
 
 // Set to true by useProjectLoader once project data is fully loaded into atoms.
 // useDraft watches this to avoid treating the initial load as a user change.
-export const projectLoadedAtom = atom(false)
+export const projectLoadedAtom = atom(false);
 
 // Plan upgrade modal
 export interface UpgradePrompt {
@@ -134,16 +134,16 @@ export interface UpgradePrompt {
   limitType: string
   message: string
 }
-export const upgradePromptAtom = atom<UpgradePrompt | null>(null)
+export const upgradePromptAtom = atom<UpgradePrompt | null>(null);
 
 // Mobile sidebar drawer
-export const sidebarOpenAtom = atom(false)
+export const sidebarOpenAtom = atom(false);
 
 // External npm dependencies detected from AI-generated code
-export const depsAtom = atom<Record<string, string>>({})
+export const depsAtom = atom<Record<string, string>>({});
 
 // Elementor-style inspect mode
-export const inspectModeAtom = atom(false)
+export const inspectModeAtom = atom(false);
 
 export interface SelectedElement {
   id: string
@@ -152,8 +152,8 @@ export interface SelectedElement {
   inlineStyle?: string
   rect: { top: number; left: number; width: number; height: number }
 }
-export const selectedElementAtom = atom<SelectedElement | null>(null)
-export const hoveredElementAtom = atom<SelectedElement | null>(null)
+export const selectedElementAtom = atom<SelectedElement | null>(null);
+export const hoveredElementAtom = atom<SelectedElement | null>(null);
 
 export interface DOMNode {
   id: string
@@ -161,19 +161,19 @@ export interface DOMNode {
   className: string
   children: DOMNode[]
 }
-export const domTreeAtom = atom<DOMNode[]>([])
+export const domTreeAtom = atom<DOMNode[]>([]);
 
 export type EditorPanelMode = 'code' | 'style' | 'layers'
-export const editorPanelModeAtom = atom<EditorPanelMode>('style')
+export const editorPanelModeAtom = atom<EditorPanelMode>('style');
 
 export type StyleBreakpoint = 'mobile' | 'tablet' | 'desktop'
-export const styleBreakpointAtom = atom<StyleBreakpoint>('mobile')
+export const styleBreakpointAtom = atom<StyleBreakpoint>('mobile');
 
 export const PREFIX_MAP: Record<StyleBreakpoint, string> = {
   mobile: '',
   tablet: 'md',
   desktop: 'lg',
-}
+};
 
 // ── Derived atoms for StyleEditor ────────────────────────────────────────────
 
@@ -182,42 +182,42 @@ export const parsedClassesAtom = atom((get) =>
     get(selectedElementAtom)?.className ?? '',
     PREFIX_MAP[get(styleBreakpointAtom)],
   )
-)
+);
 
 export const parsedInlineStyleAtom = atom((get): Record<string, string> => {
-  const s = get(selectedElementAtom)?.inlineStyle
-  return s ? parseInlineStyle(s) : {}
-})
+  const s = get(selectedElementAtom)?.inlineStyle;
+  return s ? parseInlineStyle(s) : {};
+});
 
 function field<K extends keyof ParsedClasses>(k: K) {
-  return selectAtom(parsedClassesAtom, (p) => p[k])
+  return selectAtom(parsedClassesAtom, (p) => p[k]);
 }
 
-export const fontSizeAtom      = field('fontSize')
-export const fontWeightAtom    = field('fontWeight')
-export const textAlignAtom     = field('textAlign')
-export const textColorAtom     = field('textColor')
-export const bgColorAtom       = field('bgColor')
-export const paddingTopAtom    = field('paddingTop')
-export const paddingRightAtom  = field('paddingRight')
-export const paddingBottomAtom = field('paddingBottom')
-export const paddingLeftAtom   = field('paddingLeft')
-export const marginTopAtom     = field('marginTop')
-export const marginRightAtom   = field('marginRight')
-export const marginBottomAtom  = field('marginBottom')
-export const marginLeftAtom    = field('marginLeft')
-export const widthAtom         = field('width')
-export const heightAtom        = field('height')
-export const maxWidthAtom      = field('maxWidth')
-export const displayAtom       = field('display')
-export const flexDirAtom       = field('flexDir')
-export const justifyAtom       = field('justify')
-export const alignItemsAtom    = field('alignItems')
-export const gapAtom           = field('gap')
-export const roundedAtom       = field('rounded')
-export const borderWidthAtom   = field('borderWidth')
-export const borderColorAtom   = field('borderColor')
-export const shadowAtom        = field('shadow')
-export const opacityAtom       = field('opacity')
-export const overflowAtom      = field('overflow')
-export const unknownClassesAtom = field('unknown')
+export const fontSizeAtom      = field('fontSize');
+export const fontWeightAtom    = field('fontWeight');
+export const textAlignAtom     = field('textAlign');
+export const textColorAtom     = field('textColor');
+export const bgColorAtom       = field('bgColor');
+export const paddingTopAtom    = field('paddingTop');
+export const paddingRightAtom  = field('paddingRight');
+export const paddingBottomAtom = field('paddingBottom');
+export const paddingLeftAtom   = field('paddingLeft');
+export const marginTopAtom     = field('marginTop');
+export const marginRightAtom   = field('marginRight');
+export const marginBottomAtom  = field('marginBottom');
+export const marginLeftAtom    = field('marginLeft');
+export const widthAtom         = field('width');
+export const heightAtom        = field('height');
+export const maxWidthAtom      = field('maxWidth');
+export const displayAtom       = field('display');
+export const flexDirAtom       = field('flexDir');
+export const justifyAtom       = field('justify');
+export const alignItemsAtom    = field('alignItems');
+export const gapAtom           = field('gap');
+export const roundedAtom       = field('rounded');
+export const borderWidthAtom   = field('borderWidth');
+export const borderColorAtom   = field('borderColor');
+export const shadowAtom        = field('shadow');
+export const opacityAtom       = field('opacity');
+export const overflowAtom      = field('overflow');
+export const unknownClassesAtom = field('unknown');

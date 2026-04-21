@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer'
+import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -8,11 +8,11 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
-})
+});
 
 export async function sendVerificationEmail(to: string, token: string) {
-  const appUrl = process.env.APP_URL ?? `http://localhost:${process.env.PORT ?? 3001}`
-  const link = `${appUrl}/email-confirmed?token=${token}`
+  const appUrl = process.env.APP_URL ?? `http://localhost:${process.env.PORT ?? 3001}`;
+  const link = `${appUrl}/email-confirmed?token=${token}`;
 
   await transporter.sendMail({
     from: `"PuaForge AI" <${process.env.FROM_EMAIL ?? process.env.SMTP_USER}>`,
@@ -35,5 +35,5 @@ export async function sendVerificationEmail(to: string, token: string) {
         <p style="margin:4px 0 0;font-size:11px;color:#555;word-break:break-all">${link}</p>
       </div>
     `,
-  })
+  });
 }

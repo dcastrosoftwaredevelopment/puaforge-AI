@@ -1,12 +1,12 @@
-import { Progress } from 'flowbite-react'
-import { formatBytes, formatLimit } from '@/hooks/useUsage'
+import { Progress } from 'flowbite-react';
+import { formatBytes, formatLimit } from '@/hooks/useUsage';
 
 export default function UsageBar({ used, limit, unit }: { used: number; limit: number; unit?: string }) {
-  const isUnlimited = limit === Infinity || limit >= 1e9
-  const pct = isUnlimited ? 0 : Math.min(100, (used / limit) * 100)
-  const isWarning = pct >= 80
-  const usedLabel = unit === 'bytes' ? formatBytes(used) : String(used)
-  const limitLabel = formatLimit(limit, unit)
+  const isUnlimited = limit === Infinity || limit >= 1e9;
+  const pct = isUnlimited ? 0 : Math.min(100, (used / limit) * 100);
+  const isWarning = pct >= 80;
+  const usedLabel = unit === 'bytes' ? formatBytes(used) : String(used);
+  const limitLabel = formatLimit(limit, unit);
 
   return (
     <div className="space-y-1">
@@ -18,5 +18,5 @@ export default function UsageBar({ used, limit, unit }: { used: number; limit: n
         <Progress progress={pct} size="xs" color={isWarning ? 'yellow' : 'primary'} />
       )}
     </div>
-  )
+  );
 }

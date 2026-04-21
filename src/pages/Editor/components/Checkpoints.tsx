@@ -1,20 +1,20 @@
-import { useState } from 'react'
-import { Save, Check, X } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { useCheckpoints } from '@/hooks/useCheckpoints'
-import CheckpointRow from './CheckpointRow'
+import { useState } from 'react';
+import { Save, Check, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useCheckpoints } from '@/hooks/useCheckpoints';
+import CheckpointRow from './CheckpointRow';
 
 export default function Checkpoints() {
-  const { checkpoints, createCheckpoint, restoreCheckpoint, deleteCheckpoint, renameCheckpoint } = useCheckpoints()
-  const [newName, setNewName] = useState('')
-  const [showInput, setShowInput] = useState(false)
-  const { t } = useTranslation()
+  const { checkpoints, createCheckpoint, restoreCheckpoint, deleteCheckpoint, renameCheckpoint } = useCheckpoints();
+  const [newName, setNewName] = useState('');
+  const [showInput, setShowInput] = useState(false);
+  const { t } = useTranslation();
 
   const handleCreate = () => {
-    createCheckpoint(newName)
-    setNewName('')
-    setShowInput(false)
-  }
+    createCheckpoint(newName);
+    setNewName('');
+    setShowInput(false);
+  };
 
   return (
     <div className="p-3 space-y-3">
@@ -26,8 +26,8 @@ export default function Checkpoints() {
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') handleCreate()
-                if (e.key === 'Escape') setShowInput(false)
+                if (e.key === 'Enter') handleCreate();
+                if (e.key === 'Escape') setShowInput(false);
               }}
               placeholder={t('checkpoints.placeholder')}
               className="w-36 text-xs bg-bg-elevated border border-border-default rounded px-2 py-1 text-text-primary outline-none focus:border-accent placeholder-text-muted"
@@ -75,5 +75,5 @@ export default function Checkpoints() {
         </div>
       )}
     </div>
-  )
+  );
 }

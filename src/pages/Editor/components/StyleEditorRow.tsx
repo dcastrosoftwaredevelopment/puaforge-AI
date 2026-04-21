@@ -4,5 +4,5 @@ export default function StyleEditorRow({ label, children }: { label: string; chi
       <span className="text-[11px] text-text-muted/70 w-20 shrink-0">{label}</span>
       <div className="flex-1 min-w-0">{children}</div>
     </div>
-  )
+  );
 }

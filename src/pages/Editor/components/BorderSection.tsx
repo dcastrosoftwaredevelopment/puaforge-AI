@@ -1,15 +1,15 @@
-import { memo } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useBorderSection } from '@/hooks/useBorderSection'
-import { ROUNDED_CLASSES, BORDER_WIDTHS } from '@/utils/tailwindClasses'
-import StyleEditorSection from './StyleEditorSection'
-import StyleEditorRow from './StyleEditorRow'
-import StyleEditorSelect from './StyleEditorSelect'
-import StyleEditorColorInput from './StyleEditorColorInput'
+import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useBorderSection } from '@/hooks/useBorderSection';
+import { ROUNDED_CLASSES, BORDER_WIDTHS } from '@/utils/tailwindClasses';
+import StyleEditorSection from './StyleEditorSection';
+import StyleEditorRow from './StyleEditorRow';
+import StyleEditorSelect from './StyleEditorSelect';
+import StyleEditorColorInput from './StyleEditorColorInput';
 
 const BorderSection = memo(() => {
-  const { t } = useTranslation()
-  const { rounded, borderWidth, borderColor, elementId, applyClass, onRounded, onBorderWidth } = useBorderSection()
+  const { t } = useTranslation();
+  const { rounded, borderWidth, borderColor, elementId, applyClass, onRounded, onBorderWidth } = useBorderSection();
   return (
     <StyleEditorSection title={t('inspect.sectionBorder')}>
       <StyleEditorRow label={t('inspect.rounded')}>
@@ -24,7 +24,7 @@ const BorderSection = memo(() => {
         </StyleEditorRow>
       )}
     </StyleEditorSection>
-  )
-})
+  );
+});
 
-export default BorderSection
+export default BorderSection;

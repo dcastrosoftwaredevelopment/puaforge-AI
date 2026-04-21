@@ -1,24 +1,24 @@
-import { useAtomValue } from 'jotai'
-import { Smartphone, Tablet, Monitor } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { selectedElementAtom } from '@/atoms'
-import { useStyleBreakpoint } from '@/hooks/useStyleBreakpoint'
-import { useStylePatcher, StylePatcherContext } from '@/hooks/useStylePatcher'
-import TypographySection from './TypographySection'
-import ColorsSection from './ColorsSection'
-import SpacingSection from './SpacingSection'
-import DimensionsSection from './DimensionsSection'
-import LayoutSection from './LayoutSection'
-import BorderSection from './BorderSection'
-import EffectsSection from './EffectsSection'
-import InlineStylesSection from './InlineStylesSection'
-import AdvancedSection from './AdvancedSection'
+import { useAtomValue } from 'jotai';
+import { Smartphone, Tablet, Monitor } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { selectedElementAtom } from '@/atoms';
+import { useStyleBreakpoint } from '@/hooks/useStyleBreakpoint';
+import { useStylePatcher, StylePatcherContext } from '@/hooks/useStylePatcher';
+import TypographySection from './TypographySection';
+import ColorsSection from './ColorsSection';
+import SpacingSection from './SpacingSection';
+import DimensionsSection from './DimensionsSection';
+import LayoutSection from './LayoutSection';
+import BorderSection from './BorderSection';
+import EffectsSection from './EffectsSection';
+import InlineStylesSection from './InlineStylesSection';
+import AdvancedSection from './AdvancedSection';
 
 export default function StyleEditor() {
-  const { t } = useTranslation()
-  const selectedElement = useAtomValue(selectedElementAtom)
-  const { breakpoint, setBreakpoint } = useStyleBreakpoint()
-  const patcher = useStylePatcher()
+  const { t } = useTranslation();
+  const selectedElement = useAtomValue(selectedElementAtom);
+  const { breakpoint, setBreakpoint } = useStyleBreakpoint();
+  const patcher = useStylePatcher();
 
   return (
     <StylePatcherContext.Provider value={patcher}>
@@ -52,5 +52,5 @@ export default function StyleEditor() {
         {selectedElement && <AdvancedSection />}
       </div>
     </StylePatcherContext.Provider>
-  )
+  );
 }

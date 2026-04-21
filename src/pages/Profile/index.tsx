@@ -1,11 +1,11 @@
-import { useTranslation } from 'react-i18next'
-import { useProfileForm } from '@/hooks/useProfileForm'
-import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar'
-import NameSection from './components/NameSection'
-import PasswordSection from './components/PasswordSection'
+import { useTranslation } from 'react-i18next';
+import { useProfileForm } from '@/hooks/useProfileForm';
+import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar';
+import NameSection from './components/NameSection';
+import PasswordSection from './components/PasswordSection';
 
 export default function Profile() {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   const {
     name, setName, nameError, nameSaving, nameSuccess, handleSaveName,
     currentPassword, setCurrentPassword,
@@ -14,7 +14,7 @@ export default function Profile() {
     passwordErrors, setPasswordErrors,
     passwordSaving, passwordSuccess, passwordError,
     handleSavePassword,
-  } = useProfileForm()
+  } = useProfileForm();
 
   return (
     <div className="h-screen flex bg-bg-primary">
@@ -58,5 +58,5 @@ export default function Profile() {
         </div>
       </main>
     </div>
-  )
+  );
 }

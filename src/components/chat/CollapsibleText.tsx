@@ -1,18 +1,18 @@
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
-const TEXT_COLLAPSE_CHARS = 400
+const TEXT_COLLAPSE_CHARS = 400;
 
 export default function CollapsibleText({ children, content, fadeColor = 'var(--color-bg-secondary)' }: {
   children: React.ReactNode
   content: string
   fadeColor?: string
 }) {
-  const [expanded, setExpanded] = useState(false)
-  const { t } = useTranslation()
-  const isLong = content.length > TEXT_COLLAPSE_CHARS
+  const [expanded, setExpanded] = useState(false);
+  const { t } = useTranslation();
+  const isLong = content.length > TEXT_COLLAPSE_CHARS;
 
-  if (!isLong) return <>{children}</>
+  if (!isLong) return <>{children}</>;
 
   return (
     <div>
@@ -32,5 +32,5 @@ export default function CollapsibleText({ children, content, fadeColor = 'var(--
         {expanded ? t('chat.showLess') : t('chat.showMore')}
       </button>
     </div>
-  )
+  );
 }

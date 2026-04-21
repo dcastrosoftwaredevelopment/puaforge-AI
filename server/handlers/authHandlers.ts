@@ -1,32 +1,32 @@
-import type { Request, Response } from 'express'
-import bcrypt from 'bcryptjs'
-import { randomUUID } from 'crypto'
-import { OAuth2Client } from 'google-auth-library'
-import { eq, or } from 'drizzle-orm'
-import { db } from '../db.js'
-import { users, userSettings } from '../schema.js'
-import { signToken } from '../middleware/auth.js'
-import { sendVerificationEmail } from '../services/email.js'
+import type { Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
+import { randomUUID } from 'crypto';
+import { OAuth2Client } from 'google-auth-library';
+import { eq, or } from 'drizzle-orm';
+import { db } from '../db.js';
+import { users, userSettings } from '../schema.js';
+import { signToken } from '../middleware/auth.js';
+import { sendVerificationEmail } from '../services/email.js';
 
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export async function register(req: Request, res: Response) {
-  const { email, password, name } = req.body as { email: string; password: string; name: string }
+  const { email, password, name } = req.body as { email: string; password: string; name: string };
 
   if (!email || !password || !name) {
-    res.status(400).json({ code: 'ERROR_MISSING_FIELDS' })
-    return
+    res.status(400).json({ code: 'ERROR_MISSING_FIELDS' });
+    return;
   }
 
-  const existing = await db.select({ id: users.id }).from(users).where(eq(users.email, email))
+  const existing = await db.select({ id: users.id }).from(users).where(eq(users.email, email));
   if (existing.length > 0) {
-    res.status(409).json({ code: 'ERROR_EMAIL_ALREADY_USED' })
-    return
+    res.status(409).json({ code: 'ERROR_EMAIL_ALREADY_USED' });
+    return;
   }
 
-  const passwordHash = await bcrypt.hash(password, 10)
-  const verificationToken = randomUUID()
-  const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000)
+  const passwordHash = await bcrypt.hash(password, 10);
+  const verificationToken = randomUUID();
+  const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
   await db.insert(users).values({
     email,
@@ -35,144 +35,144 @@ export async function register(req: Request, res: Response) {
     emailVerified: false,
     emailVerificationToken: verificationToken,
     emailVerificationExpiry: verificationExpiry,
-  })
+  });
 
-  await sendVerificationEmail(email, verificationToken)
-  res.status(202).json({ status: 'needs_verification' })
+  await sendVerificationEmail(email, verificationToken);
+  res.status(202).json({ status: 'needs_verification' });
 }
 
 export async function login(req: Request, res: Response) {
-  const { email, password } = req.body as { email: string; password: string }
+  const { email, password } = req.body as { email: string; password: string };
 
   if (!email || !password) {
-    res.status(400).json({ code: 'ERROR_MISSING_FIELDS' })
-    return
+    res.status(400).json({ code: 'ERROR_MISSING_FIELDS' });
+    return;
   }
 
-  const [user] = await db.select().from(users).where(eq(users.email, email))
+  const [user] = await db.select().from(users).where(eq(users.email, email));
 
   if (!user?.passwordHash) {
-    res.status(401).json({ code: 'ERROR_INVALID_CREDENTIALS' })
-    return
+    res.status(401).json({ code: 'ERROR_INVALID_CREDENTIALS' });
+    return;
   }
 
-  const valid = await bcrypt.compare(password, user.passwordHash)
+  const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) {
-    res.status(401).json({ code: 'ERROR_INVALID_CREDENTIALS' })
-    return
+    res.status(401).json({ code: 'ERROR_INVALID_CREDENTIALS' });
+    return;
   }
 
   if (!user.emailVerified) {
-    const verificationToken = randomUUID()
-    const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000)
+    const verificationToken = randomUUID();
+    const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await db.update(users)
       .set({ emailVerificationToken: verificationToken, emailVerificationExpiry: verificationExpiry })
-      .where(eq(users.id, user.id))
-    await sendVerificationEmail(email, verificationToken)
-    res.status(403).json({ code: 'ERROR_EMAIL_NOT_VERIFIED' })
-    return
+      .where(eq(users.id, user.id));
+    await sendVerificationEmail(email, verificationToken);
+    res.status(403).json({ code: 'ERROR_EMAIL_NOT_VERIFIED' });
+    return;
   }
 
-  const token = signToken({ userId: user.id, email: user.email })
-  res.json({ token, user: { id: user.id, email: user.email, name: user.name, emailVerified: user.emailVerified } })
+  const token = signToken({ userId: user.id, email: user.email });
+  res.json({ token, user: { id: user.id, email: user.email, name: user.name, emailVerified: user.emailVerified } });
 }
 
 export async function googleAuth(req: Request, res: Response) {
-  const { credential } = req.body as { credential: string }
+  const { credential } = req.body as { credential: string };
 
   if (!credential) {
-    res.status(400).json({ code: 'ERROR_MISSING_FIELDS' })
-    return
+    res.status(400).json({ code: 'ERROR_MISSING_FIELDS' });
+    return;
   }
 
   const ticket = await googleClient.verifyIdToken({
     idToken: credential,
     audience: process.env.GOOGLE_CLIENT_ID,
-  })
+  });
 
-  const payload = ticket.getPayload()
+  const payload = ticket.getPayload();
   if (!payload?.email) {
-    res.status(401).json({ code: 'ERROR_INVALID_GOOGLE_TOKEN' })
-    return
+    res.status(401).json({ code: 'ERROR_INVALID_GOOGLE_TOKEN' });
+    return;
   }
 
-  const { sub: googleId, email, name } = payload
+  const { sub: googleId, email, name } = payload;
 
   let [user] = await db
     .select()
     .from(users)
-    .where(or(eq(users.googleId, googleId), eq(users.email, email!)))
+    .where(or(eq(users.googleId, googleId), eq(users.email, email!)));
 
   if (!user) {
     ;[user] = await db
       .insert(users)
       .values({ email: email!, name, googleId, emailVerified: true })
-      .returning()
+      .returning();
   } else {
-    await db.update(users).set({ googleId, emailVerified: true }).where(eq(users.email, email!))
-    user = { ...user, googleId, emailVerified: true }
+    await db.update(users).set({ googleId, emailVerified: true }).where(eq(users.email, email!));
+    user = { ...user, googleId, emailVerified: true };
   }
 
-  const token = signToken({ userId: user.id, email: user.email })
-  res.json({ token, user: { id: user.id, email: user.email, name: user.name, emailVerified: user.emailVerified } })
+  const token = signToken({ userId: user.id, email: user.email });
+  res.json({ token, user: { id: user.id, email: user.email, name: user.name, emailVerified: user.emailVerified } });
 }
 
 export async function verifyEmail(req: Request, res: Response) {
-  const { token } = req.query as { token: string }
+  const { token } = req.query as { token: string };
 
   if (!token) {
-    res.status(400).json({ code: 'ERROR_MISSING_TOKEN' })
-    return
+    res.status(400).json({ code: 'ERROR_MISSING_TOKEN' });
+    return;
   }
 
-  const [user] = await db.select().from(users).where(eq(users.emailVerificationToken, token))
+  const [user] = await db.select().from(users).where(eq(users.emailVerificationToken, token));
 
   if (!user) {
-    res.status(400).json({ code: 'ERROR_INVALID_TOKEN' })
-    return
+    res.status(400).json({ code: 'ERROR_INVALID_TOKEN' });
+    return;
   }
 
   if (user.emailVerificationExpiry && user.emailVerificationExpiry < new Date()) {
-    res.status(400).json({ code: 'ERROR_TOKEN_EXPIRED' })
-    return
+    res.status(400).json({ code: 'ERROR_TOKEN_EXPIRED' });
+    return;
   }
 
   await db.update(users)
     .set({ emailVerified: true, emailVerificationToken: null, emailVerificationExpiry: null })
-    .where(eq(users.id, user.id))
+    .where(eq(users.id, user.id));
 
-  const jwtToken = signToken({ userId: user.id, email: user.email })
-  res.json({ token: jwtToken, user: { id: user.id, email: user.email, name: user.name, emailVerified: true } })
+  const jwtToken = signToken({ userId: user.id, email: user.email });
+  res.json({ token: jwtToken, user: { id: user.id, email: user.email, name: user.name, emailVerified: true } });
 }
 
 export async function resendVerification(req: Request, res: Response) {
-  const { email } = req.body as { email: string }
+  const { email } = req.body as { email: string };
 
   if (!email) {
-    res.status(400).json({ code: 'ERROR_MISSING_FIELDS' })
-    return
+    res.status(400).json({ code: 'ERROR_MISSING_FIELDS' });
+    return;
   }
 
-  const [user] = await db.select().from(users).where(eq(users.email, email))
+  const [user] = await db.select().from(users).where(eq(users.email, email));
 
   if (!user) {
-    res.json({ status: 'sent' })
-    return
+    res.json({ status: 'sent' });
+    return;
   }
 
   if (user.emailVerified) {
-    res.status(400).json({ code: 'ERROR_ALREADY_VERIFIED' })
-    return
+    res.status(400).json({ code: 'ERROR_ALREADY_VERIFIED' });
+    return;
   }
 
-  const verificationToken = randomUUID()
-  const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000)
+  const verificationToken = randomUUID();
+  const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
   await db.update(users)
     .set({ emailVerificationToken: verificationToken, emailVerificationExpiry: verificationExpiry })
-    .where(eq(users.id, user.id))
+    .where(eq(users.id, user.id));
 
-  await sendVerificationEmail(email, verificationToken)
-  res.json({ status: 'sent' })
+  await sendVerificationEmail(email, verificationToken);
+  res.json({ status: 'sent' });
 }
 
 export async function getMe(req: Request, res: Response) {
@@ -187,11 +187,11 @@ export async function getMe(req: Request, res: Response) {
     })
     .from(users)
     .leftJoin(userSettings, eq(users.id, userSettings.userId))
-    .where(eq(users.id, req.user!.userId))
+    .where(eq(users.id, req.user!.userId));
 
   if (!row) {
-    res.status(404).json({ code: 'ERROR_USER_NOT_FOUND' })
-    return
+    res.status(404).json({ code: 'ERROR_USER_NOT_FOUND' });
+    return;
   }
 
   res.json({
@@ -201,5 +201,5 @@ export async function getMe(req: Request, res: Response) {
     emailVerified: row.emailVerified,
     apiKey: row.apiKey ?? null,
     apiKeyEnabled: row.apiKeyEnabled ?? true,
-  })
+  });
 }

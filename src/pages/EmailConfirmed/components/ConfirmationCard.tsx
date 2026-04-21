@@ -1,5 +1,5 @@
-import { useTranslation } from 'react-i18next'
-import { Loader2, CheckCircle, XCircle } from 'lucide-react'
+import { useTranslation } from 'react-i18next';
+import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 
 type State = 'verifying' | 'success' | 'error'
 
@@ -11,7 +11,7 @@ interface Props {
 }
 
 export default function ConfirmationCard({ state, email, onRequestNew, onBackToLogin }: Props) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   return (
     <div className="bg-bg-secondary border border-border-subtle rounded-2xl p-6 flex flex-col items-center text-center gap-4">
       {state === 'verifying' && (
@@ -60,5 +60,5 @@ export default function ConfirmationCard({ state, email, onRequestNew, onBackToL
         </>
       )}
     </div>
-  )
+  );
 }

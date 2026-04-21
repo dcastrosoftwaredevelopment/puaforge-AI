@@ -1,18 +1,18 @@
-import { memo } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useTypographySection } from '@/hooks/useTypographySection'
-import { useAtomValue } from 'jotai'
-import { selectedElementAtom } from '@/atoms'
-import { FONT_SIZES, FONT_WEIGHTS, TEXT_ALIGNS } from '@/utils/tailwindClasses'
-import StyleEditorSection from './StyleEditorSection'
-import StyleEditorRow from './StyleEditorRow'
-import StyleEditorSelect from './StyleEditorSelect'
-import StyleEditorColorInput from './StyleEditorColorInput'
+import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useTypographySection } from '@/hooks/useTypographySection';
+import { useAtomValue } from 'jotai';
+import { selectedElementAtom } from '@/atoms';
+import { FONT_SIZES, FONT_WEIGHTS, TEXT_ALIGNS } from '@/utils/tailwindClasses';
+import StyleEditorSection from './StyleEditorSection';
+import StyleEditorRow from './StyleEditorRow';
+import StyleEditorSelect from './StyleEditorSelect';
+import StyleEditorColorInput from './StyleEditorColorInput';
 
 const TypographySection = memo(() => {
-  const { t } = useTranslation()
-  const { fontSize, fontWeight, textAlign, textColor, applyClass, onFontSize, onFontWeight } = useTypographySection()
-  const elementId = useAtomValue(selectedElementAtom)?.id
+  const { t } = useTranslation();
+  const { fontSize, fontWeight, textAlign, textColor, applyClass, onFontSize, onFontWeight } = useTypographySection();
+  const elementId = useAtomValue(selectedElementAtom)?.id;
   return (
     <StyleEditorSection title={t('inspect.sectionTypography')}>
       <StyleEditorRow label={t('inspect.fontSize')}>
@@ -38,7 +38,7 @@ const TypographySection = memo(() => {
         <StyleEditorColorInput key={`${elementId}-tc`} value={textColor} onChange={(v) => applyClass(v)} prefix="text-" />
       </StyleEditorRow>
     </StyleEditorSection>
-  )
-})
+  );
+});
 
-export default TypographySection
+export default TypographySection;

@@ -1,58 +1,58 @@
-import { useRef, useState } from 'react'
-import { GripHorizontal, Trash2, PanelRightClose, PanelRightOpen, Minus, Download, Upload } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { useProjects } from '@/hooks/useProjects'
-import { useFiles } from '@/hooks/useFiles'
-import { useChat } from '@/hooks/useChat'
-import { useMessages } from '@/hooks/useMessages'
-import { useIsMobile } from '@/hooks/useIsMobile'
-import { DEFAULT_FILES } from '@/utils/defaultFiles'
-import type { Message } from '@/atoms'
-import ChatHistory from './ChatHistory'
-import PromptInput from './PromptInput'
-import ModelSelector from './ModelSelector'
-import ConfirmModal from '@/components/ui/ConfirmModal'
+import { useRef, useState } from 'react';
+import { GripHorizontal, Trash2, PanelRightClose, PanelRightOpen, Minus, Download, Upload } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useProjects } from '@/hooks/useProjects';
+import { useFiles } from '@/hooks/useFiles';
+import { useChat } from '@/hooks/useChat';
+import { useMessages } from '@/hooks/useMessages';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { DEFAULT_FILES } from '@/utils/defaultFiles';
+import type { Message } from '@/atoms';
+import ChatHistory from './ChatHistory';
+import PromptInput from './PromptInput';
+import ModelSelector from './ModelSelector';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 export default function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean; onDragStart?: (e: React.PointerEvent) => void }) {
-  const { messages, setMessages } = useMessages()
-  const { setFiles, setDeps } = useFiles()
-  const { mode: chatMode, setMode: setChatMode, setIsOpen } = useChat()
-  const [showClearConfirm, setShowClearConfirm] = useState(false)
-  const importRef = useRef<HTMLInputElement>(null)
-  const { projects, activeProjectId } = useProjects()
-  const { t } = useTranslation()
-  const isMobile = useIsMobile()
+  const { messages, setMessages } = useMessages();
+  const { setFiles, setDeps } = useFiles();
+  const { mode: chatMode, setMode: setChatMode, setIsOpen } = useChat();
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const importRef = useRef<HTMLInputElement>(null);
+  const { projects, activeProjectId } = useProjects();
+  const { t } = useTranslation();
+  const isMobile = useIsMobile();
 
   function exportMessages() {
-    const projectName = projects.find((p) => p.id === activeProjectId)?.name ?? 'projeto'
-    const slug = projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-    const now = new Date()
-    const date = now.toISOString().slice(0, 10)
-    const time = now.toTimeString().slice(0, 8).replace(/:/g, '-')
-    const data = JSON.stringify(messages, null, 2)
-    const blob = new Blob([data], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `chat-${slug}-${date}-${time}.json`
-    a.click()
-    URL.revokeObjectURL(url)
+    const projectName = projects.find((p) => p.id === activeProjectId)?.name ?? 'projeto';
+    const slug = projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const now = new Date();
+    const date = now.toISOString().slice(0, 10);
+    const time = now.toTimeString().slice(0, 8).replace(/:/g, '-');
+    const data = JSON.stringify(messages, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `chat-${slug}-${date}-${time}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   function importMessages(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
     reader.onload = () => {
       try {
-        const parsed = JSON.parse(reader.result as string) as Message[]
-        if (Array.isArray(parsed)) setMessages((prev) => [...prev, ...parsed])
+        const parsed = JSON.parse(reader.result as string) as Message[];
+        if (Array.isArray(parsed)) setMessages((prev) => [...prev, ...parsed]);
       } catch {
         // invalid file — ignore
       }
-    }
-    reader.readAsText(file)
-    e.target.value = ''
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   }
 
   return (
@@ -147,13 +147,13 @@ export default function ChatPanel({ isDocked, onDragStart }: { isDocked: boolean
         confirmLabel={t('chat.clear')}
         cancelLabel={t('chat.cancel')}
         onConfirm={() => {
-          setMessages([])
-          setFiles(DEFAULT_FILES)
-          setDeps({})
-          setShowClearConfirm(false)
+          setMessages([]);
+          setFiles(DEFAULT_FILES);
+          setDeps({});
+          setShowClearConfirm(false);
         }}
         onCancel={() => setShowClearConfirm(false)}
       />
     </>
-  )
+  );
 }

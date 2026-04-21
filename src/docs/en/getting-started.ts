@@ -11,4 +11,4 @@ export const gettingStarted = {
   apiSetup_step3_title: 'Paste it into PuaForgeAI',
   apiSetup_step3_desc: 'Open Settings in the sidebar, paste your key in the field and save.',
   apiSetup_docsLink: 'Official Claude documentation →',
-}
+};

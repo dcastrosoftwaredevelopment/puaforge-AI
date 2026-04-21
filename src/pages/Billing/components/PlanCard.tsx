@@ -1,5 +1,5 @@
-import { useTranslation } from 'react-i18next'
-import { Check } from 'lucide-react'
+import { useTranslation } from 'react-i18next';
+import { Check } from 'lucide-react';
 
 export interface PlanFeature {
   text: string
@@ -26,7 +26,7 @@ interface Props {
 }
 
 export default function PlanCard({ plan, interested, onInterestClick }: Props) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   return (
     <div className={`relative flex flex-col rounded-xl border bg-bg-secondary p-5 ${plan.borderColor} ${plan.current ? 'ring-1 ring-border-default' : ''}`}>
       <div className="flex items-center justify-between mb-4">
@@ -83,5 +83,5 @@ export default function PlanCard({ plan, interested, onInterestClick }: Props) {
         </button>
       )}
     </div>
-  )
+  );
 }

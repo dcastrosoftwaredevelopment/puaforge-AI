@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { authTokenAtom } from '@/atoms/authAtoms'
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { authTokenAtom } from '@/atoms/authAtoms';
 import {
   projectsAtom,
   selectedModelAtom,
@@ -12,31 +12,31 @@ import {
   type Project,
   type ViewMode,
   type DevicePreview,
-} from '@/atoms'
-import { api } from '@/services/api'
+} from '@/atoms';
+import { api } from '@/services/api';
 
 // ─── localStorage helpers ─────────────────────────────────────────────────────
 
 function lsGet(key: string): string | null {
-  try { return localStorage.getItem(key) } catch { return null }
+  try { return localStorage.getItem(key); } catch { return null; }
 }
 function lsSet(key: string, value: string) {
-  try { localStorage.setItem(key, value) } catch { /* ignore */ }
+  try { localStorage.setItem(key, value); } catch { /* ignore */ }
 }
 
 function useDebounced(fn: (value: string) => void, delay: number) {
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   return useCallback((value: string) => {
-    if (timer.current) clearTimeout(timer.current)
-    timer.current = setTimeout(() => fn(value), delay)
-  }, [fn, delay])
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => fn(value), delay);
+  }, [fn, delay]);
 }
 
 // ─── Hook for useProjectLoader to wait for projects to load ───────────────────
 
-let pendingHydration: Promise<void> = Promise.resolve()
+let pendingHydration: Promise<void> = Promise.resolve();
 export function waitForPersist() {
-  return pendingHydration
+  return pendingHydration;
 }
 
 interface ApiProject {
@@ -44,16 +44,16 @@ interface ApiProject {
 }
 
 export function usePersistence() {
-  const token = useAtomValue(authTokenAtom)
-  const setProjects = useSetAtom(projectsAtom)
-  const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom)
-  const setViewMode = useSetAtom(viewModeAtom)
-  const setDevicePreview = useSetAtom(devicePreviewAtom)
-  const setIsChatOpen = useSetAtom(isChatOpenAtom)
-  const setEditorFraction = useSetAtom(editorFractionAtom)
-  const setChatWidth = useSetAtom(chatWidthAtom)
-  const hydrated = useRef(false)
-  const [isHydrated, setIsHydrated] = useState(false)
+  const token = useAtomValue(authTokenAtom);
+  const setProjects = useSetAtom(projectsAtom);
+  const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom);
+  const setViewMode = useSetAtom(viewModeAtom);
+  const setDevicePreview = useSetAtom(devicePreviewAtom);
+  const setIsChatOpen = useSetAtom(isChatOpenAtom);
+  const setEditorFraction = useSetAtom(editorFractionAtom);
+  const setChatWidth = useSetAtom(chatWidthAtom);
+  const hydrated = useRef(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // Hydrate UI settings from localStorage (once) + projects from API when token is available
   useEffect(() => {
@@ -61,83 +61,83 @@ export function usePersistence() {
       try {
         // UI preferences from localStorage — only on the first run
         if (!hydrated.current) {
-          const model = lsGet('selectedModel')
-          if (model) setSelectedModel(model)
+          const model = lsGet('selectedModel');
+          if (model) setSelectedModel(model);
 
-          const viewMode = lsGet('viewMode')
-          if (viewMode) setViewMode(viewMode as ViewMode)
+          const viewMode = lsGet('viewMode');
+          if (viewMode) setViewMode(viewMode as ViewMode);
 
-          const device = lsGet('devicePreview')
-          if (device) setDevicePreview(device as DevicePreview)
+          const device = lsGet('devicePreview');
+          if (device) setDevicePreview(device as DevicePreview);
 
-          const chatOpen = lsGet('isChatOpen')
-          if (chatOpen !== null) setIsChatOpen(chatOpen === 'true')
+          const chatOpen = lsGet('isChatOpen');
+          if (chatOpen !== null) setIsChatOpen(chatOpen === 'true');
 
-          const editorFraction = lsGet('editorFraction')
-          if (editorFraction) setEditorFraction(parseFloat(editorFraction))
+          const editorFraction = lsGet('editorFraction');
+          if (editorFraction) setEditorFraction(parseFloat(editorFraction));
 
-          const chatWidth = lsGet('chatWidth')
-          if (chatWidth) setChatWidth(parseInt(chatWidth, 10))
+          const chatWidth = lsGet('chatWidth');
+          if (chatWidth) setChatWidth(parseInt(chatWidth, 10));
         }
 
         // Projects from API (requires auth) — runs whenever token becomes available
         if (token) {
-          let resolve!: () => void
-          pendingHydration = new Promise<void>((r) => { resolve = r })
+          let resolve!: () => void;
+          pendingHydration = new Promise<void>((r) => { resolve = r; });
 
           const projects = await api.get<ApiProject[]>('/api/projects', {
             Authorization: `Bearer ${token}`,
-          })
-          setProjects(projects.sort((a, b) => b.updatedAt - a.updatedAt) as Project[])
-          resolve()
+          });
+          setProjects(projects.sort((a, b) => b.updatedAt - a.updatedAt) as Project[]);
+          resolve();
         }
       } catch (error) {
-        console.error('[persistence] Hydration error:', error)
+        console.error('[persistence] Hydration error:', error);
       } finally {
-        hydrated.current = true
-        setIsHydrated(true)
+        hydrated.current = true;
+        setIsHydrated(true);
       }
     }
-    hydrate()
-  }, [token]) // re-runs when token changes (e.g. after login)
+    hydrate();
+  }, [token]); // re-runs when token changes (e.g. after login)
 
   // Persist UI settings to localStorage
   useEffect(() => {
-    if (!hydrated.current) return
-    lsSet('selectedModel', selectedModel)
-  }, [selectedModel])
+    if (!hydrated.current) return;
+    lsSet('selectedModel', selectedModel);
+  }, [selectedModel]);
 
-  const viewMode = useAtomValue(viewModeAtom)
+  const viewMode = useAtomValue(viewModeAtom);
   useEffect(() => {
-    if (!hydrated.current) return
-    lsSet('viewMode', viewMode)
-  }, [viewMode])
+    if (!hydrated.current) return;
+    lsSet('viewMode', viewMode);
+  }, [viewMode]);
 
-  const devicePreview = useAtomValue(devicePreviewAtom)
+  const devicePreview = useAtomValue(devicePreviewAtom);
   useEffect(() => {
-    if (!hydrated.current) return
-    lsSet('devicePreview', devicePreview)
-  }, [devicePreview])
+    if (!hydrated.current) return;
+    lsSet('devicePreview', devicePreview);
+  }, [devicePreview]);
 
-  const isChatOpen = useAtomValue(isChatOpenAtom)
+  const isChatOpen = useAtomValue(isChatOpenAtom);
   useEffect(() => {
-    if (!hydrated.current) return
-    lsSet('isChatOpen', String(isChatOpen))
-  }, [isChatOpen])
+    if (!hydrated.current) return;
+    lsSet('isChatOpen', String(isChatOpen));
+  }, [isChatOpen]);
 
-  const saveEditorFraction = useDebounced((v) => lsSet('editorFraction', v), 300)
-  const editorFraction = useAtomValue(editorFractionAtom)
+  const saveEditorFraction = useDebounced((v) => lsSet('editorFraction', v), 300);
+  const editorFraction = useAtomValue(editorFractionAtom);
   useEffect(() => {
-    if (!hydrated.current) return
-    saveEditorFraction(String(editorFraction))
-  }, [editorFraction, saveEditorFraction])
+    if (!hydrated.current) return;
+    saveEditorFraction(String(editorFraction));
+  }, [editorFraction, saveEditorFraction]);
 
-  const saveChatWidth = useDebounced((v) => lsSet('chatWidth', v), 300)
-  const chatWidth = useAtomValue(chatWidthAtom)
+  const saveChatWidth = useDebounced((v) => lsSet('chatWidth', v), 300);
+  const chatWidth = useAtomValue(chatWidthAtom);
   useEffect(() => {
-    if (!hydrated.current) return
-    saveChatWidth(String(chatWidth))
-  }, [chatWidth, saveChatWidth])
+    if (!hydrated.current) return;
+    saveChatWidth(String(chatWidth));
+  }, [chatWidth, saveChatWidth]);
 
-  return { isHydrated }
+  return { isHydrated };
 }

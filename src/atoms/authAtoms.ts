@@ -1,4 +1,4 @@
-import { atom } from 'jotai'
+import { atom } from 'jotai';
 
 export interface AuthUser {
   id: string
@@ -9,6 +9,6 @@ export interface AuthUser {
   apiKeyEnabled: boolean
 }
 
-export const authTokenAtom = atom<string | null>(localStorage.getItem('auth_token'))
-export const authUserAtom = atom<AuthUser | null>(null)
-export const authLoadingAtom = atom(true)
+export const authTokenAtom = atom<string | null>(localStorage.getItem('auth_token'));
+export const authUserAtom = atom<AuthUser | null>(null);
+export const authLoadingAtom = atom(true);

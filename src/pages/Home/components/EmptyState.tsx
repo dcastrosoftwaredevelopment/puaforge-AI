@@ -1,13 +1,13 @@
-import { Plus, FolderOpen } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import Button from '@/components/ui/Button'
+import { Plus, FolderOpen } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import Button from '@/components/ui/Button';
 
 interface EmptyStateProps {
   onCreate: () => void
 }
 
 export default function EmptyState({ onCreate }: EmptyStateProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
   return (
     <div className="flex flex-col items-center justify-center py-20">
@@ -20,5 +20,5 @@ export default function EmptyState({ onCreate }: EmptyStateProps) {
         {t('projects.emptyCreate')}
       </Button>
     </div>
-  )
+  );
 }

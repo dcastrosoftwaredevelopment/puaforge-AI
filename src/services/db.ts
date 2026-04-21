@@ -1,4 +1,4 @@
-import Dexie, { type EntityTable } from 'dexie'
+import Dexie, { type EntityTable } from 'dexie';
 
 // Schema interfaces
 export interface DbProject {
@@ -53,8 +53,8 @@ export interface DbSetting {
 }
 
 // Database definition
-const DB_NAME = 'puaforge-ai'
-const DB_VERSION = 6
+const DB_NAME = 'puaforge-ai';
+const DB_VERSION = 6;
 
 const db = new Dexie(DB_NAME) as Dexie & {
   projects: EntityTable<DbProject, 'id'>
@@ -64,7 +64,7 @@ const db = new Dexie(DB_NAME) as Dexie & {
   checkpoints: EntityTable<DbCheckpoint, 'id'>
   publishedSites: EntityTable<DbPublishedSite, 'projectId'>
   settings: EntityTable<DbSetting, 'key'>
-}
+};
 
 db.version(DB_VERSION).stores({
   projects: 'id, createdAt, updatedAt',
@@ -74,23 +74,23 @@ db.version(DB_VERSION).stores({
   checkpoints: 'id, projectId, createdAt',
   publishedSites: 'projectId',
   settings: 'key',
-})
+});
 
 // Force-delete old incompatible DB (v1/v2 had different primary keys)
 async function ensureCleanDb() {
   try {
-    await db.open()
+    await db.open();
   } catch (e) {
     if (e instanceof Dexie.DexieError && e.name === 'UpgradeError') {
-      console.warn('[db] Incompatible schema detected, resetting database...')
-      await Dexie.delete(DB_NAME)
-      await db.open()
+      console.warn('[db] Incompatible schema detected, resetting database...');
+      await Dexie.delete(DB_NAME);
+      await db.open();
     } else {
-      throw e
+      throw e;
     }
   }
 }
 
-const dbReady = ensureCleanDb()
+const dbReady = ensureCleanDb();
 
-export { db, dbReady }
+export { db, dbReady };

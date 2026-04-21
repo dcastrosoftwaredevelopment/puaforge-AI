@@ -1,32 +1,32 @@
-import { Home, ImageIcon, History, RotateCcw, Save, Trash2, Palette, MoreHorizontal } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import Button from '@/components/ui/Button'
-import { useProjectActions } from '@/hooks/useProjectActions'
-import { useProjectImages } from '@/hooks/useProjectImages'
-import { useCheckpoints } from '@/hooks/useCheckpoints'
-import { usePanelSizes } from '@/hooks/usePanelSizes'
-import { useDraft } from '@/hooks/useDraft'
-import { useEditorHeaderDropdowns } from '@/hooks/useEditorHeaderDropdowns'
-import ViewToggle from './ViewToggle'
-import DeviceToggle from './DeviceToggle'
-import ExportButton from './ExportButton'
-import BuildDownloadButton from './BuildDownloadButton'
-import PublishButton from './PublishButton'
-import InspectToggle from './InspectToggle'
-import ProjectName from './ProjectName'
-import ImageAssets from './ImageAssets'
-import Checkpoints from './Checkpoints'
-import ColorPalette from './ColorPalette'
-import ConfirmModal from '@/components/ui/ConfirmModal'
-import Tooltip from '@/components/ui/Tooltip'
+import { Home, ImageIcon, History, RotateCcw, Save, Trash2, Palette, MoreHorizontal } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import Button from '@/components/ui/Button';
+import { useProjectActions } from '@/hooks/useProjectActions';
+import { useProjectImages } from '@/hooks/useProjectImages';
+import { useCheckpoints } from '@/hooks/useCheckpoints';
+import { usePanelSizes } from '@/hooks/usePanelSizes';
+import { useDraft } from '@/hooks/useDraft';
+import { useEditorHeaderDropdowns } from '@/hooks/useEditorHeaderDropdowns';
+import ViewToggle from './ViewToggle';
+import DeviceToggle from './DeviceToggle';
+import ExportButton from './ExportButton';
+import BuildDownloadButton from './BuildDownloadButton';
+import PublishButton from './PublishButton';
+import InspectToggle from './InspectToggle';
+import ProjectName from './ProjectName';
+import ImageAssets from './ImageAssets';
+import Checkpoints from './Checkpoints';
+import ColorPalette from './ColorPalette';
+import ConfirmModal from '@/components/ui/ConfirmModal';
+import Tooltip from '@/components/ui/Tooltip';
 
 export default function EditorHeader() {
-  const { goHome } = useProjectActions()
-  const { images } = useProjectImages()
-  const { checkpoints } = useCheckpoints()
-  const { resetPanels } = usePanelSizes()
-  const { isDraft } = useDraft()
-  const { t } = useTranslation()
+  const { goHome } = useProjectActions();
+  const { images } = useProjectImages();
+  const { checkpoints } = useCheckpoints();
+  const { resetPanels } = usePanelSizes();
+  const { isDraft } = useDraft();
+  const { t } = useTranslation();
   const {
     showImages, setShowImages,
     showCheckpoints, setShowCheckpoints,
@@ -40,7 +40,7 @@ export default function EditorHeader() {
     mobileMenuRef,
     handleSave,
     handleDiscard,
-  } = useEditorHeaderDropdowns()
+  } = useEditorHeaderDropdowns();
 
   return (
     <>
@@ -183,7 +183,7 @@ export default function EditorHeader() {
             {showMobileMenu && (
               <div className="absolute right-0 top-full mt-1 w-52 bg-bg-secondary border border-border-default rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden p-1 space-y-0.5">
                 <button
-                  onClick={() => { setShowMobileMenu(false); setShowImages(!showImages) }}
+                  onClick={() => { setShowMobileMenu(false); setShowImages(!showImages); }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
                 >
                   <ImageIcon size={14} className="text-forge-terracotta/60" />
@@ -191,14 +191,14 @@ export default function EditorHeader() {
                   {images.length > 0 && <span className="ml-auto text-[10px] text-text-muted">{images.length}</span>}
                 </button>
                 <button
-                  onClick={() => { setShowMobileMenu(false); setShowPalette(!showPalette) }}
+                  onClick={() => { setShowMobileMenu(false); setShowPalette(!showPalette); }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
                 >
                   <Palette size={14} className="text-forge-terracotta/60" />
                   {t('editor.palette')}
                 </button>
                 <button
-                  onClick={() => { setShowMobileMenu(false); setShowCheckpoints(!showCheckpoints) }}
+                  onClick={() => { setShowMobileMenu(false); setShowCheckpoints(!showCheckpoints); }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
                 >
                   <History size={14} className="text-forge-terracotta/60" />
@@ -212,7 +212,7 @@ export default function EditorHeader() {
                   <>
                     <div className="border-t border-border-subtle my-1" />
                     <button
-                      onClick={() => { setShowMobileMenu(false); void handleSave() }}
+                      onClick={() => { setShowMobileMenu(false); void handleSave(); }}
                       disabled={saving}
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-accent hover:bg-accent/10 disabled:opacity-50 transition cursor-pointer"
                     >
@@ -220,7 +220,7 @@ export default function EditorHeader() {
                       {saving ? t('common.saving') : t('editor.saveDraft')}
                     </button>
                     <button
-                      onClick={() => { setShowMobileMenu(false); setShowDiscardModal(true) }}
+                      onClick={() => { setShowMobileMenu(false); setShowDiscardModal(true); }}
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-forge-terracotta hover:bg-forge-terracotta/10 transition cursor-pointer"
                     >
                       <Trash2 size={14} />
@@ -259,5 +259,5 @@ export default function EditorHeader() {
         onCancel={() => setShowDiscardModal(false)}
       />
     </>
-  )
+  );
 }

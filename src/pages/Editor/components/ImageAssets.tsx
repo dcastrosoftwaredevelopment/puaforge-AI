@@ -1,22 +1,22 @@
-import { useRef } from 'react'
-import { ImagePlus } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { useProjectImages } from '@/hooks/useProjectImages'
-import ImageRow from './ImageRow'
+import { useRef } from 'react';
+import { ImagePlus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useProjectImages } from '@/hooks/useProjectImages';
+import ImageRow from './ImageRow';
 
 export default function ImageAssets() {
-  const { images, addImage, renameImage, removeImage } = useProjectImages()
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const { t } = useTranslation()
+  const { images, addImage, renameImage, removeImage } = useProjectImages();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
 
   const handleFiles = async (files: FileList | null) => {
-    if (!files) return
+    if (!files) return;
     for (const file of Array.from(files)) {
       if (file.type.startsWith('image/')) {
-        await addImage(file)
+        await addImage(file);
       }
     }
-  }
+  };
 
   return (
     <div className="p-3 space-y-3">
@@ -64,5 +64,5 @@ export default function ImageAssets() {
         </div>
       )}
     </div>
-  )
+  );
 }

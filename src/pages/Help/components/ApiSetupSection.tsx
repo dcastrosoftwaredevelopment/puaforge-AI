@@ -1,13 +1,13 @@
-import { useTranslation } from 'react-i18next'
-import { ExternalLink, Key } from 'lucide-react'
-import Step from './Step'
+import { useTranslation } from 'react-i18next';
+import { ExternalLink, Key } from 'lucide-react';
+import Step from './Step';
 
-const CONSOLE_URL = 'https://console.anthropic.com'
-const API_KEYS_URL = 'https://console.anthropic.com/settings/keys'
-const DOCS_URL = 'https://docs.anthropic.com/en/api/getting-started'
+const CONSOLE_URL = 'https://console.anthropic.com';
+const API_KEYS_URL = 'https://console.anthropic.com/settings/keys';
+const DOCS_URL = 'https://docs.anthropic.com/en/api/getting-started';
 
 export default function ApiSetupSection() {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   return (
     <section className="bg-bg-secondary border border-border-subtle rounded-xl p-5 space-y-5">
       <div className="flex items-center gap-2.5">
@@ -25,5 +25,5 @@ export default function ApiSetupSection() {
         <ExternalLink size={11} />
       </a>
     </section>
-  )
+  );
 }

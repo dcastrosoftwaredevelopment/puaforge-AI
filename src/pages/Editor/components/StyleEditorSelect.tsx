@@ -7,10 +7,10 @@ export default function StyleEditorSelect({ value, onChange, options }: { value:
     >
       <option value="" />
       {options.map((opt) => {
-        const val = typeof opt === 'string' ? opt : opt.value
-        const label = typeof opt === 'string' ? opt : opt.label
-        return <option key={val} value={val}>{label}</option>
+        const val = typeof opt === 'string' ? opt : opt.value;
+        const label = typeof opt === 'string' ? opt : opt.label;
+        return <option key={val} value={val}>{label}</option>;
       })}
     </select>
-  )
+  );
 }

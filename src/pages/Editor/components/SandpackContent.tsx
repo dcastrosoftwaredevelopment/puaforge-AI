@@ -1,73 +1,73 @@
-import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react'
-import { SandpackLayout, SandpackFileExplorer, SandpackCodeEditor, SandpackPreview } from '@codesandbox/sandpack-react'
-import { Search, PanelLeft } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import FindInFiles from './FindInFiles'
-import { type DevicePreview } from '@/atoms'
-import { useViewMode } from '@/hooks/useViewMode'
-import { useDevicePreview } from '@/hooks/useDevicePreview'
-import { useSandpackSync } from '@/hooks/useSandpackSync'
-import { useInspectBridge } from '@/hooks/useInspectBridge'
-import { useEditorState } from '@/hooks/useEditorState'
-import { usePanelSizes } from '@/hooks/usePanelSizes'
-import { useIsMobile } from '@/hooks/useIsMobile'
-import { useEditorPanelTabs } from '@/hooks/useEditorPanelTabs'
-import ResizeHandle from './ResizeHandle'
-import EditBar from './EditBar'
-import EditorPanelTabs from './EditorPanelTabs'
-import StyleEditor from './StyleEditor'
-import LayersPanel from './LayersPanel'
-import SelectionOverlay from './SelectionOverlay'
+import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { SandpackLayout, SandpackFileExplorer, SandpackCodeEditor, SandpackPreview } from '@codesandbox/sandpack-react';
+import { Search, PanelLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import FindInFiles from './FindInFiles';
+import { type DevicePreview } from '@/atoms';
+import { useViewMode } from '@/hooks/useViewMode';
+import { useDevicePreview } from '@/hooks/useDevicePreview';
+import { useSandpackSync } from '@/hooks/useSandpackSync';
+import { useInspectBridge } from '@/hooks/useInspectBridge';
+import { useEditorState } from '@/hooks/useEditorState';
+import { usePanelSizes } from '@/hooks/usePanelSizes';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { useEditorPanelTabs } from '@/hooks/useEditorPanelTabs';
+import ResizeHandle from './ResizeHandle';
+import EditBar from './EditBar';
+import EditorPanelTabs from './EditorPanelTabs';
+import StyleEditor from './StyleEditor';
+import LayersPanel from './LayersPanel';
+import SelectionOverlay from './SelectionOverlay';
 
 const DEVICE_WIDTHS: Record<DevicePreview, string> = {
   desktop: '100%',
   tablet: '768px',
   mobile: '375px',
-}
+};
 
-const SPLIT_MIN = 0.2
-const SPLIT_MAX = 0.8
+const SPLIT_MIN = 0.2;
+const SPLIT_MAX = 0.8;
 
 // Isolated component — absorbs re-renders from useSandpack() context
 const SandpackSyncBridge = memo(function SandpackSyncBridge() {
-  useSandpackSync()
-  useInspectBridge()
-  return null
-})
+  useSandpackSync();
+  useInspectBridge();
+  return null;
+});
 
 export default function SandpackContent() {
-  const { isDirty, saveEdits, discardEdits } = useEditorState()
-  const { editorFraction, setEditorFraction } = usePanelSizes()
-  const { showEditor, showPreview, isSplit } = useViewMode()
-  const { device } = useDevicePreview()
-  const isMobile = useIsMobile()
-  const { t } = useTranslation()
-  const { editorPanelMode, inspectMode, selectedElement } = useEditorPanelTabs()
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [findOpen, setFindOpen] = useState(false)
-  const [showExplorer, setShowExplorer] = useState(!isMobile)
+  const { isDirty, saveEdits, discardEdits } = useEditorState();
+  const { editorFraction, setEditorFraction } = usePanelSizes();
+  const { showEditor, showPreview, isSplit } = useViewMode();
+  const { device } = useDevicePreview();
+  const isMobile = useIsMobile();
+  const { t } = useTranslation();
+  const { editorPanelMode, inspectMode, selectedElement } = useEditorPanelTabs();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [findOpen, setFindOpen] = useState(false);
+  const [showExplorer, setShowExplorer] = useState(!isMobile);
 
-  const isResponsive = device !== 'desktop'
+  const isResponsive = device !== 'desktop';
 
-  const editorFractionRef = useRef(editorFraction)
-  useLayoutEffect(() => { editorFractionRef.current = editorFraction }, [editorFraction])
-  const editorPanelRef = useRef<HTMLDivElement>(null)
-  const previewPanelRef = useRef<HTMLDivElement>(null)
+  const editorFractionRef = useRef(editorFraction);
+  useLayoutEffect(() => { editorFractionRef.current = editorFraction; }, [editorFraction]);
+  const editorPanelRef = useRef<HTMLDivElement>(null);
+  const previewPanelRef = useRef<HTMLDivElement>(null);
 
   const onSplitResize = useCallback((delta: number) => {
-    const container = containerRef.current
-    if (!container) return
-    const totalWidth = container.offsetWidth
-    if (totalWidth === 0) return
-    const next = Math.min(SPLIT_MAX, Math.max(SPLIT_MIN, editorFractionRef.current + delta / totalWidth))
-    editorFractionRef.current = next
-    if (editorPanelRef.current) editorPanelRef.current.style.width = `${next * 100}%`
-    if (previewPanelRef.current) previewPanelRef.current.style.width = `${(1 - next) * 100}%`
-  }, [])
+    const container = containerRef.current;
+    if (!container) return;
+    const totalWidth = container.offsetWidth;
+    if (totalWidth === 0) return;
+    const next = Math.min(SPLIT_MAX, Math.max(SPLIT_MIN, editorFractionRef.current + delta / totalWidth));
+    editorFractionRef.current = next;
+    if (editorPanelRef.current) editorPanelRef.current.style.width = `${next * 100}%`;
+    if (previewPanelRef.current) previewPanelRef.current.style.width = `${(1 - next) * 100}%`;
+  }, []);
 
   const onSplitCommit = useCallback(() => {
-    setEditorFraction(editorFractionRef.current)
-  }, [setEditorFraction])
+    setEditorFraction(editorFractionRef.current);
+  }, [setEditorFraction]);
 
   return (
     <SandpackLayout ref={containerRef} className="flex h-full w-full">
@@ -145,5 +145,5 @@ export default function SandpackContent() {
         </div>
       </div>
     </SandpackLayout>
-  )
+  );
 }
