@@ -185,26 +185,6 @@ export default function SandpackContent() {
       : /* Desktop: preview + resize handle + editor as horizontal flex siblings */
         <>
           <div
-            ref={previewPanelRef}
-            className={
-              showPreview ?
-                `relative min-w-0 h-full flex items-start justify-center overflow-auto${inspectMode ? ' cursor-crosshair ring-1 ring-inset ring-forge-terracotta/20' : ''}`
-              : 'absolute w-0 h-0 overflow-hidden opacity-0 pointer-events-none'
-            }
-            style={isSplit ? { width: `${(1 - editorFraction) * 100}%` } : { flex: 1 }}
-          >
-            <div
-              className={`relative ${isResponsive ? 'h-full border-x border-border-subtle transition-all duration-300 shrink-0 my-0 mx-auto' : 'w-full h-full'}`}
-              style={isResponsive ? { width: DEVICE_WIDTHS[device] } : undefined}
-            >
-              <SandpackPreview showNavigator showRefreshButton showOpenInCodeSandbox={false} />
-              <SelectionOverlay />
-            </div>
-          </div>
-
-          {isSplit && <ResizeHandle onResize={onSplitResize} onCommit={onSplitCommit} />}
-
-          <div
             ref={editorPanelRef}
             className={showEditor ? 'flex flex-col min-w-0 h-full' : 'hidden'}
             style={isSplit ? { width: `${editorFraction * 100}%` } : { flex: 1 }}
@@ -244,6 +224,26 @@ export default function SandpackContent() {
                 <LayersPanel />
               </div>
             )}
+          </div>
+
+          {isSplit && <ResizeHandle onResize={onSplitResize} onCommit={onSplitCommit} />}
+
+          <div
+            ref={previewPanelRef}
+            className={
+              showPreview ?
+                `relative min-w-0 h-full flex items-start justify-center overflow-auto${inspectMode ? ' cursor-crosshair ring-1 ring-inset ring-forge-terracotta/20' : ''}`
+              : 'absolute w-0 h-0 overflow-hidden opacity-0 pointer-events-none'
+            }
+            style={isSplit ? { width: `${(1 - editorFraction) * 100}%` } : { flex: 1 }}
+          >
+            <div
+              className={`relative ${isResponsive ? 'h-full border-x border-border-subtle transition-all duration-300 shrink-0 my-0 mx-auto' : 'w-full h-full'}`}
+              style={isResponsive ? { width: DEVICE_WIDTHS[device] } : undefined}
+            >
+              <SandpackPreview showNavigator showRefreshButton showOpenInCodeSandbox={false} />
+              <SelectionOverlay />
+            </div>
           </div>
         </>
       }
