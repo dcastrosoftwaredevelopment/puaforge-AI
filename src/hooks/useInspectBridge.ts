@@ -45,7 +45,7 @@ export function useInspectBridge() {
       }
     }
     if (!sent) {
-      document.querySelector<HTMLIFrameElement>('.preview-iframe')?.contentWindow?.postMessage(msg, '*');
+      document.querySelector<HTMLIFrameElement>('.sp-preview-iframe')?.contentWindow?.postMessage(msg, '*');
     }
   };
 

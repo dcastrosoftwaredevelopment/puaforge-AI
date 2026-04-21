@@ -1,9 +1,11 @@
 import { useAtomValue } from 'jotai';
 import { selectedElementAtom, hoveredElementAtom, inspectModeAtom } from '@/atoms';
 
-function getIframeTopOffset(): number {
-  const navigator = document.querySelector<HTMLElement>('.sp-navigator');
-  return navigator ? navigator.getBoundingClientRect().height : 0;
+function getIframeViewportOrigin(): { top: number; left: number } {
+  const iframe = document.querySelector<HTMLIFrameElement>('.sp-preview-iframe');
+  if (!iframe) return { top: 0, left: 0 };
+  const { top, left } = iframe.getBoundingClientRect();
+  return { top, left };
 }
 
 export function useSelectionOverlay() {
@@ -11,7 +13,7 @@ export function useSelectionOverlay() {
   const hoveredElement = useAtomValue(hoveredElementAtom);
   const inspectMode = useAtomValue(inspectModeAtom);
 
-  const iframeTop = inspectMode ? getIframeTopOffset() : 0;
+  const iframeOrigin = inspectMode ? getIframeViewportOrigin() : { top: 0, left: 0 };
 
-  return { selectedElement, hoveredElement, inspectMode, iframeTop };
+  return { selectedElement, hoveredElement, inspectMode, iframeOrigin };
 }

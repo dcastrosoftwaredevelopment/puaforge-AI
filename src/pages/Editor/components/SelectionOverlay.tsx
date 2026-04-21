@@ -1,7 +1,7 @@
 import { useSelectionOverlay } from '@/hooks/useSelectionOverlay';
 
 export default function SelectionOverlay() {
-  const { selectedElement, hoveredElement, inspectMode, iframeTop } = useSelectionOverlay();
+  const { selectedElement, hoveredElement, inspectMode, iframeOrigin } = useSelectionOverlay();
 
   if (!inspectMode) return null;
 
@@ -9,11 +9,12 @@ export default function SelectionOverlay() {
     <>
       {hoveredElement && hoveredElement.id !== selectedElement?.id && (
         <div
-          className="absolute pointer-events-none border border-dashed border-sky-400/70 bg-sky-400/5 z-40"
+          className="pointer-events-none border border-dashed border-sky-400/70 bg-sky-400/5 z-10"
           style={{
+            position: 'fixed',
             boxSizing: 'border-box',
-            top: hoveredElement.rect.top + iframeTop,
-            left: hoveredElement.rect.left,
+            top: hoveredElement.rect.top + iframeOrigin.top,
+            left: hoveredElement.rect.left + iframeOrigin.left,
             width: hoveredElement.rect.width,
             height: hoveredElement.rect.height,
           }}
@@ -21,11 +22,12 @@ export default function SelectionOverlay() {
       )}
       {selectedElement && (
         <div
-          className="absolute pointer-events-none border border-forge-terracotta z-40"
+          className="pointer-events-none border border-forge-terracotta z-10"
           style={{
+            position: 'fixed',
             boxSizing: 'border-box',
-            top: selectedElement.rect.top + iframeTop,
-            left: selectedElement.rect.left,
+            top: selectedElement.rect.top + iframeOrigin.top,
+            left: selectedElement.rect.left + iframeOrigin.left,
             width: selectedElement.rect.width,
             height: selectedElement.rect.height,
           }}

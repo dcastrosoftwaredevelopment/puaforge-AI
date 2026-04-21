@@ -15,7 +15,7 @@ import EditorHeader from './components/EditorHeader';
 import SandpackContent from './components/SandpackContent';
 import ResizeHandle from './components/ResizeHandle';
 import MobileTabBar from './components/MobileTabBar';
-import FloatingChat, { DockedChat, MobileChatPanel } from '@/components/chat/FloatingChat';
+import FloatingChat, { DockedChat } from '@/components/chat/FloatingChat';
 import { useIsMobile } from '@/hooks/useIsMobile';
 
 const CHAT_MIN = 280;
@@ -85,31 +85,28 @@ export default function Editor() {
       <EditorHeader />
 
       <div className="flex-1 overflow-hidden flex">
-        {isMobile && isChatOpen ?
-          <MobileChatPanel />
-        : <main className="flex-1 min-w-0">
-            <SandpackProvider
-              key={sandpackKey}
-              files={{
-                '/index.html': TAILWIND_HTML,
-                ...files,
-                '/__forgeInspect.tsx': { code: FORGE_INSPECT_SOURCE, hidden: true },
-                '/index.tsx': { code: FORGE_ENTRY_SOURCE, hidden: true },
-              }}
-              theme="dark"
-              template="react-ts"
-              customSetup={{
-                dependencies: deps,
-              }}
-              options={{
-                activeFile: '/App.tsx',
-                externalResources: ['https://cdn.tailwindcss.com'],
-              }}
-            >
-              <SandpackContent />
-            </SandpackProvider>
-          </main>
-        }
+        <main className="flex-1 min-w-0">
+          <SandpackProvider
+            key={sandpackKey}
+            files={{
+              '/index.html': TAILWIND_HTML,
+              ...files,
+              '/__forgeInspect.tsx': { code: FORGE_INSPECT_SOURCE, hidden: true },
+              '/index.tsx': { code: FORGE_ENTRY_SOURCE, hidden: true },
+            }}
+            theme="dark"
+            template="react-ts"
+            customSetup={{
+              dependencies: deps,
+            }}
+            options={{
+              activeFile: '/App.tsx',
+              externalResources: ['https://cdn.tailwindcss.com'],
+            }}
+          >
+            <SandpackContent />
+          </SandpackProvider>
+        </main>
 
         {!isMobile && isDocked && !isChatOpen && (
           <div className="shrink-0 w-8 relative border-l border-border-subtle bg-bg-secondary">
