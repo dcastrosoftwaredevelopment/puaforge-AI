@@ -62,6 +62,7 @@ export const en = {
     exportTooltip: 'Download project files as .zip',
     build: 'Build',
     buildTooltip: 'Generate and download the deploy-ready build',
+    buildError: 'Build failed. Please try again.',
     manualEdit: 'Manually editing',
     files: 'Files',
     findInFilesTooltip: 'Find in files (Ctrl+Shift+F)',
