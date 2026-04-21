@@ -1,8 +1,16 @@
-import { useAtom } from 'jotai';
-import { useCallback } from 'react';
-import { mobileDrawerOpenAtom, mobileDrawerHeightPctAtom, mobileDrawerTabAtom, type MobileDrawerTab } from '@/atoms';
+import { useAtom, useAtomValue } from 'jotai';
+import { useCallback, useEffect, useRef } from 'react';
+import {
+  mobileDrawerOpenAtom,
+  mobileDrawerHeightPctAtom,
+  mobileDrawerTabAtom,
+  selectedElementAtom,
+  inspectModeAtom,
+  type MobileDrawerTab,
+} from '@/atoms';
 import { useEditorPanelTabs } from './useEditorPanelTabs';
 import { useChat } from './useChat';
+import { useIsMobile } from './useIsMobile';
 import type { EditorPanelMode } from '@/atoms';
 
 export function useMobileDrawer() {
@@ -11,6 +19,10 @@ export function useMobileDrawer() {
   const [drawerTab, setDrawerTabAtom] = useAtom(mobileDrawerTabAtom);
   const { setEditorPanelMode } = useEditorPanelTabs();
   const { setIsOpen: setChatOpen } = useChat();
+  const selectedElement = useAtomValue(selectedElementAtom);
+  const inspectMode = useAtomValue(inspectModeAtom);
+  const isMobile = useIsMobile();
+  const prevSelectedIdRef = useRef<string | null>(null);
 
   const setDrawerTab = useCallback(
     (tab: MobileDrawerTab) => {
@@ -48,6 +60,15 @@ export function useMobileDrawer() {
     },
     [drawerOpen, drawerTab, setDrawerTab, setDrawerOpen],
   );
+
+  // When a new element is selected in inspect mode on mobile, auto-open the style drawer
+  useEffect(() => {
+    const newId = selectedElement?.id ?? null;
+    if (isMobile && inspectMode && newId && newId !== prevSelectedIdRef.current) {
+      openDrawer('style');
+    }
+    prevSelectedIdRef.current = newId;
+  }, [selectedElement, isMobile, inspectMode, openDrawer]);
 
   return { drawerOpen, drawerHeightPct, setDrawerHeightPct, drawerTab, openDrawer, closeDrawer, toggleDrawer };
 }
