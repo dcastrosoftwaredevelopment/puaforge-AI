@@ -115,12 +115,12 @@ export default function SandpackContent() {
     <SandpackLayout ref={containerRef} className="flex h-full w-full">
       <SandpackSyncBridge />
 
-      {/* Mobile: flex-column so drawer pushes preview up instead of overlapping */}
+      {/* Mobile: preview always full size, drawer overlays from bottom */}
       {isMobile ?
-        <div className="flex flex-1 flex-col min-w-0 h-full">
-          {/* Preview — shrinks to give space to drawer */}
+        <div className="relative flex flex-1 min-w-0 h-full">
+          {/* Preview — always full height, never resized by drawer */}
           <div
-            className={`relative flex-1 min-h-0 flex items-start justify-center overflow-auto${inspectMode ? ' cursor-crosshair ring-1 ring-inset ring-forge-terracotta/20' : ''}`}
+            className={`absolute inset-0 flex items-start justify-center overflow-auto${inspectMode ? ' cursor-crosshair ring-1 ring-inset ring-forge-terracotta/20' : ''}`}
           >
             <div
               className={`relative ${isResponsive ? 'h-full border-x border-border-subtle transition-all duration-300 shrink-0 my-0 mx-auto' : 'w-full h-full'}`}
@@ -131,11 +131,11 @@ export default function SandpackContent() {
             </div>
           </div>
 
-          {/* Drawer — height-based, not absolute, so preview shrinks */}
+          {/* Drawer — absolute overlay from bottom, slides in/out */}
           <div
             ref={drawerRef}
-            className="flex shrink-0 flex-col bg-bg-secondary border-t border-border-subtle overflow-hidden transition-[height] duration-300 ease-in-out"
-            style={{ height: drawerOpen ? `${drawerHeightPct}%` : 0 }}
+            className={`absolute bottom-0 left-0 right-0 flex flex-col bg-bg-secondary border-t border-border-subtle overflow-hidden transition-transform duration-300 ease-in-out ${drawerOpen ? 'translate-y-0' : 'translate-y-full'}`}
+            style={{ height: `${drawerHeightPct}%` }}
           >
             {/* Drag handle */}
             <div
