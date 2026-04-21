@@ -62,6 +62,7 @@ export const pt = {
     exportTooltip: 'Baixar arquivos do projeto como .zip',
     build: 'Build',
     buildTooltip: 'Gerar e baixar o build pronto para deploy',
+    buildError: 'Erro ao gerar o build. Tente novamente.',
     manualEdit: 'Editando manualmente',
     files: 'Arquivos',
     findInFilesTooltip: 'Buscar em arquivos (Ctrl+Shift+F)',

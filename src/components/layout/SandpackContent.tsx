@@ -1,6 +1,6 @@
 import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { SandpackLayout, SandpackFileExplorer, SandpackCodeEditor, SandpackPreview } from '@codesandbox/sandpack-react'
-import { Save, Undo2, Search, PanelLeft } from 'lucide-react'
+import { Search, PanelLeft } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import FindInFiles from './FindInFiles'
 import { type DevicePreview } from '@/atoms'
@@ -11,6 +11,7 @@ import { useEditorState } from '@/hooks/useEditorState'
 import { usePanelSizes } from '@/hooks/usePanelSizes'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import ResizeHandle from '@/components/layout/ResizeHandle'
+import EditBar from './EditBar'
 
 const DEVICE_WIDTHS: Record<DevicePreview, string> = {
   desktop: '100%',
@@ -26,31 +27,6 @@ const SandpackSyncBridge = memo(function SandpackSyncBridge() {
   useSandpackSync()
   return null
 })
-
-function EditBar({ onSave, onDiscard }: { onSave: () => void; onDiscard: () => void }) {
-  const { t } = useTranslation()
-  return (
-    <div className="flex items-center justify-between px-3 py-1.5 bg-forge-terracotta/10 border-b border-forge-terracotta/20 shrink-0">
-      <span className="text-[11px] font-medium text-forge-terracotta">{t('editor.manualEdit')}</span>
-      <div className="flex items-center gap-1.5">
-        <button
-          onClick={onDiscard}
-          className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
-        >
-          <Undo2 size={13} />
-          {t('common.discard')}
-        </button>
-        <button
-          onClick={onSave}
-          className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium bg-accent/15 text-accent hover:bg-accent/25 transition cursor-pointer"
-        >
-          <Save size={13} />
-          {t('common.save')}
-        </button>
-      </div>
-    </div>
-  )
-}
 
 export default function SandpackContent() {
   const { isDirty, saveEdits, discardEdits } = useEditorState()

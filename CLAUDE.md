@@ -35,3 +35,29 @@ Prioritize Flowbite React components for all new frontend work. Before writing c
 - Drawers → Flowbite `Drawer`
 - Raw `<button>` is acceptable only for: icon-only tight-layout buttons, tab-style groups with active state that doesn't map to existing variants, or elements with unique hover colors with no matching variant
 - Never hardcode button styles inline when a variant already covers the case
+
+## Hooks as controllers (frontend)
+
+Hooks are the "controller" layer; components are pure "views".
+
+- All state (`useState`), side-effects (`useEffect`), handlers (`handleX`), and API calls belong in a custom hook in `src/hooks/`
+- A component file must not declare `useState`, `useEffect`, or handler functions directly — it only calls a hook and maps the returned values to JSX
+- Acceptable exception: purely local visual state with no side-effects (e.g. `isOpen` for a tooltip that never leaves the component)
+- Name the hook after the component it drives: `EditorHeader` → `useEditorHeader`, `LoginForm` → `useLoginForm`
+
+## One component per file (frontend)
+
+- Each `.tsx` file exports exactly one component
+- **`src/components/`**: exclusive sub-components live as siblings in the same domain folder
+  (e.g. `layout/CheckpointRow.tsx` alongside `layout/Checkpoints.tsx`)
+- **`src/pages/`**: each page uses the folder pattern — `PageName/index.tsx`; exclusive
+  sub-components go in `PageName/components/SubComponent.tsx`
+- Pure utility functions (formatDate, formatBytes, etc.) go in `src/utils/`, never inside a component file
+
+## Handler layer (backend)
+
+Route files are wiring only — method + path + middleware + handler call.
+
+- Business logic (DB queries, validation, error handling) goes in a named exported function in `server/handlers/<domain>Handlers.ts`
+- Route callbacks must be a single line: `router.post('/path', requireAuth, handler)`
+- Helpers shared across handlers in the same domain stay in the same handlers file
