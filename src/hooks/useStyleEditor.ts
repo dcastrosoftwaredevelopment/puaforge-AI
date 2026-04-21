@@ -1,35 +1,29 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { useAtom } from 'jotai'
-import { selectedElementAtom } from '@/atoms'
-import { parseClassesByBreakpoint, replaceClassWithPrefix, removeClassCategoryWithPrefix, removeClass, addClass } from '@/utils/tailwindClasses'
+import { useCallback, useEffect, useRef } from 'react'
+import { useStore, useSetAtom } from 'jotai'
+import { selectedElementAtom, styleBreakpointAtom, PREFIX_MAP } from '@/atoms'
+import { replaceClassWithPrefix, removeClassCategoryWithPrefix, removeClass, addClass } from '@/utils/tailwindClasses'
 import { parseInlineStyle, toInlineCss } from '@/utils/inlineStyles'
 import { useStylePatcher } from './useStylePatcher'
-import { useStyleBreakpoint } from './useStyleBreakpoint'
 
 export function useStyleEditor() {
-  const [selectedElement, setSelectedElement] = useAtom(selectedElementAtom)
+  const store = useStore()
+  const setSelectedElement = useSetAtom(selectedElementAtom)
   const { applyClassChange, applyInlineStyleChange } = useStylePatcher()
-  const { prefix } = useStyleBreakpoint()
 
-  const parsed = useMemo(
-    () => parseClassesByBreakpoint(selectedElement?.className ?? '', prefix),
-    [selectedElement, prefix],
-  )
-
-  const parsedInlineStyle = useMemo(
-    () => (selectedElement?.inlineStyle ? parseInlineStyle(selectedElement.inlineStyle) : {}),
-    [selectedElement],
-  )
-
-  // Live refs track in-progress edits without triggering re-renders.
-  // Synced from atom only when the selected element changes (not on every keystroke).
-  const liveClassNameRef = useRef(selectedElement?.className ?? '')
-  const liveInlineStyleRef = useRef(selectedElement?.inlineStyle ?? '')
+  // Live refs — updated via store.sub, never cause re-renders
+  const liveClassNameRef = useRef(store.get(selectedElementAtom)?.className ?? '')
+  const liveInlineStyleRef = useRef(store.get(selectedElementAtom)?.inlineStyle ?? '')
 
   useEffect(() => {
-    liveClassNameRef.current = selectedElement?.className ?? ''
-    liveInlineStyleRef.current = selectedElement?.inlineStyle ?? ''
-  }, [selectedElement?.id, prefix])
+    const unsubEl = store.sub(selectedElementAtom, () => {
+      liveClassNameRef.current = store.get(selectedElementAtom)?.className ?? ''
+      liveInlineStyleRef.current = store.get(selectedElementAtom)?.inlineStyle ?? ''
+    })
+    const unsubBp = store.sub(styleBreakpointAtom, () => {
+      liveClassNameRef.current = store.get(selectedElementAtom)?.className ?? ''
+    })
+    return () => { unsubEl(); unsubBp() }
+  }, [store])
 
   // ── debounce per field ────────────────────────────────────────────────────
 
@@ -52,109 +46,112 @@ export function useStyleEditor() {
     pendingRef.current.delete(key)
   }, [])
 
+  // ── immediate helpers (selects/buttons) ──────────────────────────────────
+
+  const apply = useCallback((newClassName: string) => {
+    const el = store.get(selectedElementAtom)
+    if (!el) return
+    applyClassChange(el.className, newClassName)
+    liveClassNameRef.current = newClassName
+    setSelectedElement((prev) => (prev ? { ...prev, className: newClassName } : null))
+  }, [store, applyClassChange, setSelectedElement])
+
+  const applyClass = useCallback((newClass: string) => {
+    const el = store.get(selectedElementAtom)
+    if (!el) return
+    const prefix = PREFIX_MAP[store.get(styleBreakpointAtom)]
+    apply(replaceClassWithPrefix(el.className, newClass, prefix))
+  }, [store, apply])
+
+  const removeOneClass = useCallback((cls: string) => {
+    const el = store.get(selectedElementAtom)
+    if (!el) return
+    apply(removeClass(el.className, cls))
+  }, [store, apply])
+
+  const addOneClass = useCallback((cls: string) => {
+    const el = store.get(selectedElementAtom)
+    if (!el) return
+    apply(addClass(el.className, cls))
+  }, [store, apply])
+
+  const removeCategory = useCallback((representative: string) => {
+    const el = store.get(selectedElementAtom)
+    if (!el) return
+    const prefix = PREFIX_MAP[store.get(styleBreakpointAtom)]
+    apply(removeClassCategoryWithPrefix(el.className, representative, prefix))
+  }, [store, apply])
+
   // ── live className helpers (no atom update → no re-render) ───────────────
 
   const applyLiveClass = useCallback((newClass: string) => {
-    if (!selectedElement) return
+    if (!store.get(selectedElementAtom)) return
+    const prefix = PREFIX_MAP[store.get(styleBreakpointAtom)]
     const newClassName = replaceClassWithPrefix(liveClassNameRef.current, newClass, prefix)
     applyClassChange(liveClassNameRef.current, newClassName)
     liveClassNameRef.current = newClassName
-  }, [selectedElement, applyClassChange, prefix])
+  }, [store, applyClassChange])
 
   const removeLiveCategory = useCallback((representative: string) => {
-    if (!selectedElement) return
+    if (!store.get(selectedElementAtom)) return
+    const prefix = PREFIX_MAP[store.get(styleBreakpointAtom)]
     const newClassName = removeClassCategoryWithPrefix(liveClassNameRef.current, representative, prefix)
     applyClassChange(liveClassNameRef.current, newClassName)
     liveClassNameRef.current = newClassName
-  }, [selectedElement, applyClassChange, prefix])
+  }, [store, applyClassChange])
 
   const commitClassName = useCallback(() => {
-    if (!selectedElement) return
+    if (!store.get(selectedElementAtom)) return
     setSelectedElement((prev) => prev ? { ...prev, className: liveClassNameRef.current } : null)
-  }, [selectedElement, setSelectedElement])
+  }, [store, setSelectedElement])
 
   // ── live inline style helpers (no atom update → no re-render) ───────────
 
   const applyLiveInlineProp = useCallback((prop: string, value: string) => {
-    if (!selectedElement) return
+    if (!store.get(selectedElementAtom)) return
     const current = parseInlineStyle(liveInlineStyleRef.current)
     const updated = value ? { ...current, [prop]: value } : (() => { const c = { ...current }; delete c[prop]; return c })()
     const newStyle = toInlineCss(updated)
     applyInlineStyleChange(liveInlineStyleRef.current, newStyle)
     liveInlineStyleRef.current = newStyle
-  }, [selectedElement, applyInlineStyleChange])
+  }, [store, applyInlineStyleChange])
 
   const commitInlineStyle = useCallback(() => {
-    if (!selectedElement) return
+    if (!store.get(selectedElementAtom)) return
     setSelectedElement((prev) => prev ? { ...prev, inlineStyle: liveInlineStyleRef.current } : null)
-  }, [selectedElement, setSelectedElement])
+  }, [store, setSelectedElement])
 
-  // ── immediate helpers (for selects, buttons — instant feedback needed) ───
-
-  const apply = useCallback((newClassName: string) => {
-    if (!selectedElement) return
-    applyClassChange(selectedElement.className, newClassName)
-    liveClassNameRef.current = newClassName
-    setSelectedElement((prev) => (prev ? { ...prev, className: newClassName } : null))
-  }, [selectedElement, applyClassChange, setSelectedElement])
-
-  const applyClass = useCallback((newClass: string) => {
-    if (!selectedElement) return
-    apply(replaceClassWithPrefix(selectedElement.className, newClass, prefix))
-  }, [selectedElement, apply, prefix])
-
-  const removeOneClass = useCallback((cls: string) => {
-    if (!selectedElement) return
-    apply(removeClass(selectedElement.className, cls))
-  }, [selectedElement, apply])
-
-  const addOneClass = useCallback((cls: string) => {
-    if (!selectedElement) return
-    apply(addClass(selectedElement.className, cls))
-  }, [selectedElement, apply])
-
-  const removeCategory = useCallback((representative: string) => {
-    if (!selectedElement) return
-    apply(removeClassCategoryWithPrefix(selectedElement.className, representative, prefix))
-  }, [selectedElement, apply, prefix])
-
-  // ── inline style helpers (immediate, for add/remove buttons) ─────────────
+  // ── immediate inline style helpers ───────────────────────────────────────
 
   const applyInlineStyle = useCallback((updated: Record<string, string>) => {
-    if (!selectedElement) return
+    const el = store.get(selectedElementAtom)
+    if (!el) return
     const newStyle = toInlineCss(updated)
-    applyInlineStyleChange(selectedElement.inlineStyle ?? '', newStyle)
+    applyInlineStyleChange(el.inlineStyle ?? '', newStyle)
     liveInlineStyleRef.current = newStyle
     setSelectedElement((prev) => (prev ? { ...prev, inlineStyle: newStyle } : null))
-  }, [selectedElement, applyInlineStyleChange, setSelectedElement])
-
-  const setInlineProp = useCallback((key: string, value: string) => {
-    applyInlineStyle({ ...parsedInlineStyle, [key]: value })
-  }, [parsedInlineStyle, applyInlineStyle])
+  }, [store, applyInlineStyleChange, setSelectedElement])
 
   const removeInlineProp = useCallback((key: string) => {
-    const updated = { ...parsedInlineStyle }
+    const current = parseInlineStyle(liveInlineStyleRef.current)
+    const updated = { ...current }
     delete updated[key]
     applyInlineStyle(updated)
-  }, [parsedInlineStyle, applyInlineStyle])
+  }, [applyInlineStyle])
 
   const addInlineProp = useCallback((key: string, value: string) => {
     if (!key.trim()) return
-    applyInlineStyle({ ...parsedInlineStyle, [key.trim()]: value.trim() })
-  }, [parsedInlineStyle, applyInlineStyle])
+    const current = parseInlineStyle(liveInlineStyleRef.current)
+    applyInlineStyle({ ...current, [key.trim()]: value.trim() })
+  }, [applyInlineStyle])
 
   return {
-    selectedElement,
-    parsed,
-    parsedInlineStyle,
     applyClass,
     removeOneClass,
     addOneClass,
     removeCategory,
-    setInlineProp,
     removeInlineProp,
     addInlineProp,
-    setSelectedElement,
     withDebounce,
     flushDebounce,
     applyLiveClass,

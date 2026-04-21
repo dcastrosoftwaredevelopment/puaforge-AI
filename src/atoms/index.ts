@@ -1,4 +1,7 @@
 import { atom } from 'jotai'
+import { selectAtom } from 'jotai/utils'
+import { parseClassesByBreakpoint, type ParsedClasses } from '@/utils/tailwindClasses'
+import { parseInlineStyle } from '@/utils/inlineStyles'
 
 // Project
 export interface Project {
@@ -165,3 +168,56 @@ export const editorPanelModeAtom = atom<EditorPanelMode>('style')
 
 export type StyleBreakpoint = 'mobile' | 'tablet' | 'desktop'
 export const styleBreakpointAtom = atom<StyleBreakpoint>('mobile')
+
+export const PREFIX_MAP: Record<StyleBreakpoint, string> = {
+  mobile: '',
+  tablet: 'md',
+  desktop: 'lg',
+}
+
+// ── Derived atoms for StyleEditor ────────────────────────────────────────────
+
+export const parsedClassesAtom = atom((get) =>
+  parseClassesByBreakpoint(
+    get(selectedElementAtom)?.className ?? '',
+    PREFIX_MAP[get(styleBreakpointAtom)],
+  )
+)
+
+export const parsedInlineStyleAtom = atom((get): Record<string, string> => {
+  const s = get(selectedElementAtom)?.inlineStyle
+  return s ? parseInlineStyle(s) : {}
+})
+
+function field<K extends keyof ParsedClasses>(k: K) {
+  return selectAtom(parsedClassesAtom, (p) => p[k])
+}
+
+export const fontSizeAtom      = field('fontSize')
+export const fontWeightAtom    = field('fontWeight')
+export const textAlignAtom     = field('textAlign')
+export const textColorAtom     = field('textColor')
+export const bgColorAtom       = field('bgColor')
+export const paddingTopAtom    = field('paddingTop')
+export const paddingRightAtom  = field('paddingRight')
+export const paddingBottomAtom = field('paddingBottom')
+export const paddingLeftAtom   = field('paddingLeft')
+export const marginTopAtom     = field('marginTop')
+export const marginRightAtom   = field('marginRight')
+export const marginBottomAtom  = field('marginBottom')
+export const marginLeftAtom    = field('marginLeft')
+export const widthAtom         = field('width')
+export const heightAtom        = field('height')
+export const maxWidthAtom      = field('maxWidth')
+export const displayAtom       = field('display')
+export const flexDirAtom       = field('flexDir')
+export const justifyAtom       = field('justify')
+export const alignItemsAtom    = field('alignItems')
+export const gapAtom           = field('gap')
+export const roundedAtom       = field('rounded')
+export const borderWidthAtom   = field('borderWidth')
+export const borderColorAtom   = field('borderColor')
+export const shadowAtom        = field('shadow')
+export const opacityAtom       = field('opacity')
+export const overflowAtom      = field('overflow')
+export const unknownClassesAtom = field('unknown')
