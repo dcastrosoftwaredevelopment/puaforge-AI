@@ -52,7 +52,7 @@ function Select({ value, onChange, options }: { value: string; onChange: (v: str
   )
 }
 
-function ColorInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function ColorInput({ value, onChange, prefix = '' }: { value: string; onChange: (v: string) => void; prefix?: string }) {
   const hexMatch = value.match(/\[#([0-9a-fA-F]{3,6})\]/)
   const hex = hexMatch ? `#${hexMatch[1]}` : '#000000'
   return (
@@ -62,7 +62,14 @@ function ColorInput({ value, onChange }: { value: string; onChange: (v: string) 
         value={hex}
         onChange={(e) => {
           const h = e.target.value
-          onChange(value.replace(/\[#[0-9a-fA-F]{3,6}\]/, `[${h}]`) || `[${h}]`)
+          const replaced = value.replace(/\[#[0-9a-fA-F]{3,6}\]/, `[${h}]`)
+          if (replaced !== value) {
+            onChange(replaced)
+          } else {
+            // value is a named class (e.g. text-gray-500) — detect prefix or fall back to prop
+            const detectedPrefix = value.match(/^(text|bg|border)-/)?.[0] ?? prefix
+            onChange(`${detectedPrefix}[${h}]`)
+          }
         }}
         className="w-6 h-6 rounded border border-border-subtle cursor-pointer shrink-0 bg-transparent"
       />
@@ -97,8 +104,10 @@ function SpacingInput({ label, value, onChange }: { label: string; value: string
 
 export default function StyleEditor() {
   const { t } = useTranslation()
-  const { selectedElement, parsed, applyClass, removeOneClass, addOneClass, removeCategory } = useStyleEditor()
+  const { selectedElement, parsed, parsedInlineStyle, applyClass, removeOneClass, addOneClass, removeCategory, setInlineProp, removeInlineProp, addInlineProp } = useStyleEditor()
   const [newClass, setNewClass] = useState('')
+  const [newInlineProp, setNewInlineProp] = useState('')
+  const [newInlineValue, setNewInlineValue] = useState('')
 
   if (!selectedElement || !parsed) {
     return (
@@ -142,14 +151,14 @@ export default function StyleEditor() {
           </div>
         </Row>
         <Row label={t('inspect.textColor')}>
-          <ColorInput value={parsed.textColor} onChange={(v) => applyClass(v)} />
+          <ColorInput value={parsed.textColor} onChange={(v) => applyClass(v)} prefix="text-" />
         </Row>
       </Section>
 
       {/* Colors */}
       <Section title={t('inspect.sectionColors')}>
         <Row label={t('inspect.bgColor')}>
-          <ColorInput value={parsed.bgColor} onChange={(v) => applyClass(v)} />
+          <ColorInput value={parsed.bgColor} onChange={(v) => applyClass(v)} prefix="bg-" />
         </Row>
       </Section>
 
@@ -217,7 +226,7 @@ export default function StyleEditor() {
         </Row>
         {parsed.borderWidth && parsed.borderWidth !== 'border-0' && (
           <Row label={t('inspect.borderColor')}>
-            <ColorInput value={parsed.borderColor} onChange={(v) => applyClass(v)} />
+            <ColorInput value={parsed.borderColor} onChange={(v) => applyClass(v)} prefix="border-" />
           </Row>
         )}
       </Section>
@@ -236,10 +245,61 @@ export default function StyleEditor() {
       </Section>
 
       {/* Inline styles */}
-      {selectedElement.inlineStyle && (
+      {(selectedElement.inlineStyle || Object.keys(parsedInlineStyle).length > 0) && (
         <Section title={t('inspect.sectionInlineStyles')} defaultOpen={true}>
-          <div className="font-mono text-[11px] text-text-muted/80 bg-bg-secondary rounded px-2 py-1.5 break-all select-text">
-            {selectedElement.inlineStyle}
+          {Object.entries(parsedInlineStyle).map(([prop, value]) => (
+            <Row key={prop} label={prop}>
+              <div className="flex gap-1">
+                <input
+                  type="text"
+                  value={value}
+                  onChange={(e) => setInlineProp(prop, e.target.value)}
+                  onBlur={(e) => { if (!e.target.value) removeInlineProp(prop) }}
+                  className="flex-1 text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono"
+                />
+                <button
+                  onClick={() => removeInlineProp(prop)}
+                  className="shrink-0 text-text-muted/50 hover:text-red-400 transition cursor-pointer px-1"
+                >
+                  <X size={10} />
+                </button>
+              </div>
+            </Row>
+          ))}
+          <div className="flex gap-1 mt-1">
+            <input
+              type="text"
+              value={newInlineProp}
+              onChange={(e) => setNewInlineProp(e.target.value)}
+              placeholder={t('inspect.inlineStyleAddProp')}
+              className="w-24 shrink-0 text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono"
+            />
+            <input
+              type="text"
+              value={newInlineValue}
+              onChange={(e) => setNewInlineValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && newInlineProp.trim()) {
+                  addInlineProp(newInlineProp, newInlineValue)
+                  setNewInlineProp('')
+                  setNewInlineValue('')
+                }
+              }}
+              placeholder={t('inspect.inlineStyleAddValue')}
+              className="flex-1 text-[11px] bg-bg-elevated border border-border-subtle rounded px-1.5 py-1 text-text-secondary outline-none focus:border-forge-terracotta font-mono"
+            />
+            <button
+              onClick={() => {
+                if (newInlineProp.trim()) {
+                  addInlineProp(newInlineProp, newInlineValue)
+                  setNewInlineProp('')
+                  setNewInlineValue('')
+                }
+              }}
+              className="px-2 py-1 rounded bg-bg-elevated border border-border-subtle text-text-muted hover:text-text-primary hover:border-border-default transition cursor-pointer"
+            >
+              <Plus size={11} />
+            </button>
           </div>
         </Section>
       )}

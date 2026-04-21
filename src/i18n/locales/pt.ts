@@ -353,6 +353,8 @@ export const pt = {
     sectionEffects: 'Efeitos',
     sectionAdvanced: 'Classes avançadas',
     sectionInlineStyles: 'Estilos inline',
+    inlineStyleAddProp: 'propriedade',
+    inlineStyleAddValue: 'valor',
     fontSize: 'Tamanho',
     fontWeight: 'Peso',
     textAlign: 'Alinhamento',

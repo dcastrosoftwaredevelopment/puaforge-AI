@@ -151,15 +151,19 @@ const CATEGORY_SETS: Array<Set<string> | RegExp> = [
   /^mt-/, /^mr-/, /^mb-/, /^ml-/,
 ]
 
-function sameCategory(a: string, b: string): boolean {
-  for (const cat of CATEGORY_SETS) {
-    if (cat instanceof Set) {
-      if (cat.has(a) && cat.has(b)) return true
-    } else {
-      if (cat.test(a) && cat.test(b)) return true
-    }
+function getCategoryIndex(cls: string): number {
+  for (let i = 0; i < CATEGORY_SETS.length; i++) {
+    const cat = CATEGORY_SETS[i]
+    if (cat instanceof Set ? cat.has(cls) : cat.test(cls)) return i
   }
-  return false
+  return -1
+}
+
+// "First category wins": text-xs belongs to FONT_SIZE_SET (index 0), so it never
+// collides with text-transparent which first matches /^text-/ (a later index).
+function sameCategory(a: string, b: string): boolean {
+  const ai = getCategoryIndex(a)
+  return ai !== -1 && ai === getCategoryIndex(b)
 }
 
 /** Remove all classes in the same category as `newClass`, then append `newClass`. */

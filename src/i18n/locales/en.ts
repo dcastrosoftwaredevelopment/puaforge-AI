@@ -353,6 +353,8 @@ export const en = {
     sectionEffects: 'Effects',
     sectionAdvanced: 'Advanced classes',
     sectionInlineStyles: 'Inline styles',
+    inlineStyleAddProp: 'property',
+    inlineStyleAddValue: 'value',
     fontSize: 'Size',
     fontWeight: 'Weight',
     textAlign: 'Align',

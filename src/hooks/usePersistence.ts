@@ -55,30 +55,32 @@ export function usePersistence() {
   const hydrated = useRef(false)
   const [isHydrated, setIsHydrated] = useState(false)
 
-  // Hydrate UI settings from localStorage + projects from API on mount
+  // Hydrate UI settings from localStorage (once) + projects from API when token is available
   useEffect(() => {
     async function hydrate() {
       try {
-        // UI preferences from localStorage
-        const model = lsGet('selectedModel')
-        if (model) setSelectedModel(model)
+        // UI preferences from localStorage — only on the first run
+        if (!hydrated.current) {
+          const model = lsGet('selectedModel')
+          if (model) setSelectedModel(model)
 
-        const viewMode = lsGet('viewMode')
-        if (viewMode) setViewMode(viewMode as ViewMode)
+          const viewMode = lsGet('viewMode')
+          if (viewMode) setViewMode(viewMode as ViewMode)
 
-        const device = lsGet('devicePreview')
-        if (device) setDevicePreview(device as DevicePreview)
+          const device = lsGet('devicePreview')
+          if (device) setDevicePreview(device as DevicePreview)
 
-        const chatOpen = lsGet('isChatOpen')
-        if (chatOpen !== null) setIsChatOpen(chatOpen === 'true')
+          const chatOpen = lsGet('isChatOpen')
+          if (chatOpen !== null) setIsChatOpen(chatOpen === 'true')
 
-        const editorFraction = lsGet('editorFraction')
-        if (editorFraction) setEditorFraction(parseFloat(editorFraction))
+          const editorFraction = lsGet('editorFraction')
+          if (editorFraction) setEditorFraction(parseFloat(editorFraction))
 
-        const chatWidth = lsGet('chatWidth')
-        if (chatWidth) setChatWidth(parseInt(chatWidth, 10))
+          const chatWidth = lsGet('chatWidth')
+          if (chatWidth) setChatWidth(parseInt(chatWidth, 10))
+        }
 
-        // Projects from API (requires auth)
+        // Projects from API (requires auth) — runs whenever token becomes available
         if (token) {
           let resolve!: () => void
           pendingHydration = new Promise<void>((r) => { resolve = r })
@@ -97,7 +99,7 @@ export function usePersistence() {
       }
     }
     hydrate()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [token]) // re-runs when token changes (e.g. after login)
 
   // Persist UI settings to localStorage
   useEffect(() => {

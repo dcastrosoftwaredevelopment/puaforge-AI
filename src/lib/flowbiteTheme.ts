@@ -26,7 +26,7 @@ export const flowbiteTheme = createTheme({
   },
   modal: {
     root: {
-      base: 'fixed inset-0 z-50 flex items-center justify-center px-4',
+      base: 'fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm',
       show: {
         on: 'flex',
         off: 'hidden',
