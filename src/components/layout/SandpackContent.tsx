@@ -79,36 +79,35 @@ export default function SandpackContent() {
       >
         {isDirty && <EditBar onSave={saveEdits} onDiscard={discardEdits} />}
         <EditorPanelTabs />
-        {editorPanelMode === 'code' && (
-          <>
-            <div className="flex items-center justify-end gap-1 px-2 py-1 border-b border-border-subtle shrink-0 bg-bg-secondary">
-              <button
-                onClick={() => setShowExplorer((v) => !v)}
-                className={`p-1.5 rounded-md transition cursor-pointer ${showExplorer ? 'text-text-primary bg-bg-elevated' : 'text-text-muted hover:text-text-primary hover:bg-bg-elevated'}`}
-                title={t('editor.files')}
-              >
-                <PanelLeft size={13} />
-              </button>
-              <button
-                onClick={() => setFindOpen((v) => !v)}
-                className="p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
-                title={t('editor.findInFilesTooltip')}
-              >
-                <Search size={13} />
-              </button>
-            </div>
-            <div className="relative flex flex-1 min-h-0">
-              {showExplorer && <SandpackFileExplorer />}
-              <SandpackCodeEditor
-                showTabs
-                closableTabs
-                showLineNumbers
-                showInlineErrors
-              />
-              <FindInFiles key={String(findOpen)} open={findOpen} onClose={() => setFindOpen(false)} />
-            </div>
-          </>
-        )}
+        {/* Code editor — always mounted to avoid expensive Monaco re-initialization */}
+        <div className={editorPanelMode === 'code' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
+          <div className="flex items-center justify-end gap-1 px-2 py-1 border-b border-border-subtle shrink-0 bg-bg-secondary">
+            <button
+              onClick={() => setShowExplorer((v) => !v)}
+              className={`p-1.5 rounded-md transition cursor-pointer ${showExplorer ? 'text-text-primary bg-bg-elevated' : 'text-text-muted hover:text-text-primary hover:bg-bg-elevated'}`}
+              title={t('editor.files')}
+            >
+              <PanelLeft size={13} />
+            </button>
+            <button
+              onClick={() => setFindOpen((v) => !v)}
+              className="p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+              title={t('editor.findInFilesTooltip')}
+            >
+              <Search size={13} />
+            </button>
+          </div>
+          <div className="relative flex flex-1 min-h-0">
+            {showExplorer && <SandpackFileExplorer />}
+            <SandpackCodeEditor
+              showTabs
+              closableTabs
+              showLineNumbers
+              showInlineErrors
+            />
+            <FindInFiles key={String(findOpen)} open={findOpen} onClose={() => setFindOpen(false)} />
+          </div>
+        </div>
         {editorPanelMode === 'style' && (
           <div className="flex-1 min-h-0 overflow-hidden">
             <StyleEditor />

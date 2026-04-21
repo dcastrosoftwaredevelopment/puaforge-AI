@@ -244,9 +244,8 @@ export default function StyleEditor() {
         </Row>
       </Section>
 
-      {/* Inline styles */}
-      {(selectedElement.inlineStyle || Object.keys(parsedInlineStyle).length > 0) && (
-        <Section title={t('inspect.sectionInlineStyles')} defaultOpen={true}>
+      {/* Inline styles — always shown so user can add properties even when element has none */}
+      <Section title={t('inspect.sectionInlineStyles')} defaultOpen={false}>
           {Object.entries(parsedInlineStyle).map(([prop, value]) => (
             <Row key={prop} label={prop}>
               <div className="flex gap-1">
@@ -302,7 +301,6 @@ export default function StyleEditor() {
             </button>
           </div>
         </Section>
-      )}
 
       {/* Advanced classes */}
       <Section title={t('inspect.sectionAdvanced')} defaultOpen={false}>
