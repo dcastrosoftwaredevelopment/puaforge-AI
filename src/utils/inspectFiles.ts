@@ -138,8 +138,9 @@ export function ForgeInspect({ children }) {
       e.stopPropagation()
       var el = hitElement(e.clientX, e.clientY)
       if (!el) return
+      var isReselect = el === selectedElRef
       watchSelected(el)
-      window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_SELECTED' }, getInfo(el)), '*')
+      window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_SELECTED', isReselect: isReselect }, getInfo(el)), '*')
     }
 
     function activate() {

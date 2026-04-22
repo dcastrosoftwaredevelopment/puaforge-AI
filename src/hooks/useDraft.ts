@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useAtomValue } from 'jotai';
-import { activeProjectIdAtom, messagesAtom, filesAtom, projectLoadedAtom, type Message } from '@/atoms';
+import { useCallback, useEffect, useRef } from 'react';
+import { useAtom, useAtomValue } from 'jotai';
+import { activeProjectIdAtom, messagesAtom, filesAtom, projectLoadedAtom, isDraftAtom, type Message } from '@/atoms';
 
 import { authTokenAtom } from '@/atoms/authAtoms';
 import { db, dbReady } from '@/services/db';
@@ -16,7 +16,7 @@ export function useDraft() {
   const messagesValue = useAtomValue(messagesAtom);
   const filesValue = useAtomValue(filesAtom);
   const projectLoaded = useAtomValue(projectLoadedAtom);
-  const [isDraft, setIsDraft] = useState(false);
+  const [isDraft, setIsDraft] = useAtom(isDraftAtom);
 
   // Skip the first save triggered by the initial project load (not a user change).
   // Each ref is cleared after the first save attempt following a project change.

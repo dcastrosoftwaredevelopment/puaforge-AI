@@ -112,7 +112,9 @@ export function useInspectBridge() {
         const blockId = forgeBlockId ? forgeBlockId.slice(0, forgeBlockId.lastIndexOf('-')) : '';
         const isContainer = !!BLOCKS.find((b) => b.id === blockId)?.isContainer;
         setInsertParentId(isContainer ? forgeBlockId : null);
-        if (!e.data.stayInLayers) setPanelMode('style');
+        // Only open the style panel on a second click on the same element,
+        // so a single click just selects without disrupting the active panel.
+        if (!e.data.stayInLayers && e.data.isReselect) setPanelMode('style');
       } else if (type === 'FORGE_ELEMENT_RESIZED') {
         const rect = e.data.rect;
         setSelected((prev) => (prev ? { ...prev, rect } : null));

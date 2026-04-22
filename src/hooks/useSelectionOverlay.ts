@@ -1,14 +1,8 @@
 import { useAtom, useAtomValue } from 'jotai';
+import { useEffect, useRef, useState } from 'react';
 import { selectedElementAtom, hoveredElementAtom, inspectModeAtom } from '@/atoms';
 import { useFiles } from '@/hooks/useFiles';
 import { removeBlockInstance } from '@/utils/jsxInserter';
-
-function getIframeViewportOrigin(): { top: number; left: number } {
-  const iframe = document.querySelector<HTMLIFrameElement>('.sp-preview-iframe');
-  if (!iframe) return { top: 0, left: 0 };
-  const { top, left } = iframe.getBoundingClientRect();
-  return { top, left };
-}
 
 export function useSelectionOverlay() {
   const [selectedElement, setSelected] = useAtom(selectedElementAtom);
@@ -16,7 +10,36 @@ export function useSelectionOverlay() {
   const inspectMode = useAtomValue(inspectModeAtom);
   const { setFiles } = useFiles();
 
-  const iframeOrigin = inspectMode ? getIframeViewportOrigin() : { top: 0, left: 0 };
+  const [iframeOrigin, setIframeOrigin] = useState({ top: 0, left: 0 });
+  const originRef = useRef(iframeOrigin);
+
+  // Track the iframe's viewport origin reactively so the overlay stays aligned
+  // during device-mode transitions (CSS transition-all duration-300 on the wrapper).
+  // ResizeObserver fires on every animation frame where the iframe box changes,
+  // giving us continuous updates throughout the transition.
+  useEffect(() => {
+    const iframe = document.querySelector<HTMLIFrameElement>('.sp-preview-iframe');
+    if (!iframe) return;
+
+    const update = () => {
+      const { top, left } = iframe.getBoundingClientRect();
+      if (originRef.current.top !== top || originRef.current.left !== left) {
+        originRef.current = { top, left };
+        setIframeOrigin({ top, left });
+      }
+    };
+
+    update();
+
+    const ro = new ResizeObserver(update);
+    ro.observe(iframe);
+    window.addEventListener('resize', update);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', update);
+    };
+  }, []);
 
   function removeSelectedBlock() {
     const blockId = selectedElement?.forgeBlockId;
