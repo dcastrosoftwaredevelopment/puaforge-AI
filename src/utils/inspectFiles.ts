@@ -136,6 +136,9 @@ export function ForgeInspect({ children }) {
 
     function onViewportResize() {
       if (resizeRafId) return
+      // Hide stale hover immediately — element positions shift on viewport resize
+      if (hoverBox) { hoverBox.style.display = 'none' }
+      lastHoveredId = null
       resizeRafId = requestAnimationFrame(function() {
         resizeRafId = null
         sendSelectedRect()
