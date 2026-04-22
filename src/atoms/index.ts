@@ -173,10 +173,13 @@ export const editorPanelModeAtom = atom<EditorPanelMode>('style');
 export type StyleBreakpoint = 'mobile' | 'tablet' | 'desktop';
 export const styleBreakpointAtom = atom<StyleBreakpoint>('mobile');
 
+// Desktop-first: base styles (no prefix) represent the desktop design.
+// Mobile overrides use max-md: (applies below 768 px).
+// Tablet overrides use md: (applies at 768 px and above, overriding base).
 export const PREFIX_MAP: Record<StyleBreakpoint, string> = {
-  mobile: '',
+  mobile: 'max-md',
   tablet: 'md',
-  desktop: 'lg',
+  desktop: '',
 };
 
 // ── Derived atoms for StyleEditor ────────────────────────────────────────────

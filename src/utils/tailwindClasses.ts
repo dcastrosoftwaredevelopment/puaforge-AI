@@ -372,7 +372,7 @@ export function addClass(className: string, cls: string): string {
   return [...classes, cls].join(' ');
 }
 
-const BREAKPOINT_RE = /^(sm|md|lg|xl|2xl):/;
+const BREAKPOINT_RE = /^(max-)?(sm|md|lg|xl|2xl):/;
 
 /** Parse classes filtering by breakpoint prefix. Mobile = no prefix; Desktop = `md:` prefix. */
 export function parseClassesByBreakpoint(className: string, prefix: string): ParsedClasses {
