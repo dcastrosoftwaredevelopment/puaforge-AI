@@ -99,25 +99,30 @@ export function ForgeInspect({ children }) {
       }
     }
 
-    function onDocMove(e) {
-      var el = e.target
-      if (el && el !== document.body && el !== document.documentElement) {
-        var id = el.getAttribute('data-vibe-id') || ''
-        if (id === lastHoveredId) return
-        lastHoveredId = id
-        window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_HOVERED' }, getInfo(el)), '*')
-      }
-    }
-
     var selectedElRef = null
     var resizeObs = null
     var scrollRafId = null
     var resizeRafId = null
     var lastHoveredId = null
 
+    // Overlay DOM elements — created in activate(), removed in deactivate()
+    var hoverBox = null
+    var selectedBox = null
+    var selectedTagLabel = null
+    var selectedDeleteBtn = null
+
+    function updateBoxRect(box, rect) {
+      box.style.top = rect.top + 'px'
+      box.style.left = rect.left + 'px'
+      box.style.width = rect.width + 'px'
+      box.style.height = rect.height + 'px'
+    }
+
     function sendSelectedRect() {
       if (selectedElRef && document.body.contains(selectedElRef)) {
-        window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_RESIZED' }, getInfo(selectedElRef)), '*')
+        var info = getInfo(selectedElRef)
+        if (selectedBox) updateBoxRect(selectedBox, info.rect)
+        window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_RESIZED' }, info), '*')
       }
     }
 
@@ -145,10 +150,28 @@ export function ForgeInspect({ children }) {
       resizeObs = new ResizeObserver(function() {
         if (skipFirst) { skipFirst = false; return }
         if (selectedElRef && document.body.contains(selectedElRef)) {
-          window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_RESIZED' }, getInfo(selectedElRef)), '*')
+          var info = getInfo(selectedElRef)
+          if (selectedBox) updateBoxRect(selectedBox, info.rect)
+          window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_RESIZED' }, info), '*')
         }
       })
       resizeObs.observe(el)
+    }
+
+    function onDocMove(e) {
+      var el = e.target
+      if (el && el !== document.body && el !== document.documentElement) {
+        var id = el.getAttribute('data-vibe-id') || ''
+        if (id === lastHoveredId) return
+        lastHoveredId = id
+        if (el !== selectedElRef) {
+          updateBoxRect(hoverBox, el.getBoundingClientRect())
+          hoverBox.style.display = 'block'
+        } else {
+          hoverBox.style.display = 'none'
+        }
+        window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_HOVERED' }, getInfo(el)), '*')
+      }
     }
 
     function onDocClick(e) {
@@ -158,6 +181,14 @@ export function ForgeInspect({ children }) {
       if (!el || el === document.body || el === document.documentElement) return
       var isReselect = el === selectedElRef
       watchSelected(el)
+      hoverBox.style.display = 'none'
+      lastHoveredId = null
+      var rect = el.getBoundingClientRect()
+      updateBoxRect(selectedBox, rect)
+      selectedTagLabel.textContent = el.tagName.toLowerCase()
+      var bid = getForgeBlockId(el)
+      selectedDeleteBtn.style.display = bid ? 'flex' : 'none'
+      selectedBox.style.display = 'block'
       window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_SELECTED', isReselect: isReselect }, getInfo(el)), '*')
     }
 
@@ -167,9 +198,40 @@ export function ForgeInspect({ children }) {
       activeRef.current = true
       assignIds()
       sendTree()
+
+      hoverBox = document.createElement('div')
+      hoverBox.style.cssText = 'position:fixed;pointer-events:none;z-index:2147483647;box-sizing:border-box;border:1px dashed rgba(56,189,248,0.7);background:rgba(56,189,248,0.05);display:none;'
+      document.body.appendChild(hoverBox)
+
+      selectedBox = document.createElement('div')
+      selectedBox.style.cssText = 'position:fixed;pointer-events:none;z-index:2147483647;box-sizing:border-box;border:1px solid #e07055;display:none;'
+      var label = document.createElement('div')
+      label.style.cssText = 'position:absolute;top:-20px;left:0;display:flex;align-items:center;gap:2px;pointer-events:auto;'
+      selectedTagLabel = document.createElement('span')
+      selectedTagLabel.style.cssText = 'background:#e07055;color:#fff;font:10px/1 sans-serif;padding:2px 6px;border-radius:2px;white-space:nowrap;'
+      selectedDeleteBtn = document.createElement('button')
+      selectedDeleteBtn.style.cssText = 'background:#ef4444;color:#fff;border:none;cursor:pointer;padding:2px 4px;border-radius:2px;display:none;align-items:center;'
+      selectedDeleteBtn.innerHTML = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>'
+      selectedDeleteBtn.addEventListener('click', function(e) {
+        e.stopPropagation(); e.preventDefault()
+        var bid = selectedElRef ? getForgeBlockId(selectedElRef) : ''
+        if (bid) window.parent.postMessage({ type: 'FORGE_REMOVE_BLOCK', forgeBlockId: bid }, '*')
+      })
+      label.appendChild(selectedTagLabel)
+      label.appendChild(selectedDeleteBtn)
+      selectedBox.appendChild(label)
+      document.body.appendChild(selectedBox)
+
       if (selectedElRef && document.body.contains(selectedElRef)) {
-        window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_RESIZED' }, getInfo(selectedElRef)), '*')
+        var info = getInfo(selectedElRef)
+        updateBoxRect(selectedBox, info.rect)
+        selectedTagLabel.textContent = selectedElRef.tagName.toLowerCase()
+        var bid2 = getForgeBlockId(selectedElRef)
+        selectedDeleteBtn.style.display = bid2 ? 'flex' : 'none'
+        selectedBox.style.display = 'block'
+        window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_RESIZED' }, info), '*')
       }
+
       if (!cursorStyle) {
         cursorStyle = document.createElement('style')
         cursorStyle.textContent = '* { cursor: crosshair !important; }'
@@ -194,6 +256,9 @@ export function ForgeInspect({ children }) {
       document.removeEventListener('mousemove', onDocMove, true)
       if (cursorStyle) { cursorStyle.remove(); cursorStyle = null }
       removeIds()
+      if (hoverBox) { hoverBox.remove(); hoverBox = null }
+      if (selectedBox) { selectedBox.remove(); selectedBox = null }
+      selectedTagLabel = null; selectedDeleteBtn = null
     }
 
     function onMessage(e) {
@@ -208,12 +273,36 @@ export function ForgeInspect({ children }) {
         var el = document.querySelector('[data-vibe-id="' + e.data.id + '"]')
         if (!el) return
         try { el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) } catch(x) {}
+        watchSelected(el)
+        if (selectedBox) {
+          var rect = el.getBoundingClientRect()
+          updateBoxRect(selectedBox, rect)
+          selectedTagLabel.textContent = el.tagName.toLowerCase()
+          var bid3 = getForgeBlockId(el)
+          selectedDeleteBtn.style.display = bid3 ? 'flex' : 'none'
+          selectedBox.style.display = 'block'
+          hoverBox.style.display = 'none'
+          lastHoveredId = null
+        }
         window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_SELECTED', stayInLayers: !!e.data.stayInLayers }, getInfo(el)), '*')
       } else if (t === 'FORGE_HOVER_BY_ID') {
         var el2 = document.querySelector('[data-vibe-id="' + e.data.id + '"]')
-        if (el2) window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_HOVERED' }, getInfo(el2)), '*')
+        if (el2) {
+          if (hoverBox && el2 !== selectedElRef) {
+            updateBoxRect(hoverBox, el2.getBoundingClientRect())
+            hoverBox.style.display = 'block'
+            lastHoveredId = el2.getAttribute('data-vibe-id') || ''
+          }
+          window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_HOVERED' }, getInfo(el2)), '*')
+        }
       } else if (t === 'FORGE_REFRESH_TREE') {
         if (activeRef.current) { assignIds(); sendTree() }
+      } else if (t === 'FORGE_DESELECT') {
+        if (selectedBox) selectedBox.style.display = 'none'
+        if (hoverBox) hoverBox.style.display = 'none'
+        if (resizeObs) { resizeObs.disconnect(); resizeObs = null }
+        selectedElRef = null
+        lastHoveredId = null
       }
     }
 

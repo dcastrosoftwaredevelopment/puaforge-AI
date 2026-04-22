@@ -12,6 +12,8 @@ import {
   type DOMNode,
 } from '@/atoms';
 import { BLOCKS } from '@/utils/blockCatalog';
+import { useFiles } from '@/hooks/useFiles';
+import { removeBlockInstance } from '@/utils/jsxInserter';
 
 /**
  * Bridges postMessage traffic between the platform and the Sandpack preview iframe.
@@ -31,6 +33,7 @@ export function useInspectBridge() {
   const setDomTree = useSetAtom(domTreeAtom);
   const setPanelMode = useSetAtom(editorPanelModeAtom);
   const setInsertParentId = useSetAtom(blockInsertParentAtom);
+  const { setFiles } = useFiles();
 
   useEffect(() => {
     sandpackRef.current = sandpack;
@@ -134,10 +137,18 @@ export function useInspectBridge() {
         setHovered(el);
       } else if (type === 'FORGE_DOM_TREE') {
         setDomTree(e.data.tree as DOMNode[]);
+      } else if (type === 'FORGE_REMOVE_BLOCK') {
+        const blockId = e.data.forgeBlockId as string;
+        if (!blockId) return;
+        setFiles((prev) => ({ ...prev, '/App.tsx': removeBlockInstance(prev['/App.tsx'] ?? '', blockId) }));
+        setSelected(null);
+        for (const client of Object.values(sandpackRef.current.clients)) {
+          client.iframe?.contentWindow?.postMessage({ type: 'FORGE_DESELECT' }, '*');
+        }
       }
     };
 
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [setSelected, setHovered, setDomTree, setPanelMode]);
+  }, [setSelected, setHovered, setDomTree, setPanelMode, setFiles]);
 }

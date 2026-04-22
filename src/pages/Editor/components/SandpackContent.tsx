@@ -19,7 +19,6 @@ import EditBar from './EditBar';
 import EditorPanelTabs from './EditorPanelTabs';
 import StyleEditor from './StyleEditor';
 import LayersPanel from './LayersPanel';
-import SelectionOverlay from './SelectionOverlay';
 import BlockLibraryPanel from './BlockLibraryPanel';
 import BlockDropOverlay from './BlockDropOverlay';
 import { MobileChatPanel } from '@/components/chat/FloatingChat';
@@ -130,8 +129,7 @@ export default function SandpackContent() {
               className={`relative ${isResponsive ? 'h-full border-x border-border-subtle transition-all duration-300 shrink-0 my-0 mx-auto' : 'w-full h-full'}`}
               style={isResponsive ? { width: DEVICE_WIDTHS[device] } : undefined}
             >
-              <SandpackPreview showNavigator showRefreshButton showOpenInCodeSandbox={false} />
-              <SelectionOverlay />
+              <SandpackPreview showRefreshButton showOpenInCodeSandbox={false} />
               {isDragging && <BlockDropOverlay onDrop={handleDrop} targetLabel={dropTargetLabel} />}
             </div>
           </div>
@@ -256,8 +254,7 @@ export default function SandpackContent() {
               className={`relative ${isResponsive ? 'h-full border-x border-border-subtle transition-all duration-300 shrink-0 my-0 mx-auto' : 'w-full h-full'}`}
               style={isResponsive ? { width: DEVICE_WIDTHS[device] } : undefined}
             >
-              <SandpackPreview showNavigator showRefreshButton showOpenInCodeSandbox={false} />
-              <SelectionOverlay />
+              <SandpackPreview showRefreshButton showOpenInCodeSandbox={false} />
               {isDragging && <BlockDropOverlay onDrop={handleDrop} targetLabel={dropTargetLabel} />}
             </div>
           </div>
