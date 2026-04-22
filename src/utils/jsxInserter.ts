@@ -31,7 +31,10 @@ export function injectForgeBlockId(jsx: string, instanceId: string): string {
       inQuote = true;
       quoteChar = ch;
     } else if (ch === '>') {
-      if (jsx[i - 1] === '/') return jsx; // self-closing, nothing to inject
+      if (jsx[i - 1] === '/') {
+        // Self-closing tag (e.g. <img />, <hr />): inject before />
+        return jsx.slice(0, i - 1) + ` data-forge-block-id="${instanceId}"` + jsx.slice(i - 1);
+      }
       return jsx.slice(0, i) + ` data-forge-block-id="${instanceId}"` + jsx.slice(i);
     }
     i++;
