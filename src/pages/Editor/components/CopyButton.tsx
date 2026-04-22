@@ -3,7 +3,15 @@ import { Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useCopyButton } from '@/hooks/useCopyButton';
 
-export default function CopyButton({ text, title: titleProp, icon }: { text: string; title?: string; icon?: ReactNode }) {
+export default function CopyButton({
+  text,
+  title: titleProp,
+  icon,
+}: {
+  text: string;
+  title?: string;
+  icon?: ReactNode;
+}) {
   const { t } = useTranslation();
   const { copied, copy } = useCopyButton(text);
 

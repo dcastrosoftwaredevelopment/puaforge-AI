@@ -265,6 +265,7 @@ export const en = {
     resendCooldown: 'Resend in {{seconds}}s',
     resendSuccess: 'Email resent successfully!',
     resendError: 'Error resending. Please try again.',
+    resendRecentlySent: 'Email already sent recently. Please wait a few minutes before trying again.',
     backToLogin: 'Back to login',
     spamHint: "Can't find it? Check your spam or junk folder.",
   },

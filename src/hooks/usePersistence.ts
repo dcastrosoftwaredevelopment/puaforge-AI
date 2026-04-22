@@ -115,7 +115,16 @@ export function usePersistence() {
       }
     }
     hydrate();
-  }, [token]); // re-runs when token changes (e.g. after login)
+  }, [
+    token,
+    setProjects,
+    setSelectedModel,
+    setViewMode,
+    setDevicePreview,
+    setIsChatOpen,
+    setEditorFraction,
+    setChatWidth,
+  ]); // re-runs when token changes (e.g. after login)
 
   // Persist UI settings to localStorage
   useEffect(() => {

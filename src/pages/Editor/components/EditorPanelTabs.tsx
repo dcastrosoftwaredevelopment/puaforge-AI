@@ -6,7 +6,7 @@ import Tooltip from '@/components/ui/Tooltip';
 
 export default function EditorPanelTabs() {
   const { t } = useTranslation();
-  const { editorPanelMode, setEditorPanelMode, inspectMode, selectedElement } = useEditorPanelTabs();
+  const { editorPanelMode, setEditorPanelMode, inspectMode } = useEditorPanelTabs();
 
   const tabs: Array<{
     mode: EditorPanelMode;

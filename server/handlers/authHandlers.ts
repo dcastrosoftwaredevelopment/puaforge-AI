@@ -6,7 +6,9 @@ import { eq, or } from 'drizzle-orm';
 import { db } from '../db.js';
 import { users, userSettings } from '../schema.js';
 import { signToken } from '../middleware/auth.js';
-import { sendVerificationEmail } from '../services/email.js';
+import { enqueueVerificationEmail } from '../services/emailQueue.js';
+
+const RESEND_BLOCK_MS = 5 * 60 * 1000;
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -28,6 +30,7 @@ export async function register(req: Request, res: Response) {
   const verificationToken = randomUUID();
   const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
+  const now = new Date();
   await db.insert(users).values({
     email,
     name,
@@ -35,9 +38,10 @@ export async function register(req: Request, res: Response) {
     emailVerified: false,
     emailVerificationToken: verificationToken,
     emailVerificationExpiry: verificationExpiry,
+    lastVerificationEmailSentAt: now,
   });
 
-  await sendVerificationEmail(email, verificationToken);
+  await enqueueVerificationEmail(email, verificationToken);
   res.status(202).json({ status: 'needs_verification' });
 }
 
@@ -65,11 +69,17 @@ export async function login(req: Request, res: Response) {
   if (!user.emailVerified) {
     const verificationToken = randomUUID();
     const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    await db
-      .update(users)
-      .set({ emailVerificationToken: verificationToken, emailVerificationExpiry: verificationExpiry })
-      .where(eq(users.id, user.id));
-    await sendVerificationEmail(email, verificationToken);
+    const enqueued = await enqueueVerificationEmail(email, verificationToken);
+    if (enqueued) {
+      await db
+        .update(users)
+        .set({
+          emailVerificationToken: verificationToken,
+          emailVerificationExpiry: verificationExpiry,
+          lastVerificationEmailSentAt: new Date(),
+        })
+        .where(eq(users.id, user.id));
+    }
     res.status(403).json({ code: 'ERROR_EMAIL_NOT_VERIFIED' });
     return;
   }
@@ -164,14 +174,29 @@ export async function resendVerification(req: Request, res: Response) {
     return;
   }
 
+  if (user.lastVerificationEmailSentAt && Date.now() - user.lastVerificationEmailSentAt.getTime() < RESEND_BLOCK_MS) {
+    res.status(429).json({ code: 'ERROR_EMAIL_RECENTLY_SENT' });
+    return;
+  }
+
   const verificationToken = randomUUID();
   const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+  const enqueued = await enqueueVerificationEmail(email, verificationToken);
+  if (!enqueued) {
+    res.status(429).json({ code: 'ERROR_EMAIL_RECENTLY_SENT' });
+    return;
+  }
+
   await db
     .update(users)
-    .set({ emailVerificationToken: verificationToken, emailVerificationExpiry: verificationExpiry })
+    .set({
+      emailVerificationToken: verificationToken,
+      emailVerificationExpiry: verificationExpiry,
+      lastVerificationEmailSentAt: new Date(),
+    })
     .where(eq(users.id, user.id));
 
-  await sendVerificationEmail(email, verificationToken);
   res.json({ status: 'sent' });
 }
 

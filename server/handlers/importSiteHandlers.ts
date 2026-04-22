@@ -44,7 +44,10 @@ function extractImageUrls(html: string, baseUrl?: string): string[] {
 
   const srcsetRe = /srcset=["']([^"']+)["']/gi;
   while ((m = srcsetRe.exec(html)) !== null) {
-    const first = m[1].trim().split(/\s*,\s*/)[0]?.split(/\s+/)[0];
+    const first = m[1]
+      .trim()
+      .split(/\s*,\s*/)[0]
+      ?.split(/\s+/)[0];
     if (first) urls.add(first);
   }
 
@@ -103,10 +106,16 @@ function cleanHtml(html: string): { html: string; isSpa: boolean } {
   cleaned = cleaned.replace(/\s+style\s*=\s*"[^"]{150,}"/gi, '');
   cleaned = cleaned.replace(/\s+style\s*=\s*'[^']{150,}'/gi, '');
   cleaned = cleaned.replace(/<(?:div|span|p|section|article)\s*><\/(?:div|span|p|section|article)>/gi, '');
-  cleaned = cleaned.replace(/[ \t]{2,}/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+  cleaned = cleaned
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 
   const bodyInner = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(cleaned)?.[1] ?? cleaned;
-  const visibleText = bodyInner.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  const visibleText = bodyInner
+    .replace(/<[^>]+>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
   const isSpa = visibleText.length < 200;
 
   return { html: cleaned, isSpa };
@@ -116,7 +125,10 @@ function suggestName(url: string, index: number): string {
   try {
     const pathname = new URL(url.startsWith('//') ? `https:${url}` : url).pathname;
     const filename = pathname.split('/').pop() ?? '';
-    const clean = filename.replace(/[?#].*$/, '').replace(/[^a-zA-Z0-9._-]/g, '').slice(0, 60);
+    const clean = filename
+      .replace(/[?#].*$/, '')
+      .replace(/[^a-zA-Z0-9._-]/g, '')
+      .slice(0, 60);
     if (clean && /\.(jpe?g|png|gif|webp|svg|avif)$/i.test(clean)) return clean;
   } catch {
     /* ignore */

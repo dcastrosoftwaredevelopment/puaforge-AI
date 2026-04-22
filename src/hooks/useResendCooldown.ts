@@ -9,7 +9,7 @@ export function useResendCooldown() {
   const { resendVerification } = useAuth();
   const navigate = useNavigate();
   const [cooldown, setCooldown] = useState(0);
-  const [resendState, setResendState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [resendState, setResendState] = useState<'idle' | 'loading' | 'success' | 'error' | 'recentlySent'>('idle');
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -42,6 +42,11 @@ export function useResendCooldown() {
       const code = err instanceof ApiError ? err.code : '';
       if (code === 'ERROR_ALREADY_VERIFIED') {
         navigate('/login');
+        return;
+      }
+      if (code === 'ERROR_EMAIL_RECENTLY_SENT') {
+        setResendState('recentlySent');
+        startCooldown();
         return;
       }
       setResendState('error');
