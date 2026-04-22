@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-export default function CopyButton({ text }: { text: string }) {
+export default function CopyButton({ text, title: titleProp, icon }: { text: string; title?: string; icon?: ReactNode }) {
   const [copied, setCopied] = useState(false);
   const { t } = useTranslation();
 
@@ -17,8 +17,8 @@ export default function CopyButton({ text }: { text: string }) {
     : <button
         onClick={handleCopy}
         className="p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"
-        title={t('images.copyToChat')}
+        title={titleProp ?? t('images.copyToChat')}
       >
-        <Copy size={12} />
+        {icon ?? <Copy size={12} />}
       </button>;
 }

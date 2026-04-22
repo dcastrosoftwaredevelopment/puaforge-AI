@@ -5,32 +5,17 @@ import { authTokenAtom } from '@/atoms/authAtoms';
 import { useFiles } from '@/hooks/useFiles';
 import { api } from '@/services/api';
 import { usePlanLimit } from '@/hooks/usePlanLimit';
-
-/** Converts a name like "hero-bg.jpg" to a valid JS identifier like "heroBg" */
-function toExportName(fileName: string): string {
-  const base = fileName.replace(/\.[^.]+$/, '');
-  return base
-    .replace(/[^a-zA-Z0-9]+(.)/g, (_, c) => c.toUpperCase())
-    .replace(/[^a-zA-Z0-9]/g, '')
-    .replace(/^(\d)/, '_$1');
-}
-
-/** Converts a name like "hero-bg.jpg" to a CSS variable name like "--img-hero-bg" */
-function toCssVarName(fileName: string): string {
-  const base = fileName
-    .replace(/\.[^.]+$/, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-  return `--img-${base}`;
-}
+import { toExportName, toCssVarName } from '@/utils/imageUtils';
 
 /**
  * Generates virtual file contents for /assets/images.ts and /assets/images.css.
- * Images are referenced by their PocketBase URL — no base64 duplication.
+ * The CSS file is always emitted (even empty) so the entry-file import never fails.
+ * CSS variables hold data URLs — CSS is NOT parsed by Babel, avoiding line-length limits.
  */
 export function generateImagesFiles(images: ProjectImage[]): Record<string, string> {
-  if (images.length === 0) return {};
+  if (images.length === 0) {
+    return { '/assets/images.css': '' };
+  }
 
   const tsExports = images
     .map((img) => `export const ${toExportName(img.name)} = '${img.dataUrl ?? img.url}'`)

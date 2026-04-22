@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Trash2, Pencil, Check, X } from 'lucide-react';
+import { Trash2, Pencil, Check, X, Link } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toExportName, formatSize, baseName } from '@/utils/imageUtils';
 import CopyButton from './CopyButton';
@@ -79,6 +79,7 @@ export default function ImageRow({
       {!editing && (
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
           <CopyButton text={t('images.copyTemplate', { name: exportName })} />
+          <CopyButton text={img.url} title={t('images.copyUrl')} icon={<Link size={12} />} />
           <button
             onClick={startEditing}
             className="p-1 rounded text-text-muted hover:text-text-primary transition cursor-pointer"

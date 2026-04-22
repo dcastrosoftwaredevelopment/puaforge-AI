@@ -1,3 +1,12 @@
+export function toCssVarName(fileName: string): string {
+  const base = fileName
+    .replace(/\.[^.]+$/, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+  return `--img-${base}`;
+}
+
 export function toExportName(fileName: string): string {
   const base = fileName.replace(/\.[^.]+$/, '');
   return base

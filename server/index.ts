@@ -1,5 +1,5 @@
 import path from 'path';
-import express from 'express';
+import express, { type Request, type Response, type NextFunction } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
@@ -50,6 +50,13 @@ if (process.env.NODE_ENV === 'production') {
     res.sendFile(indexHtml);
   });
 }
+
+// Global JSON error handler — must be registered after all routes
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  const message = err instanceof Error ? err.message : 'Internal server error';
+  console.error('[server error]', err);
+  res.status(500).json({ error: message });
+});
 
 runMigrations()
   .then(() => {

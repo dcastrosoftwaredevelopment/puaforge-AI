@@ -82,15 +82,71 @@ function patchClassNameForElement(code: string, forgeBlockId: string, oldClass: 
 }
 
 function patchInlineStyle(code: string, oldStyle: string, newStyle: string): string {
-  // Pattern 1: style="old"
+  const jsxObj = toJSXStyleObject(newStyle);
+
+  // Pattern 1: style="old" (HTML string format — convert to JSX object)
   const esc = escapeRegex(oldStyle);
-  const patched1 = code.replace(new RegExp(`style="${esc}"`, 'g'), `style="${newStyle}"`);
+  const patched1 = code.replace(new RegExp(`style="${esc}"`, 'g'), `style={${jsxObj}}`);
   if (patched1 !== code) return patched1;
 
   // Pattern 2: style={{ ... }} — replace the whole JSX object
-  const jsxObj = toJSXStyleObject(newStyle);
   const patched2 = code.replace(/style=\{\{[^}]*\}\}/g, `style={${jsxObj}}`);
   return patched2;
+}
+
+/**
+ * Scoped inline style patch: finds the specific JSX element with data-forge-block-id
+ * and patches (or injects) the style attribute only within that opening tag.
+ * Handles three cases: replace existing style="...", replace style={{...}}, or
+ * inject a new style attribute when none exists yet.
+ */
+function patchInlineStyleForElement(code: string, forgeBlockId: string, oldStyle: string, newStyle: string): string {
+  const forgeAttr = `data-forge-block-id="${forgeBlockId}"`;
+  const attrIdx = code.indexOf(forgeAttr);
+  if (attrIdx === -1) return patchInlineStyle(code, oldStyle, newStyle);
+
+  // Walk back to find '<' (start of opening tag)
+  let tagStart = attrIdx;
+  while (tagStart > 0 && code[tagStart] !== '<') tagStart--;
+
+  // Walk forward to find '>' (end of opening tag, quote-aware)
+  let pos = attrIdx + forgeAttr.length;
+  let inQ = false;
+  let qCh = '';
+  while (pos < code.length) {
+    const ch = code[pos];
+    if (inQ) {
+      if (ch === qCh) inQ = false;
+    } else if (ch === '"' || ch === "'") {
+      inQ = true;
+      qCh = ch;
+    } else if (ch === '>') break;
+    pos++;
+  }
+
+  const tag = code.slice(tagStart, pos + 1);
+  let patchedTag: string;
+  const jsxObj = toJSXStyleObject(newStyle);
+
+  if (!newStyle) {
+    // Remove style attribute entirely — match both brace pairs {{ ... }} for JSX objects
+    patchedTag = tag.replace(/\s+style="[^]*?"(?=\s|\/?>)/, '').replace(/\s+style=\{\{[^}]*\}\}/, '');
+  } else if (tag.match(/style=\{\{[^}]*\}\}/)) {
+    // Replace existing JSX object attr — match both brace pairs {{ ... }}
+    patchedTag = tag.replace(/style=\{\{[^}]*\}\}/, `style={${jsxObj}}`);
+  } else if (tag.includes('style="')) {
+    // Has a string-style attr — replace and convert to JSX object
+    patchedTag = tag.replace(/style="[^]*?"(?=\s|\/?>)/, `style={${jsxObj}}`);
+  } else {
+    // No style attr yet — inject JSX object before closing > or />
+    patchedTag =
+      tag.endsWith('/>') ?
+        tag.slice(0, -2) + ` style={${jsxObj}} />`
+      : tag.slice(0, -1) + ` style={${jsxObj}}>`;
+  }
+
+  if (patchedTag === tag) return code;
+  return code.slice(0, tagStart) + patchedTag + code.slice(pos + 1);
 }
 
 const DEBOUNCE_MS = 500;
@@ -163,14 +219,18 @@ export function useStylePatcher() {
   const applyInlineStyleChange = useCallback(
     (oldStyle: string, newStyle: string) => {
       if (oldStyle === newStyle) return;
+      const forgeBlockId = store.get(selectedElementAtom)?.forgeBlockId ?? '';
       const updates: Array<[string, string]> = [];
       for (const [path, code] of Object.entries(filesRef.current)) {
-        const patched = patchInlineStyle(code, oldStyle, newStyle);
+        const patched =
+          forgeBlockId ?
+            patchInlineStyleForElement(code, forgeBlockId, oldStyle, newStyle)
+          : patchInlineStyle(code, oldStyle, newStyle);
         if (patched !== code) updates.push([path, patched]);
       }
       if (updates.length > 0) commitUpdates(updates);
     },
-    [commitUpdates],
+    [store, commitUpdates],
   );
 
   return { applyClassChange, applyInlineStyleChange };

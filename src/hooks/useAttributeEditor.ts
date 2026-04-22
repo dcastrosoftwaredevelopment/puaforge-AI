@@ -1,10 +1,9 @@
 import { useAtomValue } from 'jotai';
 import { useEffect, useState } from 'react';
-import { selectedElementAtom } from '@/atoms';
+import { selectedElementAtom, projectImagesAtom } from '@/atoms';
 import { useFiles } from '@/hooks/useFiles';
 import { updateAttributeInSource } from '@/utils/jsxInserter';
 
-// Attributes shown per tag. Only tags listed here get the Attributes section.
 const EDITABLE_ATTRS: Record<string, string[]> = {
   a: ['href', 'target'],
   img: ['src', 'alt'],
@@ -16,6 +15,7 @@ const EDITABLE_ATTRS: Record<string, string[]> = {
 
 export function useAttributeEditor() {
   const selectedElement = useAtomValue(selectedElementAtom);
+  const images = useAtomValue(projectImagesAtom);
   const { setFiles } = useFiles();
 
   const tagName = selectedElement?.tagName ?? '';
@@ -23,10 +23,11 @@ export function useAttributeEditor() {
   const forgeBlockId = selectedElement?.forgeBlockId ?? '';
   const sourceAttrs = selectedElement?.attributes ?? {};
 
-  // Local pending values reset whenever the selected element changes.
   const [pendingValues, setPendingValues] = useState<Record<string, string>>({});
+  const [srcPickerOpen, setSrcPickerOpen] = useState(false);
   useEffect(() => {
     setPendingValues({});
+    setSrcPickerOpen(false);
   }, [selectedElement?.id]);
 
   function attrValue(name: string): string {
@@ -46,11 +47,25 @@ export function useAttributeEditor() {
     }));
   }
 
+  function applyAttr(name: string, value: string) {
+    setPendingValues((prev) => ({ ...prev, [name]: value }));
+    if (!forgeBlockId) return;
+    setFiles((prev) => ({
+      ...prev,
+      '/App.tsx': updateAttributeInSource(prev['/App.tsx'] ?? '', forgeBlockId, name, value),
+    }));
+  }
+
   return {
     editableAttrs,
+    tagName,
     canEdit: !!forgeBlockId && editableAttrs.length > 0,
     attrValue,
     setAttrValue,
     commitAttr,
+    applyAttr,
+    images,
+    srcPickerOpen,
+    setSrcPickerOpen,
   };
 }
