@@ -266,6 +266,7 @@ export const pt = {
     resendCooldown: 'Reenviar em {{seconds}}s',
     resendSuccess: 'E-mail reenviado com sucesso!',
     resendError: 'Erro ao reenviar. Tente novamente.',
+    resendRecentlySent: 'E-mail enviado recentemente. Aguarde alguns minutos antes de tentar novamente.',
     backToLogin: 'Voltar ao login',
     spamHint: 'Não encontrou? Verifique a pasta de spam ou lixo eletrônico.',
   },

@@ -140,9 +140,7 @@ function patchInlineStyleForElement(code: string, forgeBlockId: string, oldStyle
   } else {
     // No style attr yet — inject JSX object before closing > or />
     patchedTag =
-      tag.endsWith('/>') ?
-        tag.slice(0, -2) + ` style={${jsxObj}} />`
-      : tag.slice(0, -1) + ` style={${jsxObj}}>`;
+      tag.endsWith('/>') ? tag.slice(0, -2) + ` style={${jsxObj}} />` : tag.slice(0, -1) + ` style={${jsxObj}}>`;
   }
 
   if (patchedTag === tag) return code;

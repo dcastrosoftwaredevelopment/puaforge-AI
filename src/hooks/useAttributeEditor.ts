@@ -1,5 +1,5 @@
 import { useAtomValue } from 'jotai';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { selectedElementAtom, projectImagesAtom } from '@/atoms';
 import { useFiles } from '@/hooks/useFiles';
 import { updateAttributeInSource } from '@/utils/jsxInserter';
@@ -25,10 +25,13 @@ export function useAttributeEditor() {
 
   const [pendingValues, setPendingValues] = useState<Record<string, string>>({});
   const [srcPickerOpen, setSrcPickerOpen] = useState(false);
-  useEffect(() => {
+  const [trackedId, setTrackedId] = useState(selectedElement?.id);
+
+  if (trackedId !== selectedElement?.id) {
+    setTrackedId(selectedElement?.id);
     setPendingValues({});
     setSrcPickerOpen(false);
-  }, [selectedElement?.id]);
+  }
 
   function attrValue(name: string): string {
     return name in pendingValues ? pendingValues[name] : (sourceAttrs[name] ?? '');

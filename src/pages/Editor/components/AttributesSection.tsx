@@ -8,8 +8,18 @@ import ImagePickerDropdown from './ImagePickerDropdown';
 
 const AttributesSection = memo(() => {
   const { t } = useTranslation();
-  const { editableAttrs, tagName, canEdit, attrValue, setAttrValue, commitAttr, applyAttr, images, srcPickerOpen, setSrcPickerOpen } =
-    useAttributeEditor();
+  const {
+    editableAttrs,
+    tagName,
+    canEdit,
+    attrValue,
+    setAttrValue,
+    commitAttr,
+    applyAttr,
+    images,
+    srcPickerOpen,
+    setSrcPickerOpen,
+  } = useAttributeEditor();
 
   if (!canEdit) return null;
 

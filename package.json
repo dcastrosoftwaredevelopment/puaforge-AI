@@ -1,5 +1,5 @@
 {
-  "name": "vibe-plaftorm",
+  "name": "puaforgeai",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -35,6 +35,7 @@
     "multer": "^2.1.1",
     "nodemailer": "^8.0.4",
     "pg": "^8.20.0",
+    "pg-boss": "^12.15.0",
     "react-i18next": "^17.0.2",
     "react-syntax-highlighter": "^16.1.1",
     "style-to-object": "^1.0.14",

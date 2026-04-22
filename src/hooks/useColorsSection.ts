@@ -53,9 +53,7 @@ export function useColorsSection() {
     if (value) {
       // Already a CSS function (var(), url(), gradient…) — use as-is
       cssValue =
-        /^(var|url|linear-gradient|radial-gradient|conic-gradient)\s*\(/.test(value.trim()) ?
-          value
-        : `url('${value}')`;
+        /^(var|url|linear-gradient|radial-gradient|conic-gradient)\s*\(/.test(value.trim()) ? value : `url('${value}')`;
     }
     applyLiveInlineProp('background-image', cssValue);
     commitInlineStyle();

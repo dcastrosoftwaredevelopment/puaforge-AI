@@ -31,7 +31,7 @@ export function useDraft() {
     hasDraft(activeProjectId).then((exists) => {
       setIsDraft(exists);
     });
-  }, [activeProjectId]);
+  }, [activeProjectId, setIsDraft]);
 
   // Auto-save messages to IndexedDB — only after project is fully loaded
   useEffect(() => {
@@ -51,7 +51,7 @@ export function useDraft() {
       )
       .then(() => setIsDraft(true))
       .catch((e) => console.error('[draft] messages save error:', e));
-  }, [messagesValue, activeProjectId, projectLoaded]);
+  }, [messagesValue, activeProjectId, projectLoaded, setIsDraft]);
 
   // Auto-save files to IndexedDB — only after project is fully loaded
   useEffect(() => {
@@ -76,7 +76,7 @@ export function useDraft() {
       )
       .then(() => setIsDraft(true))
       .catch((e) => console.error('[draft] files save error:', e));
-  }, [filesValue, activeProjectId, projectLoaded]);
+  }, [filesValue, activeProjectId, projectLoaded, setIsDraft]);
 
   /** Persist current state (messages + files) to PostgreSQL and clear local draft */
   const saveDraft = useCallback(async () => {
@@ -94,7 +94,7 @@ export function useDraft() {
       ),
     ]);
     setIsDraft(false);
-  }, [activeProjectId, token, messagesValue, filesValue]);
+  }, [activeProjectId, token, messagesValue, filesValue, setIsDraft]);
 
   /** Delete local IndexedDB draft — next load will come from PostgreSQL */
   const discardDraft = useCallback(async () => {
@@ -105,7 +105,7 @@ export function useDraft() {
       db.projectFiles.where('projectId').equals(activeProjectId).delete(),
     ]);
     setIsDraft(false);
-  }, [activeProjectId]);
+  }, [activeProjectId, setIsDraft]);
 
   return { isDraft, saveDraft, discardDraft };
 }

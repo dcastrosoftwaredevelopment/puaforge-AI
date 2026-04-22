@@ -6,7 +6,7 @@ interface Props {
   maskedEmail: string;
   email: string;
   cooldown: number;
-  resendState: 'idle' | 'loading' | 'success' | 'error';
+  resendState: 'idle' | 'loading' | 'success' | 'error' | 'recentlySent';
   handleResend: (email: string) => void;
 }
 
@@ -36,6 +36,9 @@ export default function VerifyEmailCard({ maskedEmail, email, cooldown, resendSt
         </div>
       )}
       {resendState === 'error' && <p className="text-xs text-red-400">{t('verifyEmail.resendError')}</p>}
+      {resendState === 'recentlySent' && (
+        <p className="text-xs text-yellow-400">{t('verifyEmail.resendRecentlySent')}</p>
+      )}
 
       <button
         onClick={() => handleResend(email)}

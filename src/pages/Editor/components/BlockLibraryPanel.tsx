@@ -13,8 +13,17 @@ const CATEGORIES: Array<{ key: BlockCategory; labelKey: string }> = [
 
 export default function BlockLibraryPanel() {
   const { t } = useTranslation();
-  const { query, setQuery, filtered, selected, setSelected, instanceCounts, hasActiveParent, insertBlock, removeBlock } =
-    useBlockLibrary();
+  const {
+    query,
+    setQuery,
+    filtered,
+    selected,
+    setSelected,
+    instanceCounts,
+    hasActiveParent,
+    insertBlock,
+    removeBlock,
+  } = useBlockLibrary();
 
   const selectedCount = selected ? (instanceCounts[selected.id] ?? 0) : 0;
 
@@ -23,7 +32,10 @@ export default function BlockLibraryPanel() {
       {/* Search */}
       <div className="shrink-0 px-3 py-2 border-b border-border-subtle">
         <div className="relative">
-          <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+          <Search
+            size={13}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none"
+          />
           <input
             type="text"
             value={query}

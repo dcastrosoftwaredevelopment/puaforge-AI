@@ -71,6 +71,13 @@
       "when": 1775530000000,
       "tag": "0009_email_verification",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1745280000000,
+      "tag": "0010_email_queue_timestamp",
+      "breakpoints": true
     }
   ]
 }

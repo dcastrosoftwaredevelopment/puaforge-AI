@@ -13,6 +13,7 @@ import { profileRoute } from './routes/profile.js';
 import { projectsRoute } from './routes/projects.js';
 import { usageRoute } from './routes/usage.js';
 import { runMigrations } from './db.js';
+import { initEmailQueue } from './services/emailQueue.js';
 import { siteServingMiddleware } from './middleware/siteServing.js';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
@@ -59,7 +60,8 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 runMigrations()
-  .then(() => {
+  .then(async () => {
+    await initEmailQueue();
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });

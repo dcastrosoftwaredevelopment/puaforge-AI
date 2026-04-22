@@ -150,5 +150,5 @@ export function useInspectBridge() {
 
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [setSelected, setHovered, setDomTree, setPanelMode, setFiles]);
+  }, [setSelected, setHovered, setDomTree, setPanelMode, setFiles, setInsertParentId]);
 }
