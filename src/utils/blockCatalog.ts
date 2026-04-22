@@ -128,6 +128,15 @@ export const BLOCKS: Block[] = [
   "Uma citação inspiradora vai aqui."
 </blockquote>`,
   },
+  {
+    id: 'link',
+    category: 'typography',
+    labelKey: 'blocks.link',
+    previewBg: 'bg-[#111]',
+    code: `<a href="#" className="text-indigo-600 hover:underline font-medium">
+  Texto do link
+</a>`,
+  },
 
   // ── Form ─────────────────────────────────────────────────────────────────────
   {
@@ -147,6 +156,15 @@ export const BLOCKS: Block[] = [
     code: `<button type="button" className="inline-flex items-center justify-center px-6 py-2.5 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition cursor-pointer">
   Botão
 </button>`,
+  },
+  {
+    id: 'button-link',
+    category: 'form',
+    labelKey: 'blocks.buttonLink',
+    previewBg: 'bg-[#111]',
+    code: `<a href="#" className="inline-flex items-center justify-center px-6 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition">
+  Link botão
+</a>`,
   },
   {
     id: 'input-text',
@@ -215,9 +233,24 @@ export const BLOCKS: Block[] = [
     category: 'ui',
     labelKey: 'blocks.image',
     previewBg: 'bg-[#111]',
-    code: `<div className="w-full aspect-video bg-gray-100 rounded-xl overflow-hidden flex items-center justify-center text-gray-400 text-sm">
-  Imagem
-</div>`,
+    code: `<img
+  src="https://placehold.co/800x450"
+  alt="Descrição da imagem"
+  className="w-full rounded-xl object-cover block"
+/>`,
+  },
+  {
+    id: 'image-link',
+    category: 'ui',
+    labelKey: 'blocks.imageLink',
+    previewBg: 'bg-[#111]',
+    code: `<a href="#">
+  <img
+    src="https://placehold.co/800x450"
+    alt="Descrição da imagem"
+    className="w-full rounded-xl object-cover block hover:opacity-90 transition"
+  />
+</a>`,
   },
   {
     id: 'avatar',
