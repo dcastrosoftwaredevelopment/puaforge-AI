@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react';
 import { Trash2, Pencil, Check, X, Link } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { toExportName, formatSize, baseName } from '@/utils/imageUtils';
+import { toExportName, formatSize } from '@/utils/imageUtils';
+import { useImageRow } from '@/hooks/useImageRow';
 import CopyButton from './CopyButton';
 
 export default function ImageRow({
@@ -13,26 +13,11 @@ export default function ImageRow({
   onRename: (id: string, name: string) => void;
   onRemove: (id: string) => void;
 }) {
-  const [editing, setEditing] = useState(false);
-  const [editValue, setEditValue] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
-
-  const startEditing = () => {
-    setEditValue(baseName(img.name));
-    setEditing(true);
-    setTimeout(() => inputRef.current?.select(), 0);
-  };
-
-  const confirmRename = () => {
-    const trimmed = editValue.trim();
-    if (trimmed && trimmed !== baseName(img.name)) {
-      onRename(img.id, trimmed);
-    }
-    setEditing(false);
-  };
-
-  const cancelRename = () => setEditing(false);
+  const { editing, editValue, setEditValue, inputRef, startEditing, confirmRename, cancelRename } = useImageRow(
+    img,
+    onRename,
+  );
 
   const exportName = toExportName(img.name);
 

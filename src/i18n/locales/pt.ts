@@ -355,6 +355,7 @@ export const pt = {
     breakpointTablet: 'Tablet (md:)',
     breakpointDesktop: 'Desktop (lg:)',
     layersEmpty: 'Ative o inspect e interaja com o preview para ver as camadas',
+    sectionText: 'Conteúdo',
     sectionTypography: 'Tipografia',
     sectionColors: 'Cores',
     sectionSpacing: 'Espaçamento',

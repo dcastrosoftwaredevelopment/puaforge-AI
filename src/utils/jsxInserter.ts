@@ -213,6 +213,46 @@ export function updateAttributeInSource(
   return source.slice(0, startIdx) + updatedBlock + source.slice(blockEnd);
 }
 
+/**
+ * Replace the text content of a JSX element identified by its data-forge-block-id.
+ * Only works for leaf elements (no child elements) — the patching relies on finding
+ * the next closing tag after the opening tag's '>'.
+ */
+export function patchTextContent(code: string, forgeBlockId: string, tagName: string, newText: string): string {
+  const forgeAttr = `data-forge-block-id="${forgeBlockId}"`;
+  const attrIdx = code.indexOf(forgeAttr);
+  if (attrIdx === -1) return code;
+
+  let tagStart = attrIdx;
+  while (tagStart > 0 && code[tagStart] !== '<') tagStart--;
+
+  let pos = attrIdx + forgeAttr.length;
+  let inQ = false;
+  let qCh = '';
+  while (pos < code.length) {
+    const ch = code[pos];
+    if (inQ) {
+      if (ch === qCh) inQ = false;
+    } else if (ch === '"' || ch === "'") {
+      inQ = true;
+      qCh = ch;
+    } else if (ch === '>') break;
+    pos++;
+  }
+
+  const closeTag = `</${tagName}>`;
+  const closeIdx = code.indexOf(closeTag, pos);
+  if (closeIdx === -1) return code;
+
+  const oldInner = code.slice(pos + 1, closeIdx);
+  const leadMatch = oldInner.match(/^(\s*)/);
+  const trailMatch = oldInner.match(/(\s*)$/);
+  const lead = leadMatch ? leadMatch[1] : '';
+  const trail = trailMatch ? trailMatch[1] : '';
+
+  return code.slice(0, pos + 1) + lead + newText + trail + code.slice(closeIdx);
+}
+
 /** Remove the last inserted instance of blockId (by document order). */
 export function removeLastBlockInstance(source: string, blockId: string): string {
   const instances = getBlockInstances(source).filter((b) => b.blockId === blockId);

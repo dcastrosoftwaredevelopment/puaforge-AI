@@ -90,7 +90,7 @@ function patchInlineStyle(code: string, oldStyle: string, newStyle: string): str
   if (patched1 !== code) return patched1;
 
   // Pattern 2: style={{ ... }} — replace the whole JSX object
-  const patched2 = code.replace(/style=\{\{[^}]*\}\}/g, `style={${jsxObj}}`);
+  const patched2 = code.replace(/style=\{\{[\s\S]*?\}\}/g, `style={${jsxObj}}`);
   return patched2;
 }
 
@@ -130,10 +130,10 @@ function patchInlineStyleForElement(code: string, forgeBlockId: string, oldStyle
 
   if (!newStyle) {
     // Remove style attribute entirely — match both brace pairs {{ ... }} for JSX objects
-    patchedTag = tag.replace(/\s+style="[^]*?"(?=\s|\/?>)/, '').replace(/\s+style=\{\{[^}]*\}\}/, '');
-  } else if (tag.match(/style=\{\{[^}]*\}\}/)) {
+    patchedTag = tag.replace(/\s+style="[^]*?"(?=\s|\/?>)/, '').replace(/\s+style=\{\{[\s\S]*?\}\}/, '');
+  } else if (tag.match(/style=\{\{[\s\S]*?\}\}/)) {
     // Replace existing JSX object attr — match both brace pairs {{ ... }}
-    patchedTag = tag.replace(/style=\{\{[^}]*\}\}/, `style={${jsxObj}}`);
+    patchedTag = tag.replace(/style=\{\{[\s\S]*?\}\}/, `style={${jsxObj}}`);
   } else if (tag.includes('style="')) {
     // Has a string-style attr — replace and convert to JSX object
     patchedTag = tag.replace(/style="[^]*?"(?=\s|\/?>)/, `style={${jsxObj}}`);

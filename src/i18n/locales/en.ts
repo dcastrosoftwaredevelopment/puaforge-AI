@@ -353,6 +353,7 @@ export const en = {
     breakpointTablet: 'Tablet (md:)',
     breakpointDesktop: 'Desktop (lg:)',
     layersEmpty: 'Activate inspect and interact with the preview to see layers',
+    sectionText: 'Content',
     sectionTypography: 'Typography',
     sectionColors: 'Colors',
     sectionSpacing: 'Spacing',

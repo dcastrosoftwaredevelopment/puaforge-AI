@@ -14,6 +14,7 @@ import EffectsSection from './EffectsSection';
 import InlineStylesSection from './InlineStylesSection';
 import AttributesSection from './AttributesSection';
 import AdvancedSection from './AdvancedSection';
+import TextContentSection from './TextContentSection';
 import InspectToggle from './InspectToggle';
 
 export default function StyleEditor() {
@@ -61,6 +62,7 @@ export default function StyleEditor() {
           </div>
         </div>
         <div className={!selectedElement ? 'pointer-events-none opacity-40 select-none' : ''}>
+          {selectedElement && <TextContentSection />}
           <TypographySection />
           <ColorsSection />
           <SpacingSection />

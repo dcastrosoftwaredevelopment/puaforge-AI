@@ -104,6 +104,7 @@ export function useInspectBridge() {
           inlineStyle: e.data.inlineStyle || '',
           forgeBlockId: e.data.forgeBlockId || '',
           attributes: (e.data.attributes as Record<string, string>) || {},
+          textContent: e.data.textContent as string | undefined,
           rect: e.data.rect,
         };
         setSelected(el);
@@ -126,6 +127,8 @@ export function useInspectBridge() {
           className: e.data.className,
           inlineStyle: e.data.inlineStyle || '',
           forgeBlockId: e.data.forgeBlockId || '',
+          attributes: (e.data.attributes as Record<string, string>) || {},
+          textContent: e.data.textContent as string | undefined,
           rect: e.data.rect,
         };
         setHovered(el);
