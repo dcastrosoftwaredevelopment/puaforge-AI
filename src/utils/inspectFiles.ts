@@ -3,7 +3,6 @@ import React, { useEffect, useRef } from 'react'
 
 export function ForgeInspect({ children }) {
   const activeRef = useRef(false)
-  const overlayRef = useRef(null)
 
   useEffect(() => {
     function stableId(el) {
@@ -90,17 +89,11 @@ export function ForgeInspect({ children }) {
       }
     }
 
-    function hitElement(x, y) {
-      var ov = overlayRef.current
-      if (ov) ov.style.pointerEvents = 'none'
-      var el = document.elementFromPoint(x, y)
-      if (ov) ov.style.pointerEvents = 'all'
-      return (el && el !== document.body && el !== document.documentElement) ? el : null
-    }
-
-    function onMove(e) {
-      var el = hitElement(e.clientX, e.clientY)
-      if (el) window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_HOVERED' }, getInfo(el)), '*')
+    function onDocMove(e) {
+      var el = e.target
+      if (el && el !== document.body && el !== document.documentElement) {
+        window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_HOVERED' }, getInfo(el)), '*')
+      }
     }
 
     var selectedElRef = null
@@ -144,15 +137,17 @@ export function ForgeInspect({ children }) {
       resizeObs.observe(el)
     }
 
-    function onClick(e) {
+    function onDocClick(e) {
       e.preventDefault()
       e.stopPropagation()
-      var el = hitElement(e.clientX, e.clientY)
-      if (!el) return
+      var el = e.target
+      if (!el || el === document.body || el === document.documentElement) return
       var isReselect = el === selectedElRef
       watchSelected(el)
       window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_SELECTED', isReselect: isReselect }, getInfo(el)), '*')
     }
+
+    var cursorStyle = null
 
     function activate() {
       activeRef.current = true
@@ -161,16 +156,15 @@ export function ForgeInspect({ children }) {
       if (selectedElRef && document.body.contains(selectedElRef)) {
         window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_RESIZED' }, getInfo(selectedElRef)), '*')
       }
+      if (!cursorStyle) {
+        cursorStyle = document.createElement('style')
+        cursorStyle.textContent = '* { cursor: crosshair !important; }'
+        document.head.appendChild(cursorStyle)
+      }
       window.addEventListener('scroll', onScroll, true)
       window.addEventListener('resize', onViewportResize)
-      if (!overlayRef.current) {
-        var ov = document.createElement('div')
-        ov.style.cssText = 'position:fixed;inset:0;z-index:9999;cursor:crosshair;'
-        ov.addEventListener('mousemove', onMove)
-        ov.addEventListener('click', onClick)
-        document.body.appendChild(ov)
-        overlayRef.current = ov
-      }
+      document.addEventListener('click', onDocClick, true)
+      document.addEventListener('mousemove', onDocMove, true)
     }
 
     function deactivate() {
@@ -181,12 +175,9 @@ export function ForgeInspect({ children }) {
       if (resizeRafId) { cancelAnimationFrame(resizeRafId); resizeRafId = null }
       if (resizeObs) { resizeObs.disconnect(); resizeObs = null }
       selectedElRef = null
-      if (overlayRef.current) {
-        overlayRef.current.removeEventListener('mousemove', onMove)
-        overlayRef.current.removeEventListener('click', onClick)
-        overlayRef.current.remove()
-        overlayRef.current = null
-      }
+      document.removeEventListener('click', onDocClick, true)
+      document.removeEventListener('mousemove', onDocMove, true)
+      if (cursorStyle) { cursorStyle.remove(); cursorStyle = null }
       removeIds()
     }
 
