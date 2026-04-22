@@ -13,12 +13,15 @@ import { usePanelSizes } from '@/hooks/usePanelSizes';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useEditorPanelTabs } from '@/hooks/useEditorPanelTabs';
 import { useMobileDrawer } from '@/hooks/useMobileDrawer';
+import { useBlockDropZone } from '@/hooks/useBlockDropZone';
 import ResizeHandle from './ResizeHandle';
 import EditBar from './EditBar';
 import EditorPanelTabs from './EditorPanelTabs';
 import StyleEditor from './StyleEditor';
 import LayersPanel from './LayersPanel';
 import SelectionOverlay from './SelectionOverlay';
+import BlockLibraryPanel from './BlockLibraryPanel';
+import BlockDropOverlay from './BlockDropOverlay';
 import { MobileChatPanel } from '@/components/chat/FloatingChat';
 
 const DEVICE_WIDTHS: Record<DevicePreview, string> = {
@@ -48,6 +51,7 @@ export default function SandpackContent() {
   const { t } = useTranslation();
   const { editorPanelMode, inspectMode } = useEditorPanelTabs();
   const { drawerOpen, drawerHeightPct, setDrawerHeightPct, drawerTab } = useMobileDrawer();
+  const { isDragging, handleDrop } = useBlockDropZone();
   const containerRef = useRef<HTMLDivElement>(null);
   const [findOpen, setFindOpen] = useState(false);
   const [showExplorer, setShowExplorer] = useState(!isMobile);
@@ -128,6 +132,7 @@ export default function SandpackContent() {
             >
               <SandpackPreview showNavigator showRefreshButton showOpenInCodeSandbox={false} />
               <SelectionOverlay />
+              {isDragging && <BlockDropOverlay onDrop={handleDrop} />}
             </div>
           </div>
 
@@ -178,6 +183,11 @@ export default function SandpackContent() {
                     <LayersPanel />
                   </div>
                 )}
+                {editorPanelMode === 'blocks' && (
+                  <div className="flex-1 min-h-0 overflow-hidden">
+                    <BlockLibraryPanel />
+                  </div>
+                )}
               </>
             }
           </div>
@@ -224,6 +234,11 @@ export default function SandpackContent() {
                 <LayersPanel />
               </div>
             )}
+            {editorPanelMode === 'blocks' && (
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <BlockLibraryPanel />
+              </div>
+            )}
           </div>
 
           {isSplit && <ResizeHandle onResize={onSplitResize} onCommit={onSplitCommit} />}
@@ -243,6 +258,7 @@ export default function SandpackContent() {
             >
               <SandpackPreview showNavigator showRefreshButton showOpenInCodeSandbox={false} />
               <SelectionOverlay />
+              {isDragging && <BlockDropOverlay onDrop={handleDrop} />}
             </div>
           </div>
         </>

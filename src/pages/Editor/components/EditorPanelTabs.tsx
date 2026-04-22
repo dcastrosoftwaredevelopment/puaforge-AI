@@ -1,4 +1,4 @@
-import { Code2, Paintbrush, Layers } from 'lucide-react';
+import { Code2, Paintbrush, Layers, LayoutGrid } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useEditorPanelTabs } from '@/hooks/useEditorPanelTabs';
 import type { EditorPanelMode } from '@/atoms';
@@ -24,6 +24,7 @@ export default function EditorPanelTabs() {
       enabled: inspectMode,
       disabledTip: t('inspect.tabLayersDisabled'),
     },
+    { mode: 'blocks', label: t('inspect.tabBlocks'), icon: <LayoutGrid size={13} />, enabled: true, disabledTip: '' },
   ];
 
   return (

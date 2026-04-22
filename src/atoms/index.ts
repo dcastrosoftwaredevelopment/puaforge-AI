@@ -163,7 +163,7 @@ export interface DOMNode {
 }
 export const domTreeAtom = atom<DOMNode[]>([]);
 
-export type EditorPanelMode = 'code' | 'style' | 'layers';
+export type EditorPanelMode = 'code' | 'style' | 'layers' | 'blocks';
 export const editorPanelModeAtom = atom<EditorPanelMode>('style');
 
 export type StyleBreakpoint = 'mobile' | 'tablet' | 'desktop';
@@ -221,7 +221,15 @@ export const unknownClassesAtom = field('unknown');
 
 // ── Mobile bottom drawer ──────────────────────────────────────────────────────
 
-export type MobileDrawerTab = 'code' | 'style' | 'layers' | 'chat';
+export type MobileDrawerTab = 'code' | 'style' | 'layers' | 'blocks' | 'chat';
 export const mobileDrawerOpenAtom = atom(false);
 export const mobileDrawerHeightPctAtom = atom(55);
 export const mobileDrawerTabAtom = atom<MobileDrawerTab>('style');
+
+// ── Block library drag state ──────────────────────────────────────────────────
+
+export interface DraggedBlock {
+  blockId: string;
+  code: string;
+}
+export const blockDragAtom = atom<DraggedBlock | null>(null);
