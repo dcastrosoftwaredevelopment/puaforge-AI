@@ -4,7 +4,7 @@ import { useSelectionOverlay } from '@/hooks/useSelectionOverlay';
 
 export default function SelectionOverlay() {
   const { t } = useTranslation();
-  const { selectedElement, hoveredElement, inspectMode, iframeOrigin, removeSelectedBlock } = useSelectionOverlay();
+  const { selectedElement, hoveredElement, inspectMode, removeSelectedBlock } = useSelectionOverlay();
 
   if (!inspectMode) return null;
 
@@ -14,10 +14,10 @@ export default function SelectionOverlay() {
         <div
           className="pointer-events-none border border-dashed border-sky-400/70 bg-sky-400/5 z-10"
           style={{
-            position: 'fixed',
+            position: 'absolute',
             boxSizing: 'border-box',
-            top: hoveredElement.rect.top + iframeOrigin.top,
-            left: hoveredElement.rect.left + iframeOrigin.left,
+            top: hoveredElement.rect.top,
+            left: hoveredElement.rect.left,
             width: hoveredElement.rect.width,
             height: hoveredElement.rect.height,
           }}
@@ -27,10 +27,10 @@ export default function SelectionOverlay() {
         <div
           className="pointer-events-none border border-forge-terracotta z-10"
           style={{
-            position: 'fixed',
+            position: 'absolute',
             boxSizing: 'border-box',
-            top: selectedElement.rect.top + iframeOrigin.top,
-            left: selectedElement.rect.left + iframeOrigin.left,
+            top: selectedElement.rect.top,
+            left: selectedElement.rect.left,
             width: selectedElement.rect.width,
             height: selectedElement.rect.height,
           }}

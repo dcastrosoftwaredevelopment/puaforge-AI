@@ -102,6 +102,9 @@ export function ForgeInspect({ children }) {
     function onDocMove(e) {
       var el = e.target
       if (el && el !== document.body && el !== document.documentElement) {
+        var id = el.getAttribute('data-vibe-id') || ''
+        if (id === lastHoveredId) return
+        lastHoveredId = id
         window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_HOVERED' }, getInfo(el)), '*')
       }
     }
@@ -110,6 +113,7 @@ export function ForgeInspect({ children }) {
     var resizeObs = null
     var scrollRafId = null
     var resizeRafId = null
+    var lastHoveredId = null
 
     function sendSelectedRect() {
       if (selectedElRef && document.body.contains(selectedElRef)) {
@@ -185,6 +189,7 @@ export function ForgeInspect({ children }) {
       if (resizeRafId) { cancelAnimationFrame(resizeRafId); resizeRafId = null }
       if (resizeObs) { resizeObs.disconnect(); resizeObs = null }
       selectedElRef = null
+      lastHoveredId = null
       document.removeEventListener('click', onDocClick, true)
       document.removeEventListener('mousemove', onDocMove, true)
       if (cursorStyle) { cursorStyle.remove(); cursorStyle = null }
