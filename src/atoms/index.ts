@@ -150,6 +150,7 @@ export interface SelectedElement {
   tagName: string;
   className: string;
   inlineStyle?: string;
+  forgeBlockId?: string;
   rect: { top: number; left: number; width: number; height: number };
 }
 export const selectedElementAtom = atom<SelectedElement | null>(null);
@@ -233,3 +234,7 @@ export interface DraggedBlock {
   code: string;
 }
 export const blockDragAtom = atom<DraggedBlock | null>(null);
+
+// Tracks which container instance is the active insertion target (null = root).
+// Stored as an atom so both useBlockLibrary and useBlockDropZone can share it.
+export const blockInsertParentAtom = atom<string | null>(null);

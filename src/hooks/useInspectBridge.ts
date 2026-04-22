@@ -7,9 +7,11 @@ import {
   domTreeAtom,
   editorPanelModeAtom,
   inspectModeAtom,
+  blockInsertParentAtom,
   type SelectedElement,
   type DOMNode,
 } from '@/atoms';
+import { BLOCKS } from '@/utils/blockCatalog';
 
 /**
  * Bridges postMessage traffic between the platform and the Sandpack preview iframe.
@@ -28,6 +30,7 @@ export function useInspectBridge() {
   const setHovered = useSetAtom(hoveredElementAtom);
   const setDomTree = useSetAtom(domTreeAtom);
   const setPanelMode = useSetAtom(editorPanelModeAtom);
+  const setInsertParentId = useSetAtom(blockInsertParentAtom);
 
   useEffect(() => {
     sandpackRef.current = sandpack;
@@ -99,9 +102,16 @@ export function useInspectBridge() {
           tagName: e.data.tagName,
           className: e.data.className,
           inlineStyle: e.data.inlineStyle || '',
+          forgeBlockId: e.data.forgeBlockId || '',
           rect: e.data.rect,
         };
         setSelected(el);
+        // Sync inspect selection → block insert target.
+        // Only containers are valid drop targets; anything else resets to root.
+        const forgeBlockId = e.data.forgeBlockId || '';
+        const blockId = forgeBlockId ? forgeBlockId.slice(0, forgeBlockId.lastIndexOf('-')) : '';
+        const isContainer = !!BLOCKS.find((b) => b.id === blockId)?.isContainer;
+        setInsertParentId(isContainer ? forgeBlockId : null);
         if (!e.data.stayInLayers) setPanelMode('style');
       } else if (type === 'FORGE_ELEMENT_RESIZED') {
         const rect = e.data.rect;
@@ -112,6 +122,7 @@ export function useInspectBridge() {
           tagName: e.data.tagName,
           className: e.data.className,
           inlineStyle: e.data.inlineStyle || '',
+          forgeBlockId: e.data.forgeBlockId || '',
           rect: e.data.rect,
         };
         setHovered(el);

@@ -393,10 +393,11 @@ export const pt = {
     emptySearch: 'Nenhum bloco encontrado',
     insert: 'Inserir',
     insertInside: 'Inserir dentro',
-    insertInto: 'Inserindo em',
-    insertRoot: 'Raiz',
+
     removeLast: 'Remover último',
+    removeBlock: 'Remover bloco',
     dropHere: 'Soltar aqui',
+    dropInside: 'Soltar dentro de',
     categoryLayout: 'Layout',
     categoryTypography: 'Tipografia',
     categoryForm: 'Formulário',

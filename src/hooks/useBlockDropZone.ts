@@ -1,25 +1,41 @@
+import { useMemo } from 'react';
 import { useAtomValue } from 'jotai';
-import { blockDragAtom } from '@/atoms';
+import { useTranslation } from 'react-i18next';
+import { blockDragAtom, blockInsertParentAtom } from '@/atoms';
 import { useFiles } from '@/hooks/useFiles';
-import { insertBlockIntoApp, generateInstanceId } from '@/utils/jsxInserter';
+import { insertBlockIntoApp, insertBlockInsideParent, generateInstanceId } from '@/utils/jsxInserter';
 import { BLOCKS } from '@/utils/blockCatalog';
 
 export function useBlockDropZone() {
+  const { t } = useTranslation();
   const draggedBlock = useAtomValue(blockDragAtom);
-  const { files, setFiles } = useFiles();
+  const insertParentId = useAtomValue(blockInsertParentAtom);
+  const { setFiles } = useFiles();
 
   const isDragging = draggedBlock !== null;
+
+  // Resolve a human-readable label for the current drop target
+  const dropTargetLabel = useMemo(() => {
+    if (!insertParentId) return null;
+    const blockId = insertParentId.slice(0, insertParentId.lastIndexOf('-'));
+    const block = BLOCKS.find((b) => b.id === blockId);
+    return block ? t(block.labelKey) : null;
+  }, [insertParentId, t]);
 
   function handleDrop() {
     if (!draggedBlock) return;
     const block = BLOCKS.find((b) => b.id === draggedBlock.blockId);
     if (!block) return;
     const instanceId = generateInstanceId(block.id);
-    setFiles((prev) => ({
-      ...prev,
-      '/App.tsx': insertBlockIntoApp(prev['/App.tsx'] ?? '', instanceId, block.code),
-    }));
+    setFiles((prev) => {
+      const source = prev['/App.tsx'] ?? '';
+      const next =
+        insertParentId ?
+          insertBlockInsideParent(source, insertParentId, instanceId, block.code)
+        : insertBlockIntoApp(source, instanceId, block.code);
+      return { ...prev, '/App.tsx': next };
+    });
   }
 
-  return { isDragging, handleDrop };
+  return { isDragging, handleDrop, dropTargetLabel };
 }

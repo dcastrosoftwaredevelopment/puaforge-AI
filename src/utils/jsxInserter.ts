@@ -12,8 +12,36 @@ export function generateInstanceId(blockId: string): string {
   return `${blockId}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
+/**
+ * Injects data-forge-block-id into the first opening (non-self-closing) tag of a JSX snippet.
+ * Used so the inspect bridge can identify which forge block a selected element belongs to.
+ */
+export function injectForgeBlockId(jsx: string, instanceId: string): string {
+  let i = 0;
+  while (i < jsx.length && jsx[i] !== '<') i++;
+  if (i >= jsx.length || jsx[i + 1] === '/') return jsx;
+  i++; // skip '<'
+  let inQuote = false;
+  let quoteChar = '';
+  while (i < jsx.length) {
+    const ch = jsx[i];
+    if (inQuote) {
+      if (ch === quoteChar) inQuote = false;
+    } else if (ch === '"' || ch === "'") {
+      inQuote = true;
+      quoteChar = ch;
+    } else if (ch === '>') {
+      if (jsx[i - 1] === '/') return jsx; // self-closing, nothing to inject
+      return jsx.slice(0, i) + ` data-forge-block-id="${instanceId}"` + jsx.slice(i);
+    }
+    i++;
+  }
+  return jsx;
+}
+
 export function insertBlockIntoApp(source: string, instanceId: string, blockJsx: string): string {
-  const wrapped = `{/* forge-block-start:${instanceId} */}\n${blockJsx}\n{/* forge-block-end:${instanceId} */}`;
+  const tagged = injectForgeBlockId(blockJsx, instanceId);
+  const wrapped = `{/* forge-block-start:${instanceId} */}\n${tagged}\n{/* forge-block-end:${instanceId} */}`;
 
   const returnIdx = source.indexOf('return (');
   if (returnIdx === -1) return appendFallback(source, wrapped);
@@ -103,7 +131,8 @@ export function insertBlockInsideParent(
   childInstanceId: string,
   childCode: string,
 ): string {
-  const wrapped = `{/* forge-block-start:${childInstanceId} */}\n${childCode}\n{/* forge-block-end:${childInstanceId} */}`;
+  const tagged = injectForgeBlockId(childCode, childInstanceId);
+  const wrapped = `{/* forge-block-start:${childInstanceId} */}\n${tagged}\n{/* forge-block-end:${childInstanceId} */}`;
 
   const parentStartMarker = `{/* forge-block-start:${parentInstanceId} */}`;
   const markerIdx = source.indexOf(parentStartMarker);

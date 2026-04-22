@@ -57,6 +57,16 @@ export function ForgeInspect({ children }) {
       window.parent.postMessage({ type: 'FORGE_DOM_TREE', tree: tree }, '*')
     }
 
+    function getForgeBlockId(el) {
+      var cur = el
+      while (cur && cur !== document.documentElement) {
+        var bid = cur.getAttribute('data-forge-block-id')
+        if (bid) return bid
+        cur = cur.parentElement
+      }
+      return ''
+    }
+
     function getInfo(el) {
       var rect = el.getBoundingClientRect()
       return {
@@ -64,6 +74,7 @@ export function ForgeInspect({ children }) {
         tagName: el.tagName.toLowerCase(),
         className: el.getAttribute('class') || '',
         inlineStyle: el.getAttribute('style') || '',
+        forgeBlockId: getForgeBlockId(el),
         rect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
       }
     }

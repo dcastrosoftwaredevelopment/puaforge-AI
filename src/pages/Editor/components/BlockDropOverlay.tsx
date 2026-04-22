@@ -1,10 +1,12 @@
 import { useTranslation } from 'react-i18next';
+import { CornerDownRight } from 'lucide-react';
 
 interface BlockDropOverlayProps {
   onDrop: () => void;
+  targetLabel?: string | null;
 }
 
-export default function BlockDropOverlay({ onDrop }: BlockDropOverlayProps) {
+export default function BlockDropOverlay({ onDrop, targetLabel }: BlockDropOverlayProps) {
   const { t } = useTranslation();
   return (
     <div
@@ -16,8 +18,9 @@ export default function BlockDropOverlay({ onDrop }: BlockDropOverlayProps) {
       }}
     >
       <div className="absolute inset-2 rounded-xl border-2 border-dashed border-forge-terracotta/60 bg-forge-terracotta/5 pointer-events-none" />
-      <div className="relative bg-forge-terracotta text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg pointer-events-none">
-        {t('blocks.dropHere')}
+      <div className="relative flex items-center gap-1.5 bg-forge-terracotta text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg pointer-events-none">
+        {targetLabel && <CornerDownRight size={11} />}
+        {targetLabel ? `${t('blocks.dropInside')} ${targetLabel}` : t('blocks.dropHere')}
       </div>
     </div>
   );

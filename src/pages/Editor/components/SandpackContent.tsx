@@ -51,7 +51,7 @@ export default function SandpackContent() {
   const { t } = useTranslation();
   const { editorPanelMode, inspectMode } = useEditorPanelTabs();
   const { drawerOpen, drawerHeightPct, setDrawerHeightPct, drawerTab } = useMobileDrawer();
-  const { isDragging, handleDrop } = useBlockDropZone();
+  const { isDragging, handleDrop, dropTargetLabel } = useBlockDropZone();
   const containerRef = useRef<HTMLDivElement>(null);
   const [findOpen, setFindOpen] = useState(false);
   const [showExplorer, setShowExplorer] = useState(!isMobile);
@@ -132,7 +132,7 @@ export default function SandpackContent() {
             >
               <SandpackPreview showNavigator showRefreshButton showOpenInCodeSandbox={false} />
               <SelectionOverlay />
-              {isDragging && <BlockDropOverlay onDrop={handleDrop} />}
+              {isDragging && <BlockDropOverlay onDrop={handleDrop} targetLabel={dropTargetLabel} />}
             </div>
           </div>
 
@@ -258,7 +258,7 @@ export default function SandpackContent() {
             >
               <SandpackPreview showNavigator showRefreshButton showOpenInCodeSandbox={false} />
               <SelectionOverlay />
-              {isDragging && <BlockDropOverlay onDrop={handleDrop} />}
+              {isDragging && <BlockDropOverlay onDrop={handleDrop} targetLabel={dropTargetLabel} />}
             </div>
           </div>
         </>

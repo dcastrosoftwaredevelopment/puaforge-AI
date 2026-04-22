@@ -1,7 +1,10 @@
+import { Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useSelectionOverlay } from '@/hooks/useSelectionOverlay';
 
 export default function SelectionOverlay() {
-  const { selectedElement, hoveredElement, inspectMode, iframeOrigin } = useSelectionOverlay();
+  const { t } = useTranslation();
+  const { selectedElement, hoveredElement, inspectMode, iframeOrigin, removeSelectedBlock } = useSelectionOverlay();
 
   if (!inspectMode) return null;
 
@@ -32,9 +35,21 @@ export default function SelectionOverlay() {
             height: selectedElement.rect.height,
           }}
         >
-          <span className="absolute -top-5 left-0 bg-forge-terracotta text-white text-[10px] px-1.5 py-0.5 leading-none rounded-sm select-none">
-            {selectedElement.tagName}
-          </span>
+          <div className="absolute -top-5 left-0 flex items-center gap-0.5">
+            <span className="bg-forge-terracotta text-white text-[10px] px-1.5 py-0.5 leading-none rounded-sm select-none">
+              {selectedElement.tagName}
+            </span>
+            {selectedElement.forgeBlockId && (
+              <button
+                type="button"
+                onClick={removeSelectedBlock}
+                title={t('blocks.removeBlock')}
+                className="pointer-events-auto flex items-center bg-red-500 hover:bg-red-600 text-white transition px-1 py-0.5 rounded-sm"
+              >
+                <Trash2 size={9} />
+              </button>
+            )}
+          </div>
         </div>
       )}
     </>

@@ -391,10 +391,11 @@ export const en = {
     emptySearch: 'No blocks found',
     insert: 'Insert',
     insertInside: 'Insert inside',
-    insertInto: 'Inserting into',
-    insertRoot: 'Root',
+
     removeLast: 'Remove last',
+    removeBlock: 'Remove block',
     dropHere: 'Drop here',
+    dropInside: 'Drop inside',
     categoryLayout: 'Layout',
     categoryTypography: 'Typography',
     categoryForm: 'Form',
