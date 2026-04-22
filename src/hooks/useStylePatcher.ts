@@ -1,7 +1,7 @@
 import { createContext, useCallback, useEffect, useRef } from 'react';
 import { useStore, useSetAtom } from 'jotai';
 import { useSandpack } from '@codesandbox/sandpack-react';
-import { filesAtom } from '@/atoms';
+import { filesAtom, selectedElementAtom } from '@/atoms';
 import { toJSXStyleObject } from '@/utils/inlineStyles';
 
 type StylePatcherValue = {
@@ -25,6 +25,60 @@ function patchCode(code: string, oldClass: string, newClass: string): string {
     .replace(new RegExp(`(className\\s*=\\s*")${esc}(")`, 'g'), replace)
     .replace(new RegExp(`(className\\s*=\\s*')${esc}(')`, 'g'), replace)
     .replace(new RegExp(`(className\\s*=\\s*\\{'")${esc}("'\\})`, 'g'), replace);
+}
+
+/**
+ * Scoped className patch: finds the specific JSX element with data-forge-block-id
+ * and replaces className only within that opening tag, preventing false positives
+ * when two elements share the same className string (e.g. nested containers).
+ *
+ * Falls back to forge-block-range scoping, then to global, in that order.
+ */
+function patchClassNameForElement(code: string, forgeBlockId: string, oldClass: string, newClass: string): string {
+  const forgeAttr = `data-forge-block-id="${forgeBlockId}"`;
+  const attrIdx = code.indexOf(forgeAttr);
+  if (attrIdx !== -1) {
+    // Walk back to the start of the opening tag
+    let tagStart = attrIdx;
+    while (tagStart > 0 && code[tagStart] !== '<') tagStart--;
+
+    // Walk forward to the closing '>' of the opening tag (respects quoted values)
+    let pos = attrIdx + forgeAttr.length;
+    let inQ = false;
+    let qCh = '';
+    while (pos < code.length) {
+      const ch = code[pos];
+      if (inQ) {
+        if (ch === qCh) inQ = false;
+      } else if (ch === '"' || ch === "'") {
+        inQ = true;
+        qCh = ch;
+      } else if (ch === '>') break;
+      pos++;
+    }
+    const tag = code.slice(tagStart, pos + 1);
+    const esc = escapeRegex(oldClass);
+    const patchedTag = tag
+      .replace(new RegExp(`(className\\s*=\\s*")${esc}(")`, 'g'), `$1${newClass}$2`)
+      .replace(new RegExp(`(className\\s*=\\s*')${esc}(')`, 'g'), `$1${newClass}$2`)
+      .replace(new RegExp(`(className\\s*=\\s*\\{'")${esc}("'\\})`, 'g'), `$1${newClass}$2`);
+    if (patchedTag !== tag) {
+      return code.slice(0, tagStart) + patchedTag + code.slice(pos + 1);
+    }
+    // className not found on the root element — element is a child inside the block.
+    // Scope the search to the forge block range (still better than global).
+    const startMarker = `{/* forge-block-start:${forgeBlockId} */}`;
+    const endMarker = `{/* forge-block-end:${forgeBlockId} */}`;
+    const startIdx = code.indexOf(startMarker);
+    const endIdx = code.indexOf(endMarker, startIdx);
+    if (startIdx !== -1 && endIdx !== -1) {
+      const blockEnd = endIdx + endMarker.length;
+      const blockSource = code.slice(startIdx, blockEnd);
+      const patchedBlock = patchCode(blockSource, oldClass, newClass);
+      if (patchedBlock !== blockSource) return code.slice(0, startIdx) + patchedBlock + code.slice(blockEnd);
+    }
+  }
+  return patchCode(code, oldClass, newClass);
 }
 
 function patchInlineStyle(code: string, oldStyle: string, newStyle: string): string {
@@ -92,14 +146,18 @@ export function useStylePatcher() {
 
   const applyClassChange = useCallback(
     (oldClassName: string, newClassName: string) => {
+      const forgeBlockId = store.get(selectedElementAtom)?.forgeBlockId ?? '';
       const updates: Array<[string, string]> = [];
       for (const [path, code] of Object.entries(filesRef.current)) {
-        const patched = patchCode(code, oldClassName, newClassName);
+        const patched =
+          forgeBlockId ?
+            patchClassNameForElement(code, forgeBlockId, oldClassName, newClassName)
+          : patchCode(code, oldClassName, newClassName);
         if (patched !== code) updates.push([path, patched]);
       }
       if (updates.length > 0) commitUpdates(updates);
     },
-    [commitUpdates],
+    [store, commitUpdates],
   );
 
   const applyInlineStyleChange = useCallback(
