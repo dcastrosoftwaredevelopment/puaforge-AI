@@ -154,6 +154,7 @@ export interface SelectedElement {
   className: string;
   inlineStyle?: string;
   forgeBlockId?: string;
+  attributes?: Record<string, string>;
   rect: { top: number; left: number; width: number; height: number };
 }
 export const selectedElementAtom = atom<SelectedElement | null>(null);

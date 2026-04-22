@@ -67,6 +67,16 @@ export function ForgeInspect({ children }) {
       return ''
     }
 
+    function getAttributes(el) {
+      var names = ['href', 'src', 'alt', 'target', 'placeholder', 'type', 'name', 'rows']
+      var attrs = {}
+      for (var i = 0; i < names.length; i++) {
+        var v = el.getAttribute(names[i])
+        if (v !== null) attrs[names[i]] = v
+      }
+      return attrs
+    }
+
     function getInfo(el) {
       var rect = el.getBoundingClientRect()
       return {
@@ -75,6 +85,7 @@ export function ForgeInspect({ children }) {
         className: el.getAttribute('class') || '',
         inlineStyle: el.getAttribute('style') || '',
         forgeBlockId: getForgeBlockId(el),
+        attributes: getAttributes(el),
         rect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
       }
     }

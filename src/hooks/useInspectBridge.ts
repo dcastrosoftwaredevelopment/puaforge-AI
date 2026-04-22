@@ -103,6 +103,7 @@ export function useInspectBridge() {
           className: e.data.className,
           inlineStyle: e.data.inlineStyle || '',
           forgeBlockId: e.data.forgeBlockId || '',
+          attributes: (e.data.attributes as Record<string, string>) || {},
           rect: e.data.rect,
         };
         setSelected(el);

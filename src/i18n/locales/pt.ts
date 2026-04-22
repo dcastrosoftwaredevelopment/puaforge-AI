@@ -361,6 +361,7 @@ export const pt = {
     sectionLayout: 'Layout',
     sectionBorder: 'Borda',
     sectionEffects: 'Efeitos',
+    sectionAttributes: 'Atributos',
     sectionAdvanced: 'Classes avançadas',
     sectionInlineStyles: 'Estilos inline',
     inlineStyleAddProp: 'propriedade',

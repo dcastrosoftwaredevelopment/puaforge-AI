@@ -182,6 +182,34 @@ export function insertBlockInsideParent(
   return insertBlockIntoApp(source, childInstanceId, childCode);
 }
 
+/**
+ * Update an HTML/JSX attribute value within a specific forge block instance.
+ * Finds `attrName="..."` inside the block's source range and replaces the value.
+ */
+export function updateAttributeInSource(
+  source: string,
+  forgeBlockId: string,
+  attrName: string,
+  newValue: string,
+): string {
+  const startMarker = `{/* forge-block-start:${forgeBlockId} */}`;
+  const endMarker = `{/* forge-block-end:${forgeBlockId} */}`;
+  const startIdx = source.indexOf(startMarker);
+  const endIdx = source.indexOf(endMarker, startIdx);
+  if (startIdx === -1 || endIdx === -1) return source;
+
+  const blockEnd = endIdx + endMarker.length;
+  const blockSource = source.slice(startIdx, blockEnd);
+
+  const escapedName = attrName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const attrRe = new RegExp(`(\\b${escapedName}=")([^"]*)(")`, 'g');
+  if (!attrRe.test(blockSource)) return source;
+  attrRe.lastIndex = 0;
+
+  const updatedBlock = blockSource.replace(attrRe, `$1${newValue}$3`);
+  return source.slice(0, startIdx) + updatedBlock + source.slice(blockEnd);
+}
+
 /** Remove the last inserted instance of blockId (by document order). */
 export function removeLastBlockInstance(source: string, blockId: string): string {
   const instances = getBlockInstances(source).filter((b) => b.blockId === blockId);

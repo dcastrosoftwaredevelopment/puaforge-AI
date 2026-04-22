@@ -12,6 +12,7 @@ import LayoutSection from './LayoutSection';
 import BorderSection from './BorderSection';
 import EffectsSection from './EffectsSection';
 import InlineStylesSection from './InlineStylesSection';
+import AttributesSection from './AttributesSection';
 import AdvancedSection from './AdvancedSection';
 import InspectToggle from './InspectToggle';
 
@@ -67,6 +68,7 @@ export default function StyleEditor() {
           <LayoutSection />
           <BorderSection />
           <EffectsSection />
+          {selectedElement && <AttributesSection />}
           <InlineStylesSection />
           {selectedElement && <AdvancedSection />}
         </div>

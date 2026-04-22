@@ -359,6 +359,7 @@ export const en = {
     sectionLayout: 'Layout',
     sectionBorder: 'Border',
     sectionEffects: 'Effects',
+    sectionAttributes: 'Attributes',
     sectionAdvanced: 'Advanced classes',
     sectionInlineStyles: 'Inline styles',
     inlineStyleAddProp: 'property',
