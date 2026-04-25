@@ -23,13 +23,13 @@ export function ForgeInspect({ children }) {
 
     function assignIds() {
       document.querySelectorAll('*').forEach(function(el) {
-        el.setAttribute('data-vibe-id', stableId(el))
+        el.setAttribute('data-forge-id', stableId(el))
       })
     }
 
     function removeIds() {
-      document.querySelectorAll('[data-vibe-id]').forEach(function(el) {
-        el.removeAttribute('data-vibe-id')
+      document.querySelectorAll('[data-forge-id]').forEach(function(el) {
+        el.removeAttribute('data-forge-id')
       })
     }
 
@@ -42,7 +42,7 @@ export function ForgeInspect({ children }) {
         var n = domNode(el.children[i], depth + 1)
         if (n) kids.push(n)
       }
-      return { id: el.getAttribute('data-vibe-id') || '', tagName: tag, className: el.getAttribute('class') || '', children: kids }
+      return { id: el.getAttribute('data-forge-id') || '', tagName: tag, className: el.getAttribute('class') || '', children: kids }
     }
 
     function sendTree() {
@@ -88,10 +88,11 @@ export function ForgeInspect({ children }) {
     function getInfo(el) {
       var rect = el.getBoundingClientRect()
       return {
-        id: el.getAttribute('data-vibe-id') || '',
+        id: el.getAttribute('data-forge-id') || '',
         tagName: el.tagName.toLowerCase(),
         className: el.getAttribute('class') || '',
         inlineStyle: el.getAttribute('style') || '',
+        isBlockRoot: el.hasAttribute('data-forge-block-id'),
         forgeBlockId: getForgeBlockId(el),
         attributes: getAttributes(el),
         textContent: getDirectText(el),
@@ -164,7 +165,7 @@ export function ForgeInspect({ children }) {
     function onDocMove(e) {
       var el = e.target
       if (el && el !== document.body && el !== document.documentElement) {
-        var id = el.getAttribute('data-vibe-id') || ''
+        var id = el.getAttribute('data-forge-id') || ''
         if (id === lastHoveredId) return
         lastHoveredId = id
         if (el !== selectedElRef) {
@@ -273,7 +274,7 @@ export function ForgeInspect({ children }) {
         if (on === activeRef.current) return
         if (on) activate(); else deactivate()
       } else if (t === 'FORGE_SELECT_BY_ID') {
-        var el = document.querySelector('[data-vibe-id="' + e.data.id + '"]')
+        var el = document.querySelector('[data-forge-id="' + e.data.id + '"]')
         if (!el) return
         try { el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) } catch(x) {}
         watchSelected(el)
@@ -289,12 +290,12 @@ export function ForgeInspect({ children }) {
         }
         window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_SELECTED', stayInLayers: !!e.data.stayInLayers }, getInfo(el)), '*')
       } else if (t === 'FORGE_HOVER_BY_ID') {
-        var el2 = document.querySelector('[data-vibe-id="' + e.data.id + '"]')
+        var el2 = document.querySelector('[data-forge-id="' + e.data.id + '"]')
         if (el2) {
           if (hoverBox && el2 !== selectedElRef) {
             updateBoxRect(hoverBox, el2.getBoundingClientRect())
             hoverBox.style.display = 'block'
-            lastHoveredId = el2.getAttribute('data-vibe-id') || ''
+            lastHoveredId = el2.getAttribute('data-forge-id') || ''
           }
           window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_HOVERED' }, getInfo(el2)), '*')
         }

@@ -2,6 +2,7 @@ import { atom } from 'jotai';
 import { selectAtom } from 'jotai/utils';
 import { parseClassesByBreakpoint, type ParsedClasses } from '@/utils/tailwindClasses';
 import { parseInlineStyle } from '@/utils/inlineStyles';
+import { parseFontClassFromClassName } from '@/utils/googleFonts';
 
 // Project
 export interface Project {
@@ -153,6 +154,7 @@ export interface SelectedElement {
   tagName: string;
   className: string;
   inlineStyle?: string;
+  isBlockRoot?: boolean;
   forgeBlockId?: string;
   attributes?: Record<string, string>;
   textContent?: string;
@@ -229,6 +231,12 @@ export const overflowAtom = field('overflow');
 export const unknownClassesAtom = field('unknown');
 
 export const fontFamilyAtom = atom((get): string => {
+  const el = get(selectedElementAtom);
+  if (!el) return '';
+  // Primary: read from vibe-font-* class (class-based approach, works for all elements)
+  const fromClass = parseFontClassFromClassName(el.className);
+  if (fromClass) return fromClass;
+  // Fallback: legacy inline style (projects set before the class-based approach)
   const style = get(parsedInlineStyleAtom);
   const raw = style['font-family'] ?? '';
   return raw.replace(/['"]/g, '').split(',')[0].trim();

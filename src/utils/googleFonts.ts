@@ -49,6 +49,38 @@ export function buildGlobalCss(fontFamily: string): string {
   return `@import url('${url}');\nbody, body * { font-family: '${fontFamily}', sans-serif; }`;
 }
 
+/** CSS class name for a specific font (e.g. "DM Sans" → "vibe-font-dm-sans"). */
+export function buildFontClassName(fontFamily: string): string {
+  return 'vibe-font-' + fontFamily.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
+
+/**
+ * Ensures the font @import and CSS class rule for `fontFamily` are present in the
+ * global CSS string. Returns the updated CSS (unchanged if already present).
+ */
+export function ensureFontClassInGlobalCss(existingCss: string, fontFamily: string): string {
+  if (!fontFamily) return existingCss;
+  const cls = buildFontClassName(fontFamily);
+  if (existingCss.includes(`.${cls}`)) return existingCss;
+  const alreadyImported = existingCss.includes(encodeURIComponent(fontFamily));
+  const importLine = alreadyImported ? '' : `@import url('${buildGoogleFontsUrl([fontFamily])}');\n`;
+  const rule = `.${cls} { font-family: '${fontFamily}', sans-serif; }`;
+  return `${importLine}${existingCss}\n${rule}`;
+}
+
+/**
+ * Reads the font family name from the first `vibe-font-*` class in a className string.
+ * Matches against the curated list for correct casing; falls back to title-case.
+ */
+export function parseFontClassFromClassName(className: string): string {
+  const match = className.match(/\bvibe-font-([a-z0-9-]+)\b/);
+  if (!match) return '';
+  const slug = match[1];
+  const known = POPULAR_GOOGLE_FONTS.find((f) => buildFontClassName(f.family) === `vibe-font-${slug}`);
+  if (known) return known.family;
+  return slug.replace(/-([a-z])/g, (_, c: string) => ' ' + c.toUpperCase()).replace(/^./, (c) => c.toUpperCase());
+}
+
 export function parseGlobalFont(css: string): string {
   if (!css) return '';
   const match = css.match(/font-family:\s*['"]?([^,'";\n}]+)/);
