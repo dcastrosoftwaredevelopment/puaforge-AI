@@ -8,13 +8,17 @@ import StyleEditorSection from './StyleEditorSection';
 import StyleEditorRow from './StyleEditorRow';
 import StyleEditorSelect from './StyleEditorSelect';
 import StyleEditorColorInput from './StyleEditorColorInput';
+import FontFamilyPicker from './FontFamilyPicker';
 
 const TypographySection = memo(() => {
   const { t } = useTranslation();
-  const { fontSize, fontWeight, textAlign, textColor, applyClass, onFontSize, onFontWeight } = useTypographySection();
+  const { fontSize, fontWeight, textAlign, textColor, fontFamily, applyClass, onFontSize, onFontWeight, onFontFamily } = useTypographySection();
   const elementId = useAtomValue(selectedElementAtom)?.id;
   return (
     <StyleEditorSection title={t('inspect.sectionTypography')}>
+      <StyleEditorRow label={t('inspect.fontFamily')}>
+        <FontFamilyPicker value={fontFamily} onChange={onFontFamily} />
+      </StyleEditorRow>
       <StyleEditorRow label={t('inspect.fontSize')}>
         <StyleEditorSelect
           value={fontSize}

@@ -1,3 +1,7 @@
+import { buildGlobalCss } from './googleFonts';
+
+export const DEFAULT_GLOBAL_FONT = 'Roboto';
+
 export const TAILWIND_HTML = `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -31,6 +35,7 @@ export function buildPackageJson(extraDeps: Record<string, string> = {}): string
 export const DEFAULT_FILES: Record<string, string> = {
   '/index.html': TAILWIND_HTML,
   '/package.json': buildPackageJson(),
+  '/__forge_global.css': buildGlobalCss(DEFAULT_GLOBAL_FONT),
   '/App.tsx': `export default function App() {
   return (
     <div

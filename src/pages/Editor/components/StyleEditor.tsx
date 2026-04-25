@@ -16,6 +16,7 @@ import AttributesSection from './AttributesSection';
 import AdvancedSection from './AdvancedSection';
 import TextContentSection from './TextContentSection';
 import InspectToggle from './InspectToggle';
+import GlobalFontSection from './GlobalFontSection';
 
 export default function StyleEditor() {
   const { t } = useTranslation();
@@ -61,6 +62,7 @@ export default function StyleEditor() {
             <InspectToggle />
           </div>
         </div>
+        <GlobalFontSection />
         <div className={!selectedElement ? 'pointer-events-none opacity-40 select-none' : ''}>
           {selectedElement && <TextContentSection />}
           <TypographySection />

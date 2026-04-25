@@ -228,6 +228,12 @@ export const opacityAtom = field('opacity');
 export const overflowAtom = field('overflow');
 export const unknownClassesAtom = field('unknown');
 
+export const fontFamilyAtom = atom((get): string => {
+  const style = get(parsedInlineStyleAtom);
+  const raw = style['font-family'] ?? '';
+  return raw.replace(/['"]/g, '').split(',')[0].trim();
+});
+
 // ── Mobile bottom drawer ──────────────────────────────────────────────────────
 
 export type MobileDrawerTab = 'code' | 'style' | 'layers' | 'blocks' | 'chat';

@@ -328,6 +328,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App'
 import { ForgeInspect } from './__forgeInspect'
 import './assets/images.css'
+import './__forge_global.css'
 
 createRoot(document.getElementById('root')).render(
   React.createElement(ForgeInspect, null, React.createElement(App, null))

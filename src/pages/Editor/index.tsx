@@ -90,6 +90,7 @@ export default function Editor() {
             key={sandpackKey}
             files={{
               '/index.html': TAILWIND_HTML,
+              '/__forge_global.css': '',
               ...files,
               '/__forgeInspect.tsx': { code: FORGE_INSPECT_SOURCE, hidden: true },
               '/index.tsx': { code: FORGE_ENTRY_SOURCE, hidden: true },
