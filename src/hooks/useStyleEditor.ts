@@ -187,10 +187,13 @@ export function useStyleEditor() {
   const addInlineProp = useCallback(
     (key: string, value: string) => {
       if (!key.trim()) return;
-      const current = parseInlineStyle(liveInlineStyleRef.current);
+      // Read from atom (always up to date) so we never drop existing inline props
+      // when the live ref hasn't been initialised yet for the current element.
+      const el = store.get(selectedElementAtom);
+      const current = parseInlineStyle(el?.inlineStyle ?? liveInlineStyleRef.current);
       applyInlineStyle({ ...current, [key.trim()]: value.trim() });
     },
-    [applyInlineStyle],
+    [store, applyInlineStyle],
   );
 
   return {

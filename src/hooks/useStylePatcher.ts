@@ -85,11 +85,16 @@ function patchInlineStyle(code: string, oldStyle: string, newStyle: string): str
   const jsxObj = toJSXStyleObject(newStyle);
 
   // Pattern 1: style="old" (HTML string format — convert to JSX object)
-  const esc = escapeRegex(oldStyle);
-  const patched1 = code.replace(new RegExp(`style="${esc}"`, 'g'), `style={${jsxObj}}`);
-  if (patched1 !== code) return patched1;
+  if (oldStyle) {
+    const esc = escapeRegex(oldStyle);
+    const patched1 = code.replace(new RegExp(`style="${esc}"`, 'g'), `style={${jsxObj}}`);
+    if (patched1 !== code) return patched1;
+  }
 
-  // Pattern 2: style={{ ... }} — replace the whole JSX object
+  // Pattern 2: style={{ ... }} — replace the whole JSX object.
+  // Only safe when oldStyle is known; without it we cannot identify which element
+  // to target and a global replace would corrupt unrelated style blocks.
+  if (!oldStyle) return code;
   const patched2 = code.replace(/style=\{\{[\s\S]*?\}\}/g, `style={${jsxObj}}`);
   return patched2;
 }
