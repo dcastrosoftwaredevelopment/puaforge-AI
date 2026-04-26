@@ -23,7 +23,9 @@ export function ForgeInspect({ children }) {
 
     function assignIds() {
       document.querySelectorAll('*').forEach(function(el) {
-        el.setAttribute('data-forge-id', stableId(el))
+        if (!el.hasAttribute('data-forge-id')) {
+          el.setAttribute('data-forge-id', stableId(el))
+        }
       })
     }
 
@@ -76,9 +78,7 @@ export function ForgeInspect({ children }) {
       return attrs
     }
 
-    var TEXT_TAGS_SET = { h1: 1, h2: 1, h3: 1, h4: 1, h5: 1, h6: 1, p: 1, span: 1, a: 1, button: 1, label: 1, blockquote: 1, li: 1 }
     function getDirectText(el) {
-      if (!TEXT_TAGS_SET[el.tagName.toLowerCase()]) return undefined
       for (var i = 0; i < el.childNodes.length; i++) {
         if (el.childNodes[i].nodeType === 1) return undefined
       }

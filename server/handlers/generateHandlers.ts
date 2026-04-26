@@ -235,8 +235,8 @@ export async function generate(req: Request<object, object, GenerateBody>, res: 
     const response = await stream.finalMessage();
 
     const rawResponse = response.content
-      .filter((block): block is Anthropic.TextBlock => block.type === 'text')
-      .map((block) => block.text)
+      .filter((block: any): block is Anthropic.TextBlock => block.type === 'text')
+      .map((block: any) => block.text)
       .join('\n');
 
     console.log('[generate] Response length:', rawResponse.length);
@@ -244,7 +244,7 @@ export async function generate(req: Request<object, object, GenerateBody>, res: 
     console.log('[generate] Usage:', response.usage);
 
     res.json({ rawResponse });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof Anthropic.APIError) {
       console.error('[generate] Anthropic API Error:', error.status, error.message);
       res.status(error.status ?? 500).json({ code: 'ANTHROPIC_ERROR', error: error.message });
