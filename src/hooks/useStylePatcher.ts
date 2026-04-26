@@ -78,25 +78,7 @@ function patchClassNameForElement(code: string, forgeBlockId: string, oldClass: 
       if (patchedBlock !== blockSource) return code.slice(0, startIdx) + patchedBlock + code.slice(blockEnd);
     }
   }
-  return patchCode(code, oldClass, newClass);
-}
-
-function patchInlineStyle(code: string, oldStyle: string, newStyle: string): string {
-  const jsxObj = toJSXStyleObject(newStyle);
-
-  // Pattern 1: style="old" (HTML string format — convert to JSX object)
-  if (oldStyle) {
-    const esc = escapeRegex(oldStyle);
-    const patched1 = code.replace(new RegExp(`style="${esc}"`, 'g'), `style={${jsxObj}}`);
-    if (patched1 !== code) return patched1;
-  }
-
-  // Pattern 2: style={{ ... }} — replace the whole JSX object.
-  // Only safe when oldStyle is known; without it we cannot identify which element
-  // to target and a global replace would corrupt unrelated style blocks.
-  if (!oldStyle) return code;
-  const patched2 = code.replace(/style=\{\{[\s\S]*?\}\}/g, `style={${jsxObj}}`);
-  return patched2;
+  return code;
 }
 
 /**
@@ -158,13 +140,7 @@ function patchInlineStyleByClassName(code: string, className: string, newStyle: 
  * Scopes the className search to the forge block range when markers are available,
  * then falls back to a full-file search by className, then to the global patcher.
  */
-function patchInlineStyleForChild(
-  code: string,
-  forgeBlockId: string,
-  className: string,
-  oldStyle: string,
-  newStyle: string,
-): string {
+function patchInlineStyleForChild(code: string, forgeBlockId: string, className: string, newStyle: string): string {
   const startMarker = `{/* forge-block-start:${forgeBlockId} */}`;
   const endMarker = `{/* forge-block-end:${forgeBlockId} */}`;
   const startIdx = code.indexOf(startMarker);
@@ -182,13 +158,13 @@ function patchInlineStyleForChild(
     if (patched !== code) return patched;
   }
 
-  return patchInlineStyle(code, oldStyle, newStyle);
+  return code;
 }
 
-function patchInlineStyleForElement(code: string, forgeBlockId: string, oldStyle: string, newStyle: string): string {
+function patchInlineStyleForElement(code: string, forgeBlockId: string, newStyle: string): string {
   const forgeAttr = `data-forge-block-id="${forgeBlockId}"`;
   const attrIdx = code.indexOf(forgeAttr);
-  if (attrIdx === -1) return patchInlineStyle(code, oldStyle, newStyle);
+  if (attrIdx === -1) return code;
 
   // Walk back to find '<' (start of opening tag)
   let tagStart = attrIdx;
@@ -641,8 +617,6 @@ export function useStylePatcher() {
         // Fallback: patch by data-forge-block-id (catalog blocks not yet reached by forge-id)
         if (patched === code && forgeBlockId)
           patched = patchClassNameForElement(code, forgeBlockId, oldClassName, newClassName);
-        // Last resort: global className replace
-        if (patched === code) patched = patchCode(code, oldClassName, newClassName);
         if (patched !== code) updates.push([path, patched]);
       }
       if (updates.length > 0) commitUpdates(updates);
@@ -665,11 +639,11 @@ export function useStylePatcher() {
         if (patched === code) {
           // Fallback: block-id based patchers (catalog blocks / pre-injection state)
           if (forgeBlockId && isBlockRoot) {
-            patched = patchInlineStyleForElement(code, forgeBlockId, oldStyle, newStyle);
+            patched = patchInlineStyleForElement(code, forgeBlockId, newStyle);
           } else if (forgeBlockId && !isBlockRoot) {
-            patched = patchInlineStyleForChild(code, forgeBlockId, className, oldStyle, newStyle);
+            patched = patchInlineStyleForChild(code, forgeBlockId, className, newStyle);
           } else {
-            patched = patchInlineStyle(code, oldStyle, newStyle);
+            patched = code;
           }
         }
         if (patched !== code) updates.push([path, patched]);
