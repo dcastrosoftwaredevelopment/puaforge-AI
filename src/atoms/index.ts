@@ -82,13 +82,6 @@ export const selectedModelAtom = atom('');
 // Whether there is a local draft not yet saved to PostgreSQL
 export const isDraftAtom = atom(false);
 
-// Editor dirty state (user has unsaved manual edits)
-export const editorDirtyAtom = atom(false);
-export const editorActionsAtom = atom<{ save: () => void; discard: () => void }>({
-  save: () => {},
-  discard: () => {},
-});
-
 // Panel sizes
 export const editorFractionAtom = atom(0.3);
 export const chatWidthAtom = atom(384);

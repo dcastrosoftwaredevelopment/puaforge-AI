@@ -104,7 +104,7 @@ function patchInlineStyle(code: string, oldStyle: string, newStyle: string): str
  * inline style patch logic as `patchInlineStyleForElement`. Used when a child element
  * (no own data-forge-block-id) is selected and needs its own style modified.
  */
-function patchInlineStyleByClassName(code: string, className: string, oldStyle: string, newStyle: string): string {
+function patchInlineStyleByClassName(code: string, className: string, newStyle: string): string {
   if (!className) return code;
 
   const classAttr1 = `className="${className}"`;
@@ -173,12 +173,12 @@ function patchInlineStyleForChild(
   if (startIdx !== -1 && endIdx !== -1 && className) {
     const blockEnd = endIdx + endMarker.length;
     const blockSource = code.slice(startIdx, blockEnd);
-    const patchedBlock = patchInlineStyleByClassName(blockSource, className, oldStyle, newStyle);
+    const patchedBlock = patchInlineStyleByClassName(blockSource, className, newStyle);
     if (patchedBlock !== blockSource) return code.slice(0, startIdx) + patchedBlock + code.slice(blockEnd);
   }
 
   if (className) {
-    const patched = patchInlineStyleByClassName(code, className, oldStyle, newStyle);
+    const patched = patchInlineStyleByClassName(code, className, newStyle);
     if (patched !== code) return patched;
   }
 
