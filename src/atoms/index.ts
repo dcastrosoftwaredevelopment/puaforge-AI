@@ -233,7 +233,7 @@ export const unknownClassesAtom = field('unknown');
 export const fontFamilyAtom = atom((get): string => {
   const el = get(selectedElementAtom);
   if (!el) return '';
-  // Primary: read from vibe-font-* class (class-based approach, works for all elements)
+  // Primary: read from forge-font-* class (class-based approach, works for all elements)
   const fromClass = parseFontClassFromClassName(el.className);
   if (fromClass) return fromClass;
   // Fallback: legacy inline style (projects set before the class-based approach)
