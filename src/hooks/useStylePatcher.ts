@@ -232,10 +232,41 @@ function patchInlineStyleForElement(code: string, forgeBlockId: string, oldStyle
   return code.slice(0, tagStart) + patchedTag + code.slice(pos + 1);
 }
 
+function findMatchingClosingTag(
+  code: string,
+  tagLower: string,
+  searchFrom: number,
+): { start: number; end: number } | null {
+  let depth = 1;
+  let pos = searchFrom;
+  const openTag = `<${tagLower}`;
+  const closeTag = `</${tagLower}`;
+
+  while (pos < code.length && depth > 0) {
+    const nextOpen = code.indexOf(openTag, pos);
+    const nextClose = code.indexOf(closeTag, pos);
+    if (nextClose === -1) return null;
+
+    if (nextOpen !== -1 && nextOpen < nextClose) {
+      const afterTag = code[nextOpen + openTag.length] ?? '';
+      if (/[\s/>]/.test(afterTag)) depth++;
+      pos = nextOpen + openTag.length;
+    } else {
+      depth--;
+      if (depth === 0) {
+        let end = nextClose + closeTag.length;
+        while (end < code.length && code[end] !== '>') end++;
+        return { start: nextClose, end: end + 1 };
+      }
+      pos = nextClose + closeTag.length;
+    }
+  }
+  return null;
+}
+
 /**
  * Injects a `data-forge-block-id` attribute into the opening tag of an element
- * located by tagName + className. Used to give manually-added elements an anchor
- * so the style patcher can scope edits correctly.
+ * located by tagName + className, and wraps it with forge-block-start/end markers.
  */
 function injectForgeBlockId(
   code: string,
@@ -260,11 +291,55 @@ function injectForgeBlockId(
     return { patched: code, injected: false };
   }
 
-  const insertAt = tagStart + 1 + tagLower.length;
-  return {
-    patched: code.slice(0, insertAt) + ` data-forge-block-id="${id}"` + code.slice(insertAt),
-    injected: true,
-  };
+  // Find end of opening tag (quote-aware)
+  let pos = tagStart + 1 + tagLower.length;
+  let inQ = false;
+  let qCh = '';
+  while (pos < code.length) {
+    const ch = code[pos];
+    if (inQ) {
+      if (ch === qCh) inQ = false;
+    } else if (ch === '"' || ch === "'") {
+      inQ = true; qCh = ch;
+    } else if (ch === '>') break;
+    pos++;
+  }
+  const openingTagEnd = pos;
+  const isSelfClosing = code[pos - 1] === '/';
+
+  // Indentation of the line containing the opening tag
+  let lineStart = tagStart;
+  while (lineStart > 0 && code[lineStart - 1] !== '\n') lineStart--;
+  const indent = code.slice(lineStart, tagStart).match(/^(\s*)/)?.[1] ?? '';
+
+  // Inject data-forge-block-id attribute after tagName
+  const insertAttrAt = tagStart + 1 + tagLower.length;
+  const attrInjection = ` data-forge-block-id="${id}"`;
+  let result = code.slice(0, insertAttrAt) + attrInjection + code.slice(insertAttrAt);
+  const shift = attrInjection.length;
+  const adjustedOpeningTagEnd = openingTagEnd + shift;
+
+  const startMarker = `{/* forge-block-start:${id} */}\n${indent}`;
+  const endMarker = `\n${indent}{/* forge-block-end:${id} */}`;
+
+  if (isSelfClosing) {
+    const after = adjustedOpeningTagEnd + 1;
+    result =
+      result.slice(0, tagStart) + startMarker + result.slice(tagStart, after) + endMarker + result.slice(after);
+    return { patched: result, injected: true };
+  }
+
+  const closing = findMatchingClosingTag(result, tagLower, adjustedOpeningTagEnd + 1);
+  if (!closing) {
+    // Could not find matching closing tag — return with just the attribute injected
+    return { patched: result, injected: true };
+  }
+
+  // Insert end marker first (higher index), then start marker (avoids position shift)
+  result = result.slice(0, closing.end) + endMarker + result.slice(closing.end);
+  result = result.slice(0, tagStart) + startMarker + result.slice(tagStart);
+
+  return { patched: result, injected: true };
 }
 
 const DEBOUNCE_MS = 500;
@@ -318,14 +393,20 @@ export function useStylePatcher() {
     [flushToSandpack],
   );
 
-  // Auto-inject data-forge-block-id for selected elements that have none
+  // Auto-inject data-forge-block-id for selected elements that have none.
+  // tryInject runs on mount (handles elements selected before StyleEditor was open)
+  // AND on every atom change (handles new selections while StyleEditor is open).
   useEffect(() => {
-    let prevId = store.get(selectedElementAtom)?.id ?? '';
-    const unsub = store.sub(selectedElementAtom, () => {
+    let lastProcessedId = '';
+
+    const tryInject = () => {
       const el = store.get(selectedElementAtom);
-      if (!el || el.id === prevId) return;
-      prevId = el.id;
-      if (el.forgeBlockId || !el.className || !el.tagName) return;
+      if (!el) return;
+      if (el.id === lastProcessedId) return;
+      if (el.forgeBlockId || !el.className || !el.tagName) {
+        lastProcessedId = el.id;
+        return;
+      }
 
       const newId = `block-${el.tagName.toLowerCase()}-${Date.now()}`;
       const updates: Array<[string, string]> = [];
@@ -337,8 +418,13 @@ export function useStylePatcher() {
       if (updates.length > 0) {
         commitUpdates(updates);
         store.set(selectedElementAtom, { ...el, forgeBlockId: newId, isBlockRoot: true });
+        lastProcessedId = el.id;
       }
-    });
+      // If injection failed, don't set lastProcessedId — allow retry on re-selection
+    };
+
+    tryInject();
+    const unsub = store.sub(selectedElementAtom, tryInject);
     return unsub;
   }, [store, commitUpdates]);
 
