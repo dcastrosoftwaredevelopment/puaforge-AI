@@ -353,10 +353,17 @@ export function useStylePatcher() {
   const pendingRef = useRef<Map<string, string>>(new Map());
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Sync filesRef when atom changes from external sources (AI code gen, file save, etc.)
+  // Sync filesRef when atom changes from external sources (AI code gen, file save, etc.).
+  // Re-apply any pending (not-yet-flushed) patches on top so they are not lost when an
+  // unrelated setFiles call (e.g. updating /__forge_global.css) resets filesAtom.
   useEffect(() => {
     return store.sub(filesAtom, () => {
-      filesRef.current = store.get(filesAtom);
+      const next = store.get(filesAtom);
+      if (pendingRef.current.size > 0) {
+        filesRef.current = { ...next, ...Object.fromEntries(pendingRef.current) };
+      } else {
+        filesRef.current = next;
+      }
     });
   }, [store]);
 
