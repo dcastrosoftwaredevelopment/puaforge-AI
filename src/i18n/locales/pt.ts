@@ -166,7 +166,7 @@ export const pt = {
     clear: 'Limpar',
     cancel: 'Cancelar',
     shiftEnter: 'Shift+Enter para nova linha',
-    editingWarning: 'Você está editando o código. Salve ou descarte as alterações no editor para voltar a usar a IA.',
+    editingWarning: 'Você está editando o código. Descarte as alterações ou saia do editor para voltar a usar a IA.',
     placeholder: 'Descreva o que deseja construir...',
     sendImage: 'Enviar imagem',
     imageOnly: '(imagem enviada)',

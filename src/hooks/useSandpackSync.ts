@@ -7,7 +7,8 @@ import { useEditorState } from './useEditorState';
 
 /**
  * Syncs filesAtom changes into Sandpack's internal state.
- * Registers save/discard actions via atom for external consumption.
+ * Also auto-syncs Sandpack editor changes back to filesAtom so the style patcher
+ * always operates on the latest code without requiring an explicit save.
  * Must be rendered inside <SandpackProvider>.
  */
 export function useSandpackSync() {
@@ -19,6 +20,10 @@ export function useSandpackSync() {
   const prevFilesRef = useRef(files);
   const isFirstRunRef = useRef(true);
   const isDirtyRef = useRef(isDirty);
+  // Prevents the filesAtom→Sandpack push from firing when auto-sync triggers setFiles
+  const isAutoSyncRef = useRef(false);
+  // Snapshot captured at the start of a manual edit session (used for Discard)
+  const preEditSnapshotRef = useRef<Record<string, string> | null>(null);
 
   useEffect(() => {
     sandpackRef.current = sandpack;
@@ -27,10 +32,17 @@ export function useSandpackSync() {
     isDirtyRef.current = isDirty;
   });
 
-  // Push atom changes → Sandpack (skip first run, Provider already has correct files)
+  // Push atom changes → Sandpack (skip first run, Provider already has correct files).
+  // When the change came from the editor auto-sync, skip the push and dirty-clear
+  // to avoid an unnecessary Sandpack update and to preserve the dirty state.
   useEffect(() => {
     if (isFirstRunRef.current) {
       isFirstRunRef.current = false;
+      return;
+    }
+    if (isAutoSyncRef.current) {
+      isAutoSyncRef.current = false;
+      prevFilesRef.current = files;
       return;
     }
     const sp = sandpackRef.current;
@@ -51,51 +63,49 @@ export function useSandpackSync() {
     setDirty(false);
   }, [files, setDirty]);
 
-  // Detect user edits — poll using refs to avoid re-renders when already dirty
+  // Detect user edits in the Sandpack editor. When a change is found:
+  // - capture a pre-edit snapshot for potential Discard
+  // - immediately sync filesAtom with the live Sandpack state (no manual Save needed)
+  // - set dirty so the EditBar appears and chat is disabled
   useEffect(() => {
     const interval = setInterval(() => {
       if (isDirtyRef.current) return;
       const spFiles = sandpackRef.current.files;
+      const updated: Record<string, string> = {};
+      let changed = false;
       for (const [path, file] of Object.entries(spFiles)) {
         if (path === '/index.html' || path === '/package.json') continue;
         if (typeof file === 'object' && file.hidden) continue;
         const code = typeof file === 'string' ? file : file.code;
+        updated[path] = code;
         if (prevFilesRef.current[path] !== undefined && prevFilesRef.current[path] !== code) {
-          setDirty(true);
-          return;
+          changed = true;
         }
+      }
+      if (changed) {
+        preEditSnapshotRef.current = { ...prevFilesRef.current };
+        isAutoSyncRef.current = true;
+        setFiles(updated);
+        setDirty(true);
       }
     }, 800);
     return () => clearInterval(interval);
-  }, [setDirty]);
+  }, [setDirty, setFiles]);
 
-  // Save: read all files from Sandpack → update atoms
-  const saveEdits = useCallback(() => {
-    const spFiles = sandpackRef.current.files;
-    const updated: Record<string, string> = {};
-
-    for (const [path, file] of Object.entries(spFiles)) {
-      if (path === '/index.html' || path === '/package.json') continue;
-      if (typeof file === 'object' && file.hidden) continue;
-      const code = typeof file === 'string' ? file : file.code;
-      updated[path] = code;
+  // Discard: revert Sandpack and filesAtom to the state captured before editing started
+  const discardEdits = useCallback(() => {
+    const snapshot = preEditSnapshotRef.current ?? prevFilesRef.current;
+    const sp = sandpackRef.current;
+    for (const [path, code] of Object.entries(snapshot)) {
+      sp.updateFile(path, code);
     }
-
-    setFiles(updated);
+    isAutoSyncRef.current = true;
+    setFiles({ ...snapshot });
+    preEditSnapshotRef.current = null;
     setDirty(false);
   }, [setFiles, setDirty]);
 
-  // Discard: reset Sandpack to atom state
-  const discardEdits = useCallback(() => {
-    const sp = sandpackRef.current;
-    for (const [path, code] of Object.entries(prevFilesRef.current)) {
-      sp.updateFile(path, code);
-    }
-    setDirty(false);
-  }, [setDirty]);
-
-  // Register actions so other components can call save/discard without useSandpack()
   useEffect(() => {
-    setActions({ save: saveEdits, discard: discardEdits });
-  }, [saveEdits, discardEdits, setActions]);
+    setActions({ save: () => {}, discard: discardEdits });
+  }, [discardEdits, setActions]);
 }

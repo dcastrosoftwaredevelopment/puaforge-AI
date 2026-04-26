@@ -166,7 +166,7 @@ export const en = {
     clear: 'Clear',
     cancel: 'Cancel',
     shiftEnter: 'Shift+Enter for new line',
-    editingWarning: 'You are editing the code. Save or discard your changes in the editor to use the AI again.',
+    editingWarning: 'You are editing the code. Discard changes or leave the editor to use AI again.',
     placeholder: 'Describe what you want to build...',
     sendImage: 'Send image',
     imageOnly: '(image sent)',
