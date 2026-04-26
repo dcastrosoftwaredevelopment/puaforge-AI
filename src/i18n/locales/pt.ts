@@ -373,6 +373,7 @@ export const pt = {
     globalFont: 'Fonte Global',
     fontDefault: 'Padrão',
     searchFonts: 'Buscar fontes...',
+    selectBlockRoot: '↑ Selecionar bloco pai',
     clearFont: 'Remover fonte',
     useCustomFont: 'Usar "{{font}}"',
     noFontsFound: 'Nenhuma fonte encontrada',

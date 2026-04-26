@@ -232,6 +232,41 @@ function patchInlineStyleForElement(code: string, forgeBlockId: string, oldStyle
   return code.slice(0, tagStart) + patchedTag + code.slice(pos + 1);
 }
 
+/**
+ * Injects a `data-forge-block-id` attribute into the opening tag of an element
+ * located by tagName + className. Used to give manually-added elements an anchor
+ * so the style patcher can scope edits correctly.
+ */
+function injectForgeBlockId(
+  code: string,
+  tagName: string,
+  className: string,
+  id: string,
+): { patched: string; injected: boolean } {
+  if (!tagName || !className) return { patched: code, injected: false };
+
+  const classAttr1 = `className="${className}"`;
+  const classAttr2 = `className={'${className}'}`;
+  let anchorIdx = code.indexOf(classAttr1);
+  if (anchorIdx === -1) anchorIdx = code.indexOf(classAttr2);
+  if (anchorIdx === -1) return { patched: code, injected: false };
+
+  let tagStart = anchorIdx;
+  while (tagStart > 0 && code[tagStart] !== '<') tagStart--;
+
+  const tagLower = tagName.toLowerCase();
+  const tagSlice = code.slice(tagStart + 1);
+  if (!tagSlice.startsWith(tagLower) || /[a-z0-9]/i.test(tagSlice[tagLower.length] ?? '')) {
+    return { patched: code, injected: false };
+  }
+
+  const insertAt = tagStart + 1 + tagLower.length;
+  return {
+    patched: code.slice(0, insertAt) + ` data-forge-block-id="${id}"` + code.slice(insertAt),
+    injected: true,
+  };
+}
+
 const DEBOUNCE_MS = 500;
 
 export function useStylePatcher() {
@@ -282,6 +317,30 @@ export function useStylePatcher() {
     },
     [flushToSandpack],
   );
+
+  // Auto-inject data-forge-block-id for selected elements that have none
+  useEffect(() => {
+    let prevId = store.get(selectedElementAtom)?.id ?? '';
+    const unsub = store.sub(selectedElementAtom, () => {
+      const el = store.get(selectedElementAtom);
+      if (!el || el.id === prevId) return;
+      prevId = el.id;
+      if (el.forgeBlockId || !el.className || !el.tagName) return;
+
+      const newId = `block-${el.tagName.toLowerCase()}-${Date.now()}`;
+      const updates: Array<[string, string]> = [];
+      for (const [path, code] of Object.entries(filesRef.current)) {
+        if (!path.endsWith('.tsx') && !path.endsWith('.jsx')) continue;
+        const { patched, injected } = injectForgeBlockId(code, el.tagName, el.className, newId);
+        if (injected) updates.push([path, patched]);
+      }
+      if (updates.length > 0) {
+        commitUpdates(updates);
+        store.set(selectedElementAtom, { ...el, forgeBlockId: newId, isBlockRoot: true });
+      }
+    });
+    return unsub;
+  }, [store, commitUpdates]);
 
   const applyClassChange = useCallback(
     (oldClassName: string, newClassName: string) => {

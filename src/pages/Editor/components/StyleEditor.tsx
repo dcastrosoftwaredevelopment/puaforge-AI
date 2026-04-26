@@ -33,6 +33,21 @@ export default function StyleEditor() {
               {selectedElement.tagName}
             </span>
           )}
+          {selectedElement && !selectedElement.isBlockRoot && selectedElement.forgeBlockId && (
+            <button
+              onClick={() =>
+                window.dispatchEvent(
+                  new CustomEvent('forge-select-block-root', {
+                    detail: { forgeBlockId: selectedElement.forgeBlockId },
+                  }),
+                )
+              }
+              title={t('inspect.selectBlockRoot')}
+              className="text-[10px] font-mono text-text-muted border border-[rgba(255,255,255,0.06)] px-1.5 py-0.5 rounded hover:text-text-secondary hover:border-[rgba(255,255,255,0.12)] transition cursor-pointer flex items-center gap-1 max-w-[120px] truncate"
+            >
+              ↑ <span className="truncate">{selectedElement.forgeBlockId}</span>
+            </button>
+          )}
           <div className="ml-auto flex items-center gap-1.5">
             {selectedElement && (
               <div className="flex items-center gap-0.5 bg-bg-elevated rounded px-1 py-0.5">

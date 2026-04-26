@@ -301,6 +301,23 @@ export function ForgeInspect({ children }) {
         }
       } else if (t === 'FORGE_REFRESH_TREE') {
         if (activeRef.current) { assignIds(); sendTree() }
+      } else if (t === 'FORGE_SELECT_BLOCK_ROOT') {
+        var bid = e.data.forgeBlockId
+        if (!bid) return
+        var blockEl = document.querySelector('[data-forge-block-id="' + bid + '"]')
+        if (!blockEl) return
+        try { blockEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) } catch(x) {}
+        watchSelected(blockEl)
+        if (selectedBox) {
+          var brect = blockEl.getBoundingClientRect()
+          updateBoxRect(selectedBox, brect)
+          selectedTagLabel.textContent = blockEl.tagName.toLowerCase()
+          selectedDeleteBtn.style.display = 'flex'
+          selectedBox.style.display = 'block'
+          if (hoverBox) hoverBox.style.display = 'none'
+          lastHoveredId = null
+        }
+        window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_SELECTED' }, getInfo(blockEl)), '*')
       } else if (t === 'FORGE_DESELECT') {
         if (selectedBox) selectedBox.style.display = 'none'
         if (hoverBox) hoverBox.style.display = 'none'

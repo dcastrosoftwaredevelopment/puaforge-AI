@@ -371,6 +371,7 @@ export const en = {
     globalFont: 'Global Font',
     fontDefault: 'Default',
     searchFonts: 'Search fonts...',
+    selectBlockRoot: '↑ Select parent block',
     clearFont: 'Clear font',
     useCustomFont: 'Use "{{font}}"',
     noFontsFound: 'No fonts found',
