@@ -16,6 +16,7 @@ import AttributesSection from './AttributesSection';
 import AdvancedSection from './AdvancedSection';
 import TextContentSection from './TextContentSection';
 import InspectToggle from './InspectToggle';
+import GlobalFontSection from './GlobalFontSection';
 
 export default function StyleEditor() {
   const { t } = useTranslation();
@@ -31,6 +32,21 @@ export default function StyleEditor() {
             <span className="text-[10px] font-mono bg-forge-terracotta/10 text-forge-terracotta border border-forge-terracotta/20 px-1.5 py-0.5 rounded">
               {selectedElement.tagName}
             </span>
+          )}
+          {selectedElement && !selectedElement.isBlockRoot && selectedElement.forgeBlockId && (
+            <button
+              onClick={() =>
+                window.dispatchEvent(
+                  new CustomEvent('forge-select-block-root', {
+                    detail: { forgeBlockId: selectedElement.forgeBlockId },
+                  }),
+                )
+              }
+              title={t('inspect.selectBlockRoot')}
+              className="text-[10px] font-mono text-text-muted border border-[rgba(255,255,255,0.06)] px-1.5 py-0.5 rounded hover:text-text-secondary hover:border-[rgba(255,255,255,0.12)] transition cursor-pointer flex items-center gap-1 max-w-[120px] truncate"
+            >
+              ↑ <span className="truncate">{selectedElement.forgeBlockId}</span>
+            </button>
           )}
           <div className="ml-auto flex items-center gap-1.5">
             {selectedElement && (
@@ -61,6 +77,7 @@ export default function StyleEditor() {
             <InspectToggle />
           </div>
         </div>
+        <GlobalFontSection />
         <div className={!selectedElement ? 'pointer-events-none opacity-40 select-none' : ''}>
           {selectedElement && <TextContentSection />}
           <TypographySection />

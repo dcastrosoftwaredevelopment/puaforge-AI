@@ -77,17 +77,21 @@ export function useInspectBridge() {
       });
     const onHoverById = (e: Event) => post({ type: 'FORGE_HOVER_BY_ID', id: (e as CustomEvent).detail.id });
     const onRefreshTree = () => post({ type: 'FORGE_REFRESH_TREE' });
+    const onSelectBlockRoot = (e: Event) =>
+      post({ type: 'FORGE_SELECT_BLOCK_ROOT', forgeBlockId: (e as CustomEvent).detail.forgeBlockId });
 
     window.addEventListener('forge-inspect-toggle', onToggle);
     window.addEventListener('forge-select-by-id', onSelectById);
     window.addEventListener('forge-hover-by-id', onHoverById);
     window.addEventListener('forge-refresh-tree', onRefreshTree);
+    window.addEventListener('forge-select-block-root', onSelectBlockRoot);
 
     return () => {
       window.removeEventListener('forge-inspect-toggle', onToggle);
       window.removeEventListener('forge-select-by-id', onSelectById);
       window.removeEventListener('forge-hover-by-id', onHoverById);
       window.removeEventListener('forge-refresh-tree', onRefreshTree);
+      window.removeEventListener('forge-select-block-root', onSelectBlockRoot);
     };
   }, []); // stable — closes over sandpackRef (a stable object)
 
@@ -105,6 +109,7 @@ export function useInspectBridge() {
           tagName: e.data.tagName,
           className: e.data.className,
           inlineStyle: e.data.inlineStyle || '',
+          isBlockRoot: !!e.data.isBlockRoot,
           forgeBlockId: e.data.forgeBlockId || '',
           attributes: (e.data.attributes as Record<string, string>) || {},
           textContent: e.data.textContent as string | undefined,

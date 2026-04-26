@@ -23,13 +23,15 @@ export function ForgeInspect({ children }) {
 
     function assignIds() {
       document.querySelectorAll('*').forEach(function(el) {
-        el.setAttribute('data-vibe-id', stableId(el))
+        if (!el.hasAttribute('data-forge-id')) {
+          el.setAttribute('data-forge-id', stableId(el))
+        }
       })
     }
 
     function removeIds() {
-      document.querySelectorAll('[data-vibe-id]').forEach(function(el) {
-        el.removeAttribute('data-vibe-id')
+      document.querySelectorAll('[data-forge-id]').forEach(function(el) {
+        el.removeAttribute('data-forge-id')
       })
     }
 
@@ -42,7 +44,7 @@ export function ForgeInspect({ children }) {
         var n = domNode(el.children[i], depth + 1)
         if (n) kids.push(n)
       }
-      return { id: el.getAttribute('data-vibe-id') || '', tagName: tag, className: el.getAttribute('class') || '', children: kids }
+      return { id: el.getAttribute('data-forge-id') || '', tagName: tag, className: el.getAttribute('class') || '', children: kids }
     }
 
     function sendTree() {
@@ -76,9 +78,7 @@ export function ForgeInspect({ children }) {
       return attrs
     }
 
-    var TEXT_TAGS_SET = { h1: 1, h2: 1, h3: 1, h4: 1, h5: 1, h6: 1, p: 1, span: 1, a: 1, button: 1, label: 1, blockquote: 1, li: 1 }
     function getDirectText(el) {
-      if (!TEXT_TAGS_SET[el.tagName.toLowerCase()]) return undefined
       for (var i = 0; i < el.childNodes.length; i++) {
         if (el.childNodes[i].nodeType === 1) return undefined
       }
@@ -88,10 +88,11 @@ export function ForgeInspect({ children }) {
     function getInfo(el) {
       var rect = el.getBoundingClientRect()
       return {
-        id: el.getAttribute('data-vibe-id') || '',
+        id: el.getAttribute('data-forge-id') || '',
         tagName: el.tagName.toLowerCase(),
         className: el.getAttribute('class') || '',
         inlineStyle: el.getAttribute('style') || '',
+        isBlockRoot: el.hasAttribute('data-forge-block-id'),
         forgeBlockId: getForgeBlockId(el),
         attributes: getAttributes(el),
         textContent: getDirectText(el),
@@ -164,7 +165,7 @@ export function ForgeInspect({ children }) {
     function onDocMove(e) {
       var el = e.target
       if (el && el !== document.body && el !== document.documentElement) {
-        var id = el.getAttribute('data-vibe-id') || ''
+        var id = el.getAttribute('data-forge-id') || ''
         if (id === lastHoveredId) return
         lastHoveredId = id
         if (el !== selectedElRef) {
@@ -273,7 +274,7 @@ export function ForgeInspect({ children }) {
         if (on === activeRef.current) return
         if (on) activate(); else deactivate()
       } else if (t === 'FORGE_SELECT_BY_ID') {
-        var el = document.querySelector('[data-vibe-id="' + e.data.id + '"]')
+        var el = document.querySelector('[data-forge-id="' + e.data.id + '"]')
         if (!el) return
         try { el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) } catch(x) {}
         watchSelected(el)
@@ -289,17 +290,34 @@ export function ForgeInspect({ children }) {
         }
         window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_SELECTED', stayInLayers: !!e.data.stayInLayers }, getInfo(el)), '*')
       } else if (t === 'FORGE_HOVER_BY_ID') {
-        var el2 = document.querySelector('[data-vibe-id="' + e.data.id + '"]')
+        var el2 = document.querySelector('[data-forge-id="' + e.data.id + '"]')
         if (el2) {
           if (hoverBox && el2 !== selectedElRef) {
             updateBoxRect(hoverBox, el2.getBoundingClientRect())
             hoverBox.style.display = 'block'
-            lastHoveredId = el2.getAttribute('data-vibe-id') || ''
+            lastHoveredId = el2.getAttribute('data-forge-id') || ''
           }
           window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_HOVERED' }, getInfo(el2)), '*')
         }
       } else if (t === 'FORGE_REFRESH_TREE') {
         if (activeRef.current) { assignIds(); sendTree() }
+      } else if (t === 'FORGE_SELECT_BLOCK_ROOT') {
+        var bid = e.data.forgeBlockId
+        if (!bid) return
+        var blockEl = document.querySelector('[data-forge-block-id="' + bid + '"]')
+        if (!blockEl) return
+        try { blockEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) } catch(x) {}
+        watchSelected(blockEl)
+        if (selectedBox) {
+          var brect = blockEl.getBoundingClientRect()
+          updateBoxRect(selectedBox, brect)
+          selectedTagLabel.textContent = blockEl.tagName.toLowerCase()
+          selectedDeleteBtn.style.display = 'flex'
+          selectedBox.style.display = 'block'
+          if (hoverBox) hoverBox.style.display = 'none'
+          lastHoveredId = null
+        }
+        window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_SELECTED' }, getInfo(blockEl)), '*')
       } else if (t === 'FORGE_DESELECT') {
         if (selectedBox) selectedBox.style.display = 'none'
         if (hoverBox) hoverBox.style.display = 'none'
@@ -328,6 +346,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App'
 import { ForgeInspect } from './__forgeInspect'
 import './assets/images.css'
+import './__forge_global.css'
 
 createRoot(document.getElementById('root')).render(
   React.createElement(ForgeInspect, null, React.createElement(App, null))

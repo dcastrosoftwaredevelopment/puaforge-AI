@@ -8,14 +8,12 @@ import { useViewMode } from '@/hooks/useViewMode';
 import { useDevicePreview } from '@/hooks/useDevicePreview';
 import { useSandpackSync } from '@/hooks/useSandpackSync';
 import { useInspectBridge } from '@/hooks/useInspectBridge';
-import { useEditorState } from '@/hooks/useEditorState';
 import { usePanelSizes } from '@/hooks/usePanelSizes';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useEditorPanelTabs } from '@/hooks/useEditorPanelTabs';
 import { useMobileDrawer } from '@/hooks/useMobileDrawer';
 import { useBlockDropZone } from '@/hooks/useBlockDropZone';
 import ResizeHandle from './ResizeHandle';
-import EditBar from './EditBar';
 import EditorPanelTabs from './EditorPanelTabs';
 import StyleEditor from './StyleEditor';
 import LayersPanel from './LayersPanel';
@@ -42,7 +40,6 @@ const SandpackSyncBridge = memo(function SandpackSyncBridge() {
 });
 
 export default function SandpackContent() {
-  const { isDirty, saveEdits, discardEdits } = useEditorState();
   const { editorFraction, setEditorFraction } = usePanelSizes();
   const { showEditor, showPreview, isSplit } = useViewMode();
   const { device } = useDevicePreview();
@@ -148,8 +145,6 @@ export default function SandpackContent() {
               <div className="h-1 w-10 rounded-full bg-border-default" />
             </div>
 
-            {isDirty && <EditBar onSave={saveEdits} onDiscard={discardEdits} />}
-
             {drawerTab === 'chat' ?
               <div className="flex-1 min-h-0 overflow-hidden">
                 <MobileChatPanel />
@@ -197,7 +192,6 @@ export default function SandpackContent() {
             className={showEditor ? 'flex flex-col min-w-0 h-full' : 'hidden'}
             style={isSplit ? { width: `${editorFraction * 100}%` } : { flex: 1 }}
           >
-            {isDirty && <EditBar onSave={saveEdits} onDiscard={discardEdits} />}
             <EditorPanelTabs />
             <div className={editorPanelMode === 'code' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
               <div className="flex items-center justify-end gap-1 px-2 py-1 border-b border-border-subtle shrink-0 bg-bg-secondary">

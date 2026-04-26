@@ -3,7 +3,6 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { Send, ImagePlus, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMessages } from '@/hooks/useMessages';
-import { useEditorState } from '@/hooks/useEditorState';
 import { useMessageSender } from '@/hooks/useMessageSender';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { useState } from 'react';
@@ -12,14 +11,13 @@ export default function PromptInput() {
   const [prompt, setPrompt] = useState('');
   const { t } = useTranslation();
   const { isGenerating } = useMessages();
-  const { isDirty } = useEditorState();
   const { sendMessage } = useMessageSender();
   const { pendingImages, imageError, handleImageSelect, removeImage, clearImages } = useImageUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSend = async () => {
     const text = prompt.trim();
-    if ((!text && pendingImages.length === 0) || isGenerating || isDirty) return;
+    if ((!text && pendingImages.length === 0) || isGenerating) return;
     const images = pendingImages.length > 0 ? [...pendingImages] : undefined;
     setPrompt('');
     clearImages();
@@ -33,15 +31,10 @@ export default function PromptInput() {
     }
   };
 
-  const isDisabled = isGenerating || isDirty;
+  const isDisabled = isGenerating;
 
   return (
     <div className="space-y-2">
-      {isDirty && (
-        <div className="text-xs text-forge-terracotta bg-forge-terracotta/10 border border-forge-terracotta/20 rounded-lg px-3 py-2">
-          {t('chat.editingWarning')}
-        </div>
-      )}
       {imageError && (
         <div className="text-xs text-forge-terracotta bg-forge-terracotta/10 border border-forge-terracotta/20 rounded-lg px-3 py-2">
           {imageError}

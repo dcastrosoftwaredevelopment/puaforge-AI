@@ -85,21 +85,106 @@ function patchInlineStyle(code: string, oldStyle: string, newStyle: string): str
   const jsxObj = toJSXStyleObject(newStyle);
 
   // Pattern 1: style="old" (HTML string format — convert to JSX object)
-  const esc = escapeRegex(oldStyle);
-  const patched1 = code.replace(new RegExp(`style="${esc}"`, 'g'), `style={${jsxObj}}`);
-  if (patched1 !== code) return patched1;
+  if (oldStyle) {
+    const esc = escapeRegex(oldStyle);
+    const patched1 = code.replace(new RegExp(`style="${esc}"`, 'g'), `style={${jsxObj}}`);
+    if (patched1 !== code) return patched1;
+  }
 
-  // Pattern 2: style={{ ... }} — replace the whole JSX object
+  // Pattern 2: style={{ ... }} — replace the whole JSX object.
+  // Only safe when oldStyle is known; without it we cannot identify which element
+  // to target and a global replace would corrupt unrelated style blocks.
+  if (!oldStyle) return code;
   const patched2 = code.replace(/style=\{\{[\s\S]*?\}\}/g, `style={${jsxObj}}`);
   return patched2;
 }
 
 /**
- * Scoped inline style patch: finds the specific JSX element with data-forge-block-id
- * and patches (or injects) the style attribute only within that opening tag.
- * Handles three cases: replace existing style="...", replace style={{...}}, or
- * inject a new style attribute when none exists yet.
+ * Finds an element within `code` by its exact `className` value and applies the same
+ * inline style patch logic as `patchInlineStyleForElement`. Used when a child element
+ * (no own data-forge-block-id) is selected and needs its own style modified.
  */
+function patchInlineStyleByClassName(code: string, className: string, oldStyle: string, newStyle: string): string {
+  if (!className) return code;
+
+  const classAttr1 = `className="${className}"`;
+  const classAttr2 = `className={'${className}'}`;
+  let anchorIdx = code.indexOf(classAttr1);
+  let anchorLen = classAttr1.length;
+  if (anchorIdx === -1) {
+    anchorIdx = code.indexOf(classAttr2);
+    anchorLen = classAttr2.length;
+  }
+  if (anchorIdx === -1) return code;
+
+  let tagStart = anchorIdx;
+  while (tagStart > 0 && code[tagStart] !== '<') tagStart--;
+
+  let pos = anchorIdx + anchorLen;
+  let inQ = false;
+  let qCh = '';
+  while (pos < code.length) {
+    const ch = code[pos];
+    if (inQ) {
+      if (ch === qCh) inQ = false;
+    } else if (ch === '"' || ch === "'") {
+      inQ = true;
+      qCh = ch;
+    } else if (ch === '>') break;
+    pos++;
+  }
+
+  const tag = code.slice(tagStart, pos + 1);
+  const jsxObj = toJSXStyleObject(newStyle);
+  let patchedTag: string;
+
+  if (!newStyle) {
+    patchedTag = tag.replace(/\s+style="[^]*?"(?=\s|\/?>)/, '').replace(/\s+style=\{\{[\s\S]*?\}\}/, '');
+  } else if (tag.match(/style=\{\{[\s\S]*?\}\}/)) {
+    patchedTag = tag.replace(/style=\{\{[\s\S]*?\}\}/, `style={${jsxObj}}`);
+  } else if (tag.includes('style="')) {
+    patchedTag = tag.replace(/style="[^]*?"(?=\s|\/?>)/, `style={${jsxObj}}`);
+  } else {
+    patchedTag =
+      tag.endsWith('/>') ? tag.slice(0, -2) + ` style={${jsxObj}} />` : tag.slice(0, -1) + ` style={${jsxObj}}>`;
+  }
+
+  if (patchedTag === tag) return code;
+  return code.slice(0, tagStart) + patchedTag + code.slice(pos + 1);
+}
+
+/**
+ * Inline style patch for a child element (no own data-forge-block-id).
+ * Scopes the className search to the forge block range when markers are available,
+ * then falls back to a full-file search by className, then to the global patcher.
+ */
+function patchInlineStyleForChild(
+  code: string,
+  forgeBlockId: string,
+  className: string,
+  oldStyle: string,
+  newStyle: string,
+): string {
+  const startMarker = `{/* forge-block-start:${forgeBlockId} */}`;
+  const endMarker = `{/* forge-block-end:${forgeBlockId} */}`;
+  const startIdx = code.indexOf(startMarker);
+  const endIdx = code.indexOf(endMarker, startIdx);
+
+  if (startIdx !== -1 && endIdx !== -1 && className) {
+    const blockEnd = endIdx + endMarker.length;
+    const blockSource = code.slice(startIdx, blockEnd);
+    const patchedBlock = patchInlineStyleByClassName(blockSource, className, oldStyle, newStyle);
+    if (patchedBlock !== blockSource) return code.slice(0, startIdx) + patchedBlock + code.slice(blockEnd);
+  }
+
+  if (className) {
+    const patched = patchInlineStyleByClassName(code, className, oldStyle, newStyle);
+    if (patched !== code) return patched;
+  }
+
+  return patchInlineStyle(code, oldStyle, newStyle);
+}
+
 function patchInlineStyleForElement(code: string, forgeBlockId: string, oldStyle: string, newStyle: string): string {
   const forgeAttr = `data-forge-block-id="${forgeBlockId}"`;
   const attrIdx = code.indexOf(forgeAttr);
@@ -129,13 +214,13 @@ function patchInlineStyleForElement(code: string, forgeBlockId: string, oldStyle
   const jsxObj = toJSXStyleObject(newStyle);
 
   if (!newStyle) {
-    // Remove style attribute entirely — match both brace pairs {{ ... }} for JSX objects
+    // Remove style attribute entirely
     patchedTag = tag.replace(/\s+style="[^]*?"(?=\s|\/?>)/, '').replace(/\s+style=\{\{[\s\S]*?\}\}/, '');
   } else if (tag.match(/style=\{\{[\s\S]*?\}\}/)) {
     // Replace existing JSX object attr — match both brace pairs {{ ... }}
     patchedTag = tag.replace(/style=\{\{[\s\S]*?\}\}/, `style={${jsxObj}}`);
   } else if (tag.includes('style="')) {
-    // Has a string-style attr — replace and convert to JSX object
+    // Replace and convert to JSX object
     patchedTag = tag.replace(/style="[^]*?"(?=\s|\/?>)/, `style={${jsxObj}}`);
   } else {
     // No style attr yet — inject JSX object before closing > or />
@@ -145,6 +230,296 @@ function patchInlineStyleForElement(code: string, forgeBlockId: string, oldStyle
 
   if (patchedTag === tag) return code;
   return code.slice(0, tagStart) + patchedTag + code.slice(pos + 1);
+}
+
+/**
+ * Patches className on the exact element identified by its data-forge-id in source.
+ * Because the element is already located by data-forge-id, oldClass is not needed —
+ * we replace whatever className value is there, or inject one if absent.
+ * Returns the unmodified code when the forge-id is not found (caller handles fallback).
+ */
+function patchClassNameByForgeId(code: string, forgeId: string, _oldClass: string, newClass: string): string {
+  const anchor = `data-forge-id="${forgeId}"`;
+  const anchorIdx = code.indexOf(anchor);
+  if (anchorIdx === -1) return code;
+
+  let tagStart = anchorIdx;
+  while (tagStart > 0 && code[tagStart] !== '<') tagStart--;
+
+  let pos = anchorIdx + anchor.length;
+  let inQ = false;
+  let qCh = '';
+  while (pos < code.length) {
+    const ch = code[pos];
+    if (inQ) {
+      if (ch === qCh) inQ = false;
+    } else if (ch === '"' || ch === "'") {
+      inQ = true;
+      qCh = ch;
+    } else if (ch === '>') break;
+    pos++;
+  }
+
+  const tag = code.slice(tagStart, pos + 1);
+
+  // Element found — replace or inject className without relying on oldClass
+  let patchedTag: string;
+  if (!newClass) {
+    // Remove className attribute entirely
+    patchedTag = tag
+      .replace(/\s+className\s*=\s*"[^"]*"/, '')
+      .replace(/\s+className\s*=\s*'[^']*'/, '')
+      .replace(/\s+className\s*=\s*\{['"][^'"]*['"]\}/, '');
+  } else if (/className\s*=/.test(tag)) {
+    // Replace existing className value
+    patchedTag = tag
+      .replace(/(className\s*=\s*")[^"]*(")/g, `$1${newClass}$2`)
+      .replace(/(className\s*=\s*')[^']*(')/g, `$1${newClass}$2`)
+      .replace(/(className\s*=\s*\{')[^']*('\})/g, `$1${newClass}$2`);
+  } else {
+    // No className yet — inject it before the closing > or />
+    patchedTag =
+      tag.endsWith('/>') ?
+        tag.slice(0, -2) + ` className="${newClass}" />`
+      : tag.slice(0, -1) + ` className="${newClass}">`;
+  }
+
+  if (patchedTag === tag) return code;
+  return code.slice(0, tagStart) + patchedTag + code.slice(pos + 1);
+}
+
+/**
+ * Patches inline style on the exact element identified by its data-forge-id in source.
+ * Returns the unmodified code when the forge-id is not found (caller handles fallback).
+ */
+function patchInlineStyleByForgeId(code: string, forgeId: string, _oldStyle: string, newStyle: string): string {
+  const anchor = `data-forge-id="${forgeId}"`;
+  const anchorIdx = code.indexOf(anchor);
+  if (anchorIdx === -1) return code;
+
+  let tagStart = anchorIdx;
+  while (tagStart > 0 && code[tagStart] !== '<') tagStart--;
+
+  let pos = anchorIdx + anchor.length;
+  let inQ = false;
+  let qCh = '';
+  while (pos < code.length) {
+    const ch = code[pos];
+    if (inQ) {
+      if (ch === qCh) inQ = false;
+    } else if (ch === '"' || ch === "'") {
+      inQ = true;
+      qCh = ch;
+    } else if (ch === '>') break;
+    pos++;
+  }
+
+  const tag = code.slice(tagStart, pos + 1);
+  const jsxObj = toJSXStyleObject(newStyle);
+  let patchedTag: string;
+
+  if (!newStyle) {
+    patchedTag = tag.replace(/\s+style="[^]*?"(?=\s|\/?>)/, '').replace(/\s+style=\{\{[\s\S]*?\}\}/, '');
+  } else if (tag.match(/style=\{\{[\s\S]*?\}\}/)) {
+    patchedTag = tag.replace(/style=\{\{[\s\S]*?\}\}/, `style={${jsxObj}}`);
+  } else if (tag.includes('style="')) {
+    patchedTag = tag.replace(/style="[^]*?"(?=\s|\/?>)/, `style={${jsxObj}}`);
+  } else {
+    patchedTag =
+      tag.endsWith('/>') ? tag.slice(0, -2) + ` style={${jsxObj}} />` : tag.slice(0, -1) + ` style={${jsxObj}}>`;
+  }
+
+  if (patchedTag === tag) return code;
+  return code.slice(0, tagStart) + patchedTag + code.slice(pos + 1);
+}
+
+function findMatchingClosingTag(
+  code: string,
+  tagLower: string,
+  searchFrom: number,
+): { start: number; end: number } | null {
+  let depth = 1;
+  let pos = searchFrom;
+  const openTag = `<${tagLower}`;
+  const closeTag = `</${tagLower}`;
+
+  while (pos < code.length && depth > 0) {
+    const nextOpen = code.indexOf(openTag, pos);
+    const nextClose = code.indexOf(closeTag, pos);
+    if (nextClose === -1) return null;
+
+    if (nextOpen !== -1 && nextOpen < nextClose) {
+      const afterTag = code[nextOpen + openTag.length] ?? '';
+      if (/[\s/>]/.test(afterTag)) depth++;
+      pos = nextOpen + openTag.length;
+    } else {
+      depth--;
+      if (depth === 0) {
+        let end = nextClose + closeTag.length;
+        while (end < code.length && code[end] !== '>') end++;
+        return { start: nextClose, end: end + 1 };
+      }
+      pos = nextClose + closeTag.length;
+    }
+  }
+  return null;
+}
+
+/**
+ * Injects `data-forge-id` + `data-forge-block-id` attributes into an element's opening
+ * tag and wraps it with forge-block-start/end markers. Uses a cascade of search strategies
+ * to locate the element even when it has no className or shares classes with other elements.
+ */
+function injectForgeBlockId(
+  code: string,
+  tagName: string,
+  id: string,
+  forgeId: string,
+  opts: {
+    className?: string;
+    parentForgeBlockId?: string;
+    attributes?: Record<string, string>;
+    textContent?: string;
+  },
+): { patched: string; injected: boolean } {
+  if (!tagName) return { patched: code, injected: false };
+  const tagLower = tagName.toLowerCase();
+
+  // Walk back from anchorIdx to find '<' and verify the tag matches tagLower.
+  function findTagStart(anchorIdx: number): number {
+    let ts = anchorIdx;
+    while (ts > 0 && code[ts] !== '<') ts--;
+    const slice = code.slice(ts + 1);
+    if (!slice.startsWith(tagLower) || /[a-z0-9]/i.test(slice[tagLower.length] ?? '')) return -1;
+    return ts;
+  }
+
+  let tagStart = -1;
+  let alreadyHasForgeId = false;
+
+  // Strategy 0: data-forge-id already in source — use as direct anchor (avoids re-scanning)
+  if (tagStart === -1) {
+    const s0 = code.indexOf(`data-forge-id="${forgeId}"`);
+    if (s0 !== -1) {
+      const ts = findTagStart(s0);
+      if (ts !== -1) {
+        tagStart = ts;
+        alreadyHasForgeId = true;
+      }
+    }
+  }
+
+  // Strategy 1: className scoped to parent forge block (precise when class is non-unique)
+  if (tagStart === -1 && opts.className && opts.parentForgeBlockId) {
+    const sm = `{/* forge-block-start:${opts.parentForgeBlockId} */}`;
+    const em = `{/* forge-block-end:${opts.parentForgeBlockId} */}`;
+    const bs = code.indexOf(sm);
+    const be = bs !== -1 ? code.indexOf(em, bs) : -1;
+    if (bs !== -1 && be !== -1) {
+      const scope = code.slice(bs, be);
+      let ai = scope.indexOf(`className="${opts.className}"`);
+      if (ai === -1) ai = scope.indexOf(`className={'${opts.className}'}`);
+      if (ai !== -1) {
+        const ts = findTagStart(bs + ai);
+        if (ts !== -1) tagStart = ts;
+      }
+    }
+  }
+
+  // Strategy 2: className global
+  if (tagStart === -1 && opts.className) {
+    let ai = code.indexOf(`className="${opts.className}"`);
+    if (ai === -1) ai = code.indexOf(`className={'${opts.className}'}`);
+    if (ai !== -1) {
+      const ts = findTagStart(ai);
+      if (ts !== -1) tagStart = ts;
+    }
+  }
+
+  // Strategy 3: id attribute
+  if (tagStart === -1 && opts.attributes?.id) {
+    const ai = code.indexOf(`id="${opts.attributes.id}"`);
+    if (ai !== -1) {
+      const ts = findTagStart(ai);
+      if (ts !== -1) tagStart = ts;
+    }
+  }
+
+  // Strategy 4: other unique HTML attributes
+  if (tagStart === -1 && opts.attributes) {
+    for (const attr of ['href', 'src', 'alt', 'placeholder', 'type', 'name'] as const) {
+      const val = opts.attributes[attr];
+      if (!val) continue;
+      const ai = code.indexOf(`${attr}="${val}"`);
+      if (ai === -1) continue;
+      const ts = findTagStart(ai);
+      if (ts !== -1) {
+        tagStart = ts;
+        break;
+      }
+    }
+  }
+
+  // Strategy 5: textContent (for leaf text elements with no class or attributes)
+  if (tagStart === -1 && opts.textContent) {
+    const textEsc = escapeRegex(opts.textContent);
+    const re = new RegExp(`<${tagLower}(\\s[^>]*)?>\\s*${textEsc}\\s*<\\/${tagLower}\\s*>`);
+    const m = re.exec(code);
+    if (m) tagStart = m.index;
+  }
+
+  if (tagStart === -1) return { patched: code, injected: false };
+
+  // Find end of opening tag (quote-aware)
+  let pos = tagStart + 1 + tagLower.length;
+  let inQ = false;
+  let qCh = '';
+  while (pos < code.length) {
+    const ch = code[pos];
+    if (inQ) {
+      if (ch === qCh) inQ = false;
+    } else if (ch === '"' || ch === "'") {
+      inQ = true;
+      qCh = ch;
+    } else if (ch === '>') break;
+    pos++;
+  }
+  const openingTagEnd = pos;
+  const isSelfClosing = code[pos - 1] === '/';
+
+  // Indentation of the line containing the opening tag
+  let lineStart = tagStart;
+  while (lineStart > 0 && code[lineStart - 1] !== '\n') lineStart--;
+  const indent = code.slice(lineStart, tagStart).match(/^(\s*)/)?.[1] ?? '';
+
+  // Inject data-forge-id (unless already present) + data-forge-block-id after tagName
+  const insertAttrAt = tagStart + 1 + tagLower.length;
+  const attrInjection =
+    alreadyHasForgeId ? ` data-forge-block-id="${id}"` : ` data-forge-id="${forgeId}" data-forge-block-id="${id}"`;
+  let result = code.slice(0, insertAttrAt) + attrInjection + code.slice(insertAttrAt);
+  const shift = attrInjection.length;
+  const adjustedOpeningTagEnd = openingTagEnd + shift;
+
+  const startMarker = `{/* forge-block-start:${id} */}\n${indent}`;
+  const endMarker = `\n${indent}{/* forge-block-end:${id} */}`;
+
+  if (isSelfClosing) {
+    const after = adjustedOpeningTagEnd + 1;
+    result = result.slice(0, tagStart) + startMarker + result.slice(tagStart, after) + endMarker + result.slice(after);
+    return { patched: result, injected: true };
+  }
+
+  const closing = findMatchingClosingTag(result, tagLower, adjustedOpeningTagEnd + 1);
+  if (!closing) {
+    // Could not find matching closing tag — return with just the attributes injected
+    return { patched: result, injected: true };
+  }
+
+  // Insert end marker first (higher index), then start marker (avoids position shift)
+  result = result.slice(0, closing.end) + endMarker + result.slice(closing.end);
+  result = result.slice(0, tagStart) + startMarker + result.slice(tagStart);
+
+  return { patched: result, injected: true };
 }
 
 const DEBOUNCE_MS = 500;
@@ -158,10 +533,17 @@ export function useStylePatcher() {
   const pendingRef = useRef<Map<string, string>>(new Map());
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Sync filesRef when atom changes from external sources (AI code gen, file save, etc.)
+  // Sync filesRef when atom changes from external sources (AI code gen, file save, etc.).
+  // Re-apply any pending (not-yet-flushed) patches on top so they are not lost when an
+  // unrelated setFiles call (e.g. updating /__forge_global.css) resets filesAtom.
   useEffect(() => {
     return store.sub(filesAtom, () => {
-      filesRef.current = store.get(filesAtom);
+      const next = store.get(filesAtom);
+      if (pendingRef.current.size > 0) {
+        filesRef.current = { ...next, ...Object.fromEntries(pendingRef.current) };
+      } else {
+        filesRef.current = next;
+      }
     });
   }, [store]);
 
@@ -198,15 +580,69 @@ export function useStylePatcher() {
     [flushToSandpack],
   );
 
-  const applyClassChange = useCallback(
-    (oldClassName: string, newClassName: string) => {
-      const forgeBlockId = store.get(selectedElementAtom)?.forgeBlockId ?? '';
+  // Auto-inject data-forge-block-id for selected elements that have none.
+  // tryInject runs on mount (handles elements selected before StyleEditor was open)
+  // AND on every atom change (handles new selections while StyleEditor is open).
+  useEffect(() => {
+    let lastProcessedId = '';
+
+    const tryInject = () => {
+      const el = store.get(selectedElementAtom);
+      if (!el) return;
+      if (el.id === lastProcessedId) return;
+      if (el.isBlockRoot || !el.tagName) {
+        lastProcessedId = el.id;
+        return;
+      }
+
+      const newId = `block-${el.tagName.toLowerCase()}-${Date.now()}`;
       const updates: Array<[string, string]> = [];
       for (const [path, code] of Object.entries(filesRef.current)) {
-        const patched =
-          forgeBlockId ?
-            patchClassNameForElement(code, forgeBlockId, oldClassName, newClassName)
-          : patchCode(code, oldClassName, newClassName);
+        if (!path.endsWith('.tsx') && !path.endsWith('.jsx')) continue;
+        const { patched, injected } = injectForgeBlockId(code, el.tagName, newId, el.id, {
+          className: el.className || undefined,
+          parentForgeBlockId: el.forgeBlockId || undefined,
+          attributes: el.attributes,
+          textContent: el.textContent,
+        });
+        if (injected) updates.push([path, patched]);
+      }
+      if (updates.length > 0) {
+        commitUpdates(updates);
+        store.set(selectedElementAtom, { ...el, forgeBlockId: newId, isBlockRoot: true });
+        lastProcessedId = el.id;
+      }
+      // If injection failed, don't set lastProcessedId — allow retry on re-selection
+    };
+
+    tryInject();
+    const unsub = store.sub(selectedElementAtom, tryInject);
+    // Retry when files change — covers the case where the element was selected before
+    // the 800ms auto-sync poll fired (filesRef was stale at injection time).
+    const unsubFiles = store.sub(filesAtom, () => {
+      const el = store.get(selectedElementAtom);
+      if (el && !el.forgeBlockId && el.id !== lastProcessedId) tryInject();
+    });
+    return () => {
+      unsub();
+      unsubFiles();
+    };
+  }, [store, commitUpdates]);
+
+  const applyClassChange = useCallback(
+    (oldClassName: string, newClassName: string) => {
+      const el = store.get(selectedElementAtom);
+      const forgeId = el?.id ?? '';
+      const forgeBlockId = el?.forgeBlockId ?? '';
+      const updates: Array<[string, string]> = [];
+      for (const [path, code] of Object.entries(filesRef.current)) {
+        // Primary: patch by data-forge-id (unique, written to source during injection)
+        let patched = forgeId ? patchClassNameByForgeId(code, forgeId, oldClassName, newClassName) : code;
+        // Fallback: patch by data-forge-block-id (catalog blocks not yet reached by forge-id)
+        if (patched === code && forgeBlockId)
+          patched = patchClassNameForElement(code, forgeBlockId, oldClassName, newClassName);
+        // Last resort: global className replace
+        if (patched === code) patched = patchCode(code, oldClassName, newClassName);
         if (patched !== code) updates.push([path, patched]);
       }
       if (updates.length > 0) commitUpdates(updates);
@@ -217,13 +653,25 @@ export function useStylePatcher() {
   const applyInlineStyleChange = useCallback(
     (oldStyle: string, newStyle: string) => {
       if (oldStyle === newStyle) return;
-      const forgeBlockId = store.get(selectedElementAtom)?.forgeBlockId ?? '';
+      const el = store.get(selectedElementAtom);
+      const forgeId = el?.id ?? '';
+      const forgeBlockId = el?.forgeBlockId ?? '';
+      const isBlockRoot = el?.isBlockRoot ?? false;
+      const className = el?.className ?? '';
       const updates: Array<[string, string]> = [];
       for (const [path, code] of Object.entries(filesRef.current)) {
-        const patched =
-          forgeBlockId ?
-            patchInlineStyleForElement(code, forgeBlockId, oldStyle, newStyle)
-          : patchInlineStyle(code, oldStyle, newStyle);
+        // Primary: patch by data-forge-id (unique, written to source during injection)
+        let patched = forgeId ? patchInlineStyleByForgeId(code, forgeId, oldStyle, newStyle) : code;
+        if (patched === code) {
+          // Fallback: block-id based patchers (catalog blocks / pre-injection state)
+          if (forgeBlockId && isBlockRoot) {
+            patched = patchInlineStyleForElement(code, forgeBlockId, oldStyle, newStyle);
+          } else if (forgeBlockId && !isBlockRoot) {
+            patched = patchInlineStyleForChild(code, forgeBlockId, className, oldStyle, newStyle);
+          } else {
+            patched = patchInlineStyle(code, oldStyle, newStyle);
+          }
+        }
         if (patched !== code) updates.push([path, patched]);
       }
       if (updates.length > 0) commitUpdates(updates);

@@ -1,36 +1,44 @@
-import { useCallback, useEffect, useRef } from 'react';
-import { useSetAtom } from 'jotai';
+import { useEffect, useRef } from 'react';
 import { useSandpack } from '@codesandbox/sandpack-react';
-import { editorActionsAtom } from '@/atoms';
 import { useFiles } from './useFiles';
-import { useEditorState } from './useEditorState';
+import { FORGE_INSPECT_SOURCE } from '@/utils/inspectFiles';
 
 /**
  * Syncs filesAtom changes into Sandpack's internal state.
- * Registers save/discard actions via atom for external consumption.
+ * Also auto-syncs Sandpack editor changes back to filesAtom so the style patcher
+ * always operates on the latest code without requiring an explicit save.
  * Must be rendered inside <SandpackProvider>.
  */
 export function useSandpackSync() {
   const { files, setFiles } = useFiles();
   const { sandpack } = useSandpack();
-  const { isDirty, setDirty } = useEditorState();
-  const setActions = useSetAtom(editorActionsAtom);
   const sandpackRef = useRef(sandpack);
   const prevFilesRef = useRef(files);
   const isFirstRunRef = useRef(true);
-  const isDirtyRef = useRef(isDirty);
+  // Prevents the filesAtom→Sandpack push from firing when auto-sync triggers setFiles
+  const isAutoSyncRef = useRef(false);
 
   useEffect(() => {
     sandpackRef.current = sandpack;
   });
-  useEffect(() => {
-    isDirtyRef.current = isDirty;
-  });
 
-  // Push atom changes → Sandpack (skip first run, Provider already has correct files)
+  // Always push the current FORGE_INSPECT_SOURCE to the sandbox on mount.
+  // The file is set once at SandpackProvider initialization so HMR/cache can leave
+  // the iframe running a stale version — unconditional updateFile forces a rebundle.
+  useEffect(() => {
+    sandpackRef.current.updateFile('/__forgeInspect.tsx', FORGE_INSPECT_SOURCE);
+  }, []);
+
+  // Push atom changes → Sandpack (skip first run, Provider already has correct files).
+  // When the change came from the editor auto-sync, skip the push to avoid feedback loop.
   useEffect(() => {
     if (isFirstRunRef.current) {
       isFirstRunRef.current = false;
+      return;
+    }
+    if (isAutoSyncRef.current) {
+      isAutoSyncRef.current = false;
+      prevFilesRef.current = files;
       return;
     }
     const sp = sandpackRef.current;
@@ -47,55 +55,29 @@ export function useSandpackSync() {
     for (const [path, code] of Object.entries(files)) {
       sp.updateFile(path, code);
     }
+  }, [files]);
 
-    setDirty(false);
-  }, [files, setDirty]);
-
-  // Detect user edits — poll using refs to avoid re-renders when already dirty
+  // Detect user edits in the Sandpack editor and immediately sync filesAtom.
+  // The changed flag prevents spurious updates when nothing has changed.
   useEffect(() => {
     const interval = setInterval(() => {
-      if (isDirtyRef.current) return;
       const spFiles = sandpackRef.current.files;
+      const updated: Record<string, string> = {};
+      let changed = false;
       for (const [path, file] of Object.entries(spFiles)) {
         if (path === '/index.html' || path === '/package.json') continue;
         if (typeof file === 'object' && file.hidden) continue;
         const code = typeof file === 'string' ? file : file.code;
+        updated[path] = code;
         if (prevFilesRef.current[path] !== undefined && prevFilesRef.current[path] !== code) {
-          setDirty(true);
-          return;
+          changed = true;
         }
+      }
+      if (changed) {
+        isAutoSyncRef.current = true;
+        setFiles(updated);
       }
     }, 800);
     return () => clearInterval(interval);
-  }, [setDirty]);
-
-  // Save: read all files from Sandpack → update atoms
-  const saveEdits = useCallback(() => {
-    const spFiles = sandpackRef.current.files;
-    const updated: Record<string, string> = {};
-
-    for (const [path, file] of Object.entries(spFiles)) {
-      if (path === '/index.html' || path === '/package.json') continue;
-      if (typeof file === 'object' && file.hidden) continue;
-      const code = typeof file === 'string' ? file : file.code;
-      updated[path] = code;
-    }
-
-    setFiles(updated);
-    setDirty(false);
-  }, [setFiles, setDirty]);
-
-  // Discard: reset Sandpack to atom state
-  const discardEdits = useCallback(() => {
-    const sp = sandpackRef.current;
-    for (const [path, code] of Object.entries(prevFilesRef.current)) {
-      sp.updateFile(path, code);
-    }
-    setDirty(false);
-  }, [setDirty]);
-
-  // Register actions so other components can call save/discard without useSandpack()
-  useEffect(() => {
-    setActions({ save: saveEdits, discard: discardEdits });
-  }, [saveEdits, discardEdits, setActions]);
+  }, [setFiles]);
 }

@@ -64,7 +64,32 @@ Native element styling guide (apply these patterns consistently):
 - Button primary: className="px-4 py-2 rounded-md bg-[#D65A31] text-white font-medium hover:bg-[#c04e27] transition"
 - Button secondary: className="px-4 py-2 rounded-md bg-[#1A1A1A] border border-[rgba(255,255,255,0.08)] text-[#E0E0E0] hover:bg-[#1F1F1F] transition"
 - Input: className="w-full px-3 py-2 rounded-md bg-[#1A1A1A] border border-[rgba(255,255,255,0.08)] text-[#E0E0E0] focus:outline-none focus:border-[#D65A31]"
-- Card: className="bg-[#141414] border border-[rgba(255,255,255,0.06)] rounded-lg p-4"`;
+- Card: className="bg-[#141414] border border-[rgba(255,255,255,0.06)] rounded-lg p-4"
+
+VISUAL INSPECTOR INTEGRATION — MANDATORY:
+Every distinct section or block in the rendered output MUST have a unique data-forge-block-id on its outermost element, wrapped by JSX comments. This is required for the visual style editor to target elements correctly.
+
+Format — blocks that are siblings inside a parent element or fragment:
+\`\`\`
+<>
+  {/* forge-block-start:nav-bar */}
+  <nav data-forge-block-id="nav-bar" className="...">...</nav>
+  {/* forge-block-end:nav-bar */}
+
+  {/* forge-block-start:hero-section */}
+  <section data-forge-block-id="hero-section" className="...">
+    ...content with child elements...
+  </section>
+  {/* forge-block-end:hero-section */}
+</>
+\`\`\`
+
+Rules:
+- Use short descriptive kebab-case IDs (e.g., hero-section, features-grid, cta-banner, nav-bar, footer)
+- EVERY top-level section, component, or visual grouping in /App.tsx and all component files MUST have data-forge-block-id
+- Use a React fragment (<>) when blocks are at the top level of a return statement — never return sibling elements without a wrapper
+- If updating an existing file, preserve existing data-forge-block-id values — only add new ones to new blocks
+- Blocks without these markers cannot be targeted by the visual style editor`;
 
 interface ImageData {
   base64: string;
@@ -210,8 +235,8 @@ export async function generate(req: Request<object, object, GenerateBody>, res: 
     const response = await stream.finalMessage();
 
     const rawResponse = response.content
-      .filter((block): block is Anthropic.TextBlock => block.type === 'text')
-      .map((block) => block.text)
+      .filter((block: any): block is Anthropic.TextBlock => block.type === 'text')
+      .map((block: any) => block.text)
       .join('\n');
 
     console.log('[generate] Response length:', rawResponse.length);
@@ -219,7 +244,7 @@ export async function generate(req: Request<object, object, GenerateBody>, res: 
     console.log('[generate] Usage:', response.usage);
 
     res.json({ rawResponse });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof Anthropic.APIError) {
       console.error('[generate] Anthropic API Error:', error.status, error.message);
       res.status(error.status ?? 500).json({ code: 'ANTHROPIC_ERROR', error: error.message });
