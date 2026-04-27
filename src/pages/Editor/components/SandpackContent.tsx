@@ -1,6 +1,6 @@
 import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { SandpackLayout, SandpackFileExplorer, SandpackCodeEditor, SandpackPreview } from '@codesandbox/sandpack-react';
-import { Search, PanelLeft } from 'lucide-react';
+import { Search, PanelLeft, FilePlus, Check, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import FindInFiles from './FindInFiles';
 import { type DevicePreview } from '@/atoms';
@@ -13,6 +13,7 @@ import { useIsMobile } from '@/hooks/useIsMobile';
 import { useEditorPanelTabs } from '@/hooks/useEditorPanelTabs';
 import { useMobileDrawer } from '@/hooks/useMobileDrawer';
 import { useBlockDropZone } from '@/hooks/useBlockDropZone';
+import { useNewFile } from '@/hooks/useNewFile';
 import ResizeHandle from './ResizeHandle';
 import EditorPanelTabs from './EditorPanelTabs';
 import StyleEditor from './StyleEditor';
@@ -48,6 +49,8 @@ export default function SandpackContent() {
   const { editorPanelMode, inspectMode } = useEditorPanelTabs();
   const { drawerOpen, drawerHeightPct, setDrawerHeightPct, drawerTab } = useMobileDrawer();
   const { isDragging, handleDrop, dropTargetLabel } = useBlockDropZone();
+  const { isCreating, fileName, setFileName, inputRef, startCreate, cancelCreate, confirmCreate, handleKeyDown } =
+    useNewFile();
   const containerRef = useRef<HTMLDivElement>(null);
   const [findOpen, setFindOpen] = useState(false);
   const [showExplorer, setShowExplorer] = useState(!isMobile);
@@ -194,21 +197,54 @@ export default function SandpackContent() {
           >
             <EditorPanelTabs />
             <div className={editorPanelMode === 'code' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
-              <div className="flex items-center justify-end gap-1 px-2 py-1 border-b border-border-subtle shrink-0 bg-bg-secondary">
-                <button
-                  onClick={() => setShowExplorer((v) => !v)}
-                  className={`p-1.5 rounded-md transition cursor-pointer ${showExplorer ? 'text-text-primary bg-bg-elevated' : 'text-text-muted hover:text-text-primary hover:bg-bg-elevated'}`}
-                  title={t('editor.files')}
-                >
-                  <PanelLeft size={13} />
-                </button>
-                <button
-                  onClick={() => setFindOpen((v) => !v)}
-                  className="p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
-                  title={t('editor.findInFilesTooltip')}
-                >
-                  <Search size={13} />
-                </button>
+              <div className="flex items-center gap-1 px-2 py-1 border-b border-border-subtle shrink-0 bg-bg-secondary">
+                {isCreating ?
+                  <div className="flex items-center gap-1 flex-1 min-w-0">
+                    <input
+                      ref={inputRef}
+                      value={fileName}
+                      onChange={(e) => setFileName(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder={t('editor.newFilePlaceholder')}
+                      className="flex-1 min-w-0 text-xs bg-bg-elevated border border-border-subtle rounded px-2 py-0.5 text-text-primary placeholder-text-muted outline-none focus:border-forge-terracotta/60"
+                    />
+                    <button
+                      onClick={confirmCreate}
+                      className="p-1 rounded text-green-400 hover:bg-bg-elevated transition cursor-pointer shrink-0"
+                    >
+                      <Check size={13} />
+                    </button>
+                    <button
+                      onClick={cancelCreate}
+                      className="p-1 rounded text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer shrink-0"
+                    >
+                      <X size={13} />
+                    </button>
+                  </div>
+                : <div className="flex items-center gap-1 ml-auto">
+                    <button
+                      onClick={startCreate}
+                      className="p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+                      title={t('editor.newFileTooltip')}
+                    >
+                      <FilePlus size={13} />
+                    </button>
+                    <button
+                      onClick={() => setShowExplorer((v) => !v)}
+                      className={`p-1.5 rounded-md transition cursor-pointer ${showExplorer ? 'text-text-primary bg-bg-elevated' : 'text-text-muted hover:text-text-primary hover:bg-bg-elevated'}`}
+                      title={t('editor.files')}
+                    >
+                      <PanelLeft size={13} />
+                    </button>
+                    <button
+                      onClick={() => setFindOpen((v) => !v)}
+                      className="p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer"
+                      title={t('editor.findInFilesTooltip')}
+                    >
+                      <Search size={13} />
+                    </button>
+                  </div>
+                }
               </div>
               <div className="relative flex flex-1 min-h-0">
                 {showExplorer && <SandpackFileExplorer />}

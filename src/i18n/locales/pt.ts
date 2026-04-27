@@ -67,6 +67,8 @@ export const pt = {
     manualEdit: 'Editando manualmente',
     files: 'Arquivos',
     findInFilesTooltip: 'Buscar em arquivos (Ctrl+Shift+F)',
+    newFileTooltip: 'Novo arquivo',
+    newFilePlaceholder: 'ex: components/Button.tsx',
   },
 
   viewToggle: {
