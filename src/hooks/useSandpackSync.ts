@@ -1,22 +1,25 @@
 import { useEffect, useRef } from 'react';
-import { useSandpack } from '@codesandbox/sandpack-react';
+import { useSandpack, useActiveCode } from '@codesandbox/sandpack-react';
 import { useFiles } from './useFiles';
 import { FORGE_INSPECT_SOURCE } from '@/utils/inspectFiles';
 
 /**
  * Syncs filesAtom changes into Sandpack's internal state.
- * Also auto-syncs Sandpack editor changes back to filesAtom so the style patcher
- * always operates on the latest code without requiring an explicit save.
+ * Also syncs active-file edits back to filesAtom via useActiveCode (event-driven,
+ * replaces the old 800ms polling approach).
  * Must be rendered inside <SandpackProvider>.
  */
 export function useSandpackSync() {
   const { files, setFiles } = useFiles();
   const { sandpack } = useSandpack();
+  const { code } = useActiveCode();
   const sandpackRef = useRef(sandpack);
   const prevFilesRef = useRef(files);
   const isFirstRunRef = useRef(true);
   // Prevents the filesAtom→Sandpack push from firing when auto-sync triggers setFiles
   const isAutoSyncRef = useRef(false);
+  // Tracks last code synced per file to avoid redundant setFiles calls on file switch
+  const lastSyncedCodeRef = useRef<Record<string, string>>({});
 
   useEffect(() => {
     sandpackRef.current = sandpack;
@@ -52,9 +55,9 @@ export function useSandpackSync() {
       }
     }
 
-    for (const [path, code] of Object.entries(files)) {
-      if (prevFiles[path] !== code) {
-        sp.updateFile(path, code);
+    for (const [path, fileCode] of Object.entries(files)) {
+      if (prevFiles[path] !== fileCode) {
+        sp.updateFile(path, fileCode);
         if (prevFiles[path] === undefined) {
           sp.openFile(path);
         }
@@ -62,27 +65,14 @@ export function useSandpackSync() {
     }
   }, [files]);
 
-  // Detect user edits in the Sandpack editor and immediately sync filesAtom.
-  // The changed flag prevents spurious updates when nothing has changed.
+  // Sync active-file edits → filesAtom (event-driven via useActiveCode, no polling).
+  // Guard prevents redundant updates when switching between files.
   useEffect(() => {
-    const interval = setInterval(() => {
-      const spFiles = sandpackRef.current.files;
-      const updated: Record<string, string> = {};
-      let changed = false;
-      for (const [path, file] of Object.entries(spFiles)) {
-        if (path === '/index.html' || path === '/package.json') continue;
-        if (typeof file === 'object' && file.hidden) continue;
-        const code = typeof file === 'string' ? file : file.code;
-        updated[path] = code;
-        if (prevFilesRef.current[path] !== undefined && prevFilesRef.current[path] !== code) {
-          changed = true;
-        }
-      }
-      if (changed) {
-        isAutoSyncRef.current = true;
-        setFiles(updated);
-      }
-    }, 800);
-    return () => clearInterval(interval);
-  }, [setFiles]);
+    const activeFile = sandpackRef.current.activeFile;
+    if (!activeFile || activeFile.startsWith('/__')) return;
+    if (lastSyncedCodeRef.current[activeFile] === code) return;
+    lastSyncedCodeRef.current[activeFile] = code;
+    isAutoSyncRef.current = true;
+    setFiles((prev) => ({ ...prev, [activeFile]: code }));
+  }, [code, setFiles]);
 }
