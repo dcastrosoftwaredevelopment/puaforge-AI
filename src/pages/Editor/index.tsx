@@ -72,6 +72,23 @@ export default function Editor() {
     return `${projectId}-${depsKey}`;
   }, [projectId, deps]);
 
+  // Snapshot files only when sandpackKey or projectReady changes — SandpackProvider
+  // must not re-render on every filesAtom change or Sandpack resets open tabs and
+  // active file. Incremental updates reach Sandpack via sandpack.updateFile in useSandpackSync.
+  // projectReady is included so the snapshot is recaptured once after the initial backend load.
+  const sandpackFiles = useMemo(
+    () => ({
+      '/index.html': TAILWIND_HTML,
+      '/assets/images.css': '',
+      '/__forge_global.css': '',
+      ...files,
+      '/__forgeInspect.tsx': { code: FORGE_INSPECT_SOURCE, hidden: true },
+      '/index.tsx': { code: FORGE_ENTRY_SOURCE, hidden: true },
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sandpackKey, projectReady],
+  );
+
   if (!projectReady) {
     return (
       <div className="h-screen w-screen bg-bg-primary flex items-center justify-center">
@@ -88,14 +105,7 @@ export default function Editor() {
         <main className="flex-1 min-w-0">
           <SandpackProvider
             key={sandpackKey}
-            files={{
-              '/index.html': TAILWIND_HTML,
-              '/assets/images.css': '',
-              '/__forge_global.css': '',
-              ...files,
-              '/__forgeInspect.tsx': { code: FORGE_INSPECT_SOURCE, hidden: true },
-              '/index.tsx': { code: FORGE_ENTRY_SOURCE, hidden: true },
-            }}
+            files={sandpackFiles}
             theme="dark"
             template="react-ts"
             customSetup={{

@@ -1,12 +1,16 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useSandpack } from '@codesandbox/sandpack-react';
 import { useFiles } from './useFiles';
+
+function tsxBoilerplate(path: string): string {
+  const base = path.split('/').pop()?.replace(/\.tsx$/, '') ?? 'Component';
+  const name = base.charAt(0).toUpperCase() + base.slice(1);
+  return `export default function ${name}() {\n  return (\n    <div>\n      \n    </div>\n  );\n}\n`;
+}
 
 export function useNewFile() {
   const [isCreating, setIsCreating] = useState(false);
   const [fileName, setFileName] = useState('');
   const { setFiles } = useFiles();
-  const { sandpack } = useSandpack();
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -31,11 +35,11 @@ export function useNewFile() {
       return;
     }
     const path = name.startsWith('/') ? name : `/${name}`;
-    setFiles((prev) => ({ ...prev, [path]: '' }));
-    sandpack.openFile(path);
+    const content = path.endsWith('.tsx') ? tsxBoilerplate(path) : '';
+    setFiles((prev) => ({ ...prev, [path]: content }));
     setIsCreating(false);
     setFileName('');
-  }, [fileName, setFiles, sandpack]);
+  }, [fileName, setFiles]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
