@@ -42,6 +42,7 @@ export const DEFAULT_FILES: Record<string, string> = {
       {/* forge-block-start:welcome-root */}
       <div
         data-forge-block-id="welcome-root"
+        data-forge-container="true"
         className="relative flex items-center justify-center min-h-screen bg-[#0D0D0D] text-[#E0E0E0] font-sans overflow-hidden"
       >
         {/* Background glow */}

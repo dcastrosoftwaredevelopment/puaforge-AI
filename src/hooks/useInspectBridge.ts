@@ -8,11 +8,13 @@ import {
   editorPanelModeAtom,
   inspectModeAtom,
   blockInsertParentAtom,
+  blockDragAtom,
   type SelectedElement,
   type DOMNode,
 } from '@/atoms';
 import { BLOCKS } from '@/utils/blockCatalog';
-import { useFiles } from '@/hooks/useFiles';
+import { useFileWriter } from '@/hooks/useFileWriter';
+import { useIncrementBlockRev } from '@/hooks/useBlockRevision';
 import { removeBlockInstance } from '@/utils/jsxInserter';
 
 /**
@@ -33,11 +35,16 @@ export function useInspectBridge() {
   const setDomTree = useSetAtom(domTreeAtom);
   const setPanelMode = useSetAtom(editorPanelModeAtom);
   const setInsertParentId = useSetAtom(blockInsertParentAtom);
-  const { setFiles } = useFiles();
+  const insertParentId = useAtomValue(blockInsertParentAtom);
+  const draggedBlock = useAtomValue(blockDragAtom);
+  const isDragging = draggedBlock !== null;
+  const writeFiles = useFileWriter();
+  const incrementBlockRev = useIncrementBlockRev();
 
+  // No deps — runs after every render so sandpackRef never points to a stale context.
   useEffect(() => {
     sandpackRef.current = sandpack;
-  }, [sandpack]);
+  });
   useEffect(() => {
     inspectModeRef.current = inspectMode;
   }, [inspectMode]);
@@ -65,6 +72,16 @@ export function useInspectBridge() {
     }, 400);
     return () => clearTimeout(timer);
   }, [sandpack.status]);
+
+  // Send drop-target highlight to iframe whenever the drag target changes.
+  // post closes over sandpackRef (stable ref) — not needed in deps.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    post({
+      type: 'FORGE_HIGHLIGHT_DROP_TARGET',
+      forgeBlockId: isDragging && insertParentId ? insertParentId : '',
+    });
+  }, [isDragging, insertParentId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Forward platform CustomEvents → iframe postMessages
   useEffect(() => {
@@ -121,7 +138,7 @@ export function useInspectBridge() {
         const forgeBlockId = e.data.forgeBlockId || '';
         const blockId = forgeBlockId ? forgeBlockId.slice(0, forgeBlockId.lastIndexOf('-')) : '';
         const isContainer = !!BLOCKS.find((b) => b.id === blockId)?.isContainer;
-        setInsertParentId(isContainer ? forgeBlockId : null);
+        if (isContainer) setInsertParentId(forgeBlockId);
         // Only open the style panel on a second click on the same element,
         // so a single click just selects without disrupting the active panel.
         if (!e.data.stayInLayers && e.data.isReselect) setPanelMode('style');
@@ -145,15 +162,15 @@ export function useInspectBridge() {
       } else if (type === 'FORGE_REMOVE_BLOCK') {
         const blockId = e.data.forgeBlockId as string;
         if (!blockId) return;
-        setFiles((prev) => ({ ...prev, '/App.tsx': removeBlockInstance(prev['/App.tsx'] ?? '', blockId) }));
+        // Read live Sandpack content — filesAtom is stale when editor has unsaved keystrokes.
+        const source = sandpackRef.current.files['/App.tsx']?.code ?? '';
+        writeFiles([['/App.tsx', removeBlockInstance(source, blockId)]]);
         setSelected(null);
-        for (const client of Object.values(sandpackRef.current.clients)) {
-          client.iframe?.contentWindow?.postMessage({ type: 'FORGE_DESELECT' }, '*');
-        }
+        incrementBlockRev();
       }
     };
 
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [setSelected, setHovered, setDomTree, setPanelMode, setFiles, setInsertParentId]);
+  }, [setSelected, setHovered, setDomTree, setPanelMode, writeFiles, setInsertParentId, incrementBlockRev]);
 }

@@ -413,6 +413,8 @@ export const pt = {
     emptySearch: 'Nenhum bloco encontrado',
     insert: 'Inserir',
     insertInside: 'Inserir dentro',
+    targetBanner: 'Inserindo dentro de',
+    clearTarget: 'Limpar',
 
     removeLast: 'Remover último',
     removeBlock: 'Remover bloco',

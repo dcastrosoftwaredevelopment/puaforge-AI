@@ -111,6 +111,8 @@ export function ForgeInspect({ children }) {
     var selectedBox = null
     var selectedTagLabel = null
     var selectedDeleteBtn = null
+    // Drop-target highlight — independent of inspect mode, lives for the component lifetime
+    var dropTargetBox = null
 
     function updateBoxRect(box, rect) {
       box.style.top = rect.top + 'px'
@@ -324,6 +326,42 @@ export function ForgeInspect({ children }) {
         if (resizeObs) { resizeObs.disconnect(); resizeObs = null }
         selectedElRef = null
         lastHoveredId = null
+      } else if (t === 'FORGE_HIT_TEST') {
+        var htEl = document.elementFromPoint(e.data.x, e.data.y)
+        var htBid = ''
+        var htIsContainer = false
+        if (htEl) {
+          var htCur = htEl
+          while (htCur && htCur !== document.documentElement) {
+            var htAttr = htCur.getAttribute('data-forge-block-id')
+            if (htAttr) {
+              htBid = htAttr
+              htIsContainer = htCur.hasAttribute('data-forge-container')
+              break
+            }
+            htCur = htCur.parentElement
+          }
+        }
+        window.parent.postMessage({ type: 'FORGE_HIT_TEST_RESULT', forgeBlockId: htBid, isContainer: htIsContainer }, '*')
+      } else if (t === 'FORGE_HIGHLIGHT_DROP_TARGET') {
+        var dtBid = e.data.forgeBlockId
+        if (!dtBid) {
+          if (dropTargetBox) dropTargetBox.style.display = 'none'
+          return
+        }
+        var dtEl = document.querySelector('[data-forge-block-id="' + dtBid + '"]')
+        if (!dtEl) return
+        var dtrect = dtEl.getBoundingClientRect()
+        if (!dropTargetBox) {
+          dropTargetBox = document.createElement('div')
+          dropTargetBox.style.cssText = 'position:fixed;pointer-events:none;z-index:2147483646;box-sizing:border-box;border:2px dashed #e07055;background:rgba(224,112,85,0.08);display:none;border-radius:4px;'
+          document.body.appendChild(dropTargetBox)
+        }
+        dropTargetBox.style.top = dtrect.top + 'px'
+        dropTargetBox.style.left = dtrect.left + 'px'
+        dropTargetBox.style.width = dtrect.width + 'px'
+        dropTargetBox.style.height = dtrect.height + 'px'
+        dropTargetBox.style.display = 'block'
       }
     }
 
@@ -333,6 +371,7 @@ export function ForgeInspect({ children }) {
     return function() {
       window.removeEventListener('message', onMessage)
       if (activeRef.current) deactivate()
+      if (dropTargetBox) { dropTargetBox.remove(); dropTargetBox = null }
     }
   }, [])
 

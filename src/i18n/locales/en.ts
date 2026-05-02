@@ -411,6 +411,8 @@ export const en = {
     emptySearch: 'No blocks found',
     insert: 'Insert',
     insertInside: 'Insert inside',
+    targetBanner: 'Inserting inside',
+    clearTarget: 'Clear',
 
     removeLast: 'Remove last',
     removeBlock: 'Remove block',

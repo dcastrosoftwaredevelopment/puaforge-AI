@@ -48,7 +48,7 @@ export default function SandpackContent() {
   const { t } = useTranslation();
   const { editorPanelMode, inspectMode } = useEditorPanelTabs();
   const { drawerOpen, drawerHeightPct, setDrawerHeightPct, drawerTab } = useMobileDrawer();
-  const { isDragging, handleDrop, dropTargetLabel } = useBlockDropZone();
+  const { isDragging, handleDrop, handleDragOver } = useBlockDropZone();
   const { isCreating, fileName, setFileName, inputRef, startCreate, cancelCreate, confirmCreate, handleKeyDown } =
     useNewFile();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -130,7 +130,7 @@ export default function SandpackContent() {
               style={isResponsive ? { width: DEVICE_WIDTHS[device] } : undefined}
             >
               <SandpackPreview showRefreshButton showOpenInCodeSandbox={false} />
-              {isDragging && <BlockDropOverlay onDrop={handleDrop} targetLabel={dropTargetLabel} />}
+              {isDragging && <BlockDropOverlay onDrop={handleDrop} onDragOver={handleDragOver} />}
             </div>
           </div>
 
@@ -285,7 +285,7 @@ export default function SandpackContent() {
               style={isResponsive ? { width: DEVICE_WIDTHS[device] } : undefined}
             >
               <SandpackPreview showRefreshButton showOpenInCodeSandbox={false} />
-              {isDragging && <BlockDropOverlay onDrop={handleDrop} targetLabel={dropTargetLabel} />}
+              {isDragging && <BlockDropOverlay onDrop={handleDrop} onDragOver={handleDragOver} />}
             </div>
           </div>
         </>

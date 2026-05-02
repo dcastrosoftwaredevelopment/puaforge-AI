@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Search } from 'lucide-react';
+import { Search, X, CornerDownRight } from 'lucide-react';
 import { useBlockLibrary } from '@/hooks/useBlockLibrary';
 import { type Block, type BlockCategory } from '@/utils/blockCatalog';
 import BlockCard from './BlockCard';
@@ -21,6 +21,8 @@ export default function BlockLibraryPanel() {
     setSelected,
     instanceCounts,
     hasActiveParent,
+    dropTargetLabel,
+    clearInsertParent,
     insertBlock,
     removeBlock,
   } = useBlockLibrary();
@@ -29,6 +31,24 @@ export default function BlockLibraryPanel() {
 
   return (
     <div className="flex flex-col h-full">
+      {/* Insert-target banner */}
+      {hasActiveParent && dropTargetLabel && (
+        <div className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-forge-terracotta/10 border-b border-forge-terracotta/20 text-forge-terracotta text-xs font-medium">
+          <CornerDownRight size={11} className="shrink-0" />
+          <span className="truncate flex-1">
+            {t('blocks.targetBanner')} <span className="font-semibold">{dropTargetLabel}</span>
+          </span>
+          <button
+            type="button"
+            onClick={clearInsertParent}
+            className="shrink-0 hover:text-forge-terracotta/70 transition cursor-pointer"
+            title={t('blocks.clearTarget')}
+          >
+            <X size={11} />
+          </button>
+        </div>
+      )}
+
       {/* Search */}
       <div className="shrink-0 px-3 py-2 border-b border-border-subtle">
         <div className="relative">
