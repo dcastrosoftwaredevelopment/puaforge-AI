@@ -74,13 +74,20 @@ export function useInspectBridge() {
   }, [sandpack.status]);
 
   // Send drop-target highlight to iframe whenever the drag target changes.
+  // Only highlight catalog containers — template blocks (e.g. welcome-root) are valid
+  // drop targets but cover the entire viewport, so showing the rect for them looks wrong.
+  // Also clear the inspect selectedBox when drag starts so the two overlays don't conflict.
   // post closes over sandpackRef (stable ref) — not needed in deps.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    post({
-      type: 'FORGE_HIGHLIGHT_DROP_TARGET',
-      forgeBlockId: isDragging && insertParentId ? insertParentId : '',
-    });
+    if (isDragging) post({ type: 'FORGE_DESELECT' });
+
+    let highlightId = '';
+    if (isDragging && insertParentId) {
+      const blockId = insertParentId.slice(0, insertParentId.lastIndexOf('-'));
+      const isCatalogContainer = !!BLOCKS.find((b) => b.id === blockId)?.isContainer;
+      if (isCatalogContainer) highlightId = insertParentId;
+    }
+    post({ type: 'FORGE_HIGHLIGHT_DROP_TARGET', forgeBlockId: highlightId });
   }, [isDragging, insertParentId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Forward platform CustomEvents → iframe postMessages

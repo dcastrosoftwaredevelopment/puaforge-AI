@@ -9,8 +9,6 @@ export default function BlockDropOverlay({ onDrop, onDragOver }: BlockDropOverla
       className="absolute inset-0 z-20"
       onDragOver={(e) => { e.preventDefault(); onDragOver(e); }}
       onDrop={(e) => { e.preventDefault(); onDrop(); }}
-    >
-      <div className="absolute inset-2 rounded-xl border-2 border-dashed border-forge-terracotta/40 pointer-events-none" />
-    </div>
+    />
   );
 }
