@@ -185,6 +185,14 @@ export function ForgeInspect({ children }) {
       e.stopPropagation()
       var el = e.target
       if (!el || el === document.body || el === document.documentElement) return
+      // Capture phase blocks the button's own listener, so handle delete here.
+      if (selectedBox && selectedBox.contains(el)) {
+        if (selectedDeleteBtn && (el === selectedDeleteBtn || selectedDeleteBtn.contains(el))) {
+          var delBid = selectedElRef ? getForgeBlockId(selectedElRef) : ''
+          if (delBid) window.parent.postMessage({ type: 'FORGE_REMOVE_BLOCK', forgeBlockId: delBid }, '*')
+        }
+        return
+      }
       var isReselect = el === selectedElRef
       watchSelected(el)
       hoverBox.style.display = 'none'
