@@ -68,6 +68,11 @@ export function ForgeInspect({ children }) {
       return ''
     }
 
+    function blockLabel(bid, el) {
+      if (bid) return bid.replace(/-[^-]+$/, '') || bid
+      return el.tagName.toLowerCase()
+    }
+
     function getAttributes(el) {
       var names = ['href', 'src', 'alt', 'target', 'placeholder', 'type', 'name', 'rows']
       var attrs = {}
@@ -199,8 +204,8 @@ export function ForgeInspect({ children }) {
       lastHoveredId = null
       var rect = el.getBoundingClientRect()
       updateBoxRect(selectedBox, rect)
-      selectedTagLabel.textContent = el.tagName.toLowerCase()
       var bid = getForgeBlockId(el)
+      selectedTagLabel.textContent = blockLabel(bid, el)
       selectedDeleteBtn.style.display = bid ? 'flex' : 'none'
       selectedBox.style.display = 'block'
       window.parent.postMessage(Object.assign({ type: 'FORGE_ELEMENT_SELECTED', isReselect: isReselect }, getInfo(el)), '*')
@@ -291,8 +296,8 @@ export function ForgeInspect({ children }) {
         if (selectedBox) {
           var rect = el.getBoundingClientRect()
           updateBoxRect(selectedBox, rect)
-          selectedTagLabel.textContent = el.tagName.toLowerCase()
           var bid3 = getForgeBlockId(el)
+          selectedTagLabel.textContent = blockLabel(bid3, el)
           selectedDeleteBtn.style.display = bid3 ? 'flex' : 'none'
           selectedBox.style.display = 'block'
           hoverBox.style.display = 'none'
@@ -321,7 +326,7 @@ export function ForgeInspect({ children }) {
         if (selectedBox) {
           var brect = blockEl.getBoundingClientRect()
           updateBoxRect(selectedBox, brect)
-          selectedTagLabel.textContent = blockEl.tagName.toLowerCase()
+          selectedTagLabel.textContent = bid.replace(/-[^-]+$/, '') || bid
           selectedDeleteBtn.style.display = 'flex'
           selectedBox.style.display = 'block'
           if (hoverBox) hoverBox.style.display = 'none'
