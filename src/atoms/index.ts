@@ -253,3 +253,8 @@ export const blockDragAtom = atom<DraggedBlock | null>(null);
 // Tracks which container instance is the active insertion target (null = root).
 // Stored as an atom so both useBlockLibrary and useBlockDropZone can share it.
 export const blockInsertParentAtom = atom<string | null>(null);
+
+// Incremented on every structural block change (insert/remove).
+// Used in sandpackKey to force a SandpackProvider remount so the preview
+// picks up the new files without relying on HMR (which fails in the cross-origin CDN iframe).
+export const blockRevAtom = atom(0);

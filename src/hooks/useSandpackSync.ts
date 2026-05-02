@@ -3,6 +3,11 @@ import { useSandpack } from '@codesandbox/sandpack-react';
 import { useFiles } from './useFiles';
 import { FORGE_INSPECT_SOURCE } from '@/utils/inspectFiles';
 
+// Paths directly pushed to Sandpack by useStylePatcher.commitUpdates.
+// The push effect skips sp.updateFile for these paths to prevent a double-push
+// that would overwrite user's edits made after the immediate patch.
+export const stylePushedPaths = new Map<string, string>();
+
 /**
  * Syncs filesAtom changes into Sandpack's internal state.
  * Editor changes stay in Sandpack's internal state only — no setFiles on keystrokes,
@@ -46,10 +51,15 @@ export function useSandpackSync() {
 
     for (const [path, fileCode] of Object.entries(files)) {
       if (prevFiles[path] !== fileCode) {
-        sp.updateFile(path, fileCode);
-        if (prevFiles[path] === undefined) {
-          sp.openFile(path);
+        const alreadyPushed = stylePushedPaths.get(path);
+        if (alreadyPushed === fileCode) {
+          stylePushedPaths.delete(path);
+          // Sandpack already has this content from commitUpdates — skip to avoid revert
+        } else {
+          if (alreadyPushed !== undefined) stylePushedPaths.delete(path);
+          sp.updateFile(path, fileCode);
         }
+        if (prevFiles[path] === undefined) sp.openFile(path);
       }
     }
   }, [files]);

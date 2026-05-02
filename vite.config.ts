@@ -14,6 +14,9 @@ export default defineConfig(({ mode }) => {
       watch: {
         usePolling: true,
       },
+      headers: {
+        'Permissions-Policy': 'unload=(self)',
+      },
     },
     resolve: {
       alias: {

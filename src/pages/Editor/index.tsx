@@ -8,6 +8,7 @@ import { useChat } from '@/hooks/useChat';
 import { usePanelSizes } from '@/hooks/usePanelSizes';
 import { useProjectLoader } from '@/hooks/useProjectLoader';
 import { useDraft } from '@/hooks/useDraft';
+import { useBlockRevision } from '@/hooks/useBlockRevision';
 import { extractDependencies } from '@/services/fileParser';
 import { TAILWIND_HTML, buildPackageJson } from '@/utils/defaultFiles';
 import { FORGE_INSPECT_SOURCE, FORGE_ENTRY_SOURCE } from '@/utils/inspectFiles';
@@ -67,10 +68,11 @@ export default function Editor() {
     setChatWidth(chatWidthRef.current);
   }, [setChatWidth]);
 
+  const blockRev = useBlockRevision();
   const sandpackKey = useMemo(() => {
     const depsKey = Object.keys(deps).sort().join(',');
-    return `${projectId}-${depsKey}`;
-  }, [projectId, deps]);
+    return `${projectId}-${depsKey}-${blockRev}`;
+  }, [projectId, deps, blockRev]);
 
   // Snapshot files only when sandpackKey or projectReady changes — SandpackProvider
   // must not re-render on every filesAtom change or Sandpack resets open tabs and

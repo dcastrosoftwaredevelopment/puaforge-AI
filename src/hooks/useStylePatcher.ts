@@ -1,6 +1,7 @@
 import { createContext, useCallback, useEffect, useRef } from 'react';
 import { useStore, useSetAtom } from 'jotai';
-import { useSandpack } from '@codesandbox/sandpack-react';
+import { useSandpack, useActiveCode } from '@codesandbox/sandpack-react';
+import { stylePushedPaths } from './useSandpackSync';
 import { filesAtom, selectedElementAtom } from '@/atoms';
 import { toJSXStyleObject } from '@/utils/inlineStyles';
 
@@ -309,38 +310,6 @@ function patchInlineStyleByForgeId(code: string, forgeId: string, _oldStyle: str
   return code.slice(0, tagStart) + patchedTag + code.slice(pos + 1);
 }
 
-function findMatchingClosingTag(
-  code: string,
-  tagLower: string,
-  searchFrom: number,
-): { start: number; end: number } | null {
-  let depth = 1;
-  let pos = searchFrom;
-  const openTag = `<${tagLower}`;
-  const closeTag = `</${tagLower}`;
-
-  while (pos < code.length && depth > 0) {
-    const nextOpen = code.indexOf(openTag, pos);
-    const nextClose = code.indexOf(closeTag, pos);
-    if (nextClose === -1) return null;
-
-    if (nextOpen !== -1 && nextOpen < nextClose) {
-      const afterTag = code[nextOpen + openTag.length] ?? '';
-      if (/[\s/>]/.test(afterTag)) depth++;
-      pos = nextOpen + openTag.length;
-    } else {
-      depth--;
-      if (depth === 0) {
-        let end = nextClose + closeTag.length;
-        while (end < code.length && code[end] !== '>') end++;
-        return { start: nextClose, end: end + 1 };
-      }
-      pos = nextClose + closeTag.length;
-    }
-  }
-  return null;
-}
-
 /**
  * Injects `data-forge-id` + `data-forge-block-id` attributes into an element's opening
  * tag and wraps it with forge-block-start/end markers. Uses a cascade of search strategies
@@ -446,123 +415,71 @@ function injectForgeBlockId(
 
   if (tagStart === -1) return { patched: code, injected: false };
 
-  // Find end of opening tag (quote-aware)
-  let pos = tagStart + 1 + tagLower.length;
-  let inQ = false;
-  let qCh = '';
-  while (pos < code.length) {
-    const ch = code[pos];
-    if (inQ) {
-      if (ch === qCh) inQ = false;
-    } else if (ch === '"' || ch === "'") {
-      inQ = true;
-      qCh = ch;
-    } else if (ch === '>') break;
-    pos++;
+  // If data-forge-id is already in source, verify data-forge-block-id isn't also already
+  // there before injecting — prevents double attributes from re-entrant tryInject calls.
+  if (alreadyHasForgeId) {
+    const tagClose = code.indexOf('>', tagStart);
+    if (tagClose !== -1 && code.slice(tagStart, tagClose).includes('data-forge-block-id=')) {
+      return { patched: code, injected: false };
+    }
   }
-  const openingTagEnd = pos;
-  const isSelfClosing = code[pos - 1] === '/';
 
-  // Indentation of the line containing the opening tag
-  let lineStart = tagStart;
-  while (lineStart > 0 && code[lineStart - 1] !== '\n') lineStart--;
-  const indent = code.slice(lineStart, tagStart).match(/^(\s*)/)?.[1] ?? '';
-
-  // Inject data-forge-id (unless already present) + data-forge-block-id after tagName
+  // Inject data-forge-id (unless already present) + data-forge-block-id after tagName.
+  // No forge-block-start/end markers — they are JSX comment expressions and are only
+  // valid as children of another JSX element. When placed in a JS context (return root,
+  // ternary, &&) they produce TypeScript compilation errors that make the element disappear.
   const insertAttrAt = tagStart + 1 + tagLower.length;
   const attrInjection =
     alreadyHasForgeId ? ` data-forge-block-id="${id}"` : ` data-forge-id="${forgeId}" data-forge-block-id="${id}"`;
-  let result = code.slice(0, insertAttrAt) + attrInjection + code.slice(insertAttrAt);
-  const shift = attrInjection.length;
-  const adjustedOpeningTagEnd = openingTagEnd + shift;
-
-  const startMarker = `{/* forge-block-start:${id} */}\n${indent}`;
-  const endMarker = `\n${indent}{/* forge-block-end:${id} */}`;
-
-  if (isSelfClosing) {
-    const after = adjustedOpeningTagEnd + 1;
-    result = result.slice(0, tagStart) + startMarker + result.slice(tagStart, after) + endMarker + result.slice(after);
-    return { patched: result, injected: true };
-  }
-
-  const closing = findMatchingClosingTag(result, tagLower, adjustedOpeningTagEnd + 1);
-  if (!closing) {
-    // Could not find matching closing tag — return with just the attributes injected
-    return { patched: result, injected: true };
-  }
-
-  // Insert end marker first (higher index), then start marker (avoids position shift)
-  result = result.slice(0, closing.end) + endMarker + result.slice(closing.end);
-  result = result.slice(0, tagStart) + startMarker + result.slice(tagStart);
+  const result = code.slice(0, insertAttrAt) + attrInjection + code.slice(insertAttrAt);
 
   return { patched: result, injected: true };
 }
-
-const DEBOUNCE_MS = 500;
 
 export function useStylePatcher() {
   const { sandpack } = useSandpack();
   const store = useStore();
   const setFiles = useSetAtom(filesAtom);
-  // filesRef is updated directly on each patch — no atom subscription to avoid re-renders
-  const filesRef = useRef(store.get(filesAtom));
-  const pendingRef = useRef<Map<string, string>>(new Map());
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Sync filesRef when atom changes from external sources (AI code gen, file save, etc.).
-  // Re-apply any pending (not-yet-flushed) patches on top so they are not lost when an
-  // unrelated setFiles call (e.g. updating /__forge_global.css) resets filesAtom.
-  useEffect(() => {
-    return store.sub(filesAtom, () => {
-      const next = store.get(filesAtom);
-      if (pendingRef.current.size > 0) {
-        filesRef.current = { ...next, ...Object.fromEntries(pendingRef.current) };
-      } else {
-        filesRef.current = next;
-      }
-    });
-  }, [store]);
 
   const sandpackRef = useRef(sandpack);
+  // No deps — runs after every render so sandpackRef never points to a stale context.
   useEffect(() => {
     sandpackRef.current = sandpack;
-  }, [sandpack]);
+  });
 
-  const flushToSandpack = useCallback(() => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      const entries = [...pendingRef.current.entries()];
-      pendingRef.current.clear();
-      if (entries.length === 0) return;
-      for (const [path, code] of entries) sandpackRef.current.updateFile(path, code);
-      setFiles((prev) => {
-        const next = { ...prev };
-        for (const [path, code] of entries) next[path] = code;
-        return next;
-      });
-    }, DEBOUNCE_MS);
-  }, [setFiles]);
+  // useActiveCode() reads directly from Sandpack's React state, which is updated on
+  // every keystroke via updateCurrentFile → setState. This is the single authoritative
+  // source for the live editor content — no separate filesRef needed.
+  const { code: activeCode } = useActiveCode();
+  const activeCodeRef = useRef(activeCode);
+  useEffect(() => {
+    activeCodeRef.current = activeCode;
+  });
 
   const commitUpdates = useCallback(
     (updates: Array<[string, string]>) => {
-      const next = { ...filesRef.current };
       for (const [path, patched] of updates) {
-        next[path] = patched;
-        pendingRef.current.set(path, patched);
+        stylePushedPaths.set(path, patched);
+        sandpackRef.current.updateFile(path, patched);
       }
-      filesRef.current = next;
-      flushToSandpack();
+      setFiles((prev) => {
+        const result = { ...prev };
+        for (const [path, patched] of updates) result[path] = patched;
+        return result;
+      });
     },
-    [flushToSandpack],
+    [setFiles],
   );
 
   // Auto-inject data-forge-block-id for selected elements that have none.
   // tryInject runs on mount (handles elements selected before StyleEditor was open)
-  // AND on every atom change (handles new selections while StyleEditor is open).
+  // AND on every selectedElementAtom change (handles new selections while open).
   useEffect(() => {
     let lastProcessedId = '';
 
-    const tryInject = () => {
+    // atomSource: pass the filesAtom content explicitly for AI-rewrite retries, where
+    // activeCodeRef hasn't updated yet (Sandpack hasn't re-rendered after setFiles).
+    const tryInject = (atomSource?: string) => {
       const el = store.get(selectedElementAtom);
       if (!el) return;
       if (el.id === lastProcessedId) return;
@@ -571,33 +488,41 @@ export function useStylePatcher() {
         return;
       }
 
+      const activeFile = sandpackRef.current.activeFile;
+      if (!activeFile || activeFile.startsWith('/__')) return;
+      if (!activeFile.endsWith('.tsx') && !activeFile.endsWith('.jsx')) return;
+
+      const source = atomSource || activeCodeRef.current || store.get(filesAtom)[activeFile] || '';
+      if (!source) return;
+
       const newId = `block-${el.tagName.toLowerCase()}-${Date.now()}`;
-      const updates: Array<[string, string]> = [];
-      for (const [path, code] of Object.entries(filesRef.current)) {
-        if (!path.endsWith('.tsx') && !path.endsWith('.jsx')) continue;
-        const { patched, injected } = injectForgeBlockId(code, el.tagName, newId, el.id, {
-          className: el.className || undefined,
-          parentForgeBlockId: el.forgeBlockId || undefined,
-          attributes: el.attributes,
-          textContent: el.textContent,
-        });
-        if (injected) updates.push([path, patched]);
-      }
-      if (updates.length > 0) {
-        commitUpdates(updates);
-        store.set(selectedElementAtom, { ...el, forgeBlockId: newId, isBlockRoot: true });
+      const { patched, injected } = injectForgeBlockId(source, el.tagName, newId, el.id, {
+        className: el.className || undefined,
+        parentForgeBlockId: el.forgeBlockId || undefined,
+        attributes: el.attributes,
+        textContent: el.textContent,
+      });
+
+      if (injected) {
+        // Set lastProcessedId BEFORE commitUpdates — commitUpdates calls setFiles which
+        // triggers unsubFiles re-entrantly; without this guard we'd double-inject.
         lastProcessedId = el.id;
+        commitUpdates([[activeFile, patched]]);
+        store.set(selectedElementAtom, { ...el, forgeBlockId: newId, isBlockRoot: true });
       }
-      // If injection failed, don't set lastProcessedId — allow retry on re-selection
     };
 
     tryInject();
-    const unsub = store.sub(selectedElementAtom, tryInject);
-    // Retry when files change — covers the case where the element was selected before
-    // the 800ms auto-sync poll fired (filesRef was stale at injection time).
+    const unsub = store.sub(selectedElementAtom, () => tryInject());
+    // Retry when filesAtom changes (AI rewrite) — element was selected but injection
+    // failed because JSX wasn't rendered yet. Use atom content directly since
+    // activeCodeRef still reflects the pre-rewrite Sandpack context at this point.
     const unsubFiles = store.sub(filesAtom, () => {
       const el = store.get(selectedElementAtom);
-      if (el && !el.forgeBlockId && el.id !== lastProcessedId) tryInject();
+      if (el && !el.forgeBlockId && el.id !== lastProcessedId) {
+        const activeFile = sandpackRef.current.activeFile;
+        tryInject(activeFile ? store.get(filesAtom)[activeFile] : undefined);
+      }
     });
     return () => {
       unsub();
@@ -610,16 +535,12 @@ export function useStylePatcher() {
       const el = store.get(selectedElementAtom);
       const forgeId = el?.id ?? '';
       const forgeBlockId = el?.forgeBlockId ?? '';
-      const updates: Array<[string, string]> = [];
-      for (const [path, code] of Object.entries(filesRef.current)) {
-        // Primary: patch by data-forge-id (unique, written to source during injection)
-        let patched = forgeId ? patchClassNameByForgeId(code, forgeId, oldClassName, newClassName) : code;
-        // Fallback: patch by data-forge-block-id (catalog blocks not yet reached by forge-id)
-        if (patched === code && forgeBlockId)
-          patched = patchClassNameForElement(code, forgeBlockId, oldClassName, newClassName);
-        if (patched !== code) updates.push([path, patched]);
-      }
-      if (updates.length > 0) commitUpdates(updates);
+      const path = sandpackRef.current.activeFile || '/App.tsx';
+      const source = activeCodeRef.current || store.get(filesAtom)[path] || '';
+      let patched = forgeId ? patchClassNameByForgeId(source, forgeId, oldClassName, newClassName) : source;
+      if (patched === source && forgeBlockId)
+        patched = patchClassNameForElement(source, forgeBlockId, oldClassName, newClassName);
+      if (patched !== source) commitUpdates([[path, patched]]);
     },
     [store, commitUpdates],
   );
@@ -632,23 +553,17 @@ export function useStylePatcher() {
       const forgeBlockId = el?.forgeBlockId ?? '';
       const isBlockRoot = el?.isBlockRoot ?? false;
       const className = el?.className ?? '';
-      const updates: Array<[string, string]> = [];
-      for (const [path, code] of Object.entries(filesRef.current)) {
-        // Primary: patch by data-forge-id (unique, written to source during injection)
-        let patched = forgeId ? patchInlineStyleByForgeId(code, forgeId, oldStyle, newStyle) : code;
-        if (patched === code) {
-          // Fallback: block-id based patchers (catalog blocks / pre-injection state)
-          if (forgeBlockId && isBlockRoot) {
-            patched = patchInlineStyleForElement(code, forgeBlockId, newStyle);
-          } else if (forgeBlockId && !isBlockRoot) {
-            patched = patchInlineStyleForChild(code, forgeBlockId, className, newStyle);
-          } else {
-            patched = code;
-          }
+      const path = sandpackRef.current.activeFile || '/App.tsx';
+      const source = activeCodeRef.current || store.get(filesAtom)[path] || '';
+      let patched = forgeId ? patchInlineStyleByForgeId(source, forgeId, oldStyle, newStyle) : source;
+      if (patched === source) {
+        if (forgeBlockId && isBlockRoot) {
+          patched = patchInlineStyleForElement(source, forgeBlockId, newStyle);
+        } else if (forgeBlockId && !isBlockRoot) {
+          patched = patchInlineStyleForChild(source, forgeBlockId, className, newStyle);
         }
-        if (patched !== code) updates.push([path, patched]);
       }
-      if (updates.length > 0) commitUpdates(updates);
+      if (patched !== source) commitUpdates([[path, patched]]);
     },
     [store, commitUpdates],
   );
