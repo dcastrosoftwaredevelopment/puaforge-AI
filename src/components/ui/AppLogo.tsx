@@ -1,17 +1,30 @@
-import { Anvil } from 'lucide-react';
-
 interface AppLogoProps {
   compact?: boolean;
 }
 
+function AnvilIcon({ size }: { size: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 512 512"
+      xmlns="http://www.w3.org/2000/svg"
+      className="text-forge-terracotta shrink-0"
+      fill="#D65A31"
+    >
+      <path d="M128.688 115.594v147.75h285v-147.75h-285zm-111.844 20.47c17.374 47.14 54.372 80.413 94.906 93.81v-93.81H16.844zm414.375 12.31v88.657c21.457-9.083 42.92-25.257 64.374-47.374-21.52-22.562-42.633-35.173-64.375-41.28zm-226.25 132.47c-12.15 38.536-33.897 71.5-60.595 100.47l257.844-.002c-28.705-29.016-49.952-62.054-61.5-100.468H204.97zM101.843 400v43.78h337.562V400H101.844z" />
+    </svg>
+  );
+}
+
 export default function AppLogo({ compact = false }: AppLogoProps) {
   if (compact) {
-    return <Anvil size={20} className="text-forge-terracotta" />;
+    return <AnvilIcon size={20} />;
   }
 
   return (
     <div className="flex items-center gap-2">
-      <Anvil size={22} className="text-forge-terracotta shrink-0" />
+      <AnvilIcon size={22} />
       <span className="text-sm font-semibold text-text-primary tracking-wide">PuaForge AI</span>
     </div>
   );
