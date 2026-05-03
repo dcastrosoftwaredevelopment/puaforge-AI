@@ -106,7 +106,6 @@ export default function Editor() {
       <div className="flex-1 overflow-hidden flex">
         <main className="flex-1 min-w-0">
           <SandpackProvider
-            key={sandpackKey}
             files={sandpackFiles}
             theme="dark"
             template="react-ts"
