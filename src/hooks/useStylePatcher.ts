@@ -526,7 +526,7 @@ export function useStylePatcher() {
       const forgeId = el?.id ?? '';
       const forgeBlockId = el?.forgeBlockId ?? '';
       const path = sandpackRef.current.activeFile || '/App.tsx';
-      const source = store.get(filesAtom)[path] ?? sandpackRef.current.files[path]?.code ?? '';
+      const source = sandpackRef.current.files[path]?.code ?? store.get(filesAtom)[path] ?? '';
       let patched = forgeId ? patchClassNameByForgeId(source, forgeId, oldClassName, newClassName) : source;
       if (patched === source && forgeBlockId)
         patched = patchClassNameForElement(source, forgeBlockId, oldClassName, newClassName);
@@ -544,7 +544,7 @@ export function useStylePatcher() {
       const isBlockRoot = el?.isBlockRoot ?? false;
       const className = el?.className ?? '';
       const path = sandpackRef.current.activeFile || '/App.tsx';
-      const source = store.get(filesAtom)[path] ?? sandpackRef.current.files[path]?.code ?? '';
+      const source = sandpackRef.current.files[path]?.code ?? store.get(filesAtom)[path] ?? '';
       let patched = forgeId ? patchInlineStyleByForgeId(source, forgeId, oldStyle, newStyle) : source;
       if (patched === source) {
         if (forgeBlockId && isBlockRoot) {

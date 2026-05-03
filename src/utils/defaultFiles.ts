@@ -59,7 +59,7 @@ export const DEFAULT_FILES: Record<string, string> = {
       <div
         data-forge-block-id="${WELCOME_CONTENT_ID}"
         data-forge-container="true"
-        className="relative flex items-center justify-center min-h-screen"
+        className="relative flex flex-col items-center justify-center min-h-screen"
       >
         <div className="text-center px-6" style={{ animation: 'fadeUp 0.6s ease both' }}>
           <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full border border-[rgba(214,90,49,0.3)] bg-[rgba(214,90,49,0.08)] text-[11px] text-[#D65A31] tracking-widest uppercase">
