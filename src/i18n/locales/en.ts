@@ -100,6 +100,7 @@ export const en = {
     confirmLeave: 'Are you sure you want to leave this team?',
     confirmRemove: 'Are you sure you want to remove this member?',
     limitReached: 'Team limit reached for your plan.',
+    memberLimitReached: 'Member limit of {{limit}} reached for your plan.',
     noTeams: 'You have no teams yet.',
     errors: {
       userNotFound: 'User not found.',

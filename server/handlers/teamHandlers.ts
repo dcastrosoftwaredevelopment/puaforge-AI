@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { eq, and, count } from 'drizzle-orm';
 import { db } from '../db.js';
 import { teams, teamMembers, users } from '../schema.js';
-import { checkTeamLimit, PlanLimitError, getUserPlan, TEAM_LIMITS, isSuperUser } from '../services/plans.js';
+import { checkTeamLimit, checkMemberLimit, PlanLimitError, getUserPlan, TEAM_LIMITS, MEMBER_LIMITS, isSuperUser } from '../services/plans.js';
 
 export async function listTeams(req: Request, res: Response) {
   const userId = req.user!.userId;
@@ -30,13 +30,16 @@ export async function listTeams(req: Request, res: Response) {
   const [{ value: used }] = await db.select({ value: count() }).from(teams).where(eq(teams.ownerId, userId));
   const plan = await getUserPlan(userId);
   const superuser = await isSuperUser(userId);
-  const rawLimit = superuser ? Infinity : (TEAM_LIMITS[plan] ?? 1);
-  const limit = rawLimit === Infinity ? null : rawLimit;
+  const rawTeamLimit = superuser ? Infinity : (TEAM_LIMITS[plan] ?? 1);
+  const limit = rawTeamLimit === Infinity ? null : rawTeamLimit;
+  const rawMemberLimit = superuser ? Infinity : (MEMBER_LIMITS[plan] ?? 2);
+  const memberLimit = rawMemberLimit === Infinity ? null : rawMemberLimit;
 
   res.json({
     teams: unique.map((t) => ({ ...t, memberCount: countMap.get(t.id) ?? 0 })),
     used,
     limit,
+    memberLimit,
   });
 }
 
@@ -107,6 +110,16 @@ export async function addMember(req: Request, res: Response) {
   if (!team) {
     res.status(404).json({ code: 'ERROR_TEAM_NOT_FOUND' });
     return;
+  }
+
+  try {
+    await checkMemberLimit(id);
+  } catch (err) {
+    if (err instanceof PlanLimitError) {
+      res.status(403).json({ code: 'ERROR_MEMBER_LIMIT_REACHED', limitType: err.limitType, requiredPlan: err.requiredPlan, upgradeRequired: true });
+      return;
+    }
+    throw err;
   }
 
   const [member] = await db.select({ id: users.id, status: users.status }).from(users).where(eq(users.email, email.trim().toLowerCase()));

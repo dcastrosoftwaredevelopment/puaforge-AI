@@ -21,6 +21,7 @@ interface TeamsResponse {
   teams: Team[];
   used: number;
   limit: number | null;
+  memberLimit: number | null;
 }
 
 export function useTeam() {
@@ -30,6 +31,7 @@ export function useTeam() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [used, setUsed] = useState(0);
   const [limit, setLimit] = useState<number | null>(null);
+  const [memberLimit, setMemberLimit] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [loadingMembers, setLoadingMembers] = useState<string | null>(null);
@@ -45,6 +47,7 @@ export function useTeam() {
       setTeams(data.teams);
       setUsed(data.used);
       setLimit(data.limit);
+      setMemberLimit(data.memberLimit);
     } finally {
       setIsLoading(false);
     }
@@ -177,6 +180,7 @@ export function useTeam() {
     teams,
     used,
     limit,
+    memberLimit,
     isLoading,
     expandedId,
     loadingMembers,

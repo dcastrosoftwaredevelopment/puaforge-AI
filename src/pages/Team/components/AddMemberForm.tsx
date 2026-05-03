@@ -6,19 +6,29 @@ import Button from '@/components/ui/Button';
 interface AddMemberFormProps {
   teamId: string;
   isAdding: boolean;
+  atLimit: boolean;
+  memberLimit: number | null;
   onAdd: (email: string) => Promise<void>;
 }
 
-export default function AddMemberForm({ isAdding, onAdd }: AddMemberFormProps) {
+export default function AddMemberForm({ isAdding, atLimit, memberLimit, onAdd }: AddMemberFormProps) {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!email.trim() || atLimit) return;
     await onAdd(email.trim());
     setEmail('');
   };
+
+  if (atLimit) {
+    return (
+      <p className="text-xs text-text-muted mt-3 pt-3 border-t border-border-subtle">
+        {t('team.memberLimitReached', { limit: memberLimit })}
+      </p>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="flex gap-2 mt-3 pt-3 border-t border-border-subtle">

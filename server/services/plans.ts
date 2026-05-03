@@ -1,6 +1,6 @@
 import { eq, and, count, isNotNull } from 'drizzle-orm';
 import { db } from '../db.js';
-import { subscriptions, projects, projectImages, checkpoints, users, publishedSites, teams } from '../schema.js';
+import { subscriptions, projects, projectImages, checkpoints, users, publishedSites, teams, teamMembers } from '../schema.js';
 
 export type Plan = 'free' | 'indie' | 'pro';
 
@@ -201,6 +201,13 @@ export const TEAM_LIMITS: Record<string, number> = {
   superuser: Infinity,
 };
 
+export const MEMBER_LIMITS: Record<string, number> = {
+  free: 2,
+  indie: 5,
+  pro: 15,
+  superuser: Infinity,
+};
+
 export async function checkTeamLimit(userId: string): Promise<void> {
   if (await isSuperUser(userId)) return;
   const plan = await getUserPlan(userId);
@@ -213,6 +220,25 @@ export async function checkTeamLimit(userId: string): Promise<void> {
       `Team limit of ${limit} reached for the ${planLabel(plan)} plan.`,
       plan === 'free' ? 'indie' : 'pro',
       'teams',
+    );
+  }
+}
+
+export async function checkMemberLimit(teamId: string): Promise<void> {
+  const [team] = await db.select({ ownerId: teams.ownerId }).from(teams).where(eq(teams.id, teamId)).limit(1);
+  if (!team) return;
+
+  if (await isSuperUser(team.ownerId)) return;
+  const plan = await getUserPlan(team.ownerId);
+  const limit = MEMBER_LIMITS[plan] ?? 2;
+  if (limit === Infinity) return;
+
+  const [{ value }] = await db.select({ value: count() }).from(teamMembers).where(eq(teamMembers.teamId, teamId));
+  if (value >= limit) {
+    throw new PlanLimitError(
+      `Member limit of ${limit} reached for the ${planLabel(plan)} plan.`,
+      plan === 'free' ? 'indie' : 'pro',
+      'teamMembers',
     );
   }
 }

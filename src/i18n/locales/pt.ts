@@ -100,6 +100,7 @@ export const pt = {
     confirmLeave: 'Tem certeza que deseja sair desta equipe?',
     confirmRemove: 'Tem certeza que deseja remover este membro?',
     limitReached: 'Limite de equipes atingido para o seu plano.',
+    memberLimitReached: 'Limite de {{limit}} membros atingido para o seu plano.',
     noTeams: 'Você ainda não tem equipes.',
     errors: {
       userNotFound: 'Usuário não encontrado.',

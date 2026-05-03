@@ -23,6 +23,7 @@ export default function Team() {
     teams,
     used,
     limit,
+    memberLimit,
     isLoading,
     expandedId,
     loadingMembers,
@@ -185,6 +186,8 @@ export default function Team() {
                           <AddMemberForm
                             teamId={team.id}
                             isAdding={addingMemberTo === team.id}
+                            atLimit={memberLimit !== null && team.memberCount >= memberLimit}
+                            memberLimit={memberLimit}
                             onAdd={(email) => addMember(team.id, email)}
                           />
                         )}
