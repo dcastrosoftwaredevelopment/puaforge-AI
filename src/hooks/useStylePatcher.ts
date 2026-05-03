@@ -1,9 +1,9 @@
 import { createContext, useCallback, useEffect, useRef } from 'react';
 import { useStore, useSetAtom } from 'jotai';
-import { useSandpack, useActiveCode } from '@codesandbox/sandpack-react';
-import { stylePushedPaths } from './useSandpackSync';
+import { useSandpack } from '@codesandbox/sandpack-react';
 import { filesAtom, selectedElementAtom } from '@/atoms';
 import { toJSXStyleObject } from '@/utils/inlineStyles';
+import { useIncrementBlockRev } from './useBlockRevision';
 
 type StylePatcherValue = {
   applyClassChange: (old: string, next: string) => void;
@@ -440,6 +440,7 @@ export function useStylePatcher() {
   const { sandpack } = useSandpack();
   const store = useStore();
   const setFiles = useSetAtom(filesAtom);
+  const incrementBlockRev = useIncrementBlockRev();
 
   const sandpackRef = useRef(sandpack);
   // No deps — runs after every render so sandpackRef never points to a stale context.
@@ -447,28 +448,16 @@ export function useStylePatcher() {
     sandpackRef.current = sandpack;
   });
 
-  // useActiveCode() reads directly from Sandpack's React state, which is updated on
-  // every keystroke via updateCurrentFile → setState. This is the single authoritative
-  // source for the live editor content — no separate filesRef needed.
-  const { code: activeCode } = useActiveCode();
-  const activeCodeRef = useRef(activeCode);
-  useEffect(() => {
-    activeCodeRef.current = activeCode;
-  });
-
   const commitUpdates = useCallback(
     (updates: Array<[string, string]>) => {
-      for (const [path, patched] of updates) {
-        stylePushedPaths.set(path, patched);
-        sandpackRef.current.updateFile(path, patched);
-      }
       setFiles((prev) => {
         const result = { ...prev };
         for (const [path, patched] of updates) result[path] = patched;
         return result;
       });
+      incrementBlockRev();
     },
-    [setFiles],
+    [setFiles, incrementBlockRev],
   );
 
   // Auto-inject data-forge-block-id for selected elements that have none.
@@ -478,7 +467,7 @@ export function useStylePatcher() {
     let lastProcessedId = '';
 
     // atomSource: pass the filesAtom content explicitly for AI-rewrite retries, where
-    // activeCodeRef hasn't updated yet (Sandpack hasn't re-rendered after setFiles).
+    // Sandpack's internal file state may not yet reflect the latest filesAtom write.
     const tryInject = (atomSource?: string) => {
       const el = store.get(selectedElementAtom);
       if (!el) return;
@@ -492,7 +481,8 @@ export function useStylePatcher() {
       if (!activeFile || activeFile.startsWith('/__')) return;
       if (!activeFile.endsWith('.tsx') && !activeFile.endsWith('.jsx')) return;
 
-      const source = atomSource || activeCodeRef.current || store.get(filesAtom)[activeFile] || '';
+      const source =
+        atomSource || store.get(filesAtom)[activeFile] || sandpackRef.current.files[activeFile]?.code || '';
       if (!source) return;
 
       const newId = `block-${el.tagName.toLowerCase()}-${Date.now()}`;
@@ -515,8 +505,8 @@ export function useStylePatcher() {
     tryInject();
     const unsub = store.sub(selectedElementAtom, () => tryInject());
     // Retry when filesAtom changes (AI rewrite) — element was selected but injection
-    // failed because JSX wasn't rendered yet. Use atom content directly since
-    // activeCodeRef still reflects the pre-rewrite Sandpack context at this point.
+    // failed because JSX wasn't rendered yet. Use atom content directly since the
+    // Sandpack file state may still reflect the pre-rewrite context at this point.
     const unsubFiles = store.sub(filesAtom, () => {
       const el = store.get(selectedElementAtom);
       if (el && !el.forgeBlockId && el.id !== lastProcessedId) {
@@ -536,7 +526,7 @@ export function useStylePatcher() {
       const forgeId = el?.id ?? '';
       const forgeBlockId = el?.forgeBlockId ?? '';
       const path = sandpackRef.current.activeFile || '/App.tsx';
-      const source = activeCodeRef.current || store.get(filesAtom)[path] || '';
+      const source = store.get(filesAtom)[path] ?? sandpackRef.current.files[path]?.code ?? '';
       let patched = forgeId ? patchClassNameByForgeId(source, forgeId, oldClassName, newClassName) : source;
       if (patched === source && forgeBlockId)
         patched = patchClassNameForElement(source, forgeBlockId, oldClassName, newClassName);
@@ -554,7 +544,7 @@ export function useStylePatcher() {
       const isBlockRoot = el?.isBlockRoot ?? false;
       const className = el?.className ?? '';
       const path = sandpackRef.current.activeFile || '/App.tsx';
-      const source = activeCodeRef.current || store.get(filesAtom)[path] || '';
+      const source = store.get(filesAtom)[path] ?? sandpackRef.current.files[path]?.code ?? '';
       let patched = forgeId ? patchInlineStyleByForgeId(source, forgeId, oldStyle, newStyle) : source;
       if (patched === source) {
         if (forgeBlockId && isBlockRoot) {
