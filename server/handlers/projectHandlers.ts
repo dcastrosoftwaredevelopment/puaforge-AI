@@ -681,12 +681,12 @@ export async function listProjectTeams(req: Request, res: Response) {
   if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
 
   const rows = await db
-    .select({ id: teams.id, name: teams.name, sharedAt: projectTeams.sharedAt })
+    .select({ teamId: teams.id, name: teams.name })
     .from(projectTeams)
     .innerJoin(teams, eq(teams.id, projectTeams.teamId))
     .where(eq(projectTeams.projectId, p(req, 'id')));
 
-  res.json(rows);
+  res.json({ teams: rows });
 }
 
 export async function shareWithTeam(req: Request, res: Response) {
