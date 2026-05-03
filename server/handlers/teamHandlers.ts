@@ -1,19 +1,17 @@
 import type { Request, Response } from 'express';
-import { eq, or, and } from 'drizzle-orm';
+import { eq, and, count } from 'drizzle-orm';
 import { db } from '../db.js';
 import { teams, teamMembers, users } from '../schema.js';
-import { checkTeamLimit, PlanLimitError } from '../services/plans.js';
+import { checkTeamLimit, PlanLimitError, getUserPlan, TEAM_LIMITS, isSuperUser } from '../services/plans.js';
 
 export async function listTeams(req: Request, res: Response) {
   const userId = req.user!.userId;
 
-  // Teams owned by user
   const owned = await db
     .select({ id: teams.id, name: teams.name, ownerId: teams.ownerId, createdAt: teams.createdAt })
     .from(teams)
     .where(eq(teams.ownerId, userId));
 
-  // Teams the user is a member of (but not owner)
   const memberOf = await db
     .select({ id: teams.id, name: teams.name, ownerId: teams.ownerId, createdAt: teams.createdAt })
     .from(teams)
@@ -23,7 +21,23 @@ export async function listTeams(req: Request, res: Response) {
   const all = [...owned, ...memberOf];
   const unique = Array.from(new Map(all.map((t) => [t.id, t])).values());
 
-  res.json(unique);
+  const counts = await db
+    .select({ teamId: teamMembers.teamId, value: count() })
+    .from(teamMembers)
+    .groupBy(teamMembers.teamId);
+  const countMap = new Map(counts.map((r) => [r.teamId, r.value]));
+
+  const [{ value: used }] = await db.select({ value: count() }).from(teams).where(eq(teams.ownerId, userId));
+  const plan = await getUserPlan(userId);
+  const superuser = await isSuperUser(userId);
+  const rawLimit = superuser ? Infinity : (TEAM_LIMITS[plan] ?? 1);
+  const limit = rawLimit === Infinity ? null : rawLimit;
+
+  res.json({
+    teams: unique.map((t) => ({ ...t, memberCount: countMap.get(t.id) ?? 0 })),
+    used,
+    limit,
+  });
 }
 
 export async function createTeam(req: Request, res: Response) {
@@ -46,7 +60,7 @@ export async function createTeam(req: Request, res: Response) {
   }
 
   const [team] = await db.insert(teams).values({ ownerId: userId, name: name.trim() }).returning();
-  res.status(201).json(team);
+  res.status(201).json({ ...team, memberCount: 0 });
 }
 
 export async function deleteTeam(req: Request, res: Response) {
@@ -71,12 +85,12 @@ export async function listMembers(req: Request, res: Response) {
   if (!team) return;
 
   const members = await db
-    .select({ id: users.id, name: users.name, email: users.email, joinedAt: teamMembers.joinedAt })
+    .select({ userId: users.id, name: users.name, email: users.email })
     .from(teamMembers)
     .innerJoin(users, eq(users.id, teamMembers.userId))
     .where(eq(teamMembers.teamId, id));
 
-  res.json(members);
+  res.json({ members });
 }
 
 export async function addMember(req: Request, res: Response) {
@@ -112,7 +126,13 @@ export async function addMember(req: Request, res: Response) {
   }
 
   await db.insert(teamMembers).values({ teamId: id, userId: member.id }).onConflictDoNothing();
-  res.status(201).json({ success: true });
+
+  const [added] = await db
+    .select({ userId: users.id, name: users.name, email: users.email })
+    .from(users)
+    .where(eq(users.id, member.id));
+
+  res.status(201).json(added);
 }
 
 export async function removeMember(req: Request, res: Response) {

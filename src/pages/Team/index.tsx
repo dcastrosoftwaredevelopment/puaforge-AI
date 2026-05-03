@@ -5,9 +5,16 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTeam } from '@/hooks/useTeam';
 import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar';
 import Button from '@/components/ui/Button';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import NewTeamModal from './components/NewTeamModal';
 import MemberRow from './components/MemberRow';
 import AddMemberForm from './components/AddMemberForm';
+
+interface PendingConfirm {
+  title: string;
+  message: string;
+  onConfirm: () => void;
+}
 
 export default function Team() {
   const { user } = useAuth();
@@ -33,6 +40,10 @@ export default function Team() {
   } = useTeam();
 
   const [showNewTeamModal, setShowNewTeamModal] = useState(false);
+  const [pending, setPending] = useState<PendingConfirm | null>(null);
+
+  const confirm = (title: string, message: string, onConfirm: () => void) =>
+    setPending({ title, message, onConfirm });
 
   const atLimit = limit !== null && used >= limit;
   const limitLabel =
@@ -120,9 +131,9 @@ export default function Team() {
                       <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                         {isOwner ?
                           <button
-                            onClick={() => {
-                              if (window.confirm(t('team.confirmDelete'))) deleteTeam(team.id);
-                            }}
+                            onClick={() =>
+                              confirm(t('team.deleteTeam'), t('team.confirmDelete'), () => deleteTeam(team.id))
+                            }
                             disabled={deletingId === team.id}
                             className="p-1.5 rounded-lg text-text-muted hover:text-red-400 hover:bg-bg-primary transition disabled:opacity-40 cursor-pointer"
                             title={t('team.deleteTeam')}
@@ -130,9 +141,12 @@ export default function Team() {
                             <Trash2 size={14} />
                           </button>
                         : <button
-                            onClick={() => {
-                              if (user && window.confirm(t('team.confirmLeave'))) leaveTeam(team.id, user.id);
-                            }}
+                            onClick={() =>
+                              user &&
+                              confirm(t('team.leaveTeam'), t('team.confirmLeave'), () =>
+                                leaveTeam(team.id, user.id),
+                              )
+                            }
                             className="p-1.5 rounded-lg text-text-muted hover:text-red-400 hover:bg-bg-primary transition cursor-pointer"
                             title={t('team.leaveTeam')}
                           >
@@ -158,10 +172,11 @@ export default function Team() {
                               member={member}
                               isOwner={isOwner}
                               currentUserId={user?.id ?? ''}
-                              onRemove={() => {
-                                if (window.confirm(t('team.confirmRemove')))
-                                  removeMember(team.id, member.userId);
-                              }}
+                              onRemove={() =>
+                                confirm(t('team.removeMember'), t('team.confirmRemove'), () =>
+                                  removeMember(team.id, member.userId),
+                                )
+                              }
                             />
                           ))
                         }
@@ -193,6 +208,18 @@ export default function Team() {
           onClose={() => setShowNewTeamModal(false)}
         />
       )}
+
+      <ConfirmModal
+        open={!!pending}
+        title={pending?.title ?? ''}
+        message={pending?.message ?? ''}
+        confirmLabel={t('common.confirm')}
+        onConfirm={() => {
+          pending?.onConfirm();
+          setPending(null);
+        }}
+        onCancel={() => setPending(null)}
+      />
     </div>
   );
 }

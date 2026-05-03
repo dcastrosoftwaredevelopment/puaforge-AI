@@ -1,73 +1,53 @@
-# React + TypeScript + Vite
+# PuaForge AI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Plataforma de criação de sites com IA.
 
-Currently, two official plugins are available:
+## Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- [Docker](https://www.docker.com/) e Docker Compose
 
-## React Compiler
+## Subindo o ambiente
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+docker compose up
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+A aplicação sobe em `http://localhost:5173` e a API em `http://localhost:3001`.  
+As migrations do banco são aplicadas automaticamente na inicialização do servidor.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Seeds
+
+### Super User
+
+Registra um ou mais emails como Super User no banco. Se o email ainda não existir, cria um pré-cadastro; se já existir, promove o usuário existente.
+
+```bash
+docker compose exec app node scripts/seed-superuser.js seu@email.com
 ```
+
+Após rodar o seed, faça login normalmente (Google OAuth ou email/senha). O Super User tem acesso à tela `/admin/users` para aprovar ou bloquear contas.
+
+---
+
+### Usuários de demonstração
+
+Cria 6 usuários com email e senha, 2 por plano (free, indie, pro). Idempotente — pode rodar mais de uma vez sem duplicar.
+
+```bash
+docker compose exec app node scripts/seed-demo-users.js
+```
+
+**Senha de todos:** `Test1234!`
+
+| Email | Plano |
+|---|---|
+| free1@test.com | free |
+| free2@test.com | free |
+| indie1@test.com | indie |
+| indie2@test.com | indie |
+| pro1@test.com | pro |
+| pro2@test.com | pro |
+
+> Atenção: esses usuários têm `status=active` e `email_verified=true`. Use apenas em ambientes de desenvolvimento.
