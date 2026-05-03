@@ -31,7 +31,6 @@ export function useBlockDropZone() {
   });
 
   // Receive hit-test results from the preview iframe and update the insert target.
-  // Sets the target when a container is found, clears it when cursor is over non-container area.
   useEffect(() => {
     const onMessage = (e: MessageEvent) => {
       if (!isDraggingRef.current) return;
@@ -45,21 +44,6 @@ export function useBlockDropZone() {
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
   }, [setInsertParentId]);
-
-  const lastHitRef = useRef(0);
-
-  function handleDragOver(e: React.DragEvent) {
-    const now = Date.now();
-    if (now - lastHitRef.current < 80) return;
-    lastHitRef.current = now;
-    const iframe = document.querySelector<HTMLIFrameElement>('.sp-preview-iframe');
-    if (!iframe?.contentWindow) return;
-    const rect = iframe.getBoundingClientRect();
-    iframe.contentWindow.postMessage(
-      { type: 'FORGE_HIT_TEST', x: e.clientX - rect.left, y: e.clientY - rect.top },
-      '*',
-    );
-  }
 
   function handleDrop() {
     if (!draggedBlock) return;
@@ -76,5 +60,5 @@ export function useBlockDropZone() {
     incrementBlockRev();
   }
 
-  return { isDragging, handleDrop, handleDragOver };
+  return { isDragging, handleDrop };
 }

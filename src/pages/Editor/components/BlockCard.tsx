@@ -1,8 +1,7 @@
-import { useState } from 'react';
 import { Plus, Trash2, GripVertical } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useDraggable } from '@dnd-kit/core';
 import { type Block } from '@/utils/blockCatalog';
-import { useBlockDrag } from '@/hooks/useBlockDrag';
 import BlockIcon from './BlockIcon';
 
 interface BlockCardProps {
@@ -16,8 +15,10 @@ interface BlockCardProps {
 
 export default function BlockCard({ block, count, isSelected, onSelect, onInsert, onRemove }: BlockCardProps) {
   const { t } = useTranslation();
-  const { startDrag, endDrag } = useBlockDrag();
-  const [isDragging, setIsDragging] = useState(false);
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: block.id,
+    data: { block },
+  });
 
   return (
     <div
@@ -25,7 +26,7 @@ export default function BlockCard({ block, count, isSelected, onSelect, onInsert
         isSelected ? 'border-forge-terracotta shadow-md' : 'border-transparent hover:border-border-default'
       }`}
     >
-      {/* Main content — click selects the block, separate from footer */}
+      {/* Main content — click selects the block */}
       <div
         onClick={() => onSelect(block)}
         onDoubleClick={() => onInsert(block)}
@@ -41,39 +42,21 @@ export default function BlockCard({ block, count, isSelected, onSelect, onInsert
           className="absolute top-1.5 right-1.5 text-black/20 opacity-0 group-hover:opacity-100 transition pointer-events-none"
         />
 
-        {/* Drag button — tight around BlockIcon; click bubbles up to onSelect */}
+        {/* Drag handle — dnd-kit listeners handle both pointer and touch */}
         <button
+          ref={setNodeRef}
           type="button"
-          draggable
-          onDragStart={(e) => {
-            setIsDragging(true);
-            startDrag(block);
-            e.dataTransfer.effectAllowed = 'copy';
-
-            // Custom ghost: clone with an opaque bg so rounded corners are visible
-            const el = e.currentTarget;
-            const ghost = el.cloneNode(true) as HTMLElement;
-            ghost.style.position = 'fixed';
-            ghost.style.top = '-1000px';
-            ghost.style.left = '-1000px';
-            ghost.style.background = 'rgba(20,20,20,0.95)';
-            document.body.appendChild(ghost);
-            e.dataTransfer.setDragImage(ghost, ghost.offsetWidth / 2, ghost.offsetHeight / 2);
-            setTimeout(() => document.body.removeChild(ghost), 0);
-          }}
-          onDragEnd={() => {
-            setIsDragging(false);
-            endDrag();
-          }}
+          {...listeners}
+          {...attributes}
           className={`inline-flex items-center justify-center p-2 rounded-xl cursor-grab active:cursor-grabbing transition ${
-            isDragging ? 'ring-2 ring-white/40' : ''
+            isDragging ? 'opacity-40 ring-2 ring-white/40' : ''
           }`}
         >
           <BlockIcon blockId={block.id} />
         </button>
       </div>
 
-      {/* Footer — actions only, not part of the select area */}
+      {/* Footer */}
       <div className="bg-bg-elevated px-3 py-2 flex items-center justify-between gap-2">
         <span className="text-[11px] text-text-secondary font-medium truncate">{t(block.labelKey)}</span>
 
