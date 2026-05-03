@@ -77,7 +77,7 @@ export default function BlockIcon({ blockId, className = 'w-10 h-10 text-forge-t
     case 'heading-1':
       return (
         <svg viewBox="0 0 40 40" className={className} fill="currentColor">
-          <text x="2" y="30" fontSize="22" fontWeight="800" fontFamily="sans-serif">
+          <text x="20" y="30" fontSize="22" fontWeight="800" fontFamily="sans-serif" textAnchor="middle">
             H1
           </text>
         </svg>
@@ -86,7 +86,7 @@ export default function BlockIcon({ blockId, className = 'w-10 h-10 text-forge-t
     case 'heading-2':
       return (
         <svg viewBox="0 0 40 40" className={className} fill="currentColor">
-          <text x="2" y="29" fontSize="19" fontWeight="700" fontFamily="sans-serif">
+          <text x="20" y="29" fontSize="19" fontWeight="700" fontFamily="sans-serif" textAnchor="middle">
             H2
           </text>
         </svg>
@@ -95,7 +95,7 @@ export default function BlockIcon({ blockId, className = 'w-10 h-10 text-forge-t
     case 'heading-3':
       return (
         <svg viewBox="0 0 40 40" className={className} fill="currentColor">
-          <text x="2" y="28" fontSize="16" fontWeight="600" fontFamily="sans-serif">
+          <text x="20" y="28" fontSize="16" fontWeight="600" fontFamily="sans-serif" textAnchor="middle">
             H3
           </text>
         </svg>
@@ -120,7 +120,7 @@ export default function BlockIcon({ blockId, className = 'w-10 h-10 text-forge-t
     case 'quote':
       return (
         <svg viewBox="0 0 40 40" className={className} fill="currentColor">
-          <text x="4" y="32" fontSize="36" fontFamily="Georgia, serif" opacity="0.85">
+          <text x="20" y="32" fontSize="36" fontFamily="Georgia, serif" opacity="0.85" textAnchor="middle">
             "
           </text>
         </svg>

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Plus, Trash2, GripVertical } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { type Block } from '@/utils/blockCatalog';
@@ -16,6 +17,7 @@ interface BlockCardProps {
 export default function BlockCard({ block, count, isSelected, onSelect, onInsert, onRemove }: BlockCardProps) {
   const { t } = useTranslation();
   const { startDrag, endDrag } = useBlockDrag();
+  const [isDragging, setIsDragging] = useState(false);
 
   return (
     <div
@@ -23,92 +25,99 @@ export default function BlockCard({ block, count, isSelected, onSelect, onInsert
         isSelected ? 'border-forge-terracotta shadow-md' : 'border-transparent hover:border-border-default'
       }`}
     >
-      <button
-        type="button"
+      {/* Main content — click selects the block, separate from footer */}
+      <div
         onClick={() => onSelect(block)}
         onDoubleClick={() => onInsert(block)}
-        className="flex flex-col w-full text-left cursor-pointer"
+        className={`h-20 w-full ${block.previewBg} relative flex items-center justify-center cursor-pointer`}
       >
-        {/* Preview area */}
-        <div className={`h-20 w-full ${block.previewBg} relative flex items-center justify-center`}>
+        {count > 0 && (
+          <span className="absolute top-1.5 left-1.5 bg-forge-terracotta text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none select-none">
+            ×{count}
+          </span>
+        )}
+        <GripVertical
+          size={11}
+          className="absolute top-1.5 right-1.5 text-black/20 opacity-0 group-hover:opacity-100 transition pointer-events-none"
+        />
+
+        {/* Drag button — tight around BlockIcon; click bubbles up to onSelect */}
+        <button
+          type="button"
+          draggable
+          onDragStart={(e) => {
+            setIsDragging(true);
+            startDrag(block);
+            e.dataTransfer.effectAllowed = 'copy';
+
+            // Custom ghost: clone with an opaque bg so rounded corners are visible
+            const el = e.currentTarget;
+            const ghost = el.cloneNode(true) as HTMLElement;
+            ghost.style.position = 'fixed';
+            ghost.style.top = '-1000px';
+            ghost.style.left = '-1000px';
+            ghost.style.background = 'rgba(20,20,20,0.95)';
+            document.body.appendChild(ghost);
+            e.dataTransfer.setDragImage(ghost, ghost.offsetWidth / 2, ghost.offsetHeight / 2);
+            setTimeout(() => document.body.removeChild(ghost), 0);
+          }}
+          onDragEnd={() => {
+            setIsDragging(false);
+            endDrag();
+          }}
+          className={`inline-flex items-center justify-center p-2 rounded-xl cursor-grab active:cursor-grabbing transition ${
+            isDragging ? 'ring-2 ring-white/40' : ''
+          }`}
+        >
           <BlockIcon blockId={block.id} />
+        </button>
+      </div>
 
-          <div className="absolute top-1.5 right-1.5 flex items-center gap-1">
-            {count > 0 && (
-              <span className="bg-forge-terracotta text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none select-none">
-                ×{count}
-              </span>
-            )}
-            {/* Drag handle — draggable works on a div inside a div (not inside a button) */}
-            <div
-              draggable
-              onDragStart={(e) => {
-                e.stopPropagation();
-                startDrag(block);
-                e.dataTransfer.effectAllowed = 'copy';
-              }}
-              onDragEnd={(e) => {
-                e.stopPropagation();
-                endDrag();
-              }}
-              onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center cursor-grab active:cursor-grabbing"
-            >
-              <GripVertical size={11} className="text-black/20 opacity-0 group-hover:opacity-100 transition" />
-            </div>
-          </div>
-        </div>
+      {/* Footer — actions only, not part of the select area */}
+      <div className="bg-bg-elevated px-3 py-2 flex items-center justify-between gap-2">
+        <span className="text-[11px] text-text-secondary font-medium truncate">{t(block.labelKey)}</span>
 
-        {/* Footer */}
-        <div className="bg-bg-elevated px-3 py-2 flex items-center justify-between gap-2">
-          <span className="text-[11px] text-text-secondary font-medium truncate">{t(block.labelKey)}</span>
-
-          <div className="shrink-0 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition">
-            {count > 0 && (
-              <span
-                role="button"
-                tabIndex={0}
-                title={t('blocks.removeLast')}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRemove(block);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.stopPropagation();
-                    onRemove(block);
-                  }
-                }}
-                className="flex items-center text-red-400 hover:text-red-300 transition"
-              >
-                <Trash2 size={11} />
-              </span>
-            )}
+        <div className="shrink-0 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition">
+          {count > 0 && (
             <span
               role="button"
               tabIndex={0}
-              title={t('blocks.insert')}
+              title={t('blocks.removeLast')}
               onClick={(e) => {
                 e.stopPropagation();
-                onInsert(block);
+                onRemove(block);
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.stopPropagation();
-                  onInsert(block);
+                  onRemove(block);
                 }
               }}
-              className="flex items-center text-forge-terracotta hover:text-forge-terracotta/80 transition"
+              className="flex items-center text-red-400 hover:text-red-300 transition"
             >
-              <Plus size={13} />
+              <Trash2 size={11} />
             </span>
-          </div>
+          )}
+          <span
+            role="button"
+            tabIndex={0}
+            title={t('blocks.insert')}
+            onClick={(e) => {
+              e.stopPropagation();
+              onInsert(block);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.stopPropagation();
+                onInsert(block);
+              }
+            }}
+            className="flex items-center text-forge-terracotta hover:text-forge-terracotta/80 transition"
+          >
+            <Plus size={13} />
+          </span>
         </div>
-      </button>
-
-      {isSelected && (
-        <div className="absolute inset-0 ring-2 ring-inset ring-forge-terracotta rounded-xl pointer-events-none" />
-      )}
+      </div>
     </div>
   );
 }
