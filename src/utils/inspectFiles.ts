@@ -230,7 +230,7 @@ export function ForgeInspect({ children }) {
       selectedTagLabel.style.cssText = 'background:#e07055;color:#fff;font:10px/1 sans-serif;padding:2px 6px;border-radius:2px;white-space:nowrap;'
       selectedDeleteBtn = document.createElement('button')
       selectedDeleteBtn.style.cssText = 'background:#ef4444;color:#fff;border:none;cursor:pointer;padding:2px 4px;border-radius:2px;display:none;align-items:center;'
-      selectedDeleteBtn.innerHTML = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>'
+      selectedDeleteBtn.innerHTML = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>'
       selectedDeleteBtn.addEventListener('click', function(e) {
         e.stopPropagation(); e.preventDefault()
         var bid = selectedElRef ? getForgeBlockId(selectedElRef) : ''

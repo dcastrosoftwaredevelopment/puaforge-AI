@@ -49,7 +49,10 @@ export function useSandpackSync() {
     for (const [path, fileCode] of Object.entries(files)) {
       if (prevFiles[path] !== fileCode) {
         sp.updateFile(path, fileCode);
-        if (prevFiles[path] === undefined) sp.openFile(path);
+        if (prevFiles[path] === undefined) {
+          const p = path;
+          setTimeout(() => sandpackRef.current.openFile(p), 0);
+        }
       }
     }
   }, [files]);

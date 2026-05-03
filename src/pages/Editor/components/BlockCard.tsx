@@ -22,13 +22,7 @@ export default function BlockCard({ block, count, isSelected, onSelect, onInsert
       type="button"
       onClick={() => onSelect(block)}
       onDoubleClick={() => onInsert(block)}
-      draggable
-      onDragStart={(e) => {
-        startDrag(block);
-        e.dataTransfer.effectAllowed = 'copy';
-      }}
-      onDragEnd={endDrag}
-      className={`group relative flex flex-col rounded-xl overflow-hidden border-2 transition text-left cursor-grab active:cursor-grabbing ${
+      className={`group relative flex flex-col rounded-xl overflow-hidden border-2 transition text-left cursor-pointer ${
         isSelected ? 'border-forge-terracotta shadow-md' : 'border-transparent hover:border-border-default'
       }`}
     >
@@ -42,7 +36,18 @@ export default function BlockCard({ block, count, isSelected, onSelect, onInsert
               ×{count}
             </span>
           )}
-          <GripVertical size={11} className="text-black/20 opacity-0 group-hover:opacity-100 transition" />
+          <div
+            draggable
+            onDragStart={(e) => {
+              startDrag(block);
+              e.dataTransfer.effectAllowed = 'copy';
+            }}
+            onDragEnd={endDrag}
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center cursor-grab active:cursor-grabbing"
+          >
+            <GripVertical size={11} className="text-black/20 opacity-0 group-hover:opacity-100 transition" />
+          </div>
         </div>
       </div>
 
