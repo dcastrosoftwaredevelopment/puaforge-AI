@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProjects } from '@/hooks/useProjects';
 import { useProjectActions } from '@/hooks/useProjectActions';
 import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar';
+import AppLogo from '@/components/ui/AppLogo';
 import EmptyState from './components/EmptyState';
 import ProjectCard from './components/ProjectCard';
 import ShareModal from './components/ShareModal';
@@ -51,7 +52,7 @@ export default function Home() {
         {/* Mobile top bar */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-border-subtle md:hidden">
           <SidebarMenuButton />
-          <img src="/Logo PuaForge.png" alt="PuaForge AI" style={{ height: '20px', width: 'auto' }} />
+          <AppLogo compact />
         </div>
 
         <div className="max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-10">

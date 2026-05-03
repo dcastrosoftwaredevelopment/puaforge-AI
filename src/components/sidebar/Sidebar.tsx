@@ -4,6 +4,7 @@ import { Layers, Settings, LogOut, CreditCard, HelpCircle, X, Users, UsersRound 
 import { useTranslation } from 'react-i18next';
 import { Sidebar as FlowbiteSidebar, SidebarItem, SidebarItems, SidebarItemGroup, Drawer } from 'flowbite-react';
 import Button from '@/components/ui/Button';
+import AppLogo from '@/components/ui/AppLogo';
 import { useSidebar } from '@/hooks/useSidebar';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -46,7 +47,7 @@ export default function Sidebar() {
     <FlowbiteSidebar className="bg-bg-primary">
       {/* Header */}
       <div className="px-4 py-4 border-b border-border-subtle flex items-center justify-between shrink-0">
-        <img src="/Logo PuaForge.png" alt="PuaForge AI" style={{ width: '130px', height: 'auto' }} />
+        <AppLogo />
         <button
           onClick={() => setIsOpen(false)}
           className="p-1 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition cursor-pointer md:hidden"

@@ -4,6 +4,7 @@ import { Plus, ChevronDown, ChevronRight, Trash2, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTeam } from '@/hooks/useTeam';
 import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar';
+import AppLogo from '@/components/ui/AppLogo';
 import Button from '@/components/ui/Button';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import NewTeamModal from './components/NewTeamModal';
@@ -57,7 +58,7 @@ export default function Team() {
       <main className="flex-1 overflow-auto">
         <div className="flex items-center gap-3 px-4 py-3 border-b border-border-subtle md:hidden">
           <SidebarMenuButton />
-          <img src="/Logo PuaForge.png" alt="PuaForge AI" style={{ height: '20px', width: 'auto' }} />
+          <AppLogo compact />
         </div>
 
         <div className="max-w-3xl mx-auto px-4 md:px-8 py-6 md:py-10">

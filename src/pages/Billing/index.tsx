@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Zap, Rocket, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar';
+import AppLogo from '@/components/ui/AppLogo';
 import { useUsage, usePlansConfig, formatBytes } from '@/hooks/useUsage';
 import { track } from '@/lib/analytics';
 import UsageSection from './components/UsageSection';
@@ -115,7 +116,7 @@ export default function Billing() {
       <main className="flex-1 overflow-y-auto">
         <div className="flex items-center gap-3 px-4 py-3 border-b border-border-subtle md:hidden">
           <SidebarMenuButton />
-          <img src="/Logo PuaForge.png" alt="PuaForge AI" style={{ height: '20px', width: 'auto' }} />
+          <AppLogo compact />
         </div>
 
         <div className="max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-10">
