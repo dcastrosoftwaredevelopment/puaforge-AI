@@ -51,7 +51,7 @@ export default function SandpackContent() {
   const { t } = useTranslation();
   const { editorPanelMode, inspectMode } = useEditorPanelTabs();
   const { drawerOpen, drawerHeightPct, setDrawerHeightPct, drawerTab } = useMobileDrawer();
-  const { handleDrop } = useBlockDropZone();
+  const { isDragging, handleDrop } = useBlockDropZone();
   const { draggedBlock, startDrag, endDrag } = useBlockDrag();
   const { isCreating, fileName, setFileName, inputRef, startCreate, cancelCreate, confirmCreate, handleKeyDown } =
     useNewFile();
@@ -100,6 +100,11 @@ export default function SandpackContent() {
     },
     [handleDrop, endDrag],
   );
+
+  const onDragCancel = useCallback(() => {
+    endDrag();
+    wasOverPreviewRef.current = false;
+  }, [endDrag]);
 
   const [findOpen, setFindOpen] = useState(false);
   const [showExplorer, setShowExplorer] = useState(!isMobile);
@@ -164,7 +169,13 @@ export default function SandpackContent() {
   );
 
   return (
-    <DndContext sensors={sensors} onDragStart={onDragStart} onDragMove={onDragMove} onDragEnd={onDragEnd}>
+    <DndContext
+      sensors={sensors}
+      onDragStart={onDragStart}
+      onDragMove={onDragMove}
+      onDragEnd={onDragEnd}
+      onDragCancel={onDragCancel}
+    >
       <SandpackLayout ref={containerRef} className="flex h-full w-full">
         <SandpackSyncBridge />
 
@@ -180,6 +191,7 @@ export default function SandpackContent() {
                 style={isResponsive ? { width: DEVICE_WIDTHS[device] } : undefined}
               >
                 <SandpackPreview showRefreshButton showOpenInCodeSandbox={false} />
+                {isDragging && <div className="absolute inset-0 z-20" />}
               </div>
             </div>
 
@@ -334,6 +346,7 @@ export default function SandpackContent() {
                 style={isResponsive ? { width: DEVICE_WIDTHS[device] } : undefined}
               >
                 <SandpackPreview showRefreshButton showOpenInCodeSandbox={false} />
+                {isDragging && <div className="absolute inset-0 z-20" />}
               </div>
             </div>
           </>
