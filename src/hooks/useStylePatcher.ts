@@ -482,7 +482,10 @@ export function useStylePatcher() {
       if (!activeFile.endsWith('.tsx') && !activeFile.endsWith('.jsx')) return;
 
       const source =
-        atomSource || store.get(filesAtom)[activeFile] || sandpackRef.current.files[activeFile]?.code || '';
+        atomSource ||
+        sandpackRef.current.files[activeFile]?.code ||
+        store.get(filesAtom)[activeFile] ||
+        '';
       if (!source) return;
 
       const newId = `block-${el.tagName.toLowerCase()}-${Date.now()}`;
