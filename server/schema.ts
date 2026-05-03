@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, boolean, timestamp, integer, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text, boolean, timestamp, integer, jsonb, primaryKey } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -6,6 +6,8 @@ export const users = pgTable('users', {
   name: varchar('name', { length: 255 }),
   passwordHash: varchar('password_hash', { length: 255 }),
   googleId: varchar('google_id', { length: 255 }).unique(),
+  role: varchar('role', { length: 20 }).default('user').notNull(),
+  status: varchar('status', { length: 20 }).default('pending').notNull(),
   emailVerified: boolean('email_verified').default(false).notNull(),
   emailVerificationToken: varchar('email_verification_token', { length: 255 }).unique(),
   emailVerificationExpiry: timestamp('email_verification_expiry'),
@@ -100,6 +102,43 @@ export const subscriptions = pgTable('subscriptions', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+export const teams = pgTable('teams', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  ownerId: uuid('owner_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const teamMembers = pgTable(
+  'team_members',
+  {
+    teamId: uuid('team_id')
+      .notNull()
+      .references(() => teams.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    joinedAt: timestamp('joined_at').defaultNow().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.teamId, t.userId] })],
+);
+
+export const projectTeams = pgTable(
+  'project_teams',
+  {
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    teamId: uuid('team_id')
+      .notNull()
+      .references(() => teams.id, { onDelete: 'cascade' }),
+    sharedAt: timestamp('shared_at').defaultNow().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.projectId, t.teamId] })],
+);
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type UserSettings = typeof userSettings.$inferSelect;
@@ -110,3 +149,6 @@ export type ProjectImage = typeof projectImages.$inferSelect;
 export type Checkpoint = typeof checkpoints.$inferSelect;
 export type PublishedSite = typeof publishedSites.$inferSelect;
 export type Subscription = typeof subscriptions.$inferSelect;
+export type Team = typeof teams.$inferSelect;
+export type TeamMember = typeof teamMembers.$inferSelect;
+export type ProjectTeam = typeof projectTeams.$inferSelect;

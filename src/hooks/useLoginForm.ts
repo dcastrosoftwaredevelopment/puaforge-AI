@@ -28,6 +28,8 @@ export function useLoginForm() {
     ERROR_INVALID_GOOGLE_TOKEN: t('login.errors.googleFailed'),
     ERROR_USER_NOT_FOUND: t('login.errors.userNotFound'),
     ERROR_EMAIL_NOT_VERIFIED: t('login.errors.emailNotVerified'),
+    ERROR_ACCOUNT_PENDING_APPROVAL: t('login.errors.accountPendingApproval'),
+    ERROR_ACCOUNT_BLOCKED: t('login.errors.accountBlocked'),
   };
 
   const loginSchema = yup.object({

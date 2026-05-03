@@ -11,6 +11,8 @@ import EmailConfirmed from '@/pages/EmailConfirmed';
 import Profile from '@/pages/Profile';
 import Billing from '@/pages/Billing';
 import Help from '@/pages/Help';
+import AdminUsers from '@/pages/Admin';
+import Team from '@/pages/Team';
 import SplashScreen from '@/components/auth/SplashScreen';
 import UpgradeModal from '@/components/billing/UpgradeModal';
 
@@ -37,6 +39,8 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/billing" element={<Billing />} />
           <Route path="/help" element={<Help />} />
+          <Route path="/team" element={<Team />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
         </Routes>
       )}
     </>

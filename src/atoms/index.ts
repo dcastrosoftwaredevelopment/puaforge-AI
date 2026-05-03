@@ -10,6 +10,7 @@ export interface Project {
   name: string;
   createdAt: number;
   updatedAt: number;
+  sharedBy?: { id: string; name: string | null; email: string } | null;
 }
 
 export const projectsAtom = atom<Project[]>([]);

@@ -12,6 +12,10 @@ const RESEND_BLOCK_MS = 5 * 60 * 1000;
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+function buildUserResponse(user: { id: string; email: string; name: string | null; emailVerified: boolean; role: string; status: string }) {
+  return { id: user.id, email: user.email, name: user.name, emailVerified: user.emailVerified, role: user.role, status: user.status };
+}
+
 export async function register(req: Request, res: Response) {
   const { email, password, name } = req.body as { email: string; password: string; name: string };
 
@@ -20,9 +24,24 @@ export async function register(req: Request, res: Response) {
     return;
   }
 
-  const existing = await db.select({ id: users.id }).from(users).where(eq(users.email, email));
-  if (existing.length > 0) {
-    res.status(409).json({ code: 'ERROR_EMAIL_ALREADY_USED' });
+  const [existing] = await db.select().from(users).where(eq(users.email, email));
+
+  if (existing) {
+    // Pre-registered by superuser script (no password yet) — allow completing registration
+    if (!existing.passwordHash) {
+      const passwordHash = await bcrypt.hash(password, 10);
+      const verificationToken = randomUUID();
+      const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      const now = new Date();
+      await db
+        .update(users)
+        .set({ name, passwordHash, emailVerified: false, emailVerificationToken: verificationToken, emailVerificationExpiry: verificationExpiry, lastVerificationEmailSentAt: now })
+        .where(eq(users.id, existing.id));
+      await enqueueVerificationEmail(email, verificationToken);
+      res.status(202).json({ status: 'needs_verification' });
+    } else {
+      res.status(409).json({ code: 'ERROR_EMAIL_ALREADY_USED' });
+    }
     return;
   }
 
@@ -39,6 +58,8 @@ export async function register(req: Request, res: Response) {
     emailVerificationToken: verificationToken,
     emailVerificationExpiry: verificationExpiry,
     lastVerificationEmailSentAt: now,
+    role: 'user',
+    status: 'pending',
   });
 
   await enqueueVerificationEmail(email, verificationToken);
@@ -73,19 +94,25 @@ export async function login(req: Request, res: Response) {
     if (enqueued) {
       await db
         .update(users)
-        .set({
-          emailVerificationToken: verificationToken,
-          emailVerificationExpiry: verificationExpiry,
-          lastVerificationEmailSentAt: new Date(),
-        })
+        .set({ emailVerificationToken: verificationToken, emailVerificationExpiry: verificationExpiry, lastVerificationEmailSentAt: new Date() })
         .where(eq(users.id, user.id));
     }
     res.status(403).json({ code: 'ERROR_EMAIL_NOT_VERIFIED' });
     return;
   }
 
-  const token = signToken({ userId: user.id, email: user.email });
-  res.json({ token, user: { id: user.id, email: user.email, name: user.name, emailVerified: user.emailVerified } });
+  if (user.status === 'pending') {
+    res.status(403).json({ code: 'ERROR_ACCOUNT_PENDING_APPROVAL' });
+    return;
+  }
+
+  if (user.status === 'blocked') {
+    res.status(403).json({ code: 'ERROR_ACCOUNT_BLOCKED' });
+    return;
+  }
+
+  const token = signToken({ userId: user.id, email: user.email, role: user.role });
+  res.json({ token, user: buildUserResponse(user) });
 }
 
 export async function googleAuth(req: Request, res: Response) {
@@ -115,14 +142,30 @@ export async function googleAuth(req: Request, res: Response) {
     .where(or(eq(users.googleId, googleId), eq(users.email, email!)));
 
   if (!user) {
-    [user] = await db.insert(users).values({ email: email!, name, googleId, emailVerified: true }).returning();
+    [user] = await db
+      .insert(users)
+      .values({ email: email!, name, googleId, emailVerified: true, role: 'user', status: 'pending' })
+      .returning();
   } else {
-    await db.update(users).set({ googleId, emailVerified: true }).where(eq(users.email, email!));
-    user = { ...user, googleId, emailVerified: true };
+    [user] = await db
+      .update(users)
+      .set({ googleId, emailVerified: true })
+      .where(eq(users.email, email!))
+      .returning();
   }
 
-  const token = signToken({ userId: user.id, email: user.email });
-  res.json({ token, user: { id: user.id, email: user.email, name: user.name, emailVerified: user.emailVerified } });
+  if (user.status === 'pending') {
+    res.status(403).json({ code: 'ERROR_ACCOUNT_PENDING_APPROVAL' });
+    return;
+  }
+
+  if (user.status === 'blocked') {
+    res.status(403).json({ code: 'ERROR_ACCOUNT_BLOCKED' });
+    return;
+  }
+
+  const token = signToken({ userId: user.id, email: user.email, role: user.role });
+  res.json({ token, user: buildUserResponse(user) });
 }
 
 export async function verifyEmail(req: Request, res: Response) {
@@ -150,8 +193,9 @@ export async function verifyEmail(req: Request, res: Response) {
     .set({ emailVerified: true, emailVerificationToken: null, emailVerificationExpiry: null })
     .where(eq(users.id, user.id));
 
-  const jwtToken = signToken({ userId: user.id, email: user.email });
-  res.json({ token: jwtToken, user: { id: user.id, email: user.email, name: user.name, emailVerified: true } });
+  // After verification the account is still pending — they'll see the approval message on next login
+  const jwtToken = signToken({ userId: user.id, email: user.email, role: user.role });
+  res.json({ token: jwtToken, user: buildUserResponse({ ...user, emailVerified: true }) });
 }
 
 export async function resendVerification(req: Request, res: Response) {
@@ -190,11 +234,7 @@ export async function resendVerification(req: Request, res: Response) {
 
   await db
     .update(users)
-    .set({
-      emailVerificationToken: verificationToken,
-      emailVerificationExpiry: verificationExpiry,
-      lastVerificationEmailSentAt: new Date(),
-    })
+    .set({ emailVerificationToken: verificationToken, emailVerificationExpiry: verificationExpiry, lastVerificationEmailSentAt: new Date() })
     .where(eq(users.id, user.id));
 
   res.json({ status: 'sent' });
@@ -207,6 +247,8 @@ export async function getMe(req: Request, res: Response) {
       email: users.email,
       name: users.name,
       emailVerified: users.emailVerified,
+      role: users.role,
+      status: users.status,
       apiKey: userSettings.apiKey,
       apiKeyEnabled: userSettings.apiKeyEnabled,
     })
@@ -224,6 +266,8 @@ export async function getMe(req: Request, res: Response) {
     email: row.email,
     name: row.name,
     emailVerified: row.emailVerified,
+    role: row.role,
+    status: row.status,
     apiKey: row.apiKey ?? null,
     apiKeyEnabled: row.apiKeyEnabled ?? true,
   });

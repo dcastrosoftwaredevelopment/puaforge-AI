@@ -55,6 +55,7 @@ interface ApiProject {
   name: string;
   createdAt: number;
   updatedAt: number;
+  sharedBy?: { id: string; name: string | null; email: string } | null;
 }
 
 export function usePersistence() {

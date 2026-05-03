@@ -12,6 +12,8 @@ import { userSettingsRoute } from './routes/userSettings.js';
 import { profileRoute } from './routes/profile.js';
 import { projectsRoute } from './routes/projects.js';
 import { usageRoute } from './routes/usage.js';
+import adminRouter from './routes/admin.js';
+import teamsRouter from './routes/teams.js';
 import { runMigrations } from './db.js';
 import { initEmailQueue } from './services/emailQueue.js';
 import { siteServingMiddleware } from './middleware/siteServing.js';
@@ -37,6 +39,8 @@ app.use('/api', modelsRoute);
 app.use('/api', publishRoute);
 app.use('/api', settingsRoute);
 app.use('/api', usageRoute);
+app.use('/api/admin', adminRouter);
+app.use('/api/teams', teamsRouter);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });

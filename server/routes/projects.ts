@@ -28,6 +28,9 @@ import {
   publishToSubdomain,
   checkSubdomainAvailability,
   saveSubdomain,
+  listProjectTeams,
+  shareWithTeam,
+  unshareFromTeam,
 } from '../handlers/projectHandlers.js';
 
 const router = Router();
@@ -75,5 +78,10 @@ router.put('/projects/:id/published/subdomain', requireAuth, publishToSubdomain)
 // Subdomain
 router.get('/subdomains/check', checkSubdomainAvailability);
 router.put('/projects/:id/subdomain', requireAuth, saveSubdomain);
+
+// Team sharing
+router.get('/projects/:id/teams', requireAuth, listProjectTeams);
+router.post('/projects/:id/teams', requireAuth, shareWithTeam);
+router.delete('/projects/:id/teams/:teamId', requireAuth, unshareFromTeam);
 
 export { router as projectsRoute };

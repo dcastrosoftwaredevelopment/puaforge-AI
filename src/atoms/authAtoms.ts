@@ -5,6 +5,8 @@ export interface AuthUser {
   email: string;
   name: string;
   emailVerified: boolean;
+  role: 'user' | 'superuser';
+  status: 'pending' | 'active' | 'blocked';
   apiKey: string | null;
   apiKeyEnabled: boolean;
 }

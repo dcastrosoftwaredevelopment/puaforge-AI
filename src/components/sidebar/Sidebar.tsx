@@ -1,6 +1,6 @@
 import React, { useEffect, type ComponentProps } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Layers, Settings, LogOut, CreditCard, HelpCircle, X } from 'lucide-react';
+import { Layers, Settings, LogOut, CreditCard, HelpCircle, X, Users, UsersRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Sidebar as FlowbiteSidebar, SidebarItem, SidebarItems, SidebarItemGroup, Drawer } from 'flowbite-react';
 import Button from '@/components/ui/Button';
@@ -26,7 +26,9 @@ export default function Sidebar() {
   const isProfile = location.pathname === '/profile';
   const isBilling = location.pathname === '/billing';
   const isHelp = location.pathname === '/help';
-  const isHome = !isSettings && !isProfile && !isBilling && !isHelp;
+  const isTeam = location.pathname === '/team';
+  const isAdminUsers = location.pathname === '/admin/users';
+  const isHome = !isSettings && !isProfile && !isBilling && !isHelp && !isTeam && !isAdminUsers;
 
   useEffect(() => {
     setIsOpen(false);
@@ -59,6 +61,14 @@ export default function Sidebar() {
           <SidebarItem onClick={() => navigate('/')} icon={Layers} active={isHome}>
             {t('sidebar.projects')}
           </SidebarItem>
+          <SidebarItem onClick={() => navigate('/team')} icon={UsersRound} active={isTeam}>
+            {t('sidebar.team')}
+          </SidebarItem>
+          {user?.role === 'superuser' && (
+            <SidebarItem onClick={() => navigate('/admin/users')} icon={Users} active={isAdminUsers}>
+              {t('sidebar.users')}
+            </SidebarItem>
+          )}
         </SidebarItemGroup>
       </SidebarItems>
 

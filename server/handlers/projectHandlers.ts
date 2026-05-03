@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
-import { eq, and, asc, ne } from 'drizzle-orm';
+import { eq, and, asc, ne, inArray } from 'drizzle-orm';
 import multer from 'multer';
 import { db } from '../db.js';
-import { projects, messages, projectFiles, projectImages, checkpoints, publishedSites } from '../schema.js';
+import { projects, messages, projectFiles, projectImages, checkpoints, publishedSites, teams, teamMembers, projectTeams, users } from '../schema.js';
 import {
   uploadFileToPocketBase,
   deleteFileFromPocketBase,
@@ -44,13 +44,25 @@ function p(req: Request, name: string): string {
 }
 
 async function assertOwnership(projectId: string, userId: string, res: Response): Promise<boolean> {
-  const [project] = await db
+  // Direct owner check
+  const [owned] = await db
     .select({ id: projects.id })
     .from(projects)
     .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
     .limit(1);
 
-  if (!project) {
+  if (owned) return true;
+
+  // Team-shared access: project must be shared with a team the user is a member of
+  const [shared] = await db
+    .select({ id: projects.id })
+    .from(projects)
+    .innerJoin(projectTeams, eq(projectTeams.projectId, projects.id))
+    .innerJoin(teamMembers, eq(teamMembers.teamId, projectTeams.teamId))
+    .where(and(eq(projects.id, projectId), eq(teamMembers.userId, userId)))
+    .limit(1);
+
+  if (!shared) {
     res.status(404).json({ code: 'PROJECT_NOT_FOUND', error: 'Project not found' });
     return false;
   }
@@ -79,13 +91,52 @@ function isValidSubdomain(slug: string): boolean {
 // ─── Projects CRUD ────────────────────────────────────────────────────────────
 
 export async function listProjects(req: Request, res: Response) {
-  const rows = await db
+  const userId = req.user!.userId;
+
+  // Own projects
+  const ownRows = await db
     .select()
     .from(projects)
-    .where(eq(projects.userId, req.user!.userId))
+    .where(eq(projects.userId, userId))
     .orderBy(asc(projects.updatedAt));
 
-  res.json(rows.map((r) => ({ ...r, createdAt: toMs(r.createdAt), updatedAt: toMs(r.updatedAt) })));
+  // Projects shared with teams the user is a member of (not own projects)
+  const sharedRows = await db
+    .select({
+      id: projects.id,
+      userId: projects.userId,
+      name: projects.name,
+      palette: projects.palette,
+      customDomain: projects.customDomain,
+      createdAt: projects.createdAt,
+      updatedAt: projects.updatedAt,
+      ownerName: users.name,
+      ownerEmail: users.email,
+    })
+    .from(projects)
+    .innerJoin(projectTeams, eq(projectTeams.projectId, projects.id))
+    .innerJoin(teamMembers, eq(teamMembers.teamId, projectTeams.teamId))
+    .innerJoin(users, eq(users.id, projects.userId))
+    .where(and(eq(teamMembers.userId, userId), ne(projects.userId, userId)))
+    .orderBy(asc(projects.updatedAt));
+
+  const own = ownRows.map((r) => ({ ...r, createdAt: toMs(r.createdAt), updatedAt: toMs(r.updatedAt), sharedBy: null }));
+  const shared = sharedRows.map((r) => ({
+    id: r.id,
+    userId: r.userId,
+    name: r.name,
+    palette: r.palette,
+    customDomain: r.customDomain,
+    createdAt: toMs(r.createdAt),
+    updatedAt: toMs(r.updatedAt),
+    sharedBy: { name: r.ownerName, email: r.ownerEmail },
+  }));
+
+  // Deduplicate (a project may be shared via multiple teams)
+  const seen = new Set(own.map((p) => p.id));
+  const uniqueShared = shared.filter((p) => !seen.has(p.id));
+
+  res.json([...own, ...uniqueShared]);
 }
 
 export async function createProject(req: Request, res: Response) {
@@ -622,4 +673,76 @@ export async function saveSubdomain(req: Request, res: Response) {
     .onConflictDoUpdate({ target: publishedSites.projectId, set: { subdomain: slug } });
 
   res.json({ ok: true, subdomain: slug });
+}
+
+// ─── Project-team sharing ─────────────────────────────────────────────────────
+
+export async function listProjectTeams(req: Request, res: Response) {
+  if (!(await assertOwnership(p(req, 'id'), req.user!.userId, res))) return;
+
+  const rows = await db
+    .select({ id: teams.id, name: teams.name, sharedAt: projectTeams.sharedAt })
+    .from(projectTeams)
+    .innerJoin(teams, eq(teams.id, projectTeams.teamId))
+    .where(eq(projectTeams.projectId, p(req, 'id')));
+
+  res.json(rows);
+}
+
+export async function shareWithTeam(req: Request, res: Response) {
+  const userId = req.user!.userId;
+  const projectId = p(req, 'id');
+  const { teamId } = req.body as { teamId: string };
+
+  if (!teamId) {
+    res.status(400).json({ code: 'ERROR_MISSING_FIELDS' });
+    return;
+  }
+
+  // Only the owner (not team members) can share
+  const [project] = await db
+    .select({ id: projects.id })
+    .from(projects)
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+    .limit(1);
+
+  if (!project) {
+    res.status(404).json({ code: 'PROJECT_NOT_FOUND' });
+    return;
+  }
+
+  // Team must belong to the requesting user
+  const [team] = await db
+    .select({ id: teams.id })
+    .from(teams)
+    .where(and(eq(teams.id, teamId), eq(teams.ownerId, userId)))
+    .limit(1);
+
+  if (!team) {
+    res.status(404).json({ code: 'ERROR_TEAM_NOT_FOUND' });
+    return;
+  }
+
+  await db.insert(projectTeams).values({ projectId, teamId }).onConflictDoNothing();
+  res.status(201).json({ success: true });
+}
+
+export async function unshareFromTeam(req: Request, res: Response) {
+  const userId = req.user!.userId;
+  const projectId = p(req, 'id');
+  const { teamId } = req.params;
+
+  const [project] = await db
+    .select({ id: projects.id })
+    .from(projects)
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+    .limit(1);
+
+  if (!project) {
+    res.status(404).json({ code: 'PROJECT_NOT_FOUND' });
+    return;
+  }
+
+  await db.delete(projectTeams).where(and(eq(projectTeams.projectId, projectId), eq(projectTeams.teamId, teamId)));
+  res.json({ success: true });
 }

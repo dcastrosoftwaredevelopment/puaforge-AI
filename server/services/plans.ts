@@ -1,6 +1,6 @@
 import { eq, and, count, isNotNull } from 'drizzle-orm';
 import { db } from '../db.js';
-import { subscriptions, projects, projectImages, checkpoints, users, publishedSites } from '../schema.js';
+import { subscriptions, projects, projectImages, checkpoints, users, publishedSites, teams } from '../schema.js';
 
 export type Plan = 'free' | 'indie' | 'pro';
 
@@ -37,18 +37,9 @@ export const PLAN_LIMITS = {
   }
 >;
 
-function getSuperUserEmails(): string[] {
-  return (process.env.SUPERUSER_EMAILS ?? '')
-    .split(',')
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-}
-
 export async function isSuperUser(userId: string): Promise<boolean> {
-  const emails = getSuperUserEmails();
-  if (emails.length === 0) return false;
-  const [user] = await db.select({ email: users.email }).from(users).where(eq(users.id, userId)).limit(1);
-  return !!user && emails.includes(user.email.toLowerCase());
+  const [user] = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).limit(1);
+  return user?.role === 'superuser';
 }
 
 export class PlanLimitError extends Error {
@@ -201,4 +192,27 @@ function planLabel(plan: Plan): string {
     : plan === 'indie' ? 'Indie'
     : 'Pro'
   );
+}
+
+export const TEAM_LIMITS: Record<string, number> = {
+  free: 1,
+  indie: 5,
+  pro: 20,
+  superuser: Infinity,
+};
+
+export async function checkTeamLimit(userId: string): Promise<void> {
+  if (await isSuperUser(userId)) return;
+  const plan = await getUserPlan(userId);
+  const limit = TEAM_LIMITS[plan] ?? 1;
+  if (limit === Infinity) return;
+
+  const [{ value }] = await db.select({ value: count() }).from(teams).where(eq(teams.ownerId, userId));
+  if (value >= limit) {
+    throw new PlanLimitError(
+      `Team limit of ${limit} reached for the ${planLabel(plan)} plan.`,
+      plan === 'free' ? 'indie' : 'pro',
+      'teams',
+    );
+  }
 }

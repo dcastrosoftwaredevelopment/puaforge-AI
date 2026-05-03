@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 export interface AuthPayload {
   userId: string;
   email: string;
+  role: string;
 }
 
 declare module 'express-serve-static-core' {
@@ -26,6 +27,16 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   } catch {
     res.status(401).json({ error: 'Token inválido' });
   }
+}
+
+export function requireSuperUser(req: Request, res: Response, next: NextFunction) {
+  requireAuth(req, res, () => {
+    if (req.user?.role !== 'superuser') {
+      res.status(403).json({ error: 'ERROR_FORBIDDEN' });
+      return;
+    }
+    next();
+  });
 }
 
 export function signToken(payload: AuthPayload): string {

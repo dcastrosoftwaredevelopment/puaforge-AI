@@ -9,6 +9,7 @@ import { useProjectActions } from '@/hooks/useProjectActions';
 import Sidebar, { SidebarMenuButton } from '@/components/sidebar/Sidebar';
 import EmptyState from './components/EmptyState';
 import ProjectCard from './components/ProjectCard';
+import ShareModal from './components/ShareModal';
 import Button from '@/components/ui/Button';
 
 export default function Home() {
@@ -22,6 +23,7 @@ export default function Home() {
     customDomain: string | null;
   }
   const [publishedMap, setPublishedMap] = useState<Map<string, PublishedInfo>>(new Map());
+  const [sharingProjectId, setSharingProjectId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -79,12 +81,17 @@ export default function Home() {
                   onOpen={() => openProject(project.id)}
                   onDelete={() => deleteProject(project.id)}
                   onPreview={() => openPreview(project.id)}
+                  onShare={!project.sharedBy ? () => setSharingProjectId(project.id) : undefined}
                 />
               ))}
             </div>
           }
         </div>
       </main>
+
+      {sharingProjectId && (
+        <ShareModal projectId={sharingProjectId} onClose={() => setSharingProjectId(null)} />
+      )}
     </div>
   );
 }
