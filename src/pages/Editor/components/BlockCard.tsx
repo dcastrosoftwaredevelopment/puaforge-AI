@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { Plus, Trash2, GripVertical } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { type Block } from '@/utils/blockCatalog';
@@ -16,12 +17,26 @@ interface BlockCardProps {
 export default function BlockCard({ block, count, isSelected, onSelect, onInsert, onRemove }: BlockCardProps) {
   const { t } = useTranslation();
   const { startDrag, endDrag } = useBlockDrag();
+  const dragAllowedRef = useRef(false);
 
   return (
     <button
       type="button"
       onClick={() => onSelect(block)}
       onDoubleClick={() => onInsert(block)}
+      draggable
+      onDragStart={(e) => {
+        if (!dragAllowedRef.current) {
+          e.preventDefault();
+          return;
+        }
+        startDrag(block);
+        e.dataTransfer.effectAllowed = 'copy';
+      }}
+      onDragEnd={() => {
+        dragAllowedRef.current = false;
+        endDrag();
+      }}
       className={`group relative flex flex-col rounded-xl overflow-hidden border-2 transition text-left cursor-pointer ${
         isSelected ? 'border-forge-terracotta shadow-md' : 'border-transparent hover:border-border-default'
       }`}
@@ -36,14 +51,10 @@ export default function BlockCard({ block, count, isSelected, onSelect, onInsert
               ×{count}
             </span>
           )}
+          {/* Drag handle — mousedown sets the flag so onDragStart proceeds */}
           <div
-            draggable
-            onDragStart={(e) => {
-              startDrag(block);
-              e.dataTransfer.effectAllowed = 'copy';
-            }}
-            onDragEnd={endDrag}
-            onClick={(e) => e.stopPropagation()}
+            onMouseDown={() => { dragAllowedRef.current = true; }}
+            onMouseUp={() => { dragAllowedRef.current = false; }}
             className="inline-flex items-center cursor-grab active:cursor-grabbing"
           >
             <GripVertical size={11} className="text-black/20 opacity-0 group-hover:opacity-100 transition" />
