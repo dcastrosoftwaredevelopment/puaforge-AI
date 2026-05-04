@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import { useSandpack } from '@codesandbox/sandpack-react';
 import { useFiles } from './useFiles';
+import { useIncrementBlockRev } from './useBlockRevision';
+import { lsGet, lsSet } from './usePersistence';
 import { FORGE_INSPECT_SOURCE } from '@/utils/inspectFiles';
 
 /**
@@ -12,11 +15,13 @@ import { FORGE_INSPECT_SOURCE } from '@/utils/inspectFiles';
  * Must be rendered inside <SandpackProvider>.
  */
 export function useSandpackSync() {
+  const { projectId } = useParams<{ projectId: string }>();
   const { files } = useFiles();
   const { sandpack } = useSandpack();
   const sandpackRef = useRef(sandpack);
   const prevFilesRef = useRef(files);
   const isFirstRunRef = useRef(true);
+  const incrementBlockRev = useIncrementBlockRev();
 
   useEffect(() => {
     sandpackRef.current = sandpack;
@@ -48,12 +53,24 @@ export function useSandpackSync() {
 
     for (const [path, fileCode] of Object.entries(files)) {
       if (prevFiles[path] !== fileCode) {
-        sp.updateFile(path, fileCode);
         if (prevFiles[path] === undefined) {
-          const p = path;
-          setTimeout(() => sandpackRef.current.openFile(p), 0);
+          // New file: add to open tabs in localStorage, then remount via blockRev so
+          // the file lands in the initial files prop AND visibleFiles of SandpackProvider.
+          const saved = lsGet(`openTabs:${projectId}`);
+          let tabs: string[];
+          try {
+            tabs = saved ? (JSON.parse(saved) as string[]) : ['/App.tsx'];
+          } catch {
+            tabs = ['/App.tsx'];
+          }
+          if (!tabs.includes(path)) {
+            lsSet(`openTabs:${projectId}`, JSON.stringify([...tabs, path]));
+          }
+          incrementBlockRev();
+        } else {
+          sp.updateFile(path, fileCode);
         }
       }
     }
-  }, [files]);
+  }, [files]); // eslint-disable-line react-hooks/exhaustive-deps
 }

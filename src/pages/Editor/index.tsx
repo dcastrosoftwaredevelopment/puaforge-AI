@@ -4,6 +4,7 @@ import { SandpackProvider } from '@codesandbox/sandpack-react';
 import { Loader2, MessageCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useFiles } from '@/hooks/useFiles';
+import { lsGet } from '@/hooks/usePersistence';
 import { useChat } from '@/hooks/useChat';
 import { usePanelSizes } from '@/hooks/usePanelSizes';
 import { useProjectLoader } from '@/hooks/useProjectLoader';
@@ -91,6 +92,18 @@ export default function Editor() {
     [sandpackKey, projectReady],
   );
 
+  const initialVisibleFiles = useMemo(() => {
+    const saved = lsGet(`openTabs:${projectId}`);
+    if (!saved) return ['/App.tsx'];
+    try {
+      const parsed: string[] = JSON.parse(saved);
+      return parsed.length > 0 ? parsed : ['/App.tsx'];
+    } catch {
+      return ['/App.tsx'];
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sandpackKey, projectId, projectReady]);
+
   if (!projectReady) {
     return (
       <div className="h-screen w-screen bg-bg-primary flex items-center justify-center">
@@ -114,6 +127,7 @@ export default function Editor() {
             }}
             options={{
               activeFile: '/App.tsx',
+              visibleFiles: initialVisibleFiles,
               externalResources: ['https://cdn.tailwindcss.com'],
             }}
           >

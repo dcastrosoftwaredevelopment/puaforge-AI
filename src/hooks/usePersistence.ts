@@ -9,22 +9,24 @@ import {
   isChatOpenAtom,
   editorFractionAtom,
   chatWidthAtom,
+  editorPanelModeAtom,
   type Project,
   type ViewMode,
   type DevicePreview,
+  type EditorPanelMode,
 } from '@/atoms';
 import { api } from '@/services/api';
 
 // ─── localStorage helpers ─────────────────────────────────────────────────────
 
-function lsGet(key: string): string | null {
+export function lsGet(key: string): string | null {
   try {
     return localStorage.getItem(key);
   } catch {
     return null;
   }
 }
-function lsSet(key: string, value: string) {
+export function lsSet(key: string, value: string) {
   try {
     localStorage.setItem(key, value);
   } catch {
@@ -67,6 +69,7 @@ export function usePersistence() {
   const setIsChatOpen = useSetAtom(isChatOpenAtom);
   const setEditorFraction = useSetAtom(editorFractionAtom);
   const setChatWidth = useSetAtom(chatWidthAtom);
+  const setEditorPanelMode = useSetAtom(editorPanelModeAtom);
   const hydrated = useRef(false);
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -93,6 +96,9 @@ export function usePersistence() {
 
           const chatWidth = lsGet('chatWidth');
           if (chatWidth) setChatWidth(parseInt(chatWidth, 10));
+
+          const editorPanelMode = lsGet('editorPanelMode');
+          if (editorPanelMode) setEditorPanelMode(editorPanelMode as EditorPanelMode);
         }
 
         // Projects from API (requires auth) — runs whenever token becomes available
@@ -125,6 +131,7 @@ export function usePersistence() {
     setIsChatOpen,
     setEditorFraction,
     setChatWidth,
+    setEditorPanelMode,
   ]); // re-runs when token changes (e.g. after login)
 
   // Persist UI settings to localStorage
@@ -164,6 +171,12 @@ export function usePersistence() {
     if (!hydrated.current) return;
     saveChatWidth(String(chatWidth));
   }, [chatWidth, saveChatWidth]);
+
+  const editorPanelMode = useAtomValue(editorPanelModeAtom);
+  useEffect(() => {
+    if (!hydrated.current) return;
+    lsSet('editorPanelMode', editorPanelMode);
+  }, [editorPanelMode]);
 
   return { isHydrated };
 }
