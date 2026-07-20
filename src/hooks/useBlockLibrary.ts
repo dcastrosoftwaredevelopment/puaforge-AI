@@ -1,10 +1,10 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { useSandpack, useActiveCode } from '@codesandbox/sandpack-react';
 import { useFiles } from '@/hooks/useFiles';
 import { useIncrementBlockRev } from '@/hooks/useBlockRevision';
-import { blockInsertParentAtom } from '@/atoms';
+import { blockInsertParentAtom, selectedElementAtom, hoveredElementAtom } from '@/atoms';
 import { BLOCKS, type Block } from '@/utils/blockCatalog';
 import {
   insertBlockIntoApp,
@@ -30,6 +30,8 @@ export function useBlockLibrary() {
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<Block | null>(null);
   const [insertParentId, setInsertParentId] = useAtom(blockInsertParentAtom);
+  const setSelectedElement = useSetAtom(selectedElementAtom);
+  const setHoveredElement = useSetAtom(hoveredElementAtom);
   const incrementBlockRev = useIncrementBlockRev();
 
   const appSource = files['/App.tsx'] ?? '';
@@ -74,6 +76,8 @@ export function useBlockLibrary() {
 
   function removeBlock(block: Block) {
     const source = activeCodeRef.current || sandpackRef.current.files['/App.tsx']?.code || files['/App.tsx'] || '';
+    setSelectedElement(null);
+    setHoveredElement(null);
     setFiles((prev) => ({ ...prev, '/App.tsx': removeLastBlockInstance(source, block.id) }));
     if (insertParentId) {
       const parentBlockId = insertParentId.slice(0, insertParentId.lastIndexOf('-'));

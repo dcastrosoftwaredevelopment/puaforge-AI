@@ -75,6 +75,13 @@ export default function Editor() {
     return `${projectId}-${depsKey}-${blockRev}`;
   }, [projectId, deps, blockRev]);
 
+  // Ref always reflects the current render's files — updated synchronously before
+  // sandpackFiles useMemo runs. This ensures the snapshot is never stale when
+  // sandpackKey changes (e.g. from incrementBlockRev in insertBlock), even if
+  // filesAtom and blockRevAtom updates land in separate React render passes.
+  const filesRef = useRef(files);
+  filesRef.current = files;
+
   // Snapshot files only when sandpackKey or projectReady changes — SandpackProvider
   // must not re-render on every filesAtom change or Sandpack resets open tabs and
   // active file. Incremental updates reach Sandpack via sandpack.updateFile in useSandpackSync.
@@ -84,7 +91,7 @@ export default function Editor() {
       '/index.html': TAILWIND_HTML,
       '/assets/images.css': '',
       '/__forge_global.css': '',
-      ...files,
+      ...filesRef.current,
       '/__forgeInspect.tsx': { code: FORGE_INSPECT_SOURCE, hidden: true },
       '/index.tsx': { code: FORGE_ENTRY_SOURCE, hidden: true },
     }),
