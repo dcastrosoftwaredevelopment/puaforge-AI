@@ -1,3 +1,18 @@
+# Puaforge — Contexto do Projeto
+
+## Regras e Documentacao Tecnica
+
+Ler sempre no inicio de cada sessao:
+
+| Arquivo | Conteudo |
+|---|---|
+| `.claude/rules/workflow.md` | Feature branch, merge, commits, idioma |
+| `.claude/rules/code-style.md` | Convencoes de codigo (referencia o CLAUDE.md) |
+| `.claude/rules/migrations.md` | Regras Drizzle: timestamp do journal, scripts de emergencia |
+| `.claude/commands/migration.md` | Skill `/migration <descricao>` — cria e valida migration com verificacao de timestamp |
+
+---
+
 # Project Rules
 
 ## i18n
