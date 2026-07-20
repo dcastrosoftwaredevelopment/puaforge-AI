@@ -1,0 +1,19 @@
+Dockerfile
+  s_b60441bf47bdfe::t_498b89ad8d9402 27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a7d05182d5e754584fe44afaeb65aa796ab5249d",
+  "prompts": {},
+  "sessions": {
+    "s_b60441bf47bdfe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0b7f61e1-62b2-41e8-a97e-a96b878cd38b",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "D'Castro Software <dcastrosoftware.development@gmail.com>"
+    }
+  }
+}
