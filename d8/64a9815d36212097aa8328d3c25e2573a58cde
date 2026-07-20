@@ -1,0 +1,21 @@
+server/index.ts
+  s_b60441bf47bdfe::t_c75c079910ee05 66-67,70,73,78
+server/db.ts
+  s_b60441bf47bdfe::t_42cd20f62c41a7 21-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d864a9815d36212097aa8328d3c25e2573a58cde",
+  "prompts": {},
+  "sessions": {
+    "s_b60441bf47bdfe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0b7f61e1-62b2-41e8-a97e-a96b878cd38b",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "D'Castro Software <dcastrosoftware.development@gmail.com>"
+    }
+  }
+}
