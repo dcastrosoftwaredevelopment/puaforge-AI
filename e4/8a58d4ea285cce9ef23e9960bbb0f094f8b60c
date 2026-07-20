@@ -1,0 +1,35 @@
+.claude/commands/dcastro.plan.md
+  s_b60441bf47bdfe::t_b5c4b564c58dc9 1-32
+.claude/commands/dcastro.spec-technical.md
+  s_b60441bf47bdfe::t_b814d01f58a0b3 1-37
+.claude/commands/dcastro.verify.md
+  s_b60441bf47bdfe::t_c68b9d6a605386 1-42
+.claude/commands/dcastro.start.md
+  s_b60441bf47bdfe::t_29024805ec7e5e 1-66
+CLAUDE.md
+  s_b60441bf47bdfe::t_fc54207ab3228b 13-20
+.claude/commands/dcastro.release.md
+  s_b60441bf47bdfe::t_0f226035ee820a 1-73
+.claude/commands/dcastro.implement.md
+  s_b60441bf47bdfe::t_6db443e264c418 1-61
+.claude/commands/dcastro.spec-functional.md
+  s_b60441bf47bdfe::t_0626666641bc9d 1-35
+.claude/specs/architecture.md
+  s_b60441bf47bdfe::t_75db0b9dd909a0 1-50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e48a58d4ea285cce9ef23e9960bbb0f094f8b60c",
+  "prompts": {},
+  "sessions": {
+    "s_b60441bf47bdfe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0b7f61e1-62b2-41e8-a97e-a96b878cd38b",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "D'Castro Software <dcastrosoftware.development@gmail.com>"
+    }
+  }
+}
