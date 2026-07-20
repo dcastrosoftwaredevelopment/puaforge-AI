@@ -1,0 +1,27 @@
+.claude/rules/migrations.md
+  s_b60441bf47bdfe::t_f5c46a58b4926a 1-65
+.claude/rules/workflow.md
+  s_b60441bf47bdfe::t_ec1b5a7235dae2 1-37
+.claude/commands/migration.md
+  s_b60441bf47bdfe::t_410b817ad5b6b1 1-33
+.claude/rules/code-style.md
+  s_b60441bf47bdfe::t_ce31627f6f993b 1-55
+.gitignore
+  s_b60441bf47bdfe::t_778ad1fffcd6c2 16-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9436149e23ba9338c7c7fe0ae1e78a27a3c359e4",
+  "prompts": {},
+  "sessions": {
+    "s_b60441bf47bdfe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0b7f61e1-62b2-41e8-a97e-a96b878cd38b",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "D'Castro Software <dcastrosoftware.development@gmail.com>"
+    }
+  }
+}
