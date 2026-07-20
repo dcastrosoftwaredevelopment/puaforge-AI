@@ -1,0 +1,19 @@
+CLAUDE.md
+  s_b60441bf47bdfe::t_94f7622ec01043 1-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8783bb7d638aaf60836418cc91972582f56d61f2",
+  "prompts": {},
+  "sessions": {
+    "s_b60441bf47bdfe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0b7f61e1-62b2-41e8-a97e-a96b878cd38b",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "D'Castro Software <dcastrosoftware.development@gmail.com>"
+    }
+  }
+}
