@@ -10,6 +10,14 @@ Ler sempre no inicio de cada sessao:
 | `.claude/rules/code-style.md` | Convencoes de codigo (referencia o CLAUDE.md) |
 | `.claude/rules/migrations.md` | Regras Drizzle: timestamp do journal, scripts de emergencia |
 | `.claude/commands/migration.md` | Skill `/migration <descricao>` — cria e valida migration com verificacao de timestamp |
+| `.claude/commands/dcastro.start.md` | Skill `/dcastro.start <feature>` — orquestra todas as fases |
+| `.claude/commands/dcastro.spec-functional.md` | Skill `/dcastro.spec-functional <feature>` — gera spec funcional |
+| `.claude/commands/dcastro.spec-technical.md` | Skill `/dcastro.spec-technical <feature>` — gera spec tecnico |
+| `.claude/commands/dcastro.plan.md` | Skill `/dcastro.plan <feature>` — quebra em tasks |
+| `.claude/commands/dcastro.implement.md` | Skill `/dcastro.implement <feature>` — executa tasks |
+| `.claude/commands/dcastro.verify.md` | Skill `/dcastro.verify <feature>` — checklist de verificacao |
+| `.claude/commands/dcastro.release.md` | Skill `/dcastro.release` — bump versao, changelog, tag |
+| `.claude/specs/architecture.md` | Arquitetura: stack, camadas, estrutura de pastas |
 
 ---
 
