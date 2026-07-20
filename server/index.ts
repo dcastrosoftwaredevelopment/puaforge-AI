@@ -65,12 +65,16 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 
 runMigrations()
   .then(async () => {
-    await initEmailQueue();
+    try {
+      await initEmailQueue();
+    } catch (err) {
+      console.error('[email-queue] Failed to init (non-fatal):', err);
+    }
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });
   })
   .catch((err: unknown) => {
-    console.error('Failed to run migrations:', err);
+    console.error('[migrations] Failed:', err);
     process.exit(1);
   });
