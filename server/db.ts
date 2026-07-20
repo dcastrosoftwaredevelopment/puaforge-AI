@@ -18,8 +18,9 @@ const pool = new pg.Pool({
 export const db = drizzle(pool, { schema });
 
 export async function runMigrations() {
-  await migrate(db, {
-    migrationsFolder: path.resolve(__dirname, '../server/migrations'),
-    migrationsSchema: 'public',
-  });
+  const folder = path.resolve(__dirname, '../server/migrations');
+  console.log('[migrations] folder:', folder);
+  console.log('[migrations] running...');
+  await migrate(db, { migrationsFolder: folder, migrationsSchema: 'public' });
+  console.log('[migrations] done');
 }

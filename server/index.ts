@@ -63,15 +63,19 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({ error: message });
 });
 
+console.log('[startup] DB_HOST:', process.env.DB_HOST, 'DB_NAME:', process.env.DB_NAME, 'DB_USER:', process.env.DB_USER);
+
 runMigrations()
   .then(async () => {
+    console.log('[startup] migrations ok, starting email queue...');
     try {
       await initEmailQueue();
+      console.log('[startup] email queue ok');
     } catch (err) {
       console.error('[email-queue] Failed to init (non-fatal):', err);
     }
     app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`[startup] Server running on http://localhost:${PORT}`);
     });
   })
   .catch((err: unknown) => {
