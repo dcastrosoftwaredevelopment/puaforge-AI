@@ -1,0 +1,19 @@
+server/migrations/meta/_journal.json
+  s_b60441bf47bdfe::t_f822b3908b1271 78,85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3b50d216ecd511fa8dcd9b98aef921c19932f572",
+  "prompts": {},
+  "sessions": {
+    "s_b60441bf47bdfe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0b7f61e1-62b2-41e8-a97e-a96b878cd38b",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "D'Castro Software <dcastrosoftware.development@gmail.com>"
+    }
+  }
+}
