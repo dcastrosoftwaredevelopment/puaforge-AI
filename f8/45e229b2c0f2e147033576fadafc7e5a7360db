@@ -1,0 +1,25 @@
+src/pages/Editor/index.tsx
+  s_b60441bf47bdfe::t_b9ca79062e4a3f 78-84,94
+src/hooks/useBlockLibrary.ts
+  s_b60441bf47bdfe::t_258b54c2d758ad 2,7
+  s_b60441bf47bdfe::t_5ca7b004499b70 33-34
+  s_b60441bf47bdfe::t_4ce6dab678b747 79-80
+src/hooks/useInspectBridge.ts
+  s_b60441bf47bdfe::t_a2b90e1761910e 169-173
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f845e229b2c0f2e147033576fadafc7e5a7360db",
+  "prompts": {},
+  "sessions": {
+    "s_b60441bf47bdfe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0b7f61e1-62b2-41e8-a97e-a96b878cd38b",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "D'Castro Software <dcastrosoftware.development@gmail.com>"
+    }
+  }
+}
