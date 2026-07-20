@@ -90,9 +90,7 @@ export default function Home() {
         </div>
       </main>
 
-      {sharingProjectId && (
-        <ShareModal projectId={sharingProjectId} onClose={() => setSharingProjectId(null)} />
-      )}
+      {sharingProjectId && <ShareModal projectId={sharingProjectId} onClose={() => setSharingProjectId(null)} />}
     </div>
   );
 }

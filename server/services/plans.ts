@@ -1,6 +1,15 @@
 import { eq, and, count, isNotNull } from 'drizzle-orm';
 import { db } from '../db.js';
-import { subscriptions, projects, projectImages, checkpoints, users, publishedSites, teams, teamMembers } from '../schema.js';
+import {
+  subscriptions,
+  projects,
+  projectImages,
+  checkpoints,
+  users,
+  publishedSites,
+  teams,
+  teamMembers,
+} from '../schema.js';
 
 export type Plan = 'free' | 'indie' | 'pro';
 

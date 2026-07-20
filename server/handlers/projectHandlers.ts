@@ -2,7 +2,18 @@ import type { Request, Response } from 'express';
 import { eq, and, asc, ne, inArray } from 'drizzle-orm';
 import multer from 'multer';
 import { db } from '../db.js';
-import { projects, messages, projectFiles, projectImages, checkpoints, publishedSites, teams, teamMembers, projectTeams, users } from '../schema.js';
+import {
+  projects,
+  messages,
+  projectFiles,
+  projectImages,
+  checkpoints,
+  publishedSites,
+  teams,
+  teamMembers,
+  projectTeams,
+  users,
+} from '../schema.js';
 import {
   uploadFileToPocketBase,
   deleteFileFromPocketBase,
@@ -94,11 +105,7 @@ export async function listProjects(req: Request, res: Response) {
   const userId = req.user!.userId;
 
   // Own projects
-  const ownRows = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.userId, userId))
-    .orderBy(asc(projects.updatedAt));
+  const ownRows = await db.select().from(projects).where(eq(projects.userId, userId)).orderBy(asc(projects.updatedAt));
 
   // Projects shared with teams the user is a member of (not own projects)
   const sharedRows = await db
@@ -120,7 +127,12 @@ export async function listProjects(req: Request, res: Response) {
     .where(and(eq(teamMembers.userId, userId), ne(projects.userId, userId)))
     .orderBy(asc(projects.updatedAt));
 
-  const own = ownRows.map((r) => ({ ...r, createdAt: toMs(r.createdAt), updatedAt: toMs(r.updatedAt), sharedBy: null }));
+  const own = ownRows.map((r) => ({
+    ...r,
+    createdAt: toMs(r.createdAt),
+    updatedAt: toMs(r.updatedAt),
+    sharedBy: null,
+  }));
   const shared = sharedRows.map((r) => ({
     id: r.id,
     userId: r.userId,

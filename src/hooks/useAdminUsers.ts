@@ -84,5 +84,17 @@ export function useAdminUsers() {
     if (token) fetchUsers(1, 'all');
   }, [token]);
 
-  return { users, total, totalPages, page, statusFilter, isLoading, updatingId, fetchUsers, updateStatus, changeFilter, changePage };
+  return {
+    users,
+    total,
+    totalPages,
+    page,
+    statusFilter,
+    isLoading,
+    updatingId,
+    fetchUsers,
+    updateStatus,
+    changeFilter,
+    changePage,
+  };
 }

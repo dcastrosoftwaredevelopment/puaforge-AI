@@ -12,8 +12,22 @@ const RESEND_BLOCK_MS = 5 * 60 * 1000;
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-function buildUserResponse(user: { id: string; email: string; name: string | null; emailVerified: boolean; role: string; status: string }) {
-  return { id: user.id, email: user.email, name: user.name, emailVerified: user.emailVerified, role: user.role, status: user.status };
+function buildUserResponse(user: {
+  id: string;
+  email: string;
+  name: string | null;
+  emailVerified: boolean;
+  role: string;
+  status: string;
+}) {
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    emailVerified: user.emailVerified,
+    role: user.role,
+    status: user.status,
+  };
 }
 
 export async function register(req: Request, res: Response) {
@@ -35,7 +49,14 @@ export async function register(req: Request, res: Response) {
       const now = new Date();
       await db
         .update(users)
-        .set({ name, passwordHash, emailVerified: false, emailVerificationToken: verificationToken, emailVerificationExpiry: verificationExpiry, lastVerificationEmailSentAt: now })
+        .set({
+          name,
+          passwordHash,
+          emailVerified: false,
+          emailVerificationToken: verificationToken,
+          emailVerificationExpiry: verificationExpiry,
+          lastVerificationEmailSentAt: now,
+        })
         .where(eq(users.id, existing.id));
       await enqueueVerificationEmail(email, verificationToken);
       res.status(202).json({ status: 'needs_verification' });
@@ -94,7 +115,11 @@ export async function login(req: Request, res: Response) {
     if (enqueued) {
       await db
         .update(users)
-        .set({ emailVerificationToken: verificationToken, emailVerificationExpiry: verificationExpiry, lastVerificationEmailSentAt: new Date() })
+        .set({
+          emailVerificationToken: verificationToken,
+          emailVerificationExpiry: verificationExpiry,
+          lastVerificationEmailSentAt: new Date(),
+        })
         .where(eq(users.id, user.id));
     }
     res.status(403).json({ code: 'ERROR_EMAIL_NOT_VERIFIED' });
@@ -147,11 +172,7 @@ export async function googleAuth(req: Request, res: Response) {
       .values({ email: email!, name, googleId, emailVerified: true, role: 'user', status: 'pending' })
       .returning();
   } else {
-    [user] = await db
-      .update(users)
-      .set({ googleId, emailVerified: true })
-      .where(eq(users.email, email!))
-      .returning();
+    [user] = await db.update(users).set({ googleId, emailVerified: true }).where(eq(users.email, email!)).returning();
   }
 
   if (user.status === 'pending') {
@@ -234,7 +255,11 @@ export async function resendVerification(req: Request, res: Response) {
 
   await db
     .update(users)
-    .set({ emailVerificationToken: verificationToken, emailVerificationExpiry: verificationExpiry, lastVerificationEmailSentAt: new Date() })
+    .set({
+      emailVerificationToken: verificationToken,
+      emailVerificationExpiry: verificationExpiry,
+      lastVerificationEmailSentAt: new Date(),
+    })
     .where(eq(users.id, user.id));
 
   res.json({ status: 'sent' });

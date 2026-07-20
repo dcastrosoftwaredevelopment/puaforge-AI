@@ -28,9 +28,9 @@ Feature a implementar: $ARGUMENTS
    - Implementar seguindo CLAUDE.md
    - Se a task cria uma migration: verificar timestamp do journal antes de commitar
      (ver `.claude/rules/migrations.md`)
-   - Rodar lint:
+   - Rodar lint com auto-fix e verificar zero erros:
      ```bash
-     npm run lint
+     npm run lint -- --fix && npm run lint
      ```
    - Commitar:
      ```

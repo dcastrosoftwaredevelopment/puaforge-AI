@@ -77,7 +77,7 @@ export function useInspectBridge() {
   // post closes over sandpackRef (stable ref) — not needed in deps.
   useEffect(() => {
     if (isDragging) post({ type: 'FORGE_DESELECT' });
-  }, [isDragging]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isDragging]);
 
   // Send drop-target highlight to iframe whenever the drag target changes.
   useEffect(() => {
@@ -85,7 +85,7 @@ export function useInspectBridge() {
       type: 'FORGE_HIGHLIGHT_DROP_TARGET',
       forgeBlockId: isDragging && insertParentId ? insertParentId : '',
     });
-  }, [isDragging, insertParentId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isDragging, insertParentId]);
 
   // Forward platform CustomEvents → iframe postMessages
   useEffect(() => {

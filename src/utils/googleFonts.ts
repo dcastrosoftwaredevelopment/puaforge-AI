@@ -33,9 +33,7 @@ export const POPULAR_GOOGLE_FONTS: GoogleFont[] = [
 
 export function buildGoogleFontsUrl(families: string[]): string {
   if (families.length === 0) return '';
-  const params = families
-    .map((f) => `family=${encodeURIComponent(f)}:wght@300;400;500;600;700;800`)
-    .join('&');
+  const params = families.map((f) => `family=${encodeURIComponent(f)}:wght@300;400;500;600;700;800`).join('&');
   return `https://fonts.googleapis.com/css2?${params}&display=swap`;
 }
 
@@ -51,7 +49,13 @@ export function buildGlobalCss(fontFamily: string): string {
 
 /** CSS class name for a specific font (e.g. "DM Sans" → "forge-font-dm-sans"). */
 export function buildFontClassName(fontFamily: string): string {
-  return 'forge-font-' + fontFamily.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  return (
+    'forge-font-' +
+    fontFamily
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+  );
 }
 
 /**

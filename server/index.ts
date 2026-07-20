@@ -63,7 +63,14 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({ error: message });
 });
 
-console.log('[startup] DB_HOST:', process.env.DB_HOST, 'DB_NAME:', process.env.DB_NAME, 'DB_USER:', process.env.DB_USER);
+console.log(
+  '[startup] DB_HOST:',
+  process.env.DB_HOST,
+  'DB_NAME:',
+  process.env.DB_NAME,
+  'DB_USER:',
+  process.env.DB_USER,
+);
 
 runMigrations()
   .then(async () => {

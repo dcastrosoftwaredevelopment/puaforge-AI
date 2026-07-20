@@ -2,13 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { ChevronDown, X, Search } from 'lucide-react';
 import { useFontFamilyPicker } from '@/hooks/useFontFamilyPicker';
 
-export default function FontFamilyPicker({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (family: string) => void;
-}) {
+export default function FontFamilyPicker({ value, onChange }: { value: string; onChange: (family: string) => void }) {
   const { t } = useTranslation();
   const { isOpen, open, close, select, search, setSearch, filtered, customFont, containerRef } = useFontFamilyPicker();
 

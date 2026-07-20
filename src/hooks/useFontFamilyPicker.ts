@@ -32,16 +32,25 @@ export function useFontFamilyPicker() {
     return () => document.removeEventListener('pointerdown', onPointerDown);
   }, [isOpen]);
 
-  const filtered: GoogleFont[] = search
-    ? POPULAR_GOOGLE_FONTS.filter((f) => f.family.toLowerCase().includes(search.toLowerCase()))
+  const filtered: GoogleFont[] =
+    search ?
+      POPULAR_GOOGLE_FONTS.filter((f) => f.family.toLowerCase().includes(search.toLowerCase()))
     : POPULAR_GOOGLE_FONTS;
 
-  const isCustom = search.trim().length > 0 && !POPULAR_GOOGLE_FONTS.some((f) => f.family.toLowerCase() === search.toLowerCase());
+  const isCustom =
+    search.trim().length > 0 && !POPULAR_GOOGLE_FONTS.some((f) => f.family.toLowerCase() === search.toLowerCase());
   const customFont = isCustom ? search.trim() : null;
 
   const open = useCallback(() => setIsOpen(true), []);
-  const close = useCallback(() => { setIsOpen(false); setSearch(''); }, []);
-  const select = useCallback((family: string) => { setIsOpen(false); setSearch(''); return family; }, []);
+  const close = useCallback(() => {
+    setIsOpen(false);
+    setSearch('');
+  }, []);
+  const select = useCallback((family: string) => {
+    setIsOpen(false);
+    setSearch('');
+    return family;
+  }, []);
 
   return { isOpen, open, close, select, search, setSearch, filtered, customFont, containerRef };
 }

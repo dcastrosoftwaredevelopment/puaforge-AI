@@ -62,7 +62,6 @@ export default function SandpackContent() {
   const hitThrottleRef = useRef(0);
   const wasOverPreviewRef = useRef(false);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const onDragStart = useCallback(
     ({ active }: DragStartEvent) => {
       const block = active.data.current?.block;
@@ -71,7 +70,6 @@ export default function SandpackContent() {
     [startDrag],
   );
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const onDragMove = useCallback(({ activatorEvent, delta }: DragMoveEvent) => {
     const now = Date.now();
     if (now - hitThrottleRef.current < 80) return;
@@ -90,7 +88,6 @@ export default function SandpackContent() {
     iframe.contentWindow.postMessage({ type: 'FORGE_HIT_TEST', x: clientX - rect.left, y: clientY - rect.top }, '*');
   }, []);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const onDragEnd = useCallback(
     (_e: DragEndEvent) => {
       if (wasOverPreviewRef.current) {

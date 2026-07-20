@@ -2,7 +2,15 @@ import type { Request, Response } from 'express';
 import { eq, and, count } from 'drizzle-orm';
 import { db } from '../db.js';
 import { teams, teamMembers, users } from '../schema.js';
-import { checkTeamLimit, checkMemberLimit, PlanLimitError, getUserPlan, TEAM_LIMITS, MEMBER_LIMITS, isSuperUser } from '../services/plans.js';
+import {
+  checkTeamLimit,
+  checkMemberLimit,
+  PlanLimitError,
+  getUserPlan,
+  TEAM_LIMITS,
+  MEMBER_LIMITS,
+  isSuperUser,
+} from '../services/plans.js';
 
 export async function listTeams(req: Request, res: Response) {
   const userId = req.user!.userId;
@@ -56,7 +64,9 @@ export async function createTeam(req: Request, res: Response) {
     await checkTeamLimit(userId);
   } catch (err) {
     if (err instanceof PlanLimitError) {
-      res.status(403).json({ code: 'ERROR_TEAM_LIMIT_REACHED', limitType: err.limitType, requiredPlan: err.requiredPlan });
+      res
+        .status(403)
+        .json({ code: 'ERROR_TEAM_LIMIT_REACHED', limitType: err.limitType, requiredPlan: err.requiredPlan });
       return;
     }
     throw err;
@@ -70,7 +80,10 @@ export async function deleteTeam(req: Request, res: Response) {
   const userId = req.user!.userId;
   const { id } = req.params;
 
-  const [team] = await db.select().from(teams).where(and(eq(teams.id, id), eq(teams.ownerId, userId)));
+  const [team] = await db
+    .select()
+    .from(teams)
+    .where(and(eq(teams.id, id), eq(teams.ownerId, userId)));
   if (!team) {
     res.status(404).json({ code: 'ERROR_TEAM_NOT_FOUND' });
     return;
@@ -106,7 +119,10 @@ export async function addMember(req: Request, res: Response) {
     return;
   }
 
-  const [team] = await db.select().from(teams).where(and(eq(teams.id, id), eq(teams.ownerId, userId)));
+  const [team] = await db
+    .select()
+    .from(teams)
+    .where(and(eq(teams.id, id), eq(teams.ownerId, userId)));
   if (!team) {
     res.status(404).json({ code: 'ERROR_TEAM_NOT_FOUND' });
     return;
@@ -116,13 +132,21 @@ export async function addMember(req: Request, res: Response) {
     await checkMemberLimit(id);
   } catch (err) {
     if (err instanceof PlanLimitError) {
-      res.status(403).json({ code: 'ERROR_MEMBER_LIMIT_REACHED', limitType: err.limitType, requiredPlan: err.requiredPlan, upgradeRequired: true });
+      res.status(403).json({
+        code: 'ERROR_MEMBER_LIMIT_REACHED',
+        limitType: err.limitType,
+        requiredPlan: err.requiredPlan,
+        upgradeRequired: true,
+      });
       return;
     }
     throw err;
   }
 
-  const [member] = await db.select({ id: users.id, status: users.status }).from(users).where(eq(users.email, email.trim().toLowerCase()));
+  const [member] = await db
+    .select({ id: users.id, status: users.status })
+    .from(users)
+    .where(eq(users.email, email.trim().toLowerCase()));
   if (!member) {
     res.status(404).json({ code: 'ERROR_USER_NOT_FOUND' });
     return;

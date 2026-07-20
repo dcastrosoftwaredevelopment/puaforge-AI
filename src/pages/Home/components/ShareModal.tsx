@@ -11,8 +11,7 @@ interface ShareModalProps {
 export default function ShareModal({ projectId, onClose }: ShareModalProps) {
   const { t } = useTranslation();
   const { teams, isLoading: teamsLoading } = useTeam();
-  const { sharedTeams, isLoading: sharingLoading, shareWithTeam, unshareFromTeam } =
-    useProjectSharing(projectId);
+  const { sharedTeams, isLoading: sharingLoading, shareWithTeam, unshareFromTeam } = useProjectSharing(projectId);
 
   const isShared = (teamId: string) => sharedTeams.some((t) => t.teamId === teamId);
 
@@ -44,11 +43,7 @@ export default function ShareModal({ projectId, onClose }: ShareModalProps) {
             {ownedTeams.map((team) => (
               <div key={team.id} className="flex items-center justify-between">
                 <span className="text-sm text-text-primary">{team.name}</span>
-                <ToggleSwitch
-                  checked={isShared(team.id)}
-                  onChange={() => toggle(team.id)}
-                  label=""
-                />
+                <ToggleSwitch checked={isShared(team.id)} onChange={() => toggle(team.id)} label="" />
               </div>
             ))}
           </div>

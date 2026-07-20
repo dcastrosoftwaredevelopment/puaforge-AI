@@ -44,12 +44,10 @@ export default function Team() {
   const [showNewTeamModal, setShowNewTeamModal] = useState(false);
   const [pending, setPending] = useState<PendingConfirm | null>(null);
 
-  const confirm = (title: string, message: string, onConfirm: () => void) =>
-    setPending({ title, message, onConfirm });
+  const confirm = (title: string, message: string, onConfirm: () => void) => setPending({ title, message, onConfirm });
 
   const atLimit = limit !== null && used >= limit;
-  const limitLabel =
-    limit === null ? t('team.limitUnlimited') : t('team.limitBadge', { used, limit });
+  const limitLabel = limit === null ? t('team.limitUnlimited') : t('team.limitBadge', { used, limit });
 
   return (
     <div className="h-screen flex bg-bg-primary">
@@ -145,9 +143,7 @@ export default function Team() {
                         : <button
                             onClick={() =>
                               user &&
-                              confirm(t('team.leaveTeam'), t('team.confirmLeave'), () =>
-                                leaveTeam(team.id, user.id),
-                              )
+                              confirm(t('team.leaveTeam'), t('team.confirmLeave'), () => leaveTeam(team.id, user.id))
                             }
                             className="p-1.5 rounded-lg text-text-muted hover:text-red-400 hover:bg-bg-primary transition cursor-pointer"
                             title={t('team.leaveTeam')}

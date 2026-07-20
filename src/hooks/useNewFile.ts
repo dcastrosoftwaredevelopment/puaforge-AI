@@ -2,7 +2,11 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useFiles } from './useFiles';
 
 function tsxBoilerplate(path: string): string {
-  const base = path.split('/').pop()?.replace(/\.tsx$/, '') ?? 'Component';
+  const base =
+    path
+      .split('/')
+      .pop()
+      ?.replace(/\.tsx$/, '') ?? 'Component';
   const name = base.charAt(0).toUpperCase() + base.slice(1);
   return `export default function ${name}() {\n  return (\n    <div>\n      \n    </div>\n  );\n}\n`;
 }

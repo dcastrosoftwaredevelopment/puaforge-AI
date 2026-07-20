@@ -12,8 +12,18 @@ export default function AdminUsers() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { users, total, totalPages, page, statusFilter, isLoading, updatingId, updateStatus, changeFilter, changePage } =
-    useAdminUsers();
+  const {
+    users,
+    total,
+    totalPages,
+    page,
+    statusFilter,
+    isLoading,
+    updatingId,
+    updateStatus,
+    changeFilter,
+    changePage,
+  } = useAdminUsers();
 
   if (user?.role !== 'superuser') {
     navigate('/');
@@ -29,10 +39,22 @@ export default function AdminUsers() {
 
   const statusBadge = (status: UserStatus) => {
     if (status === 'active')
-      return <span className="px-2 py-0.5 rounded-full text-xs bg-green-500/15 text-green-400">{t('adminUsers.statusActive')}</span>;
+      return (
+        <span className="px-2 py-0.5 rounded-full text-xs bg-green-500/15 text-green-400">
+          {t('adminUsers.statusActive')}
+        </span>
+      );
     if (status === 'pending')
-      return <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-500/15 text-yellow-400">{t('adminUsers.statusPending')}</span>;
-    return <span className="px-2 py-0.5 rounded-full text-xs bg-red-500/15 text-red-400">{t('adminUsers.statusBlocked')}</span>;
+      return (
+        <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-500/15 text-yellow-400">
+          {t('adminUsers.statusPending')}
+        </span>
+      );
+    return (
+      <span className="px-2 py-0.5 rounded-full text-xs bg-red-500/15 text-red-400">
+        {t('adminUsers.statusBlocked')}
+      </span>
+    );
   };
 
   return (
@@ -49,7 +71,9 @@ export default function AdminUsers() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-xl md:text-2xl font-semibold text-text-primary">{t('adminUsers.title')}</h1>
-              <p className="text-sm text-text-muted mt-1">{total} {t('adminUsers.filterAll').toLowerCase()}</p>
+              <p className="text-sm text-text-muted mt-1">
+                {total} {t('adminUsers.filterAll').toLowerCase()}
+              </p>
             </div>
           </div>
 
@@ -60,9 +84,9 @@ export default function AdminUsers() {
                 key={f.key}
                 onClick={() => changeFilter(f.key)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition cursor-pointer ${
-                  statusFilter === f.key
-                    ? 'bg-forge-terracotta text-white'
-                    : 'bg-bg-elevated text-text-muted hover:text-text-primary'
+                  statusFilter === f.key ?
+                    'bg-forge-terracotta text-white'
+                  : 'bg-bg-elevated text-text-muted hover:text-text-primary'
                 }`}
               >
                 {f.label}
@@ -76,9 +100,13 @@ export default function AdminUsers() {
               <thead className="bg-bg-elevated border-b border-border-subtle">
                 <tr>
                   <th className="text-left px-4 py-3 text-text-muted font-medium">{t('adminUsers.name')}</th>
-                  <th className="text-left px-4 py-3 text-text-muted font-medium hidden sm:table-cell">{t('adminUsers.email')}</th>
+                  <th className="text-left px-4 py-3 text-text-muted font-medium hidden sm:table-cell">
+                    {t('adminUsers.email')}
+                  </th>
                   <th className="text-left px-4 py-3 text-text-muted font-medium">{t('adminUsers.status')}</th>
-                  <th className="text-left px-4 py-3 text-text-muted font-medium hidden md:table-cell">{t('adminUsers.createdAt')}</th>
+                  <th className="text-left px-4 py-3 text-text-muted font-medium hidden md:table-cell">
+                    {t('adminUsers.createdAt')}
+                  </th>
                   <th className="text-right px-4 py-3 text-text-muted font-medium">{t('adminUsers.actions')}</th>
                 </tr>
               </thead>
@@ -157,7 +185,9 @@ export default function AdminUsers() {
                 >
                   <ChevronLeft size={16} className="text-text-muted" />
                 </button>
-                <span className="text-sm text-text-secondary">{page} / {totalPages}</span>
+                <span className="text-sm text-text-secondary">
+                  {page} / {totalPages}
+                </span>
                 <button
                   onClick={() => changePage(page + 1)}
                   disabled={page >= totalPages}

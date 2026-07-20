@@ -10,14 +10,11 @@ export async function listUsers(req: Request, res: Response) {
   const offset = (page - 1) * limit;
 
   const where =
-    statusFilter && ['pending', 'active', 'blocked'].includes(statusFilter)
-      ? eq(users.status, statusFilter)
-      : undefined;
+    statusFilter && ['pending', 'active', 'blocked'].includes(statusFilter) ?
+      eq(users.status, statusFilter)
+    : undefined;
 
-  const [{ total }] = await db
-    .select({ total: count() })
-    .from(users)
-    .where(where);
+  const [{ total }] = await db.select({ total: count() }).from(users).where(where);
 
   const rows = await db
     .select({

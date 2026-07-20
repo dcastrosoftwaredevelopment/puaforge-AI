@@ -12,7 +12,8 @@ import FontFamilyPicker from './FontFamilyPicker';
 
 const TypographySection = memo(() => {
   const { t } = useTranslation();
-  const { fontSize, fontWeight, textAlign, textColor, fontFamily, applyClass, onFontSize, onFontWeight, onFontFamily } = useTypographySection();
+  const { fontSize, fontWeight, textAlign, textColor, fontFamily, applyClass, onFontSize, onFontWeight, onFontFamily } =
+    useTypographySection();
   const elementId = useAtomValue(selectedElementAtom)?.id;
   return (
     <StyleEditorSection title={t('inspect.sectionTypography')}>
