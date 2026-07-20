@@ -4,6 +4,7 @@ import { SandpackProvider } from '@codesandbox/sandpack-react';
 import { Loader2, MessageCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useFiles } from '@/hooks/useFiles';
+import { lsGet } from '@/hooks/usePersistence';
 import { useChat } from '@/hooks/useChat';
 import { usePanelSizes } from '@/hooks/usePanelSizes';
 import { useProjectLoader } from '@/hooks/useProjectLoader';
@@ -74,6 +75,13 @@ export default function Editor() {
     return `${projectId}-${depsKey}-${blockRev}`;
   }, [projectId, deps, blockRev]);
 
+  // Ref always reflects the current render's files — updated synchronously before
+  // sandpackFiles useMemo runs. This ensures the snapshot is never stale when
+  // sandpackKey changes (e.g. from incrementBlockRev in insertBlock), even if
+  // filesAtom and blockRevAtom updates land in separate React render passes.
+  const filesRef = useRef(files);
+  filesRef.current = files;
+
   // Snapshot files only when sandpackKey or projectReady changes — SandpackProvider
   // must not re-render on every filesAtom change or Sandpack resets open tabs and
   // active file. Incremental updates reach Sandpack via sandpack.updateFile in useSandpackSync.
@@ -83,13 +91,25 @@ export default function Editor() {
       '/index.html': TAILWIND_HTML,
       '/assets/images.css': '',
       '/__forge_global.css': '',
-      ...files,
+      ...filesRef.current,
       '/__forgeInspect.tsx': { code: FORGE_INSPECT_SOURCE, hidden: true },
       '/index.tsx': { code: FORGE_ENTRY_SOURCE, hidden: true },
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [sandpackKey, projectReady],
   );
+
+  const initialVisibleFiles = useMemo(() => {
+    const saved = lsGet(`openTabs:${projectId}`);
+    if (!saved) return ['/App.tsx'];
+    try {
+      const parsed: string[] = JSON.parse(saved);
+      return parsed.length > 0 ? parsed : ['/App.tsx'];
+    } catch {
+      return ['/App.tsx'];
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sandpackKey, projectId, projectReady]);
 
   if (!projectReady) {
     return (
@@ -114,6 +134,7 @@ export default function Editor() {
             }}
             options={{
               activeFile: '/App.tsx',
+              visibleFiles: initialVisibleFiles,
               externalResources: ['https://cdn.tailwindcss.com'],
             }}
           >

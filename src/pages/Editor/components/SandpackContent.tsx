@@ -10,6 +10,7 @@ import { useViewMode } from '@/hooks/useViewMode';
 import { useDevicePreview } from '@/hooks/useDevicePreview';
 import { useSandpackSync } from '@/hooks/useSandpackSync';
 import { useInspectBridge } from '@/hooks/useInspectBridge';
+import { useSandpackTabSync } from '@/hooks/useSandpackTabSync';
 import { usePanelSizes } from '@/hooks/usePanelSizes';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useEditorPanelTabs } from '@/hooks/useEditorPanelTabs';
@@ -40,6 +41,7 @@ const DRAWER_MAX = 80;
 const SandpackSyncBridge = memo(function SandpackSyncBridge() {
   useSandpackSync();
   useInspectBridge();
+  useSandpackTabSync();
   return null;
 });
 

@@ -166,10 +166,14 @@ export function useInspectBridge() {
       } else if (type === 'FORGE_REMOVE_BLOCK') {
         const blockId = e.data.forgeBlockId as string;
         if (!blockId) return;
+        // Hide iframe overlay immediately — selectedBox persists until remount otherwise,
+        // and pointer-events:none on the box lets clicks fall through to elements below,
+        // which triggers spurious FORGE_ELEMENT_SELECTED messages that overwrite the null.
+        post({ type: 'FORGE_DESELECT' });
+        setSelected(null);
         // Read live Sandpack content — filesAtom is stale when editor has unsaved keystrokes.
         const source = sandpackRef.current.files['/App.tsx']?.code ?? '';
         writeFiles([['/App.tsx', removeBlockInstance(source, blockId)]]);
-        setSelected(null);
         incrementBlockRev();
       }
     };

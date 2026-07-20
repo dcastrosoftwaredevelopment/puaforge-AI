@@ -17,14 +17,14 @@ import { api } from '@/services/api';
 
 // ─── localStorage helpers ─────────────────────────────────────────────────────
 
-function lsGet(key: string): string | null {
+export function lsGet(key: string): string | null {
   try {
     return localStorage.getItem(key);
   } catch {
     return null;
   }
 }
-function lsSet(key: string, value: string) {
+export function lsSet(key: string, value: string) {
   try {
     localStorage.setItem(key, value);
   } catch {
